@@ -3,7 +3,7 @@ import { hashPassword, getPasswordRequirements } from '$lib/auth/password';
 import type { IRegisterFormFields } from '$lib/auth/types';
 import { getUsernameRequirements } from '$lib/auth/user';
 import { createUser } from '$lib/db/actions/user';
-import { getFormFields } from '$lib/helpers';
+import { getFormFields } from '$lib/helpers/forms';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, Action } from './$types';
 import { uploadToBucket } from '$lib/aws/actions/s3';
