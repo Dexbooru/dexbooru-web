@@ -87,15 +87,15 @@ export async function createUser(
 	username: string,
 	email: string,
 	password: string
-): Promise<boolean> {
+): Promise<User | null> {
 	const user = await prisma.user.findFirst({
 		where: {
 			OR: [{ email }, { username }]
 		}
 	});
-	if (user) return false;
+	if (user) return null;
 
-	await prisma.user.create({
+	const newUser = await prisma.user.create({
 		data: {
 			email,
 			username,
@@ -103,5 +103,5 @@ export async function createUser(
 		}
 	});
 
-	return true;
+	return newUser;
 }
