@@ -5,4 +5,3 @@ export const load: LayoutServerLoad = ({ locals }) => {
 		user: locals.user
 	};
 };
-
