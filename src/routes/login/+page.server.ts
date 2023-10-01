@@ -1,6 +1,6 @@
 import type { ILoginFormFields } from '$lib/auth/types';
 import { createSessionForUser, findUserByName } from '$lib/db/actions/user';
-import { getFormFields } from '$lib/helpers';
+import { getFormFields } from '$lib/helpers/forms';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, Action } from './$types';
 import { passwordsMatch } from '$lib/auth/password';
