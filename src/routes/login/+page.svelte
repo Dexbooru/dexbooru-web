@@ -4,7 +4,7 @@
 	export let form: ActionData;
 
 	let username: string = form ? form.username : '';
-	let password: string;
+	//let password: string;
 </script>
 
 <form method="POST">

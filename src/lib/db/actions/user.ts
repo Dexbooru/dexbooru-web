@@ -2,71 +2,66 @@ import type { Prisma, User } from '@prisma/client';
 import prisma from '../prisma';
 import type { DefaultArgs } from '@prisma/client/runtime/library';
 
-type UserColumnSelectors = Prisma.UserSelect<DefaultArgs> | null;
+type UserSelector = Prisma.UserSelect<DefaultArgs>;
 
-export const PUBLIC_USER_SELECTORS: UserColumnSelectors = {
+export const PUBLIC_USER_SELECTORS: UserSelector = {
 	id: true,
 	username: true,
 	email: true
 };
 
-export async function appendSessionIdToUser(userId: string): Promise<string> {
-	const sessionId = crypto.randomUUID();
-	await prisma.user.update({
-		where: {
-			id: userId
-		},
+export async function createSessionForUser(userId: string): Promise<string> {
+	const { id } = await prisma.sessionToken.create({
 		data: {
-			sessionIds: {
-				push: sessionId
-			}
+			userId
+		},
+		select: {
+			id: true
 		}
 	});
-	return sessionId;
+
+	return id;
 }
 
-export async function removeSessionIdFromUser(userId: string, sessionId: string): Promise<boolean> {
-	const currentUser = await findUserById(userId, { sessionIds: true });
-	if (!currentUser) {
-		return false;
-	}
+export async function deleteSessionFromUser(sessionId: string) {
+	if (!sessionId) return;
 
-	const filteredSessionIds = currentUser.sessionIds.filter(
-		(currentSessionId) => currentSessionId !== sessionId
-	);
-
-	const updatedUser = await prisma.user.update({
+	await prisma.sessionToken.delete({
 		where: {
-			id: userId
-		},
-		data: {
-			sessionIds: {
-				set: filteredSessionIds
-			}
+			id: sessionId
 		}
 	});
+}
 
-	return !!updatedUser;
+export async function deleteAllSessionsFromUser(userId: string) {
+	await prisma.sessionToken.deleteMany({
+		where: {
+			id: userId
+		}
+	});
 }
 
 export async function findUserBySessionId(
 	sessionId: string,
-	selectors: UserColumnSelectors = null
+	selectors?: UserSelector
 ): Promise<User | null> {
-	return await prisma.user.findFirst({
+	const sessionToken = await prisma.sessionToken.findUnique({
 		where: {
-			sessionIds: {
-				has: sessionId
-			}
+			id: sessionId
 		},
-		select: selectors
+		include: {
+			user: {
+				select: selectors
+			}
+		}
 	});
+
+	if (!sessionToken) return null;
+
+	return sessionToken.user;
 }
 
-export async function findUserById(
-	id: string,
-	selectors: UserColumnSelectors = null
-): Promise<User | null> {
+export async function findUserById(id: string, selectors?: UserSelector): Promise<User | null> {
 	return await prisma.user.findUnique({
 		where: {
 			id
@@ -83,25 +78,28 @@ export async function findUserByName(username: string): Promise<User | null> {
 	});
 }
 
-export async function createUser(
-	username: string,
-	email: string,
-	password: string
-): Promise<boolean> {
-	const user = await prisma.user.findFirst({
+export async function findUserByNameOrEmail(email: string, username: string): Promise<User | null> {
+	return await prisma.user.findFirst({
 		where: {
 			OR: [{ email }, { username }]
 		}
 	});
-	if (user) return false;
+}
 
-	await prisma.user.create({
+export async function createUser(
+	username: string,
+	email: string,
+	password: string,
+	profilePictureUrl: string
+): Promise<User | null> {
+	const newUser = await prisma.user.create({
 		data: {
 			email,
 			username,
-			password
+			password,
+			profilePictureUrl
 		}
 	});
 
-	return true;
+	return newUser;
 }

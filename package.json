@@ -7,12 +7,14 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"dbmigrate:dev": "dotenv -e .env.local -- npx prisma migrate dev",
+		"dbpush:dev": "dotenv -e .env.local -- npx prisma db push",
 		"dbstudio:dev": "dotenv -e .env.local -- npx prisma studio",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
-		"format": "prettier --plugin-search-dir . --write ."
+		"format": "prettier --plugin-search-dir . --write .",
+		"prepare": "husky install"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^2.0.0",
@@ -27,6 +29,7 @@
 		"eslint-plugin-svelte": "^2.30.0",
 		"flowbite": "^1.8.1",
 		"flowbite-svelte": "^0.44.17",
+		"husky": "^8.0.0",
 		"postcss": "^8.4.24",
 		"postcss-load-config": "^4.0.1",
 		"prettier": "^2.8.0",
@@ -42,7 +45,9 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.421.0",
 		"@prisma/client": "5.3.1",
-		"bcryptjs": "^2.4.3"
+		"bcryptjs": "^2.4.3",
+		"sharp": "^0.32.6"
 	}
 }

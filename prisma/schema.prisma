@@ -8,11 +8,21 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  username   String   @unique() @db.VarChar(12)
-  email      String   @unique() @db.VarChar(254)
-  password   String
-  sessionIds String[]
+  id                String         @id @default(uuid())
+  username          String         @unique() @db.VarChar(12)
+  email             String         @unique() @db.VarChar(254)
+  profilePictureUrl String
+  password          String
+  sessionTokens     SessionToken[]
+
+  @@index([id])
+}
+
+model SessionToken {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
 
   @@index([id])
 }

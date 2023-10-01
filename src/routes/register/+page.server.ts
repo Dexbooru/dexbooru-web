@@ -2,14 +2,25 @@ import { isValidEmail } from '$lib/auth/email';
 import { hashPassword, getPasswordRequirements } from '$lib/auth/password';
 import type { IRegisterFormFields } from '$lib/auth/types';
 import { getUsernameRequirements } from '$lib/auth/user';
-import { createUser } from '$lib/db/actions/user';
-import { getFormFields } from '$lib/helpers';
+import { createUser, findUserByNameOrEmail } from '$lib/db/actions/user';
+import { getFormFields } from '$lib/helpers/forms';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, Action } from './$types';
+import { uploadToBucket } from '$lib/aws/actions/s3';
+import {
+	compressImage,
+	fileToBuffer,
+	resizeImage,
+	PROFILE_PICTURE_WIDTH,
+	PROFILE_PICTURE_HEIGHT,
+	isImageSmall,
+	isFileImage,
+	MAXIMUM_IMAGE_UPLOAD_SIZE_MB
+} from '$lib/helpers/images';
 
 const handleRegistration: Action = async ({ request }) => {
 	const registerForm = await request.formData();
-	const { email, username, password, confirmedPassword } =
+	const { email, username, password, confirmedPassword, profilePicture } =
 		getFormFields<IRegisterFormFields>(registerForm);
 
 	if (!email || !username || !password || !confirmedPassword) {
@@ -45,10 +56,10 @@ const handleRegistration: Action = async ({ request }) => {
 	if (passwordUnsatisifed.length > 0) {
 		return fail(400, { email, username, reason: 'The password did not meet the requirements!' });
 	}
-
 	const hashedPassword = await hashPassword(password);
-	const userCreated = await createUser(username, email, hashedPassword);
-	if (!userCreated) {
+
+	const user = await findUserByNameOrEmail(email, username);
+	if (user) {
 		return fail(400, {
 			email,
 			username,
@@ -56,8 +67,70 @@ const handleRegistration: Action = async ({ request }) => {
 		});
 	}
 
+	let finalProfilePictureUrl = process.env.DEFAULT_PROFILE_PICTURE_URL || '';
+	if (profilePicture) {
+		if (!isFileImage(profilePicture)) {
+			return fail(400, {
+				email,
+				username,
+				reason: 'The provided profile picture file is not an image type!'
+			});
+		}
+
+		if (!isImageSmall(profilePicture)) {
+			return fail(400, {
+				email,
+				username,
+				reason: `The maximum upload size of a profile picture is ${MAXIMUM_IMAGE_UPLOAD_SIZE_MB}!`
+			});
+		}
+
+		const profilePictureBuffer = await fileToBuffer(profilePicture);
+		const compressedProfilePictureBuffer = await compressImage(profilePictureBuffer);
+
+		if (!compressedProfilePictureBuffer) {
+			return fail(400, {
+				email,
+				username,
+				reason: 'An unexpected error occured while compressing your profile picture!'
+			});
+		}
+
+		const resizedProfilePictureBuffer = await resizeImage(
+			compressedProfilePictureBuffer,
+			PROFILE_PICTURE_WIDTH,
+			PROFILE_PICTURE_HEIGHT
+		);
+
+		if (!resizedProfilePictureBuffer) {
+			return fail(400, {
+				email,
+				username,
+				reason: 'An expected error occured while resizing your profile picture!'
+			});
+		}
+
+		const profilePictureObjectUrl = await uploadToBucket(
+			process.env.AWS_PROFILE_PICTURE_BUCKET || '',
+			resizedProfilePictureBuffer,
+			'webp'
+		);
+		if (!profilePictureObjectUrl) {
+			return fail(400, {
+				email,
+				username,
+				reason: 'There was an error while uploading your profile picture to the server'
+			});
+		}
+
+		finalProfilePictureUrl = profilePictureObjectUrl;
+	}
+
+	await createUser(username, email, hashedPassword, finalProfilePictureUrl);
+
 	throw redirect(302, '/login');
 };
+
 export const actions = {
 	default: handleRegistration
 } satisfies Actions;
