@@ -1,7 +1,6 @@
 import sharp from 'sharp';
 import type { WebpOptions } from 'sharp';
 
-
 const WEBP_QUALITY = 85;
 const WEBP_OPTIONS: WebpOptions = {
 	quality: WEBP_QUALITY,
