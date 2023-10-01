@@ -14,6 +14,8 @@ model User {
   profilePictureUrl String
   password          String
   sessionTokens     SessionToken[]
+  Post              Post[]
+  Comment           Comment[]
 
   @@index([id])
 }
@@ -25,4 +27,44 @@ model SessionToken {
   userId    String
 
   @@index([id])
+}
+
+model Post {
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now())
+  description String    @db.Text
+  likes       BigInt    @default(0)
+  images      String[]
+  tags        Tag[]
+  author      User      @relation(fields: [authorId], references: [id])
+  artists     Artist[]
+  authorId    String
+  comments    Comment[]
+
+  @@index([id])
+}
+
+model Comment {
+  id              String    @id @default(uuid())
+  createdAt       DateTime  @default(now())
+  content         String    @db.VarChar(100)
+  author          User      @relation(fields: [authorId], references: [id])
+  authorId        String
+  post            Post      @relation(fields: [postId], references: [id])
+  postId          String
+  replies         Comment[] @relation(name: "replies")
+  parentComment   Comment?  @relation(name: "replies", fields: [parentCommentId], references: [id])
+  parentCommentId String?
+}
+
+model Tag {
+  id    String @id @default(uuid())
+  name  String @unique
+  posts Post[]
+}
+
+model Artist {
+  id    String @id @default(uuid())
+  name  String @unique
+  posts Post[]
 }

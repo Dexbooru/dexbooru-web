@@ -12,7 +12,6 @@ export const PROFILE_PICTURE_WIDTH = 128;
 export const PROFILE_PICTURE_HEIGHT = 128;
 export const MAXIMUM_IMAGE_UPLOAD_SIZE_MB = 1.75;
 
-
 export function isImageSmall(file: File): boolean {
 	const fileSizeMb = file.size / 1000 / 1000;
 	return fileSizeMb <= MAXIMUM_IMAGE_UPLOAD_SIZE_MB;

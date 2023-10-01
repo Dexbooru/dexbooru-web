@@ -2,12 +2,13 @@ import type { Prisma, User } from '@prisma/client';
 import prisma from '../prisma';
 import type { DefaultArgs } from '@prisma/client/runtime/library';
 
-type UserSelector = Prisma.UserSelect<DefaultArgs>;
+type TUserSelector = Prisma.UserSelect<DefaultArgs>;
 
-export const PUBLIC_USER_SELECTORS: UserSelector = {
+export const PUBLIC_USER_SELECTORS: TUserSelector = {
 	id: true,
 	username: true,
-	email: true
+	email: true,
+	profilePictureUrl: true
 };
 
 export async function createSessionForUser(userId: string): Promise<string> {
@@ -43,7 +44,7 @@ export async function deleteAllSessionsFromUser(userId: string) {
 
 export async function findUserBySessionId(
 	sessionId: string,
-	selectors?: UserSelector
+	selectors?: TUserSelector
 ): Promise<User | null> {
 	const sessionToken = await prisma.sessionToken.findUnique({
 		where: {
@@ -61,7 +62,7 @@ export async function findUserBySessionId(
 	return sessionToken.user;
 }
 
-export async function findUserById(id: string, selectors?: UserSelector): Promise<User | null> {
+export async function findUserById(id: string, selectors?: TUserSelector): Promise<User | null> {
 	return await prisma.user.findUnique({
 		where: {
 			id
