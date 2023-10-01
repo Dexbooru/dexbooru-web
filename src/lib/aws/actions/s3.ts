@@ -1,3 +1,4 @@
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import awsS3 from '../s3';
 
 export async function uploadToBucket(bucketName: string, id: string, file: Buffer, contentType: string) { 
@@ -9,7 +10,7 @@ export async function uploadToBucket(bucketName: string, id: string, file: Buffe
         ContentType: contentType,
       };
       try {
-        await awsS3.upload(uploadParams).promise();
+        await awsS3.send(new PutObjectCommand(uploadParams));
       }
       catch (error) {
         console.error(error);
