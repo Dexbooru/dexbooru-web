@@ -78,23 +78,26 @@ export async function findUserByName(username: string): Promise<User | null> {
 	});
 }
 
-export async function createUser(
-	username: string,
-	email: string,
-	password: string
-): Promise<User | null> {
-	const user = await prisma.user.findFirst({
+export async function findUserByNameOrEmail(email: string, username: string): Promise<User | null> {
+	return await prisma.user.findFirst({
 		where: {
 			OR: [{ email }, { username }]
 		}
 	});
-	if (user) return null;
+}
 
+export async function createUser(
+	username: string,
+	email: string,
+	password: string,
+	profilePictureUrl: string
+): Promise<User | null> {
 	const newUser = await prisma.user.create({
 		data: {
 			email,
 			username,
-			password
+			password,
+			profilePictureUrl
 		}
 	});
 

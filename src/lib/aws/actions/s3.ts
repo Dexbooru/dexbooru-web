@@ -3,24 +3,24 @@ import awsS3 from '../s3';
 
 export async function uploadToBucket(
 	bucketName: string,
-	id: string,
 	file: Buffer,
 	contentType: string
-): Promise<boolean> {
-	if (!bucketName) return false;
+): Promise<string | null> {
+	if (!bucketName) return null;
 
+	const objectId = crypto.randomUUID();
 	const uploadParams = {
 		Bucket: bucketName,
-		Key: id,
+		Key: objectId,
 		Body: file,
 		ContentType: contentType
 	};
 
 	try {
 		await awsS3.send(new PutObjectCommand(uploadParams));
-		return true;
+		const objectUrl = `https://${bucketName}.s3.${process.env.AWS_DEFAULT_REGION}.amazonaws.com/${objectId}`;
+		return objectUrl;
 	} catch (error) {
-		console.error(error);
-		return false;
+		return null;
 	}
 }
