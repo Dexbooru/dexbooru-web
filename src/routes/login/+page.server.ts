@@ -1,6 +1,6 @@
 import type { ILoginFormFields } from '$lib/auth/types';
-import { appendSessionIdToUser, findUserByName } from '$lib/db/actions/user';
-import { getFormFields } from '$lib/helpers/forms';
+import { createSessionForUser, findUserByName } from '$lib/db/actions/user';
+import { getFormFields } from '$lib/helpers';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, Action } from './$types';
 import { passwordsMatch } from '$lib/auth/password';
@@ -23,7 +23,7 @@ const handleLogin: Action = async ({ request, cookies }) => {
 		return fail(400, { username, reason: 'The password is incorrect!' });
 	}
 
-	const newSessionId = await appendSessionIdToUser(user.id);
+	const newSessionId = await createSessionForUser(user.id);
 	cookies.set(SESSION_ID_KEY, newSessionId, SESSION_ID_COOKIE_OPTIONS);
 
 	throw redirect(302, '/');
