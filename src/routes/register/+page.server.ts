@@ -7,13 +7,20 @@ import { getFormFields } from '$lib/helpers/forms';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, Action } from './$types';
 import { uploadToBucket } from '$lib/aws/actions/s3';
+import {
+	compressImage,
+	fileToBuffer,
+	resizeImage,
+	PROFILE_PICTURE_WIDTH,
+	PROFILE_PICTURE_HEIGHT
+} from '$lib/helpers/images';
 
 const handleRegistration: Action = async ({ request }) => {
 	const registerForm = await request.formData();
 	const { email, username, password, confirmedPassword, profilePicture } =
 		getFormFields<IRegisterFormFields>(registerForm);
 
-	if (!email || !username || !password || !confirmedPassword || !profilePicture) {
+	if (!email || !username || !password || !confirmedPassword) {
 		return fail(400, {
 			email,
 			username,
@@ -57,23 +64,41 @@ const handleRegistration: Action = async ({ request }) => {
 		});
 	}
 
-	const profilePictureFile = profilePicture;
-	const profilePictureFileType = profilePictureFile.type;
-	const profilePictureArrayBuffer = await profilePictureFile.arrayBuffer();
-	const profilePictureBuffer = Buffer.from(profilePictureArrayBuffer);
-
-	try {
-		await uploadToBucket(
-			process.env.DEV_PFP_BUCKET || '',
-			newUser.id,
-			profilePictureBuffer,
-			profilePictureFileType
-		);
-	} catch (error) {
+	const profilePictureBuffer = await fileToBuffer(profilePicture);
+	const compressedProfilePictureBuffer = await compressImage(profilePictureBuffer);
+	if (!compressedProfilePictureBuffer) {
 		return fail(400, {
 			email,
 			username,
-			reason: error
+			reason: 'An unexpected error occured while compressing your profile picture!'
+		});
+	}
+
+	const resizedProfilePictureBuffer = await resizeImage(
+		compressedProfilePictureBuffer,
+		PROFILE_PICTURE_WIDTH,
+		PROFILE_PICTURE_HEIGHT
+	);
+	if (!resizedProfilePictureBuffer) {
+		return fail(400, {
+			email,
+			username,
+			reason: 'An expected error occured while resizing your profile picture!'
+		});
+	}
+
+	const bucketFileId = `${newUser.id}-profile-picture`;
+	const uploadedProfilePicture = await uploadToBucket(
+		process.env.AWS_PROFILE_PICTURE_BUCKET || '',
+		bucketFileId,
+		resizedProfilePictureBuffer,
+		'webp'
+	);
+	if (!uploadedProfilePicture) {
+		return fail(400, {
+			email,
+			username,
+			reason: 'There was an error while uploading your profile picture to the server'
 		});
 	}
 

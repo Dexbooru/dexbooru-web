@@ -6,16 +6,21 @@ export async function uploadToBucket(
 	id: string,
 	file: Buffer,
 	contentType: string
-) {
+): Promise<boolean> {
+	if (!bucketName) return false;
+
 	const uploadParams = {
 		Bucket: bucketName,
-		Key: `${id}.${contentType === 'image/jpeg' ? 'jpeg' : 'png'}`,
+		Key: id,
 		Body: file,
 		ContentType: contentType
 	};
+
 	try {
 		await awsS3.send(new PutObjectCommand(uploadParams));
+		return true;
 	} catch (error) {
 		console.error(error);
+		return false;
 	}
 }
