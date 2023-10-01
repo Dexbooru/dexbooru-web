@@ -12,7 +12,6 @@ const handleRegistration: Action = async ({ request }) => {
 	const registerForm = await request.formData();
 	const { email, username, password, confirmedPassword, profilePicture } =
 		getFormFields<IRegisterFormFields>(registerForm);
-	console.log({ email, username, password, confirmedPassword, profilePicture });
 
 	if (!email || !username || !password || !confirmedPassword || !profilePicture) {
 		return fail(400, {
@@ -59,7 +58,6 @@ const handleRegistration: Action = async ({ request }) => {
 	}
 
 	const profilePictureFile = profilePicture;
-	console.log(profilePictureFile);
 	const profilePictureFileType = profilePictureFile.type;
 	const profilePictureArrayBuffer = await profilePictureFile.arrayBuffer();
 	const profilePictureBuffer = Buffer.from(profilePictureArrayBuffer);
