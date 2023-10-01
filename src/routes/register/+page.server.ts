@@ -63,9 +63,13 @@ const handleRegistration: Action = async ({ request }) => {
 	const profilePictureBuffer = Buffer.from(profilePictureArrayBuffer);
 
 	try {
-		await uploadToBucket(process.env.DEV_PFP_BUCKET || "", newUser.id, profilePictureBuffer, profilePictureFileType);
-	}
-	catch (error) {
+		await uploadToBucket(
+			process.env.DEV_PFP_BUCKET || '',
+			newUser.id,
+			profilePictureBuffer,
+			profilePictureFileType
+		);
+	} catch (error) {
 		return fail(400, {
 			email,
 			username,
@@ -75,7 +79,6 @@ const handleRegistration: Action = async ({ request }) => {
 
 	throw redirect(302, '/login');
 };
-
 
 export const actions = {
 	default: handleRegistration
