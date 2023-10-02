@@ -1,6 +1,5 @@
 import { WEBP_OPTIONS, fileToSharp } from '$lib/helpers/images';
 
-
 export const PROFILE_PICTURE_WIDTH = 128;
 export const PROFILE_PICTURE_HEIGHT = 128;
 
@@ -14,11 +13,7 @@ async function runPostImageTransformationPipeline(file: File): Promise<Buffer> {
 	return image.webp(WEBP_OPTIONS).toBuffer();
 }
 
-export async function runPostImageTransformationPipelineInBatch(
-	files: File[]
-): Promise<Buffer[]> {
-	const postImagePipelinePromises = files.map((file) =>
-		runPostImageTransformationPipeline(file)
-	);
+export async function runPostImageTransformationPipelineInBatch(files: File[]): Promise<Buffer[]> {
+	const postImagePipelinePromises = files.map((file) => runPostImageTransformationPipeline(file));
 	return await Promise.all(postImagePipelinePromises);
 }
