@@ -17,9 +17,11 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		});
 	}
 
-	const editedComment = await editCommentContentById(commentId, updatedContent);
+	const editedComment = await editCommentContentById(commentId, locals.user.id, updatedContent);
 	if (!editedComment) {
-		throw error(400, { message: `A comment with the id: ${commentId} does not exist!` });
+		throw error(400, {
+			message: `A comment with the id: ${commentId} does either not exist or the user with id: ${locals.user.id} is not the original author!`
+		});
 	}
 
 	return new Response(

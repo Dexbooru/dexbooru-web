@@ -18,15 +18,37 @@ export const PUBLIC_COMMENT_SELECTORS: TCommentSelector = {
 	}
 };
 
+export const PUBLIC_AUTHOR_COMMENT_SELECTIONS: TCommentSelector = {
+	id: true,
+	postId: true,
+	authorId: true,
+	content: true,
+	createdAt: true,
+	parentComment: {
+		select: {
+			content: true,
+			createdAt: true,
+			author: {
+				select: {
+					id: true,
+					username: true,
+					profilePictureUrl: true
+				}
+			}
+		}
+	}
+};
+
 export async function editCommentContentById(
 	commentId: string,
+	authorId: string,
 	updatedContent: string
 ): Promise<boolean> {
 	if (!commentId || !updatedContent) return false;
 
 	const updateCommentBatchResult = await prisma.comment.updateMany({
 		where: {
-			id: commentId
+			OR: [{ id: commentId }, { authorId }]
 		},
 		data: {
 			content: updatedContent
@@ -63,6 +85,27 @@ export async function deleteCommentById(commentId: string): Promise<boolean> {
 	});
 
 	return !!deletedComment;
+}
+
+export async function findCommentsByAuthorId(
+	authorId: string,
+	pageNumber: number,
+	pageLimit: number,
+	selectors?: TCommentSelector
+): Promise<Comment[] | null> {
+	const comments = await prisma.comment.findMany({
+		where: {
+			authorId
+		},
+		select: selectors,
+		skip: pageNumber * pageLimit,
+		take: pageLimit,
+		orderBy: {
+			createdAt: 'desc'
+		}
+	});
+
+	return comments;
 }
 
 export async function findCommentsByPostId(
