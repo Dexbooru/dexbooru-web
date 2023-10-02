@@ -18,6 +18,24 @@ export const PUBLIC_COMMENT_SELECTORS: TCommentSelector = {
 	}
 };
 
+export async function editCommentContentById(
+	commentId: string,
+	updatedContent: string
+): Promise<boolean> {
+	if (!commentId || !updatedContent) return false;
+
+	const updateCommentBatchResult = await prisma.comment.updateMany({
+		where: {
+			id: commentId
+		},
+		data: {
+			content: updatedContent
+		}
+	});
+
+	return updateCommentBatchResult.count > 0;
+}
+
 export async function deleteCommentById(commentId: string): Promise<boolean> {
 	if (!commentId) return false;
 
@@ -38,13 +56,13 @@ export async function deleteCommentById(commentId: string): Promise<boolean> {
 	const commentReplyIds = commentChildren.replies.map((commentReply) => commentReply.id);
 	await Promise.all(commentReplyIds.map((commentReplyId) => deleteCommentById(commentReplyId)));
 
-	await prisma.comment.delete({
+	const deletedComment = await prisma.comment.delete({
 		where: {
 			id: commentId
 		}
 	});
 
-	return true;
+	return !!deletedComment;
 }
 
 export async function findCommentsByPostId(
@@ -53,7 +71,7 @@ export async function findCommentsByPostId(
 	pageNumber: number,
 	pageLimit: number,
 	selectors?: TCommentSelector
-): Promise<Comment[]> {
+): Promise<Comment[] | null> {
 	const comments = await prisma.comment.findMany({
 		where: {
 			postId,

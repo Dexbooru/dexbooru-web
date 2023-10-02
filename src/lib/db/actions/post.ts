@@ -29,8 +29,8 @@ export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	}
 };
 
-export async function deletePostById(postId: string, authorId: string) {
-	if (!postId || !authorId) return;
+export async function deletePostById(postId: string, authorId: string): Promise<boolean> {
+	if (!postId || !authorId) return false;
 
 	await prisma.post.delete({
 		where: {
@@ -38,6 +38,7 @@ export async function deletePostById(postId: string, authorId: string) {
 			authorId
 		}
 	});
+	return true;
 }
 
 export async function findPostsByPage(
