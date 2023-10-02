@@ -87,6 +87,32 @@ export async function findUserByNameOrEmail(email: string, username: string): Pr
 	});
 }
 
+export async function editPasswordByUserId(userId: string, newPassword: string): Promise<boolean> {
+	const updateUserPasswordBatchResult = await prisma.user.updateMany({
+		where: {
+			id: userId
+		},
+		data: {
+			password: newPassword
+		}
+	});
+
+	return updateUserPasswordBatchResult.count > 0;
+}
+
+export async function editUsernameByUserId(userId: string, newUsername: string): Promise<boolean> {
+	const updateUsernameBatchResult = await prisma.user.updateMany({
+		where: {
+			id: userId
+		},
+		data: {
+			username: newUsername
+		}
+	});
+
+	return updateUsernameBatchResult.count > 0;
+}
+
 export async function createUser(
 	username: string,
 	email: string,

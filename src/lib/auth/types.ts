@@ -11,7 +11,17 @@ export interface ILoginFormFields {
 	password: string;
 }
 
-export interface IFieldRequirements {
+export interface IAuthFieldRequirements {
 	satisfied: string[];
 	unsatisfied: string[];
+}
+
+export interface IChangePasswordFormFields {
+	oldPassword: string;
+	newPassword: string;
+	confirmedNewPassword: string;
+}
+
+export interface IChangeUsernameFormFields {
+	newUsername: string;
 }

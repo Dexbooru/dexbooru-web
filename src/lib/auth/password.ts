@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import type { IFieldRequirements } from './types';
+import type { IAuthFieldRequirements } from './types';
 
 type TPASSWORD_REQUIREMENT_ABV =
 	| 'length'
@@ -21,7 +21,7 @@ const PASSWORD_REQUIREMENTS: Record<TPASSWORD_REQUIREMENT_ABV, string> = {
 const SPECIAL_CHARACTER_REGEX = /[\W_]/g;
 const SALT_ROUNDS = 7;
 
-export const getPasswordRequirements = (password: string): IFieldRequirements => {
+export const getPasswordRequirements = (password: string): IAuthFieldRequirements => {
 	const satisifedRequirements: string[] = [];
 	const unsatisfiedRequirements: string[] = [];
 

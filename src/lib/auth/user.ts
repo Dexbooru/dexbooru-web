@@ -1,4 +1,4 @@
-import type { IFieldRequirements } from './types';
+import type { IAuthFieldRequirements } from './types';
 
 type TUSERNAME_REQUIREMENT_ABV = 'length' | 'spaces';
 
@@ -10,7 +10,7 @@ const USERNAME_REQUIREMENTS: Record<TUSERNAME_REQUIREMENT_ABV, string> = {
 	spaces: 'The username must not contain any leading, trailing or inline spaces'
 };
 
-export const getUsernameRequirements = (username: string): IFieldRequirements => {
+export const getUsernameRequirements = (username: string): IAuthFieldRequirements => {
 	const satisfied: string[] = [];
 	const unsatisfied: string[] = [];
 
