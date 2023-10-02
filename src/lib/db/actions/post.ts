@@ -9,7 +9,7 @@ export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	id: true,
 	description: true,
 	createdAt: true,
-	images: true,
+	imageUrls: true,
 	likes: true,
 	author: {
 		select: {
@@ -75,12 +75,14 @@ export async function createPost(
 	description: string,
 	tags: string[],
 	artists: string[],
+	imageUrls: string[],
 	authorId: string
 ): Promise<Post> {
 	const newPost = await prisma.post.create({
 		data: {
 			description,
 			authorId,
+			imageUrls,
 			artists: {
 				connectOrCreate: artists.map((artist) => {
 					return {

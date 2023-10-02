@@ -34,12 +34,12 @@ model Post {
   createdAt   DateTime  @default(now())
   description String    @db.Text
   likes       BigInt    @default(0)
-  images      String[]
+  imageUrls   String[]
+  artists     Artist[]
+  comments    Comment[]
   tags        Tag[]
   author      User      @relation(fields: [authorId], references: [id])
-  artists     Artist[]
   authorId    String
-  comments    Comment[]
 
   @@index([id])
 }
@@ -59,12 +59,12 @@ model Comment {
 
 model Tag {
   id    String @id @default(uuid())
-  name  String @unique
+  name  String @unique @db.VarChar(40)
   posts Post[]
 }
 
 model Artist {
   id    String @id @default(uuid())
-  name  String @unique
+  name  String @unique @db.VarChar(40)
   posts Post[]
 }
