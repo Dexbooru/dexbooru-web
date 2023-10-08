@@ -4,6 +4,7 @@ import type { DefaultArgs } from '@prisma/client/runtime/library';
 
 type TCommentSelector = Prisma.CommentSelect<DefaultArgs>;
 
+export const MAX_COMMENTS_PER_PAGE = 35;
 export const PUBLIC_COMMENT_SELECTORS: TCommentSelector = {
 	id: true,
 	parentCommentId: true,
@@ -17,7 +18,6 @@ export const PUBLIC_COMMENT_SELECTORS: TCommentSelector = {
 		}
 	}
 };
-
 export const PUBLIC_AUTHOR_COMMENT_SELECTIONS: TCommentSelector = {
 	id: true,
 	postId: true,

@@ -3,8 +3,10 @@ import prisma from '../prisma';
 import type { DefaultArgs } from '@prisma/client/runtime/library';
 
 type TPostSelector = Prisma.PostSelect<DefaultArgs>;
-type TPostOrderByColumn = 'likes' | 'createdAt';
+export type TPostOrderByColumn = 'likes' | 'createdAt';
+export const VALID_ORDERBY_COLUMNS: TPostOrderByColumn[] = ['createdAt', 'likes'];
 
+export const MAX_POSTS_PER_PAGE = 25;
 export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	id: true,
 	description: true,
