@@ -19,7 +19,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 	}
 
 	const convertedPageNumber = parseInt(pageNumber);
-	
+
 	if (isNaN(convertedPageNumber)) {
 		throw error(400, {
 			message: 'The page number parameter must be in a valid number format!'
