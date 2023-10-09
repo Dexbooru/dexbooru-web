@@ -75,6 +75,24 @@ export async function findPostById(
 	});
 }
 
+export async function findPostsByAuthorId(
+	pageNumber: number,
+	pageLimit: number,
+	authorId: string,
+	selectors?: TPostSelector
+): Promise<Post[] | null> {
+	const posts = await prisma.post.findMany({
+		where: {
+			authorId
+		},
+		skip: pageNumber * pageLimit,
+		take: pageLimit,
+		select: selectors
+	});
+
+	return posts;
+}
+
 export async function createPost(
 	description: string,
 	tags: string[],
