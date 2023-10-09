@@ -1,10 +1,33 @@
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import type { Action, Actions } from './$types';
 import { getFormFields } from '$lib/helpers/forms';
 import type { IChangeUsernameFormFields, IChangePasswordFormFields } from '$lib/auth/types';
 import { getPasswordRequirements, hashPassword, passwordsMatch } from '$lib/auth/password';
-import { editPasswordByUserId, editUsernameByUserId, findUserById } from '$lib/db/actions/user';
+import {
+	deleteUserById,
+	editPasswordByUserId,
+	editUsernameByUserId,
+	findUserById
+} from '$lib/db/actions/user';
 import { getUsernameRequirements } from '$lib/auth/user';
+import { SESSION_ID_KEY } from '$lib/auth/cookies';
+
+const handleAccountDeletion: Action = async ({ locals, cookies }) => {
+	if (!locals.user) {
+		throw error(401, {
+			message: 'You are not authorized to delete your account, without being a signed in user!'
+		});
+	}
+
+	const deletedUser = await deleteUserById(locals.user.id);
+	if (!deletedUser) {
+		throw error(404, { message: `A user with the id: ${locals.user.id} does not exist!` });
+	}
+	
+	cookies.delete(SESSION_ID_KEY);
+
+	throw redirect(302, '/');
+};
 
 const handleChangeUsername: Action = async ({ locals, request }) => {
 	if (!locals.user) {
@@ -113,6 +136,7 @@ const handleChangePassword: Action = async ({ locals, request }) => {
 };
 
 export const actions: Actions = {
+	deleteAccount: handleAccountDeletion,
 	username: handleChangeUsername,
 	password: handleChangePassword
 };

@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 
 	const deletedPost = await deletePostById(postId, locals.user.id);
 	if (!deletedPost) {
-		throw error(400, {
+		throw error(404, {
 			message: `A post with id: ${postId} does not exist or the user id: ${locals.user.id} is not the original author of the post!`
 		});
 	}

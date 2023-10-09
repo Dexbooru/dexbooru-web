@@ -58,30 +58,13 @@ export async function editCommentContentById(
 	return updateCommentBatchResult.count > 0;
 }
 
-export async function deleteCommentById(commentId: string, authorId?: string): Promise<boolean> {
+export async function deleteCommentById(commentId: string, authorId: string): Promise<boolean> {
 	if (!commentId) return false;
-
-	const commentChildren = await prisma.comment.findUnique({
-		where: {
-			id: commentId,
-			authorId: authorId
-		},
-		select: {
-			replies: {
-				select: {
-					id: true
-				}
-			}
-		}
-	});
-	if (!commentChildren) return false;
-
-	const commentReplyIds = commentChildren.replies.map((commentReply) => commentReply.id);
-	await Promise.all(commentReplyIds.map((commentReplyId) => deleteCommentById(commentReplyId)));
 
 	const deletedComment = await prisma.comment.delete({
 		where: {
-			id: commentId
+			id: commentId,
+			authorId
 		}
 	});
 

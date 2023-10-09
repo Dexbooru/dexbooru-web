@@ -39,8 +39,8 @@ model Post {
   artists     Artist[]
   comments    Comment[]
   tags        Tag[]
-  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId    String
+  author      User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId    String?
 
   @@index([id])
 }
@@ -49,13 +49,13 @@ model Comment {
   id              String    @id @default(uuid())
   createdAt       DateTime  @default(now())
   content         String    @db.VarChar(100)
-  author          User      @relation(fields: [authorId], references: [id])
-  authorId        String
   replies         Comment[] @relation(name: "replies")
   post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId          String
-  parentComment   Comment?  @relation(name: "replies", fields: [parentCommentId], references: [id])
+  parentComment   Comment?  @relation(name: "replies", fields: [parentCommentId], references: [id], onDelete: SetNull)
   parentCommentId String?
+  author          User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId        String?
 }
 
 model Tag {

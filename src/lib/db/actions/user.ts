@@ -113,6 +113,18 @@ export async function editUsernameByUserId(userId: string, newUsername: string):
 	return updateUsernameBatchResult.count > 0;
 }
 
+export async function deleteUserById(userId: string): Promise<boolean> {
+	if (!userId) return false;
+
+	const deleteUserBatchResult = await prisma.user.deleteMany({
+		where: {
+			id: userId
+		}
+	});
+
+	return deleteUserBatchResult.count > 0;
+}
+
 export async function createUser(
 	username: string,
 	email: string,

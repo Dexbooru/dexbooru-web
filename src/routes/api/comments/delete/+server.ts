@@ -19,7 +19,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 
 	const deletedComment = await deleteCommentById(commentId, locals.user.id);
 	if (!deletedComment) {
-		throw error(400, {
+		throw error(404, {
 			message: `A comment with the id: ${commentId} does not exist or the user with id: ${locals.user.id} is not the original author of the comment!`
 		});
 	}
