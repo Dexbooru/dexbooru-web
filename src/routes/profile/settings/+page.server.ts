@@ -23,7 +23,7 @@ const handleAccountDeletion: Action = async ({ locals, cookies }) => {
 	if (!deletedUser) {
 		throw error(404, { message: `A user with the id: ${locals.user.id} does not exist!` });
 	}
-	
+
 	cookies.delete(SESSION_ID_KEY);
 
 	throw redirect(302, '/');
