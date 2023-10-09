@@ -34,13 +34,14 @@ export const PUBLIC_POST_SELECTORS: TPostSelector = {
 export async function deletePostById(postId: string, authorId: string): Promise<boolean> {
 	if (!postId || !authorId) return false;
 
-	await prisma.post.delete({
+	const deletePostBatchResult = await prisma.post.deleteMany({
 		where: {
 			id: postId,
 			authorId
 		}
 	});
-	return true;
+
+	return deletePostBatchResult.count > 0;
 }
 
 export async function findPostsByPage(

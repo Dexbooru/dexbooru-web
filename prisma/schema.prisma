@@ -23,7 +23,7 @@ model User {
 model SessionToken {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
 
   @@index([id])
@@ -33,12 +33,13 @@ model Post {
   id          String    @id @default(uuid())
   createdAt   DateTime  @default(now())
   description String    @db.Text
-  likes       Int    @default(0)
+  likes       Int       @default(0)
+  views       Int       @default(0)
   imageUrls   String[]
   artists     Artist[]
   comments    Comment[]
   tags        Tag[]
-  author      User      @relation(fields: [authorId], references: [id])
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId    String
 
   @@index([id])
@@ -50,9 +51,9 @@ model Comment {
   content         String    @db.VarChar(100)
   author          User      @relation(fields: [authorId], references: [id])
   authorId        String
-  post            Post      @relation(fields: [postId], references: [id])
-  postId          String
   replies         Comment[] @relation(name: "replies")
+  post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId          String
   parentComment   Comment?  @relation(name: "replies", fields: [parentCommentId], references: [id])
   parentCommentId String?
 }
