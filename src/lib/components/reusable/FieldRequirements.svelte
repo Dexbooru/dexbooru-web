@@ -7,14 +7,14 @@
 
 <Heading tag="h2">Satisfied Requirements:</Heading>
 <List list="disc">
-    {#each satisifedRequirements as satisifedRequirement} 
-        <Li>{satisifedRequirement}</Li>
-    {/each}
+	{#each satisifedRequirements as satisifedRequirement}
+		<Li>{satisifedRequirement}</Li>
+	{/each}
 </List>
 
 <Heading tag="h2">Unsatisfied Requirements</Heading>
 <List list="disc">
-    {#each unsatisfiedRequirements as unsatisfiedRequirement} 
-        <Li>{unsatisfiedRequirement}</Li>
-    {/each}
+	{#each unsatisfiedRequirements as unsatisfiedRequirement}
+		<Li>{unsatisfiedRequirement}</Li>
+	{/each}
 </List>
