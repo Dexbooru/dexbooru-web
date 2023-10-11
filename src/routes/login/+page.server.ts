@@ -16,10 +16,11 @@ const handleLogin: Action = async ({ request, cookies }) => {
 
 	const user = await findUserByName(username);
 	if (!user) {
-		return fail(400, { username, reason: 'We could not find anyone with this username!' });
+		return fail(400, { username, reason: 'There was no user with this name that was found!' });
 	}
 
-	if (!passwordsMatch(password, user.password)) {
+	const passwordMatchConfirmed = await passwordsMatch(password, user.password);
+	if (!passwordMatchConfirmed) {
 		return fail(400, { username, reason: 'The password is incorrect!' });
 	}
 
