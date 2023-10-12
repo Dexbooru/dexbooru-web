@@ -2,7 +2,7 @@
 	import { List, Li, Heading, Popover } from 'flowbite-svelte';
 	import { QuestionCircleSolid } from 'flowbite-svelte-icons';
 	import type { Placement } from '@floating-ui/dom';
-	
+
 	export let requirementsPlacement: Placement = 'bottom-start';
 	export let requirementsType: string;
 	export let popoverButtonId: string;

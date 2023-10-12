@@ -6,6 +6,7 @@
 
 	onMount(() => {
 		profilePictureInput = document.querySelector('#profilePictureInput') as HTMLInputElement | null;
+		console.log(profilePictureInput);
 	});
 
 	const onProfilePictureChange = async (event: Event) => {
@@ -46,9 +47,7 @@
 {#if parsingProfilePicture}
 	<ImagePlaceholder />
 {:else if profilePictureFile && profilePictureBase64String}
-	<Avatar
-		class="block ml-auto mr-auto"
-		size='xl'
-		src={profilePictureBase64String}
-	/>
+	<Avatar class="block ml-auto mr-auto" size="xl" src={profilePictureBase64String} />
+	{PROFILE_PICTURE_HEIGHT}
+	{PROFILE_PICTURE_WIDTH}
 {/if}

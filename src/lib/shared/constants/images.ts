@@ -1,4 +1,4 @@
-import type { WebpOptions } from "sharp";
+import type { WebpOptions } from 'sharp';
 
 export const PROFILE_PICTURE_WIDTH = 128;
 export const PROFILE_PICTURE_HEIGHT = 128;

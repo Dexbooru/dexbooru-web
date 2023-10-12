@@ -1,5 +1,9 @@
-import type { IAuthFieldRequirements } from "../types/auth";
-import { MINIMUM_USERNAME_LENGTH, MAXIMUM_USERNAME_LENGTH, USERNAME_REQUIREMENTS } from "../constants/auth";
+import type { IAuthFieldRequirements } from '../types/auth';
+import {
+	MINIMUM_USERNAME_LENGTH,
+	MAXIMUM_USERNAME_LENGTH,
+	USERNAME_REQUIREMENTS
+} from '../constants/auth';
 
 export const getUsernameRequirements = (username: string): IAuthFieldRequirements => {
 	const satisfied: string[] = [];
