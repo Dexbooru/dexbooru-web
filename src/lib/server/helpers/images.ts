@@ -1,7 +1,16 @@
-import { WEBP_OPTIONS, fileToSharp } from '$lib/helpers/images';
+import sharp from 'sharp';
+import type { Sharp } from 'sharp';
+import {
+	WEBP_OPTIONS,
+	PROFILE_PICTURE_WIDTH,
+	PROFILE_PICTURE_HEIGHT
+} from '$lib/shared/constants/images';
 
-export const PROFILE_PICTURE_WIDTH = 128;
-export const PROFILE_PICTURE_HEIGHT = 128;
+export async function fileToSharp(file: File): Promise<Sharp> {
+	const fileArrayBuffer = await file.arrayBuffer();
+	const fileBuffer = Buffer.from(fileArrayBuffer);
+	return sharp(fileBuffer);
+}
 
 export async function runProfileImageTransformationPipeline(file: File): Promise<Buffer> {
 	const image = await fileToSharp(file);

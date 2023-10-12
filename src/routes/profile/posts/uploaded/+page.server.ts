@@ -4,7 +4,7 @@ import {
 	MAX_POSTS_PER_PAGE,
 	PUBLIC_POST_SELECTORS,
 	findPostsByAuthorId
-} from '$lib/db/actions/post';
+} from '$lib/server/db/actions/post';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.user) {

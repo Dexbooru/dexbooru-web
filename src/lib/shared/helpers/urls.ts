@@ -1,4 +1,4 @@
-type TUrlSearchParams = Record<string, string | string[]>;
+import type { TUrlSearchParams } from '../types/urls';
 
 export function buildUrl(baseUrl: string, params: TUrlSearchParams): URL {
 	const resultantUrl = new URL(baseUrl);

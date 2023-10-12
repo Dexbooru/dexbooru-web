@@ -4,7 +4,7 @@ import {
 	type TPostOrderByColumn,
 	MAX_POSTS_PER_PAGE,
 	PUBLIC_POST_SELECTORS
-} from '$lib/db/actions/post';
+} from '$lib/server/db/actions/post';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 

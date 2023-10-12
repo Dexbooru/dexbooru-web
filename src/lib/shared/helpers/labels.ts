@@ -1,13 +1,18 @@
-import { isStringAppropriate } from '$lib/helpers/strings';
+import {
+	BLACKLISTED_LABELS,
+	MAXIMUM_ARTIST_LENGTH,
+	MAXIMUM_DESCRIPTION_LENGTH,
+	MAXIMUM_TAG_LENGTH,
+	SEPERATOR_CHARACTER
+} from '../constants/labels';
 
-const MAXIMUM_TAG_LENGTH = 30;
-const MAXIMUM_ARTIST_LENGTH = 30;
-const MAXIMUM_DESCRIPTION_LENGTH = 500;
-const SEPERATOR_CHARACTER = '-';
+export const isLabelAppropriate = (label: string): boolean => {
+	return !BLACKLISTED_LABELS.some((blackListedString) => label.includes(blackListedString));
+};
 
 export const isTagValid = (tag: string): boolean => {
 	if (tag.length <= 0 || tag.length > MAXIMUM_TAG_LENGTH) return false;
-	if (!isStringAppropriate(tag)) return false;
+	if (!isLabelAppropriate(tag)) return false;
 	if (tag.includes(SEPERATOR_CHARACTER)) return false;
 
 	return true;
@@ -15,7 +20,7 @@ export const isTagValid = (tag: string): boolean => {
 
 export const isArtistValid = (artist: string): boolean => {
 	if (artist.length <= 0 || artist.length > MAXIMUM_ARTIST_LENGTH) return false;
-	if (!isStringAppropriate(artist)) return false;
+	if (!isLabelAppropriate(artist)) return false;
 	if (artist.includes(SEPERATOR_CHARACTER)) return false;
 
 	return true;
@@ -23,7 +28,7 @@ export const isArtistValid = (artist: string): boolean => {
 
 export const isValidDescription = (description: string): boolean => {
 	if (description.length <= 0 || description.length > MAXIMUM_DESCRIPTION_LENGTH) return false;
-	if (!isStringAppropriate(description)) return false;
+	if (!isLabelAppropriate(description)) return false;
 
 	return true;
 };

@@ -1,5 +1,5 @@
-import type { ICommentDeleteBody } from '$lib/client/comments/types';
-import { deleteCommentById } from '$lib/db/actions/comment';
+import type { ICommentDeleteBody } from '$lib/shared/types/comments';
+import { deleteCommentById } from '$lib/server/db/actions/comment';
 import type { RequestHandler } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 

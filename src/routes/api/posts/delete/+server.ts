@@ -1,6 +1,6 @@
-import { deleteBatchFromBucket } from '$lib/aws/actions/s3';
-import type { IDeletePostBody } from '$lib/client/posts/types';
-import { deletePostById, findPostById } from '$lib/db/actions/post';
+import { deleteBatchFromBucket } from '$lib/server/aws/actions/s3';
+import type { IDeletePostBody } from '$lib/shared/types/posts';
+import { deletePostById, findPostById } from '$lib/server/db/actions/post';
 import { error, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ locals, request }) => {

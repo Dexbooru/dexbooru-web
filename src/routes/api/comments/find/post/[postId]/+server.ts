@@ -2,7 +2,7 @@ import {
 	MAX_COMMENTS_PER_PAGE,
 	PUBLIC_COMMENT_SELECTORS,
 	findCommentsByPostId
-} from '$lib/db/actions/comment';
+} from '$lib/server/db/actions/comment';
 import type { RequestHandler } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 

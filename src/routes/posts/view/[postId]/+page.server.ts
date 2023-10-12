@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { PUBLIC_POST_SELECTORS, findPostById } from '$lib/db/actions/post';
+import { PUBLIC_POST_SELECTORS, findPostById } from '$lib/server/db/actions/post';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const postId = params.postId;

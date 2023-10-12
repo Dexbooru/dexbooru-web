@@ -1,12 +1,13 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, Action, PageServerLoad } from './$types';
-import { getFormFields } from '$lib/helpers/forms';
-import type { IUploadFormFields } from '$lib/upload/types';
-import { isArtistValid, isTagValid, isValidDescription, transformLabels } from '$lib/upload/labels';
-import { createPost } from '$lib/db/actions/post';
-import { MAXIMUM_IMAGES_PER_POST, isFileImage, isFileImageSmall } from '$lib/helpers/images';
-import { runPostImageTransformationPipelineInBatch } from '$lib/upload/pipelines';
-import { uploadBatchToBucket } from '$lib/aws/actions/s3';
+import { getFormFields } from '$lib/shared/helpers/forms';
+import type { IUploadFormFields } from '$lib/shared/types/upload';
+import { isArtistValid, isTagValid, isValidDescription, transformLabels } from '$lib/shared/helpers/labels';
+import { createPost } from '$lib/server/db/actions/post';
+import { MAXIMUM_IMAGES_PER_POST } from '$lib/shared/constants/images';
+import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
+import { runPostImageTransformationPipelineInBatch } from '$lib/server/helpers/images';
+import { uploadBatchToBucket } from '$lib/server/aws/actions/s3';
 
 const handleUpload: Action = async ({ locals, request }) => {
 	if (!locals.user) {

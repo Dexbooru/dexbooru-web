@@ -1,5 +1,5 @@
-import type { ICommentCreateBody } from '$lib/client/comments/types';
-import { createComment } from '$lib/db/actions/comment';
+import type { ICommentCreateBody } from '$lib/shared/types/comments';
+import { createComment } from '$lib/server/db/actions/comment';
 import type { RequestHandler } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 

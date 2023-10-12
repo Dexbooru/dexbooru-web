@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Card, Button, Label, Input, Checkbox, Alert } from 'flowbite-svelte';
-	import type { ActionData } from '../../../routes/login/$types';
+	import type { ActionData } from '../../../../routes/login/$types';
 
 	export let form: ActionData;
 

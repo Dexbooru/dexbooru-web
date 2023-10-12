@@ -1,4 +1,7 @@
-import { PUBLIC_AUTHOR_COMMENT_SELECTIONS, findCommentsByAuthorId } from '$lib/db/actions/comment';
+import {
+	PUBLIC_AUTHOR_COMMENT_SELECTIONS,
+	findCommentsByAuthorId
+} from '$lib/server/db/actions/comment';
 import type { RequestHandler } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 

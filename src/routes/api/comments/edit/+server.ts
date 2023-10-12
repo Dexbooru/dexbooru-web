@@ -1,5 +1,5 @@
-import type { ICommentEditBody } from '$lib/client/comments/types';
-import { editCommentContentById } from '$lib/db/actions/comment';
+import type { ICommentEditBody } from '$lib/shared/types/comments';
+import { editCommentContentById } from '$lib/server/db/actions/comment';
 import type { RequestHandler } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 

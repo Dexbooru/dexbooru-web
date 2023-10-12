@@ -1,10 +1,10 @@
-import type { ILoginFormFields } from '$lib/auth/types';
-import { createSessionForUser, findUserByName } from '$lib/db/actions/user';
-import { getFormFields } from '$lib/helpers/forms';
+import type { ILoginFormFields } from '$lib/shared/types/auth';
+import { createSessionForUser, findUserByName } from '$lib/server/db/actions/user';
+import { getFormFields } from '$lib/shared/helpers/forms';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, Action } from './$types';
-import { passwordsMatch } from '$lib/auth/password';
-import { SESSION_ID_COOKIE_OPTIONS, SESSION_ID_KEY } from '$lib/auth/cookies';
+import { passwordsMatch } from '$lib/server/auth/password';
+import { SESSION_ID_COOKIE_OPTIONS, SESSION_ID_KEY } from '$lib/server/auth/cookies';
 
 const handleLogin: Action = async ({ request, cookies }) => {
 	const loginForm = await request.formData();

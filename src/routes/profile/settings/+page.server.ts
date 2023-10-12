@@ -1,16 +1,17 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Action, Actions } from './$types';
-import { getFormFields } from '$lib/helpers/forms';
-import type { IChangeUsernameFormFields, IChangePasswordFormFields } from '$lib/auth/types';
-import { getPasswordRequirements, hashPassword, passwordsMatch } from '$lib/auth/password';
+import { getFormFields } from '$lib/shared/helpers/forms';
+import type { IChangeUsernameFormFields, IChangePasswordFormFields } from '$lib/shared/types/auth';
+import { hashPassword, passwordsMatch } from '$lib/server/auth/password';
 import {
 	deleteUserById,
 	editPasswordByUserId,
 	editUsernameByUserId,
 	findUserById
-} from '$lib/db/actions/user';
-import { getUsernameRequirements } from '$lib/auth/user';
-import { SESSION_ID_KEY } from '$lib/auth/cookies';
+} from '$lib/server/db/actions/user';
+import { getUsernameRequirements } from '$lib/shared/auth/username';
+import { getPasswordRequirements } from '$lib/shared/auth/password';
+import { SESSION_ID_KEY } from '$lib/server/auth/cookies';
 
 const handleAccountDeletion: Action = async ({ locals, cookies }) => {
 	if (!locals.user) {

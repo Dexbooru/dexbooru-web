@@ -1,25 +1,10 @@
-import bcrypt from 'bcryptjs';
-import type { IAuthFieldRequirements } from './types';
-
-type TPASSWORD_REQUIREMENT_ABV =
-	| 'length'
-	| 'lowercase'
-	| 'uppercase'
-	| 'number'
-	| 'special-character';
-
-export const MINIMUM_PASSWORD_LENGTH = 8;
-export const MAXIMUM_PASSWORD_LENGTH = 50;
-
-const PASSWORD_REQUIREMENTS: Record<TPASSWORD_REQUIREMENT_ABV, string> = {
-	length: `The password must be between ${MINIMUM_PASSWORD_LENGTH} and ${MAXIMUM_PASSWORD_LENGTH} characters long`,
-	lowercase: 'The password must contain at least one lowercase character',
-	uppercase: 'The password must contain at least one uppercase character',
-	number: 'The password must contain at least one number',
-	'special-character': 'The password must contain at least one special charcter'
-};
-const SPECIAL_CHARACTER_REGEX = /[\W_]/g;
-const SALT_ROUNDS = 7;
+import type { IAuthFieldRequirements } from '../types/auth';
+import {
+	MINIMUM_PASSWORD_LENGTH,
+	MAXIMUM_PASSWORD_LENGTH,
+	PASSWORD_REQUIREMENTS,
+	SPECIAL_CHARACTER_REGEX
+} from '../constants/auth';
 
 export const getPasswordRequirements = (password: string): IAuthFieldRequirements => {
 	const satisifedRequirements: string[] = [];
@@ -86,17 +71,4 @@ export const getPasswordRequirements = (password: string): IAuthFieldRequirement
 		satisfied: satisifedRequirements,
 		unsatisfied: unsatisfiedRequirements
 	};
-};
-
-export const hashPassword = async (password: string): Promise<string> => {
-	const salt = await bcrypt.genSalt(SALT_ROUNDS);
-	const hashedPassword = await bcrypt.hash(password, salt);
-	return hashedPassword;
-};
-
-export const passwordsMatch = async (
-	password: string,
-	hashedPassword: string
-): Promise<boolean> => {
-	return await bcrypt.compare(password, hashedPassword);
 };

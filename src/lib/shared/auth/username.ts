@@ -1,14 +1,5 @@
-import type { IAuthFieldRequirements } from './types';
-
-type TUSERNAME_REQUIREMENT_ABV = 'length' | 'spaces';
-
-export const MINIMUM_USERNAME_LENGTH = 4;
-export const MAXIMUM_USERNAME_LENGTH = 12;
-
-const USERNAME_REQUIREMENTS: Record<TUSERNAME_REQUIREMENT_ABV, string> = {
-	length: `The username must be between ${MINIMUM_USERNAME_LENGTH} and ${MAXIMUM_USERNAME_LENGTH} characters long`,
-	spaces: 'The username must not contain any leading, trailing or inline spaces'
-};
+import type { IAuthFieldRequirements } from "../types/auth";
+import { MINIMUM_USERNAME_LENGTH, MAXIMUM_USERNAME_LENGTH, USERNAME_REQUIREMENTS } from "../constants/auth";
 
 export const getUsernameRequirements = (username: string): IAuthFieldRequirements => {
 	const satisfied: string[] = [];
