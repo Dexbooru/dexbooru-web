@@ -6,9 +6,13 @@
 	const currentPath = $page.url.pathname;
 </script>
 
-<Navbar>
+<Navbar class="sticky top-0">
 	<NavBrand href="/">
-		<img src="/images/flowbite-svelte-icon-logo.svg" class="mr-3 h-6 sm:h-9" alt="Dexbooru Logo" />
+		<img
+			src="https://avatars.pfptown.com/393/makima-pfp-3207.png"
+			class="mr-3 h-6 sm:h-9"
+			alt="Dexbooru Logo"
+		/>
 		<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">Dexbooru</span
 		>
 	</NavBrand>
