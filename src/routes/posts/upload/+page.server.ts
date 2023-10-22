@@ -99,6 +99,7 @@ const handleUpload: Action = async ({ locals, request }) => {
 	const postImageFileBuffers = await runPostImageTransformationPipelineInBatch(postImagesArray);
 	const postImageUrls = await uploadBatchToBucket(
 		process.env.AWS_POST_PICTURE_BUCKET || '',
+		'posts',
 		postImageFileBuffers
 	);
 

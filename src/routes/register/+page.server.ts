@@ -80,6 +80,7 @@ const handleRegistration: Action = async ({ request }) => {
 		const finalProfilePictureBuffer = await runProfileImageTransformationPipeline(profilePicture);
 		const profilePictureObjectUrl = await uploadToBucket(
 			process.env.AWS_PROFILE_PICTURE_BUCKET || '',
+			'profile_pictures',
 			finalProfilePictureBuffer
 		);
 

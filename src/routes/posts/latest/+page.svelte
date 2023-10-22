@@ -5,3 +5,4 @@
 </script>
 
 <h1>{JSON.stringify(data.posts)}</h1>
+<img src={data.posts[0].imageUrls[0]} />
