@@ -6,5 +6,7 @@
 </script>
 
 <Navbar />
-<slot />
+<div style="flex:1;">
+	<slot />
+</div>
 <Footer />
