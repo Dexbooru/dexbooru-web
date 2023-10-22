@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Button, DarkMode } from 'flowbite-svelte';
 	import ProfileDropdown from './ProfileDropdown.svelte';
-
 	const currentPath = $page.url.pathname;
 </script>
 
@@ -30,5 +29,6 @@
 		<NavLi href="/" active={currentPath === '/'}>Home</NavLi>
 		<NavLi href="/search" active={currentPath === '/search'}>Search</NavLi>
 		<NavLi href="/posts/latest" active={currentPath === '/posts/latest'}>Posts</NavLi>
+		<NavLi href="/posts/upload" active={currentPath === '/posts/upload'}>Upload!</NavLi>
 	</NavUl>
 </Navbar>
