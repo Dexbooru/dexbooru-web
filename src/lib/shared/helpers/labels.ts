@@ -44,10 +44,7 @@ export const transformLabels = (labels: string | string[] | undefined): string[]
 	return Array.from(new Set(convertedLabels.map(transformLabel)));
 };
 
-export const getUniqueLabelsFromPosts = (
-	posts: IPost[],
-	labelType: 'tag' | 'artist'
-): string[] => {
+export const getUniqueLabelsFromPosts = (posts: IPost[], labelType: 'tag' | 'artist'): string[] => {
 	const allLabels = posts.map((post) => {
 		return labelType === 'tag'
 			? post.tags.map((tag) => tag.name)
