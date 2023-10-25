@@ -1,12 +1,12 @@
 import {
 	VALID_ORDERBY_COLUMNS,
 	findPostsByPage,
-	type TPostOrderByColumn,
 	MAX_POSTS_PER_PAGE,
 	PUBLIC_POST_SELECTORS
 } from '$lib/server/db/actions/post';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 
 export const load: PageServerLoad = async ({ url }) => {
 	const pageNumber = url.searchParams.get('pageNumber') || '0';
@@ -49,6 +49,6 @@ export const load: PageServerLoad = async ({ url }) => {
 		posts,
 		pageNumber: convertedPageNumber,
 		ascending: convertedAscending,
-		orderBy
+		orderBy: orderBy as TPostOrderByColumn
 	};
 };

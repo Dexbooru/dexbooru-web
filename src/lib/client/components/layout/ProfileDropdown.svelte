@@ -5,7 +5,7 @@
 
 <Button color="light" id="navbar-profile-picture" class="!p-1">
 	<Avatar
-		src="https://cdn.donmai.us/original/84/bf/__echidna_re_zero_kara_hajimeru_isekai_seikatsu_drawn_by_misaka_12003_gou__84bf6a247c1a380790dab2ce3272a7df.jpg"
+		src={$page.data.user?.profilePictureUrl}
 		alt="profile picture of {$page.data.user?.username}"
 		class="mr-2"
 	/>

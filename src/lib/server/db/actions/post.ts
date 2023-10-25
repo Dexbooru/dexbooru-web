@@ -1,9 +1,6 @@
-import type { Post, Prisma } from '@prisma/client';
 import prisma from '../prisma';
-import type { DefaultArgs } from '@prisma/client/runtime/library';
+import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 
-type TPostSelector = Prisma.PostSelect<DefaultArgs>;
-export type TPostOrderByColumn = 'likes' | 'createdAt';
 export const VALID_ORDERBY_COLUMNS: TPostOrderByColumn[] = ['createdAt', 'likes'];
 
 export const MAX_POSTS_PER_PAGE = 25;
@@ -16,7 +13,8 @@ export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	author: {
 		select: {
 			id: true,
-			username: true
+			username: true,
+			profilePictureUrl: true
 		}
 	},
 	tags: {
@@ -50,7 +48,7 @@ export async function findPostsByPage(
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
 	selectors?: TPostSelector
-): Promise<Post[]> {
+): Promise<IPost[]> {
 	const pagePosts = await prisma.post.findMany({
 		select: selectors,
 		skip: pageNumber * pageLimit,
@@ -60,19 +58,19 @@ export async function findPostsByPage(
 		}
 	});
 
-	return pagePosts;
+	return pagePosts as IPost[];
 }
 
 export async function findPostById(
 	postId: string,
 	selectors?: TPostSelector
-): Promise<Post | null> {
-	return prisma.post.findUnique({
+): Promise<IPost | null> {
+	return (await prisma.post.findUnique({
 		where: {
 			id: postId
 		},
 		select: selectors
-	});
+	})) as IPost | null;
 }
 
 export async function findPostsByAuthorId(
@@ -80,7 +78,7 @@ export async function findPostsByAuthorId(
 	pageLimit: number,
 	authorId: string,
 	selectors?: TPostSelector
-): Promise<Post[] | null> {
+): Promise<IPost[] | null> {
 	const posts = await prisma.post.findMany({
 		where: {
 			authorId
@@ -90,7 +88,7 @@ export async function findPostsByAuthorId(
 		select: selectors
 	});
 
-	return posts;
+	return posts as IPost[] | null;
 }
 
 export async function createPost(
@@ -99,7 +97,7 @@ export async function createPost(
 	artists: string[],
 	imageUrls: string[],
 	authorId: string
-): Promise<Post> {
+): Promise<IPost> {
 	const newPost = await prisma.post.create({
 		data: {
 			description,
@@ -124,5 +122,5 @@ export async function createPost(
 		}
 	});
 
-	return newPost;
+	return newPost as IPost;
 }

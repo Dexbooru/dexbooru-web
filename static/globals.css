@@ -5,6 +5,9 @@ body {
 	padding: 0;
 }
 
-body > footer {
-	position: sticky;
+#app-container {
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 }

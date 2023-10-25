@@ -5,7 +5,7 @@
 	const currentPath = $page.url.pathname;
 </script>
 
-<Navbar class="sticky top-0">
+<Navbar class="sticky top-0 z-50">
 	<NavBrand href="/">
 		<img
 			src="https://avatars.pfptown.com/393/makima-pfp-3207.png"
@@ -28,7 +28,7 @@
 	<NavUl class="order-1">
 		<NavLi href="/" active={currentPath === '/'}>Home</NavLi>
 		<NavLi href="/search" active={currentPath === '/search'}>Search</NavLi>
-		<NavLi href="/posts/latest" active={currentPath === '/posts/latest'}>Posts</NavLi>
+		<NavLi href="/posts" active={currentPath === '/posts/latest'}>Posts</NavLi>
 		<NavLi href="/posts/upload" active={currentPath === '/posts/upload'}>Upload!</NavLi>
 	</NavUl>
 </Navbar>
