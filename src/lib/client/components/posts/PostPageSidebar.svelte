@@ -22,6 +22,7 @@
 	export let uniqueTags: string[] = [];
 	export let uniqueArtists: string[] = [];
 
+	console.log(pageNumber);
 	const postsBaseUrl = $page.url.origin + $page.url.pathname;
 </script>
 
