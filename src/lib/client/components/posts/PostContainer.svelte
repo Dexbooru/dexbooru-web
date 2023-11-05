@@ -21,7 +21,7 @@
 	</div>
 	<div id="post-container-body" class="space-y-4 mb-5">
 		<PostGrid {posts} />
-		<PostPaginator />
+		<PostPaginator {pageNumber} {orderBy} />
 	</div>
 	<div id="post-container-sidebar">
 		<PostPageSidebar {pageNumber} {orderBy} {ascending} {uniqueTags} {uniqueArtists} />

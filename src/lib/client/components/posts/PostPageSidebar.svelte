@@ -45,7 +45,7 @@
 					{/each}
 				{/each}
 			</SidebarDropdownWrapper>
-			<SidebarDropdownWrapper label="Tags on page {pageNumber + 1}">
+			<SidebarDropdownWrapper label="All Tags">
 				<svelte:fragment slot="icon">
 					<TagSolid
 						class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -53,7 +53,7 @@
 				</svelte:fragment>
 				<LabelContainer labelsAreLarge labels={uniqueTags} />
 			</SidebarDropdownWrapper>
-			<SidebarDropdownWrapper label="Artists on page {pageNumber + 1}">
+			<SidebarDropdownWrapper label="All Artists">
 				<svelte:fragment slot="icon">
 					<PalleteSolid
 						class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
