@@ -6,7 +6,6 @@
 
 	onMount(() => {
 		profilePictureInput = document.querySelector('#profilePictureInput') as HTMLInputElement | null;
-		console.log(profilePictureInput);
 	});
 
 	const onProfilePictureChange = async (event: Event) => {

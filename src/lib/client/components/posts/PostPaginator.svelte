@@ -6,9 +6,11 @@
 	import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 
 	export let pageNumber: number;
-	export let orderBy: TPostOrderByColumn;
+	export let orderBy: TPostOrderByColumn = 'createdAt';
+	export let noPostsLeft: boolean = false;
 
 	onMount(() => {
+		console.log(noPostsLeft); // true
 		const paginationContainer: HTMLDivElement | null =
 			document.querySelector('#pagination-container');
 		if (paginationContainer) {
@@ -29,15 +31,18 @@
 	nextPageUrl.searchParams.append('orderBy', orderBy);
 </script>
 
-<div id="pagination-container" class="flex space-x-3 justify-center">
-	{#if pageNumber - 1 >= 0}
+<div id="pagination-container" class="flex space-x-3 justify-center {noPostsLeft && 'mt-5'}">
+	{#if (pageNumber - 1 >= 0 || noPostsLeft) && pageNumber !== 0}
 		<PaginationItem href={previousPageUrl.href} large class="flex items-center previous-page-link">
 			<ArrowLeftSolid class="mr-2 w-5 h-5" />
 			Previous
 		</PaginationItem>
 	{/if}
-	<PaginationItem href={nextPageUrl.href} large class="flex items-center next-page-link">
-		Next
-		<ArrowRightSolid class="ml-2 w-5 h-5" />
-	</PaginationItem>
+
+	{#if !noPostsLeft}
+		<PaginationItem href={nextPageUrl.href} large class="flex items-center next-page-link">
+			Next
+			<ArrowRightSolid class="ml-2 w-5 h-5" />
+		</PaginationItem>
+	{/if}
 </div>

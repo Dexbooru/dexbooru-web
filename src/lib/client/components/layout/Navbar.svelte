@@ -26,9 +26,8 @@
 		<NavHamburger />
 	</div>
 	<NavUl class="order-1">
-		<NavLi href="/" active={currentPath === '/'}>Home</NavLi>
+		<NavLi data-sveltekit-reload href="/" active={currentPath === '/'}>Home</NavLi>
 		<NavLi href="/search" active={currentPath === '/search'}>Search</NavLi>
-		<NavLi href="/posts" active={currentPath === '/posts/latest'}>Posts</NavLi>
 		<NavLi href="/posts/upload" active={currentPath === '/posts/upload'}>Upload!</NavLi>
 	</NavUl>
 </Navbar>

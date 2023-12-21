@@ -10,7 +10,19 @@
 
 <div class="block space-y-2 ml-2 mt-2 mb-5">
 	<p class="text-base dark:text-white">Tags</p>
-	<LabelContainer labelColor="red" labels={tags} />
+	<LabelContainer
+		labelColor="red"
+		labels={tags.concat([
+			{ name: 'ad' },
+			{ name: 'ad' },
+			{ name: 'ad' },
+			{ name: 'ad' },
+			{ name: 'ad' },
+			{ name: 'ad' },
+			{ name: 'ad' },
+			{ name: 'ad' }
+		])}
+	/>
 
 	<p class="text-base dark:text-white">Artists</p>
 	<LabelContainer labelColor="green" labels={artists} />

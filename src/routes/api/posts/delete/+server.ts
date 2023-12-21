@@ -3,22 +3,27 @@ import type { IDeletePostBody } from '$lib/shared/types/posts';
 import { deletePostById, findPostById } from '$lib/server/db/actions/post';
 import { error, type RequestHandler } from '@sveltejs/kit';
 
-export const POST: RequestHandler = async ({ locals, request }) => {
+export const DELETE: RequestHandler = async ({ locals, request }) => {
 	if (!locals.user) {
 		throw error(401, {
 			message: 'You are not authorized to delete posts, without being a signed in user!'
 		});
 	}
 
-	const { postId }: IDeletePostBody = await request.json();
-	if (!postId) {
+	const { postId, authorId }: IDeletePostBody = await request.json();
+	if (!postId || !authorId) {
 		throw error(400, {
 			message: 'At least one of the required fields in the body was missing for deleting a post!'
 		});
 	}
 
-	const currentPost = await findPostById(postId, { imageUrls: true });
+	if (locals.user.id !== authorId) {
+		throw error(401, {
+			message: 'You are not authorized to delete this post, as you are not the author'
+		});
+	}
 
+	const currentPost = await findPostById(postId, { imageUrls: true });
 	const deletedPost = await deletePostById(postId, locals.user.id);
 	if (!deletedPost) {
 		throw error(404, {

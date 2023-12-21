@@ -3,6 +3,7 @@ import type { DefaultArgs } from '@prisma/client/runtime/library';
 
 export interface IDeletePostBody {
 	postId: string;
+	authorId: string;
 }
 
 export type IPost = Post & {
