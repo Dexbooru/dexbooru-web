@@ -7,7 +7,7 @@
 	const { posts, pageNumber, orderBy, ascending } = data;
 	postsPageStore.set(posts);
 
-	let postPageTitle: string = "";
+	let postPageTitle: string = '';
 	$: {
 		postPageTitle = `${$postsPageStore.length} Post(s) - Page ${pageNumber + 1}`;
 	}

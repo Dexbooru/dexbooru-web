@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { IPost, TPostOrderByColumn } from '$lib/shared/types/posts';
+	import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 	import PostGrid from '$lib/client/components/posts/PostGrid.svelte';
 	import PostPaginator from '$lib/client/components/posts/PostPaginator.svelte';
 	import PostPageSidebar from '$lib/client/components/posts/PostPageSidebar.svelte';
@@ -30,7 +30,7 @@
 			<PostPaginator {pageNumber} {orderBy} />
 		</div>
 	</main>
-{:else}	
+{:else}
 	<main class="flex flex-col justify-center mt-24">
 		<NoPostsFound {pageNumber} />
 		<PostPaginator noPostsLeft {pageNumber} />

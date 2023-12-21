@@ -27,12 +27,7 @@
 	{slideDuration}
 	transition={transitionFunction}
 >
-	<a
-		slot="slide"
-		href={postHref}
-		let:Slide
-		let:index
-	>
+	<a slot="slide" href={postHref} let:Slide let:index>
 		<Slide class="object-top object-contain" image={imagesData[index]} />
 	</a>
 	{#if imagesData.length > 1}

@@ -26,10 +26,10 @@
 
 	const handleTagsClick = (tag: string) => {
 		if (!tag) return;
-		
-		postsPageStore.update(currentPosts => {
-			return currentPosts.filter(post => {
-				const postTags = post.tags.map(tag => tag.name);
+
+		postsPageStore.update((currentPosts) => {
+			return currentPosts.filter((post) => {
+				const postTags = post.tags.map((tag) => tag.name);
 				return postTags.includes(tag);
 			});
 		});
@@ -38,14 +38,13 @@
 	const handleArtistClick = (artist: string) => {
 		if (!artist) return;
 		console.log($postsPageStore);
-		postsPageStore.update(currentPosts => {
-			return currentPosts.filter(post => {
-				const postArtists = post.artists.map(artist => artist.name);
+		postsPageStore.update((currentPosts) => {
+			return currentPosts.filter((post) => {
+				const postArtists = post.artists.map((artist) => artist.name);
 				return postArtists.includes(artist);
-			})
-		})
+			});
+		});
 	};
-
 </script>
 
 <Sidebar>
@@ -82,7 +81,12 @@
 						class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
 					/>
 				</svelte:fragment>
-				<LabelContainer labelsAreLarge labelColor="green" labels={uniqueArtists} handleLabelClick={handleArtistClick} />
+				<LabelContainer
+					labelsAreLarge
+					labelColor="green"
+					labels={uniqueArtists}
+					handleLabelClick={handleArtistClick}
+				/>
 			</SidebarDropdownWrapper>
 		</SidebarGroup>
 	</SidebarWrapper>

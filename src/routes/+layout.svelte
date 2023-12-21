@@ -22,8 +22,6 @@
 		isDesktopStore.set(isDesktop);
 		isTabletStore.set(isTablet);
 	});
-
-
 </script>
 
 <Navbar />

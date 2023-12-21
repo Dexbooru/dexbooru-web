@@ -1,9 +1,9 @@
 import type { TUrlSearchParams } from '../types/urls';
 
-export const getPathFromUrl = (url: string): string => {	
+export const getPathFromUrl = (url: string): string => {
 	const convertedUrl = new URL(url);
 	return convertedUrl.pathname;
-}
+};
 
 export function buildUrl(baseUrl: string, params: TUrlSearchParams): URL {
 	const resultantUrl = new URL(baseUrl);
