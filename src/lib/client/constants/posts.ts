@@ -62,3 +62,5 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 		}
 	]
 };
+
+export const POSTS_GRID_ANIMATION_DURATION_MS = 500;

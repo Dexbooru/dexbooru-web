@@ -1,6 +1,6 @@
 <script lang="ts">
-	import LabelContainer from '../labels/LabelContainer.svelte';
-	import PostAuthorDetails from './PostAuthorDetails.svelte';
+	import LabelContainer from '../../labels/LabelContainer.svelte';
+	import PostAuthorDetails from './PostCardAuthorDetails.svelte';
 
 	export let tags: { name: string }[];
 	export let artists: { name: string }[];

@@ -1,5 +1,5 @@
-import prisma from '../prisma';
 import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
+import prisma from '../prisma';
 
 export const VALID_ORDERBY_COLUMNS: TPostOrderByColumn[] = ['createdAt', 'likes'];
 
@@ -89,6 +89,45 @@ export async function findPostsByAuthorId(
 	});
 
 	return posts as IPost[] | null;
+}
+
+export async function likePostById(
+	postId: string,
+	action: string,
+	actionTriggerUserId: string
+): Promise<boolean> {
+	if (!postId || !['like', 'dislike'].includes(action)) return false;
+
+	const updatedPost = await prisma.post.update({
+		where: {
+			id: postId
+		},
+		data: {
+			likes: action === 'like' ? { increment: 1 } : { decrement: 1 }
+		}
+	});
+
+	const updatedUser = await prisma.user.update({
+		where: {
+			id: actionTriggerUserId
+		},
+		data: {
+			likedPosts: {
+				...(action === 'like' && {
+					connect: {
+						id: postId
+					}
+				}),
+				...(action === 'dislike' && {
+					disconnect: {
+						id: postId
+					}
+				})
+			}
+		}
+	});
+
+	return !!updatedPost && !!updatedUser;
 }
 
 export async function createPost(

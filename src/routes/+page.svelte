@@ -1,10 +1,20 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import PostContainer from '$lib/client/components/posts/container/PostContainer.svelte';
+	import { postsPageStore } from '$lib/client/stores/posts';
+	import type { PageData } from './$types';
+
+	export let data: PageData;
+	const { posts, pageNumber, orderBy, ascending } = data;
+	postsPageStore.set(posts);
+
+	let postPageTitle: string = '';
+	$: {
+		postPageTitle = `${$postsPageStore.length} Post(s) - Page ${pageNumber + 1}`;
+	}
 </script>
 
-{#if $page.data.user}
-	<h1>Signed in as {$page.data.user.username}</h1>
-	<a href="/logout">Log out</a>
-{:else}
-	<a href="/login">Please log in</a>
-{/if}
+<svelte:head>
+	<title>{postPageTitle}</title>
+</svelte:head>
+
+<PostContainer postContainerTitle={postPageTitle} {pageNumber} {orderBy} {ascending} />

@@ -12,16 +12,16 @@
 </script>
 
 <p class="text-base dark:text-white">Uploader</p>
-<div class="space-x-2 flex align-middle">
-	<a class="inline-flex space-x-2" href={authorId && `/profile/${authorId}`}>
+<div class="space-x-2 flex align-middle flex-wrap">
+	<a class="inline-flex align-middle space-x-2" href={authorId && `/profile/${authorId}`}>
 		<Avatar
 			src={authorProfilePictureUrl}
 			alt={authorId ? `profile picture of ${authorUsername}` : 'default user account'}
 		/>
-		<p class="text-md mt-2 dark:text-white">
-			{authorId ? authorUsername : '[deleted-user]'}
-			&#8226;
-			<span class="leading-none text-sm dark:text-gray-400">{formatPostDate(createdAt)}</span>
-		</p>
+		<p class="mt-2">{authorId ? authorUsername : '[deleted-user]'}</p>
 	</a>
+	<p class="text-md mt-2 dark:text-white">
+		&#8226;
+		<span class="leading-none text-sm dark:text-gray-400">{formatPostDate(createdAt)}</span>
+	</p>
 </div>

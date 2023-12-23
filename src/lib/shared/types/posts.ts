@@ -3,6 +3,12 @@ import type { DefaultArgs } from '@prisma/client/runtime/library';
 
 export interface IDeletePostBody {
 	postId: string;
+	authorId: string;
+}
+
+export interface ILikePostBody {
+	postId: string;
+	action: 'like' | 'dislike';
 }
 
 export type IPost = Post & {

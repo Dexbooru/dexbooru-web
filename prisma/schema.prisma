@@ -14,8 +14,9 @@ model User {
   profilePictureUrl String
   password          String
   sessionTokens     SessionToken[]
-  Post              Post[]
-  Comment           Comment[]
+  createdPosts      Post[]         @relation(name: "created posts")
+  likedPosts        Post[]         @relation(name: "liked posts")
+  createdComments   Comment[]
 
   @@index([id])
 }
@@ -30,17 +31,19 @@ model SessionToken {
 }
 
 model Post {
-  id          String    @id @default(uuid())
-  createdAt   DateTime  @default(now())
-  description String    @db.Text
-  likes       Int       @default(0)
-  views       Int       @default(0)
+  id          String       @id @default(uuid())
+  createdAt   DateTime     @default(now())
+  description String       @db.Text
+  likes       Int          @default(0)
+  views       Int          @default(0)
   imageUrls   String[]
   artists     Artist[]
   comments    Comment[]
   tags        Tag[]
-  author      User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author      User?        @relation(name: "created posts", fields: [authorId], references: [id], onDelete: SetNull)
   authorId    String?
+  likedBy     User[]       @relation(name: "liked posts")
+  postReports PostReport[]
 
   @@index([id])
 }
@@ -68,4 +71,20 @@ model Artist {
   id    String @id @default(uuid())
   name  String @unique @db.VarChar(40)
   posts Post[]
+}
+
+enum PostReportReviewStatus {
+  NOT_REVIEWED
+  IN_REVIEW
+  REJECTED
+  ACCEPTED
+}
+
+model PostReport {
+  id           String                 @id @default(uuid())
+  category     String
+  description  String                 @db.Text
+  reviewStatus PostReportReviewStatus
+  post         Post?                  @relation(fields: [postId], references: [id])
+  postId       String?
 }

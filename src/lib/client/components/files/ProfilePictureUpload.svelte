@@ -2,12 +2,10 @@
 	import { fileToBase64String } from '$lib/client/helpers/images';
 	import { PROFILE_PICTURE_HEIGHT, PROFILE_PICTURE_WIDTH } from '$lib/shared/constants/images';
 	import { Label, Fileupload, ImagePlaceholder, Avatar } from 'flowbite-svelte';
-	import { onMount } from 'svelte';
 
-	onMount(() => {
-		profilePictureInput = document.querySelector('#profilePictureInput') as HTMLInputElement | null;
-		console.log(profilePictureInput);
-	});
+	// onMount(() => {
+	// 	profilePictureInput = document.querySelector('#profilePictureInput') as HTMLInputElement | null;
+	// });
 
 	const onProfilePictureChange = async (event: Event) => {
 		const target = event.target as HTMLInputElement;
@@ -31,7 +29,7 @@
 	let profilePictureFile: File | null = null;
 	let profilePictureBase64String: string | null = null;
 	let parsingProfilePicture = false;
-	let profilePictureInput: HTMLInputElement | null = null;
+	// let profilePictureInput: HTMLInputElement | null = null;
 </script>
 
 <Label class="space-y-2">

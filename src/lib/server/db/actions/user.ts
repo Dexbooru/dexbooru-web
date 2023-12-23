@@ -1,4 +1,5 @@
-import type { Prisma, User } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
+import type { IUser } from '$lib/shared/types/users';
 import prisma from '../prisma';
 import type { DefaultArgs } from '@prisma/client/runtime/library';
 
@@ -8,7 +9,10 @@ export const PUBLIC_USER_SELECTORS: TUserSelector = {
 	id: true,
 	username: true,
 	email: true,
-	profilePictureUrl: true
+	profilePictureUrl: true,
+	likedPosts: true,
+	createdComments: true,
+	createdPosts: true
 };
 
 export async function createSessionForUser(userId: string): Promise<string> {
@@ -45,7 +49,7 @@ export async function deleteAllSessionsFromUser(userId: string) {
 export async function findUserBySessionId(
 	sessionId: string,
 	selectors?: TUserSelector
-): Promise<User | null> {
+): Promise<IUser | null> {
 	const sessionToken = await prisma.sessionToken.findUnique({
 		where: {
 			id: sessionId
@@ -59,32 +63,35 @@ export async function findUserBySessionId(
 
 	if (!sessionToken) return null;
 
-	return sessionToken.user;
+	return sessionToken.user as IUser;
 }
 
-export async function findUserById(id: string, selectors?: TUserSelector): Promise<User | null> {
-	return await prisma.user.findUnique({
+export async function findUserById(id: string, selectors?: TUserSelector): Promise<IUser | null> {
+	return (await prisma.user.findUnique({
 		where: {
 			id
 		},
 		select: selectors
-	});
+	})) as IUser;
 }
 
-export async function findUserByName(username: string): Promise<User | null> {
-	return await prisma.user.findFirst({
+export async function findUserByName(username: string): Promise<IUser | null> {
+	return (await prisma.user.findFirst({
 		where: {
 			username
 		}
-	});
+	})) as IUser;
 }
 
-export async function findUserByNameOrEmail(email: string, username: string): Promise<User | null> {
-	return await prisma.user.findFirst({
+export async function findUserByNameOrEmail(
+	email: string,
+	username: string
+): Promise<IUser | null> {
+	return (await prisma.user.findFirst({
 		where: {
 			OR: [{ email }, { username }]
 		}
-	});
+	})) as IUser;
 }
 
 export async function editPasswordByUserId(userId: string, newPassword: string): Promise<boolean> {
@@ -130,7 +137,7 @@ export async function createUser(
 	email: string,
 	password: string,
 	profilePictureUrl: string
-): Promise<User | null> {
+): Promise<IUser | null> {
 	const newUser = await prisma.user.create({
 		data: {
 			email,
@@ -140,5 +147,5 @@ export async function createUser(
 		}
 	});
 
-	return newUser;
+	return newUser as IUser;
 }
