@@ -21,15 +21,13 @@
 <div class="flex flex-wrap">
 	{#each labels as label}
 		<button
+			class={handleLabelClick ? 'cursor-pointer' : 'cursor-default'}
 			on:click={() => {
 				handleLabelClick && handleLabelClick(typeof label === 'object' ? label.name : label);
 			}}
 		>
-			<Badge
-				large={labelsAreLarge}
-				class="ml-1 mr-1 mb-1 {handleLabelClick && 'cursor-pointer'}"
-				rounded
-				color={labelColor}>{typeof label === 'object' ? label.name : label}</Badge
+			<Badge large={labelsAreLarge} class="ml-1 mr-1 mb-1" rounded color={labelColor}
+				>{typeof label === 'object' ? label.name : label}</Badge
 			>
 		</button>
 	{/each}

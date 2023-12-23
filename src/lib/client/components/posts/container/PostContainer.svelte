@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { TPostOrderByColumn } from '$lib/shared/types/posts';
-	import PostGrid from '$lib/client/components/posts/PostGrid.svelte';
-	import PostPaginator from '$lib/client/components/posts/PostPaginator.svelte';
-	import PostPageSidebar from '$lib/client/components/posts/PostPageSidebar.svelte';
+	import PostGrid from '$lib/client/components/posts/container/PostGrid.svelte';
+	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
+	import PostPageSidebar from '$lib/client/components/posts/container/PostPageSidebar.svelte';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
 	import NoPostsFound from './NoPostsFound.svelte';
 	import { postsPageStore } from '$lib/client/stores/posts';

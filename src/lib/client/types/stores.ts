@@ -3,3 +3,8 @@ export interface IFooterStoreData {
 	bottom: number;
 	element: HTMLElement | null;
 }
+
+export interface IModalStoreData {
+	isOpen: boolean;
+	focusedModalName: string | null;
+}

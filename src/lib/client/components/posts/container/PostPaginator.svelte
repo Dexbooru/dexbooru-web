@@ -10,7 +10,6 @@
 	export let noPostsLeft: boolean = false;
 
 	onMount(() => {
-		console.log(noPostsLeft); // true
 		const paginationContainer: HTMLDivElement | null =
 			document.querySelector('#pagination-container');
 		if (paginationContainer) {

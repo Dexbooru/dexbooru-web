@@ -1,13 +1,14 @@
+import type { IUser } from '$lib/shared/types/users';
 import type { User } from '@prisma/client';
 
 declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			user: User;
+			user: IUser | null | undefined;
 		}
 		interface PageData {
-			user: User | null;
+			user: IUser | null | undefined;
 		}
 		// interface Platform {}
 	}

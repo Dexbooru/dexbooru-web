@@ -10,6 +10,7 @@
 	export let transitionFunction: TCarouselTransitionFunction | null = null;
 	export let sliderControlsType: TSliderControlsType = 'controls';
 
+	let index: number = 0;
 	const imagesData: HTMLImgAttributes[] = imageUrls.map((imageUrl, index) => {
 		return {
 			src: imageUrl,
@@ -23,12 +24,13 @@
 <Carousel
 	let:Controls
 	let:Indicators
+	bind:index
 	images={imagesData}
 	{slideDuration}
 	transition={transitionFunction}
 >
-	<a slot="slide" href={postHref} let:Slide let:index>
-		<Slide class="object-top object-contain" image={imagesData[index]} />
+	<a slot="slide" href={postHref} let:Slide>
+		<Slide class="h-full object-contain" image={imagesData[index]} />
 	</a>
 	{#if imagesData.length > 1}
 		{#if sliderControlsType === 'controls'}
@@ -38,3 +40,7 @@
 		{/if}
 	{/if}
 </Carousel>
+
+{#if imagesData.length > 1}
+	<span class="text-center mt-1">{index + 1} / {imagesData.length}</span>
+{/if}

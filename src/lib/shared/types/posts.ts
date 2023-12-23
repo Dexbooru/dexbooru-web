@@ -6,6 +6,11 @@ export interface IDeletePostBody {
 	authorId: string;
 }
 
+export interface ILikePostBody {
+	postId: string;
+	action: 'like' | 'dislike';
+}
+
 export type IPost = Post & {
 	id: string;
 	description: string;
