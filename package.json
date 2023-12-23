@@ -2,7 +2,6 @@
 	"name": "dexbooru",
 	"version": "0.0.1",
 	"private": true,
-	"lint-staged": {},
 	"scripts": {
 		"dev": "dotenv -e .env.local -- vite dev",
 		"build": "vite build",
@@ -54,5 +53,11 @@
 		"@prisma/client": "^5.4.1",
 		"bcryptjs": "^2.4.3",
 		"sharp": "^0.32.6"
+	},
+	"lint-staged": {
+		"*.{js,jsx,ts,tsx}": [
+			"eslint --fix",
+			"git add"
+		]
 	}
 }
