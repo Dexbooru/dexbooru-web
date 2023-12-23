@@ -20,6 +20,7 @@
 >
 	<h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
 		Report this post anonymously!
+		{postId}
 	</h3>
 
 	<Label class="space-y-2">

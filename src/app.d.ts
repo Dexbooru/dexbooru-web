@@ -1,5 +1,4 @@
 import type { IUser } from '$lib/shared/types/users';
-import type { User } from '@prisma/client';
 
 declare global {
 	namespace App {
