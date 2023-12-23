@@ -2,6 +2,7 @@
 	"name": "dexbooru",
 	"version": "0.0.1",
 	"private": true,
+	"lint-staged": {},
 	"scripts": {
 		"dev": "dotenv -e .env.local -- vite dev",
 		"build": "vite build",
@@ -32,6 +33,7 @@
 		"flowbite-svelte": "^0.44.18",
 		"flowbite-svelte-icons": "^0.4.4",
 		"husky": "^8.0.0",
+		"lint-staged": "^15.2.0",
 		"postcss": "^8.4.24",
 		"postcss-load-config": "^4.0.1",
 		"prettier": "^2.8.0",
