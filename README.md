@@ -15,7 +15,7 @@ The tech stack for this project consists of 🍔:
 - Docker
 
 # Prerequisites for local development
-To run this project, I would highly depend on doing these tasks first, depending on your operating system:
+To run this project, its highly recommended on doing these tasks first, depending on your operating system:
 
 For everyone:
 - Install a modern version of Node (>= v15.0.0 is probably fine)
@@ -33,6 +33,7 @@ node --version
 docker --version
 docker-compose --version
 yarn --version
+brew --version
 ```
 
 # Local development setup
