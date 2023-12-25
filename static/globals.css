@@ -11,3 +11,7 @@ body {
 	flex-direction: column;
 	justify-content: space-between;
 }
+
+#footer-copyright {
+	align-self: 'center';
+}
