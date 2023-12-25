@@ -1,0 +1,1 @@
+export const MAXIMUM_CONTENT_LENGTH = 350;

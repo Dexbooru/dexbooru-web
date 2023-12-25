@@ -51,7 +51,7 @@ model Post {
 model Comment {
   id              String    @id @default(uuid())
   createdAt       DateTime  @default(now())
-  content         String    @db.VarChar(100)
+  content         String    @db.VarChar(350)
   replies         Comment[] @relation(name: "replies")
   post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId          String

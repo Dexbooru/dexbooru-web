@@ -1,21 +1,21 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/posts';
+	import { postsPageStore } from '$lib/client/stores/posts';
 	import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 	import {
 		Sidebar,
-		SidebarGroup,
-		SidebarWrapper,
 		SidebarDropdownItem,
-		SidebarDropdownWrapper
+		SidebarDropdownWrapper,
+		SidebarGroup,
+		SidebarWrapper
 	} from 'flowbite-svelte';
 	import {
 		ListOrdoredSolid as OrderedListSolid,
 		PalleteSolid,
 		TagSolid
 	} from 'flowbite-svelte-icons';
-	import { page } from '$app/stores';
-	import { postsPageStore } from '$lib/client/stores/posts';
 
 	export let orderBy: TPostOrderByColumn;
 	export let ascending: boolean;

@@ -48,8 +48,6 @@
 
 	#post-container-sidebar {
 		grid-area: 1 / 1 / 6 / 2;
-		position: sticky;
-		top: 4.5rem;
 		align-self: start;
 	}
 
