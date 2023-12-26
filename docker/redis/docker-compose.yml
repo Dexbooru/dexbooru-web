@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "${DB_REDIS_PORT}:6379"
+    environment:
+      REDIS_PASSWORD: ${DB_REDIS_PASSWORD}
+      REDIS_DISABLE_COMMANDS: "FLUSHDB,FLUSHALL"
+    volumes:
+      - ./data:/data
+    container_name: dexbooru-redis

@@ -1,15 +1,14 @@
-// See https://kit.svelte.dev/docs/types#app
+import type { IUser } from '$lib/shared/types/users';
 
-import type { User } from '@prisma/client';
-
-// for information about these interfaces
 declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			user: Partial<User>;
+			user: IUser | null | undefined;
 		}
-		// interface PageData {}
+		interface PageData {
+			user: IUser | null | undefined;
+		}
 		// interface Platform {}
 	}
 }

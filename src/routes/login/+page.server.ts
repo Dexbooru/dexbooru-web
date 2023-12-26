@@ -1,10 +1,10 @@
-import type { ILoginFormFields } from '$lib/auth/types';
-import { createSessionForUser, findUserByName } from '$lib/db/actions/user';
-import { getFormFields } from '$lib/helpers/forms';
+import type { ILoginFormFields } from '$lib/shared/types/auth';
+import { createSessionForUser, findUserByName } from '$lib/server/db/actions/user';
+import { getFormFields } from '$lib/shared/helpers/forms';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, Action } from './$types';
-import { passwordsMatch } from '$lib/auth/password';
-import { SESSION_ID_COOKIE_OPTIONS, SESSION_ID_KEY } from '$lib/auth/cookies';
+import { passwordsMatch } from '$lib/server/auth/password';
+import { SESSION_ID_COOKIE_OPTIONS, SESSION_ID_KEY } from '$lib/server/auth/cookies';
 
 const handleLogin: Action = async ({ request, cookies }) => {
 	const loginForm = await request.formData();
@@ -16,10 +16,11 @@ const handleLogin: Action = async ({ request, cookies }) => {
 
 	const user = await findUserByName(username);
 	if (!user) {
-		return fail(400, { username, reason: 'We could not find anyone with this username!' });
+		return fail(400, { username, reason: 'There was no user with this name that was found!' });
 	}
 
-	if (!passwordsMatch(password, user.password)) {
+	const passwordMatchConfirmed = await passwordsMatch(password, user.password);
+	if (!passwordMatchConfirmed) {
 		return fail(400, { username, reason: 'The password is incorrect!' });
 	}
 

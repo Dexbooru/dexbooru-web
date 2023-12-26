@@ -1,5 +1,5 @@
-import { SESSION_ID_KEY } from '$lib/auth/cookies';
-import { PUBLIC_USER_SELECTORS, findUserBySessionId } from '$lib/db/actions/user';
+import { SESSION_ID_KEY } from '$lib/server/auth/cookies';
+import { PUBLIC_USER_SELECTORS, findUserBySessionId } from '$lib/server/db/actions/user';
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {

@@ -1,22 +1,15 @@
-import { isValidEmail } from '$lib/auth/email';
-import { hashPassword, getPasswordRequirements } from '$lib/auth/password';
-import type { IRegisterFormFields } from '$lib/auth/types';
-import { getUsernameRequirements } from '$lib/auth/user';
-import { createUser, findUserByNameOrEmail } from '$lib/db/actions/user';
-import { getFormFields } from '$lib/helpers/forms';
+import { isValidEmail } from '$lib/shared/auth/email';
+import { hashPassword } from '$lib/server/auth/password';
+import type { IRegisterFormFields } from '$lib/shared/types/auth';
+import { getUsernameRequirements } from '$lib/shared/auth/username';
+import { getPasswordRequirements } from '$lib/shared/auth/password';
+import { createUser, findUserByNameOrEmail } from '$lib/server/db/actions/user';
+import { getFormFields } from '$lib/shared/helpers/forms';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, Action } from './$types';
-import { uploadToBucket } from '$lib/aws/actions/s3';
-import {
-	compressImage,
-	fileToBuffer,
-	resizeImage,
-	PROFILE_PICTURE_WIDTH,
-	PROFILE_PICTURE_HEIGHT,
-	isImageSmall,
-	isFileImage,
-	MAXIMUM_IMAGE_UPLOAD_SIZE_MB
-} from '$lib/helpers/images';
+import { uploadToBucket } from '$lib/server/aws/actions/s3';
+import { isFileImageSmall, isFileImage } from '$lib/shared/helpers/images';
+import { runProfileImageTransformationPipeline } from '$lib/server/helpers/images';
 
 const handleRegistration: Action = async ({ request }) => {
 	const registerForm = await request.formData();
@@ -56,7 +49,6 @@ const handleRegistration: Action = async ({ request }) => {
 	if (passwordUnsatisifed.length > 0) {
 		return fail(400, { email, username, reason: 'The password did not meet the requirements!' });
 	}
-	const hashedPassword = await hashPassword(password);
 
 	const user = await findUserByNameOrEmail(email, username);
 	if (user) {
@@ -68,7 +60,7 @@ const handleRegistration: Action = async ({ request }) => {
 	}
 
 	let finalProfilePictureUrl = process.env.DEFAULT_PROFILE_PICTURE_URL || '';
-	if (profilePicture) {
+	if (profilePicture.size > 0) {
 		if (!isFileImage(profilePicture)) {
 			return fail(400, {
 				email,
@@ -77,54 +69,25 @@ const handleRegistration: Action = async ({ request }) => {
 			});
 		}
 
-		if (!isImageSmall(profilePicture)) {
+		if (!isFileImageSmall(profilePicture)) {
 			return fail(400, {
 				email,
 				username,
-				reason: `The maximum upload size of a profile picture is ${MAXIMUM_IMAGE_UPLOAD_SIZE_MB}!`
+				reason: `The provided profile picture file exceeded the maximum upload size!`
 			});
 		}
 
-		const profilePictureBuffer = await fileToBuffer(profilePicture);
-		const compressedProfilePictureBuffer = await compressImage(profilePictureBuffer);
-
-		if (!compressedProfilePictureBuffer) {
-			return fail(400, {
-				email,
-				username,
-				reason: 'An unexpected error occured while compressing your profile picture!'
-			});
-		}
-
-		const resizedProfilePictureBuffer = await resizeImage(
-			compressedProfilePictureBuffer,
-			PROFILE_PICTURE_WIDTH,
-			PROFILE_PICTURE_HEIGHT
-		);
-
-		if (!resizedProfilePictureBuffer) {
-			return fail(400, {
-				email,
-				username,
-				reason: 'An expected error occured while resizing your profile picture!'
-			});
-		}
-
+		const finalProfilePictureBuffer = await runProfileImageTransformationPipeline(profilePicture);
 		const profilePictureObjectUrl = await uploadToBucket(
 			process.env.AWS_PROFILE_PICTURE_BUCKET || '',
-			resizedProfilePictureBuffer,
-			'webp'
+			'profile_pictures',
+			finalProfilePictureBuffer
 		);
-		if (!profilePictureObjectUrl) {
-			return fail(400, {
-				email,
-				username,
-				reason: 'There was an error while uploading your profile picture to the server'
-			});
-		}
 
 		finalProfilePictureUrl = profilePictureObjectUrl;
 	}
+
+	const hashedPassword = await hashPassword(password);
 
 	await createUser(username, email, hashedPassword, finalProfilePictureUrl);
 
