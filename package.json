@@ -6,7 +6,7 @@
 		"dev": "dotenv -e .env.local -- vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"dbseed:dev": "dotenv -e .env.local -- npx prisma db push --force-reset && npx prisma db seed -- --seed 69420 --user-count 20 --post-count 100 --tag-count 500 --artist-count 250 --comment-count 20000",
+		"dbseed:dev": "dotenv -e .env.local -- npx prisma db push --force-reset && npx prisma db seed",
 		"dbmigrate:dev": "dotenv -e .env.local -- npx prisma migrate dev",
 		"dbpush:dev": "dotenv -e .env.local -- npx prisma db push",
 		"dbgenerate:dev": "dotenv -e .env.local -- npx prisma generate",
@@ -64,6 +64,6 @@
 		]
 	},
 	"prisma": {
-		"seed": "tsx prisma/seed.ts"
+		"seed": "tsx prisma/seed.ts --seed 69420 --user-count 20 --post-count 100 --tag-count 500 --artist-count 250 --comment-count 20000"
 	}
 }
