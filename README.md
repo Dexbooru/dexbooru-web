@@ -15,7 +15,7 @@ The tech stack for this project consists of 🍔:
 - Docker
 
 # Prerequisites for local development
-To run this project, its highly recommended on doing these tasks first, depending on your operating system:
+To run this project, it is highly recommended to do these tasks first, depending on your operating system:
 
 For everyone:
 - Install a modern version of Node (>= v15.0.0 is probably fine)
@@ -102,3 +102,7 @@ Now to finally run the entire application, have two terminals open and run one o
 yarn dev
 yarn dbstudio:dev
 ```
+
+# Sign in to mock accounts
+You can sign into any of the mock accounts created after the seeding script has finished, by copying over any username from the database, along with this password `root_password_12345`.
+This is a hardcoded string that is then hashed, when running the insertions in the `User` table, during the seeding script.
