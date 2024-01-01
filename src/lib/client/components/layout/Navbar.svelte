@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Button, DarkMode } from 'flowbite-svelte';
+	import { Button, DarkMode, NavBrand, NavHamburger, NavLi, NavUl, Navbar } from 'flowbite-svelte';
 	import ProfileDropdown from './ProfileDropdown.svelte';
+
 	const currentPath = $page.url.pathname;
 </script>
 
@@ -27,7 +28,8 @@
 	</div>
 	<NavUl class="order-1">
 		<NavLi data-sveltekit-reload href="/" active={currentPath === '/'}>Home</NavLi>
-		<NavLi href="/search" active={currentPath === '/search'}>Search</NavLi>
-		<NavLi href="/posts/upload" active={currentPath === '/posts/upload'}>Upload!</NavLi>
+		<NavLi href="/tags" active={currentPath === '/tags'}>Tags</NavLi>
+		<NavLi href="/artists" active={currentPath === '/tags'}>Artists</NavLi>
+		<NavLi href="/posts/upload" active={currentPath === '/posts/upload'}>Upload</NavLi>
 	</NavUl>
 </Navbar>

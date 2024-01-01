@@ -1,12 +1,14 @@
 <script lang="ts">
+	import { page } from '$app/stores';
+	import { buildUrl } from '$lib/shared/helpers/urls';
+	import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 	import { PaginationItem } from 'flowbite-svelte';
 	import { ArrowLeftSolid, ArrowRightSolid } from 'flowbite-svelte-icons';
-	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 
 	export let pageNumber: number;
 	export let orderBy: TPostOrderByColumn = 'createdAt';
+	export let ascending: boolean = false;
 	export let noPostsLeft: boolean = false;
 
 	onMount(() => {
@@ -15,19 +17,25 @@
 		if (paginationContainer) {
 			const paginationLinks = paginationContainer.getElementsByTagName('a');
 			(Array.from(paginationLinks) as HTMLAnchorElement[]).forEach((paginationLink) => {
-				paginationLink.dataset['data-sveltekit-reload'] = 'true';
+				paginationLink.dataset.sveltekitReload = 'true';
 			});
 		}
 	});
 
-	const postsBaseUrl = $page.url.origin + $page.url.pathname;
-	const previousPageUrl = new URL(postsBaseUrl);
-	const nextPageUrl = new URL(postsBaseUrl);
+	const previousPageLinkParams = {
+		pageNumber: pageNumber - 1,
+		orderBy,
+		ascending
+	};
 
-	previousPageUrl.searchParams.append('pageNumber', (pageNumber - 1).toString());
-	previousPageUrl.searchParams.append('orderBy', orderBy);
-	nextPageUrl.searchParams.append('pageNumber', (pageNumber + 1).toString());
-	nextPageUrl.searchParams.append('orderBy', orderBy);
+	const nextPageLinkParams = {
+		pageNumber: pageNumber + 1,
+		orderBy,
+		ascending
+	};
+	
+	const previousPageUrl = buildUrl($page.url.pathname, previousPageLinkParams);
+	const nextPageUrl = buildUrl($page.url.pathname, nextPageLinkParams);
 </script>
 
 <div id="pagination-container" class="flex space-x-3 justify-center {noPostsLeft && 'mt-5'}">

@@ -1,85 +1,55 @@
-import type { Comment } from '@prisma/client';
-
-type TLevelOrderMap = Map<number, CommentTreeNode[]>;
-
-class CommentTreeNode {
-	public data: Comment | null;
-	public parent: CommentTreeNode | null;
-	public children: CommentTreeNode[];
-
-	constructor(
-		data: Comment | null,
-		parent: CommentTreeNode | null,
-		children: CommentTreeNode[] = []
-	) {
-		this.data = data;
-		this.parent = parent;
-		this.children = children;
-	}
-}
+import type { IComment } from '../types/comments';
 
 class CommentTree {
-	public root: CommentTreeNode;
+	private data: Map<string, IComment[]>;
 
 	constructor() {
-		this.root = new CommentTreeNode(null, null, []);
+		this.data = new Map<string, IComment[]>();
+		this.data.set('root', []);
 	}
 
-	addComment(newComment: Comment, currentCommentNode: CommentTreeNode = this.root): boolean {
-		const newCommentNode = new CommentTreeNode(newComment, null, []);
-
-		if (newComment.parentCommentId === null) {
-			newCommentNode.parent = this.root;
-			this.root.children.push(newCommentNode);
-			return true;
+	addComment(comment: IComment) {
+		if (comment.parentCommentId === null) {
+			const rootComments = this.data.get('root') || [];
+			rootComments.push(comment);
+			return;
 		}
 
-		if (newComment.parentCommentId === currentCommentNode?.data?.id) {
-			newCommentNode.parent = currentCommentNode;
-			currentCommentNode.children.push(newCommentNode);
-			return true;
+		if (!this.data.has(comment.parentCommentId)) {
+			this.data.set(comment.parentCommentId, []);
+		}
+		if (!this.data.has(comment.id)) {
+			this.data.set(comment.id, []);
 		}
 
-		for (const childCommentNode of currentCommentNode.children) {
-			const addedCommentNodeInSubtree = this.addComment(newComment, childCommentNode);
-			if (addedCommentNodeInSubtree) return true;
-		}
-
-		return false;
+		this.data.get(comment.parentCommentId)?.push(comment);
 	}
 
-	private levelOrderDFSHelper(
-		currentCommentNode: CommentTreeNode,
-		currentLevel: number,
-		levelOrderContainer: TLevelOrderMap
-	) {
-		if (currentCommentNode !== this.root) {
-			if (!levelOrderContainer.has(currentLevel)) {
-				levelOrderContainer.set(currentLevel, []);
+	getReplies(commentId: string): IComment[] {
+		if (!this.data.has(commentId)) return [];
+		return this.data.get(commentId) || [];
+	}
+
+	getLevelOrder(): IComment[] {
+		const ordered: IComment[] = [];
+		const commentIdQueue: string[] = ['root'];
+
+		while (commentIdQueue.length > 0) {
+			const currentCommentId = commentIdQueue.shift() || 'root';
+			const expandedNodes = this.data.get(currentCommentId) || [];
+
+			for (const expandedNode of expandedNodes) {
+				ordered.push(expandedNode);
+				console.log(ordered.length);
+				commentIdQueue.push(expandedNode.id);
 			}
-
-			levelOrderContainer.get(currentLevel)?.push(currentCommentNode);
 		}
 
-		for (const childCommentNode of currentCommentNode.children) {
-			this.levelOrderDFSHelper(childCommentNode, currentLevel + 1, levelOrderContainer);
-		}
+		return ordered;
 	}
 
-	getLevelOrder(): Comment[] {
-		const levelData = new Map<number, CommentTreeNode[]>();
-		this.levelOrderDFSHelper(this.root, 0, levelData);
-
-		const orderedComments: Comment[] = [];
-		for (const levelCommentNodes of levelData.values()) {
-			levelCommentNodes.forEach((levelCommentNode) => {
-				if (levelCommentNode && levelCommentNode.data) {
-					orderedComments.push(levelCommentNode.data);
-				}
-			});
-		}
-
-		return orderedComments;
+	getCount(): number {
+		return this.data.size - 1;
 	}
 }
 

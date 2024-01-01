@@ -1,7 +1,8 @@
-import type { Prisma } from '@prisma/client';
+import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { IUser } from '$lib/shared/types/users';
-import prisma from '../prisma';
+import type { Prisma } from '@prisma/client';
 import type { DefaultArgs } from '@prisma/client/runtime/library';
+import prisma from '../prisma';
 
 type TUserSelector = Prisma.UserSelect<DefaultArgs>;
 
@@ -64,6 +65,35 @@ export async function findUserBySessionId(
 	if (!sessionToken) return null;
 
 	return sessionToken.user as IUser;
+}
+
+export async function findLikedPostsByAuthorId(
+	pageNumber: number,
+	pageLimit: number,
+	authorId: string,
+	orderBy: TPostOrderByColumn,
+	ascending: boolean,
+	selectors?: TPostSelector
+): Promise<IPost[] | null> {
+	const data = await prisma.user.findFirst({
+		where: {
+			id: authorId
+		},
+		select: {
+			likedPosts: {
+				select: selectors,
+				orderBy: {
+					[orderBy]: ascending ? 'asc' : 'desc'
+				},
+				skip: pageNumber * pageLimit,
+				take: pageLimit
+			}
+		}
+	});
+
+	if (!data) return null;
+
+	return data.likedPosts as IPost[];
 }
 
 export async function findUserById(id: string, selectors?: TUserSelector): Promise<IUser | null> {

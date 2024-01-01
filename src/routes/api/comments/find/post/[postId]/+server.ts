@@ -37,6 +37,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 		MAX_COMMENTS_PER_PAGE,
 		PUBLIC_COMMENT_SELECTORS
 	);
+	
 	if (!comments) {
 		throw error(400, { message: `There is no post with the id: ${postId} that exists!` });
 	}
