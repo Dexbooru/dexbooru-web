@@ -10,6 +10,7 @@ export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	createdAt: true,
 	imageUrls: true,
 	likes: true,
+	views: true,
 	author: {
 		select: {
 			id: true,
@@ -77,6 +78,8 @@ export async function findPostsByAuthorId(
 	pageNumber: number,
 	pageLimit: number,
 	authorId: string,
+	orderBy: TPostOrderByColumn,
+	ascending: boolean,
 	selectors?: TPostSelector
 ): Promise<IPost[] | null> {
 	const posts = await prisma.post.findMany({
@@ -85,6 +88,9 @@ export async function findPostsByAuthorId(
 		},
 		skip: pageNumber * pageLimit,
 		take: pageLimit,
+		orderBy: {
+			[orderBy]: ascending ? 'asc' : 'desc'
+		},
 		select: selectors
 	});
 

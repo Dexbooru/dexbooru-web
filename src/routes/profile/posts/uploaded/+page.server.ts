@@ -1,33 +1,28 @@
-import { error, redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
 import {
 	MAX_POSTS_PER_PAGE,
 	PUBLIC_POST_SELECTORS,
 	findPostsByAuthorId
 } from '$lib/server/db/actions/post';
+import { processPostPageParams } from '$lib/server/helpers/posts';
+import type { TPostOrderByColumn } from '$lib/shared/types/posts';
+import { error, redirect } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.user) {
 		throw redirect(302, '/');
 	}
 
-	const pageNumber = url.searchParams.get('pageNumber') || '0';
-	const convertedPageNumber = parseInt(pageNumber);
-
-	if (isNaN(convertedPageNumber)) {
-		throw error(400, {
-			message: 'The page number parameter must be in a valid number format!'
-		});
-	}
-
-	if (convertedPageNumber < 0) {
-		throw error(400, { message: 'The page number parameter must be a positive, whole number!' });
-	}
+	const { convertedAscending, convertedPageNumber, orderBy } = processPostPageParams(
+		url.searchParams
+	);
 
 	const posts = await findPostsByAuthorId(
 		convertedPageNumber,
 		MAX_POSTS_PER_PAGE,
 		locals.user.id,
+		orderBy as TPostOrderByColumn,
+		convertedAscending,
 		PUBLIC_POST_SELECTORS
 	);
 
@@ -37,6 +32,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	return {
 		posts,
-		pageNumber: convertedPageNumber
+		pageNumber: convertedPageNumber,
+		ascending: convertedAscending,
+		orderBy: orderBy as TPostOrderByColumn
 	};
 };

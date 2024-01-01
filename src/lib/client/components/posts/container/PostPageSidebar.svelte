@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/posts';
-	import { postsPageStore } from '$lib/client/stores/posts';
 	import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 	import {
 		Sidebar,
@@ -23,28 +22,6 @@
 	export let uniqueArtists: string[] = [];
 
 	const postsBaseUrl = $page.url.origin + $page.url.pathname;
-
-	const handleTagsClick = (tag: string) => {
-		if (!tag) return;
-
-		postsPageStore.update((currentPosts) => {
-			return currentPosts.filter((post) => {
-				const postTags = post.tags.map((tag) => tag.name);
-				return postTags.includes(tag);
-			});
-		});
-	};
-
-	const handleArtistClick = (artist: string) => {
-		if (!artist) return;
-		console.log($postsPageStore);
-		postsPageStore.update((currentPosts) => {
-			return currentPosts.filter((post) => {
-				const postArtists = post.artists.map((artist) => artist.name);
-				return postArtists.includes(artist);
-			});
-		});
-	};
 </script>
 
 <Sidebar>
@@ -67,25 +44,25 @@
 					{/each}
 				{/each}
 			</SidebarDropdownWrapper>
-			<SidebarDropdownWrapper isOpen label="All Tags">
+			<SidebarDropdownWrapper label="All Tags">
 				<svelte:fragment slot="icon">
 					<TagSolid
 						class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
 					/>
 				</svelte:fragment>
-				<LabelContainer labelsAreLarge labels={uniqueTags} handleLabelClick={handleTagsClick} />
+				<LabelContainer labelType="tag" labelsAreLarge labels={uniqueTags} />
 			</SidebarDropdownWrapper>
-			<SidebarDropdownWrapper isOpen label="All Artists">
+			<SidebarDropdownWrapper label="All Artists">
 				<svelte:fragment slot="icon">
 					<PalleteSolid
 						class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
 					/>
 				</svelte:fragment>
 				<LabelContainer
+					labelType="artist"
 					labelsAreLarge
 					labelColor="green"
 					labels={uniqueArtists}
-					handleLabelClick={handleArtistClick}
 				/>
 			</SidebarDropdownWrapper>
 		</SidebarGroup>

@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { formatDate } from '$lib/shared/helpers/dates';
 	import { Avatar } from 'flowbite-svelte';
-	import { formatPostDate } from '$lib/shared/helpers/dates';
 
 	export let author: { id: string; username: string; profilePictureUrl: string } | null;
 	export let createdAt: Date;
@@ -22,6 +22,6 @@
 	</a>
 	<p class="text-md mt-2 dark:text-white">
 		&#8226;
-		<span class="leading-none text-sm dark:text-gray-400">{formatPostDate(createdAt)}</span>
+		<span class="leading-none text-sm dark:text-gray-400">{formatDate(createdAt)}</span>
 	</p>
 </div>

@@ -65,12 +65,16 @@ model Tag {
   id    String @id @default(uuid())
   name  String @unique @db.VarChar(40)
   posts Post[]
+
+  @@index([name])
 }
 
 model Artist {
   id    String @id @default(uuid())
   name  String @unique @db.VarChar(40)
   posts Post[]
+
+  @@index([name])
 }
 
 enum PostReportReviewStatus {

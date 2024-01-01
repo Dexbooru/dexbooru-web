@@ -3,7 +3,7 @@
 	import { Carousel } from 'flowbite-svelte';
 	import type { HTMLImgAttributes } from 'svelte/elements';
 
-	export let postHref: string;
+	export let postHref: string | null = null;
 	export let imageUrls: string[];
 	export let imagesAlt: string | null = null;
 	export let slideDuration: number = 750;
@@ -28,8 +28,8 @@
 	images={imagesData}
 	{slideDuration}
 	transition={transitionFunction}
->
-	<a slot="slide" href={postHref} let:Slide>
+>	
+	<a slot="slide" data-sveltekit-reload href={postHref} let:Slide>
 		<Slide class="h-full object-contain" image={imagesData[index]} />
 	</a>
 	{#if imagesData.length > 1}

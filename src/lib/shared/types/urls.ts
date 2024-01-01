@@ -1,1 +1,1 @@
-export type TUrlSearchParams = Record<string, string | string[]>;
+export type TUrlSearchParams = Record<string, unknown | unknown[]>;

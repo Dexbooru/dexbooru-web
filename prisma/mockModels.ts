@@ -9,8 +9,9 @@ import {
 import { MAXIMUM_CONTENT_LENGTH } from '../src/lib/shared/constants/comments';
 import { MAXIMUM_IMAGES_PER_POST } from '../src/lib/shared/constants/images';
 import CommentTree from '../src/lib/shared/helpers/comments';
+import { IComment } from '../src/lib/shared/types/comments';
 
-type IMockPost = Post & { tags: Tag[]; artists: Artist[] };
+export type IMockPost = Post & { tags: Tag[]; artists: Artist[] };
 
 interface IMockModelSettings {
 	numberOfUsers?: number;
@@ -77,7 +78,7 @@ class FakerMockGenerator {
 	}
 
 	private async buildDevPassword(): Promise<string> {
-		const realPassword = 'root_password_12345'
+		const realPassword = 'root_password_12345';
 		return await hashPassword(realPassword);
 	}
 
@@ -190,11 +191,11 @@ class FakerMockGenerator {
 		return mockArtists;
 	}
 
-	generateMockComments(n: number, mockUsers: User[], mockPosts: Post[]): Comment[] {
-		const mockComments: Comment[] = [];
+	generateMockComments(n: number, mockUsers: User[], mockPosts: Post[]): IComment[] {
+		const mockComments: IComment[] = [];
 
 		for (let i = 0; i < n; i++) {
-			const mockComment: Comment = {
+			const mockComment: Partial<IComment> = {
 				id: this.enFaker.string.uuid(),
 				createdAt: this.enFaker.date.past({ years: 5 }),
 				content: this.enFaker.lorem.paragraph({ min: 1, max: 5 }).slice(0, MAXIMUM_CONTENT_LENGTH),
@@ -203,10 +204,11 @@ class FakerMockGenerator {
 				parentCommentId: null
 			};
 
-			mockComments.push(mockComment);
+			mockComments.push(mockComment as IComment);
 		}
 
 		const mockCommentTree = new CommentTree();
+
 		mockComments.forEach((mockComment) => {
 			mockComment.parentCommentId = this.randomParentCommentId(mockComments, mockComment.id);
 			mockCommentTree.addComment(mockComment);

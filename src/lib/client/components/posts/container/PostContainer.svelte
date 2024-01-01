@@ -1,41 +1,66 @@
 <script lang="ts">
-	import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 	import PostGrid from '$lib/client/components/posts/container/PostGrid.svelte';
-	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
 	import PostPageSidebar from '$lib/client/components/posts/container/PostPageSidebar.svelte';
-	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
-	import NoPostsFound from './NoPostsFound.svelte';
+	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
 	import { postsPageStore } from '$lib/client/stores/posts';
+	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
+	import type { TPostOrderByColumn } from '$lib/shared/types/posts';
+	import { onDestroy } from 'svelte';
+	import Searchbar from '../../reusable/Searchbar.svelte';
 
 	export let postContainerTitle: string;
 	export let pageNumber: number;
 	export let orderBy: TPostOrderByColumn;
 	export let ascending: boolean;
 
-	const uniqueTags = getUniqueLabelsFromPosts($postsPageStore, 'tag');
-	const uniqueArtists = getUniqueLabelsFromPosts($postsPageStore, 'artist');
+	const originalPosts = $postsPageStore;
+
+	const onPostSearch = (query: string) => {
+		const cleanedQuery = query.toLocaleLowerCase().trim();
+
+		const filteredPosts = originalPosts.filter((post) => {
+			const tagHasQuery = post.tags
+				.map((tag) => tag.name)
+				.find((tagName) => tagName.toLocaleLowerCase().includes(cleanedQuery));
+			const artistHasQuery = post.artists
+				.map((artist) => artist.name)
+				.find((artistName) => artistName.toLocaleLowerCase().includes(cleanedQuery));
+			const descriptionHasQuery = post.description.toLocaleLowerCase().includes(cleanedQuery);
+			const uploaderHasQuery = post.author.username.toLocaleLowerCase().includes(cleanedQuery);
+
+			return tagHasQuery || artistHasQuery || descriptionHasQuery || uploaderHasQuery;
+		});
+
+		postsPageStore.set(filteredPosts);
+	};
+
+	let uniqueTags = getUniqueLabelsFromPosts(originalPosts, 'tag');
+	let uniqueArtists = getUniqueLabelsFromPosts(originalPosts, 'artist');
+
+	const postPageStoreUnsubscribe = postsPageStore.subscribe((updatedPosts) => {
+		uniqueTags = getUniqueLabelsFromPosts(updatedPosts, 'tag');
+		uniqueArtists = getUniqueLabelsFromPosts(updatedPosts, 'artist');
+	});
+
+	onDestroy(() => {
+		postPageStoreUnsubscribe();
+	});
 </script>
 
-{#if $postsPageStore.length > 0}
-	<main id="post-container" class="mt-5">
-		<div id="post-container-sidebar">
-			<PostPageSidebar {orderBy} {ascending} {uniqueTags} {uniqueArtists} />
+<main id="post-container" class="mt-5">
+	<div id="post-container-sidebar">
+		<PostPageSidebar {orderBy} {ascending} {uniqueTags} {uniqueArtists} />
+	</div>
+	<div id="post-container-body" class="space-y-4 mb-5">
+		<div id="post-container-title" class="flex justify-between">
+			<p class="text-4xl dark:text-white">{postContainerTitle}</p>
+			<Searchbar queryHandler={onPostSearch} placeholder="Search by keyword(s)" />
 		</div>
-		<div id="post-container-body" class="space-y-4 mb-5">
-			<div id="post-container-title">
-				<p class="text-4xl dark:text-white">{postContainerTitle}</p>
-			</div>
 
-			<PostGrid />
-			<PostPaginator {pageNumber} {orderBy} />
-		</div>
-	</main>
-{:else}
-	<main class="flex flex-col justify-center mt-24">
-		<NoPostsFound {pageNumber} />
-		<PostPaginator noPostsLeft {pageNumber} />
-	</main>
-{/if}
+		<PostGrid />
+		<PostPaginator {pageNumber} {orderBy} />
+	</div>
+</main>
 
 <style>
 	#post-container {
@@ -52,17 +77,19 @@
 	}
 
 	#post-container-body {
-		grid-area: 2 / 2 / 6 / 5;
+		grid-area: 2 / 2 / 6 / 25;
 	}
 
 	@media screen and (max-width: 767px) {
-		#post-container {
+		#post-container,
+		#post-container-body {
 			display: block;
+			margin-left: auto;
+			margin-right: auto;
 		}
 
 		#post-container-sidebar {
-			position: static;
-			top: auto;
+			display: none;
 		}
 
 		#post-container-title {

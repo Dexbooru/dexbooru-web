@@ -3,7 +3,7 @@
 	import { deletePost, likePost } from '$lib/client/api/posts';
 	import { REPORT_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { normalizeLikes } from '$lib/client/helpers/posts';
+	import { normalizeCount } from '$lib/client/helpers/posts';
 	import { modalStore } from '$lib/client/stores/layout';
 	import { postsPageStore } from '$lib/client/stores/posts';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -37,6 +37,13 @@
 	};
 
 	const handleLikePost = async () => {
+		if (!$page.data.user) {
+			toast.push(
+				'Please sign-in or register for an account to able to like posts',
+				FAILURE_TOAST_OPTIONS
+			);
+			return;
+		}
 		postLikeLoading = true;
 		const response = await likePost({ postId, action: hasLikedPost ? 'dislike' : 'like' });
 		postLikeLoading = false;
@@ -71,18 +78,12 @@
 </script>
 
 <div class="flex flex-col space-y-3">
-	{#if $page.data.user}
-		<Button
-			disabled={postLikeLoading}
-			on:click={handleLikePost}
-			color="alternative"
-			class="flex space-x-3"
-		>
-			<HeartSolid color={hasLikedPost ? 'red' : 'inherit'} role="icon" style="bg-red" />
-			<span>{normalizeLikes(likes)} - Like post</span>
-		</Button>
-	{/if}
-	<Button class="space-x-2" href="/posts/{postId}" color="blue">
+	<Button disabled={postLikeLoading} on:click={handleLikePost} color="green" class="flex space-x-3">
+		<HeartSolid color={hasLikedPost ? 'red' : 'inherit'} role="icon" style="bg-red" />
+		<span>{normalizeCount(likes)} - Like post</span>
+	</Button>
+
+	<Button class="space-x-2" data-sveltekit-reload href="/posts/{postId}" color="blue">
 		<span>View full post</span>
 		<ArrowRightToBracketSolid />
 	</Button>

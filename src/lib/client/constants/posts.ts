@@ -1,4 +1,10 @@
+import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 import type { TOrderByTranslationMap } from '../types/posts';
+
+export const getLabelFromOrderby = (orderBy: TPostOrderByColumn, ascending: boolean): string | null => {
+	const item = ORDER_BY_TRANSLATION_MAP[orderBy][!ascending ? 0 : 1];
+	return item.label;
+};
 
 export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 	createdAt: [
