@@ -40,7 +40,6 @@ class CommentTree {
 
 			for (const expandedNode of expandedNodes) {
 				ordered.push(expandedNode);
-				console.log(ordered.length);
 				commentIdQueue.push(expandedNode.id);
 			}
 		}
