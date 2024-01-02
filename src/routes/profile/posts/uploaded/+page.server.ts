@@ -3,7 +3,7 @@ import {
 	PUBLIC_POST_SELECTORS,
 	findPostsByAuthorId
 } from '$lib/server/db/actions/post';
-import { processPostPageParams } from '$lib/server/helpers/posts';
+import { processPostPageParams } from '$lib/server/helpers/pagination';
 import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
