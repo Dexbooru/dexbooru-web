@@ -9,7 +9,7 @@
 <Navbar class="sticky top-0 z-50">
 	<NavBrand href="/">
 		<img
-			src="https://avatars.pfptown.com/393/makima-pfp-3207.png"
+			src="favicon.png"
 			class="mr-3 h-6 sm:h-9"
 			alt="Dexbooru Logo"
 		/>
