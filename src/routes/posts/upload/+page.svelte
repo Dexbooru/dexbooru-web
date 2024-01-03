@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PostPictureUpload from '../../../lib/client/components/files/PostPictureUpload.svelte';
 	import type { ActionData } from './$types';
 
 	export let form: ActionData;
@@ -23,7 +24,7 @@
 	<input bind:value={artist} type="text" placeholder="Enter a artist name" />
 	<button type="button" on:click={() => (artists = [...artists, artist])}>Add artist</button>
 
-	<input type="file" name="postImageFiles" accept="image/*" multiple />
+	<PostPictureUpload />
 
 	<input type="hidden" name="tags" value={JSON.stringify(tags)} />
 	<input type="hidden" name="artists" value={JSON.stringify(artists)} />
