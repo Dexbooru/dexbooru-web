@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Heading, Input, Label, Textarea } from 'flowbite-svelte';
+	import { Button, Heading, Input, Label, P, Textarea } from 'flowbite-svelte';
 	import PostPictureUpload from '../../../lib/client/components/files/PostPictureUpload.svelte';
 	import LabelContainer from '../../../lib/client/components/labels/LabelContainer.svelte';
 	import type { ActionData } from './$types';
@@ -11,6 +11,7 @@
 	let tag: string = '';
 	let artist: string = '';
 	let description: string;
+	let randomArtistName: string = 'peepeepoopoo';
 
 	const uploadTags: () => void = () => {
 		if (tag.length && !tags.includes(tag)) {
@@ -23,6 +24,53 @@
 			artists = [...artists, artist];
 		}
 		artist = '';
+	};
+	const generateRandomArtist: () => void = () => {
+		const len: number = Math.floor(Math.random() * 14 + 1);
+		const charArray: string[] = [
+			'a',
+			'b',
+			'c',
+			'd',
+			'e',
+			'f',
+			'g',
+			'h',
+			'i',
+			'j',
+			'k',
+			'l',
+			'm',
+			'n',
+			'o',
+			'p',
+			'q',
+			'r',
+			's',
+			't',
+			'u',
+			'v',
+			'w',
+			'x',
+			'y',
+			'z',
+			'0',
+			'1',
+			'2',
+			'3',
+			'4',
+			'5',
+			'6',
+			'7',
+			'8',
+			'9'
+		];
+		let tempString: string = '';
+		for (let i = 0; i < len; i++) {
+			let randomCharacter: string = charArray[Math.floor(Math.random() * charArray.length)];
+			tempString += randomCharacter;
+		}
+		randomArtistName = tempString;
 	};
 </script>
 
@@ -56,15 +104,25 @@
 
 		<div id="artists" class="mb-5 px-2.5">
 			<Label>Please specify one or more artists</Label>
-			<Input
+			<!-- <Input
 				bind:value={artist}
 				type="text"
 				placeholder="Enter a artist name"
 				class="my-2.5"
 				id="artistinput"
-			/>
+			/> -->
+			<P>Is the artist's name {randomArtistName}?</P>
+			<Button
+				class="mb-2"
+				color="green"
+				on:click={() => {
+					artist = randomArtistName;
+					uploadArtists();
+				}}>Yes (Add)</Button
+			>
+			<Button color="red" class="mb-2" on:click={generateRandomArtist}>No</Button>
 			<LabelContainer labelColor="red" labelType="artist" labels={artists} />
-			<Button outline type="button" pill on:click={uploadArtists} class="my-2.5">Add artist</Button>
+			<!-- <Button outline type="button" pill on:click={uploadArtists} class="my-2.5">Add artist</Button> -->
 		</div>
 
 		<div id="photoupload" class="mb-20">
