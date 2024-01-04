@@ -26,10 +26,10 @@ const handleUpload: Action = async ({ locals, request }) => {
 		description,
 		tags: tagsStr,
 		artists: artistsStr,
-		postImageFiles
-	} = getFormFields<IUploadFormFields>(uploadForm, ['postImageFiles']);
+		postPictures
+	} = getFormFields<IUploadFormFields>(uploadForm);
 
-	const postImagesArray = Array.from(postImageFiles);
+	const postImagesArray = Array.from(postPictures);
 	const tags = transformLabels(tagsStr);
 	const artists = transformLabels(artistsStr);
 
