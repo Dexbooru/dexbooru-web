@@ -34,7 +34,7 @@
 		"eslint-plugin-svelte": "^2.30.0",
 		"flowbite": "^1.8.1",
 		"flowbite-svelte": "^0.44.18",
-		"flowbite-svelte-icons": "^0.4.4",
+		"flowbite-svelte-icons": "^0.4.5",
 		"husky": "^8.0.0",
 		"lint-staged": "^15.2.0",
 		"postcss": "^8.4.24",

@@ -8,27 +8,29 @@ import {
 export const getUsernameRequirements = (username: string): IAuthFieldRequirements => {
 	const satisfied: string[] = [];
 	const unsatisfied: string[] = [];
+	   // Check for spaces in the username
+	   const hasSpaces = username.includes(' ');
 
-	if (username.length < MINIMUM_USERNAME_LENGTH || username.length > MAXIMUM_USERNAME_LENGTH) {
-		unsatisfied.push(USERNAME_REQUIREMENTS['length']);
-	} else {
-		satisfied.push(USERNAME_REQUIREMENTS['length']);
-	}
+	   // Exclude spaces from the length count
+	   const usernameLengthWithoutSpaces = username.replace(/\s/g, '').length;
+   
+	   if (usernameLengthWithoutSpaces < MINIMUM_USERNAME_LENGTH || usernameLengthWithoutSpaces > MAXIMUM_USERNAME_LENGTH) {
+		   unsatisfied.push(USERNAME_REQUIREMENTS['length']);
+	   } else {
+		   satisfied.push(USERNAME_REQUIREMENTS['length']);
+	   }
 
-	let hasSpaces = false;
-
-	for (let i = 0; i < username.length; i++) {
-		const currentChar = username.charAt(i);
-		if (currentChar === ' ') {
-			hasSpaces = true;
-			break;
-		}
-	}
 
 	if (hasSpaces) {
 		unsatisfied.push(USERNAME_REQUIREMENTS['spaces']);
+
 	} else {
-		satisfied.push(USERNAME_REQUIREMENTS['spaces']);
+		if(!username){
+			unsatisfied.push(USERNAME_REQUIREMENTS['spaces']);
+		}else{
+			satisfied.push(USERNAME_REQUIREMENTS['spaces']);
+		}
+			
 	}
 
 	return {

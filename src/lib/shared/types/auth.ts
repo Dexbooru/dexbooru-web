@@ -31,6 +31,7 @@ export type TPASSWORD_REQUIREMENT_ABV =
 	| 'lowercase'
 	| 'uppercase'
 	| 'number'
+	| 'match'
 	| 'special-character';
 export type TPasswordRequirements = Record<TPASSWORD_REQUIREMENT_ABV, string>;
 

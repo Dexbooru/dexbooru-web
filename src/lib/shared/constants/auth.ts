@@ -23,6 +23,7 @@ export const PASSWORD_REQUIREMENTS: TPasswordRequirements = {
 	lowercase: 'The password must contain at least one lowercase character',
 	uppercase: 'The password must contain at least one uppercase character',
 	number: 'The password must contain at least one number',
+	match: 'Passwords should match',
 	'special-character': 'The password must contain at least one special charcter'
 };
 export const SPECIAL_CHARACTER_REGEX = /[\W_]/g;

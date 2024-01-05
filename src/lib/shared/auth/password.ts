@@ -6,7 +6,7 @@ import {
 	SPECIAL_CHARACTER_REGEX
 } from '../constants/auth';
 
-export const getPasswordRequirements = (password: string): IAuthFieldRequirements => {
+export const getPasswordRequirements = (password: string,confirmedPassword:string): IAuthFieldRequirements => {
 	const satisifedRequirements: string[] = [];
 	const unsatisfiedRequirements: string[] = [];
 
@@ -30,9 +30,12 @@ export const getPasswordRequirements = (password: string): IAuthFieldRequirement
 			hasLowercaseCharacter = true;
 		} else if (currentChar >= '0' && currentChar <= '9') {
 			hasNumber = true;
-		} else if (SPECIAL_CHARACTER_REGEX.test(currentChar)) {
+		} 
+		
+		if(SPECIAL_CHARACTER_REGEX.test(password)) {
 			hasSpecialCharacter = true;
 		}
+		
 
 		const charactersChecksPass = [
 			hasLowercaseCharacter,
@@ -66,6 +69,23 @@ export const getPasswordRequirements = (password: string): IAuthFieldRequirement
 	} else {
 		unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['special-character']);
 	}
+
+ 	const passwordsMatch = (password: string, confirmedPassword: string): boolean => {
+    	return password === confirmedPassword;
+	};
+	
+	if (!passwordsMatch(password, confirmedPassword)) {
+    	unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['match']);
+	}else{
+		if(!password && !confirmedPassword){
+			unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['match']);
+		}else{
+			satisifedRequirements.push(PASSWORD_REQUIREMENTS['match']);
+		}
+		
+	}
+
+
 
 	return {
 		satisfied: satisifedRequirements,

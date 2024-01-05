@@ -6,25 +6,44 @@
 	import { getEmailRequirements } from '$lib/shared/auth/email';
 	import FieldRequirements from '../reusable/FieldRequirements.svelte';
 	import ProfilePictureUpload from '../files/ProfilePictureUpload.svelte';
+	import { EyeOutline,EyeSlashOutline} from 'flowbite-svelte-icons'; 
+	let showPassword = false; 
+	const togglePassword = () => {
+   	 	showPassword = !showPassword;
+  	};
+	let showPassword2 = false; 
+	const togglePassword2 = () => {
+   	 	showPassword2 = !showPassword2;
+  	};
+
 
 	export let form: ActionData;
 
+//another way to do it without hardcode?
+//also add eye icon (fix format) "flex space-x-2"
 	const onUsernameChange = () => {
 		const { satisfied, unsatisfied } = getUsernameRequirements(username);
 		satisifedUsernameRequirements = satisfied;
-		unsatisifedUsernameRequirements = unsatisfied;
+        unsatisifedUsernameRequirements = unsatisfied;
+		
+    	
 	};
 
 	const onPasswordChange = () => {
-		const { satisfied, unsatisfied } = getPasswordRequirements(password);
-		satisifedPasswordRequirements = satisfied;
-		unsatisfiedPasswordRequirements = unsatisfied;
+		const { satisfied, unsatisfied } = getPasswordRequirements(password,confirmedPassword);
+	  
+        satisifedPasswordRequirements = satisfied;
+        unsatisfiedPasswordRequirements = unsatisfied;
+    	
 	};
+	
 
 	const onEmailChange = () => {
 		const { satisfied, unsatisfied } = getEmailRequirements(email);
+		
 		satisifedEmailRequirements = satisfied;
 		unsatisfiedEmailRequirements = unsatisfied;
+		
 	};
 
 	const registerErrroReason: string | undefined = form?.reason;
@@ -85,29 +104,88 @@
 				/>
 			</div>
 		</Label>
-		<Label class="space-y-2">
+		<Label class="space-y-1">
 			<span>Enter your password</span>
-			<div class="flex space-x-2">
-				<Input bind:value={password} type="password" name="password" placeholder="•••••" required />
-				<FieldRequirements
-					requirementsPlacement="right-end"
-					requirementsType="password"
-					popoverButtonId="password-req-popover-btn"
-					satisifedRequirements={satisifedPasswordRequirements}
-					unsatisfiedRequirements={unsatisfiedPasswordRequirements}
+			<div class= "relative">
+				
+				{#if showPassword}
+				<div class="flex space-x-2 ">
+				<Input
+				  bind:value={password}
+				  on:input={onPasswordChange}
+				  type="text"
+				  name="password"
+				  placeholder="•••••"
+				  required
 				/>
+				<FieldRequirements
+				requirementsPlacement="right-end"
+				requirementsType="password"
+				popoverButtonId="password-req-popover-btn"
+				satisifedRequirements={satisifedPasswordRequirements}
+				unsatisfiedRequirements={unsatisfiedPasswordRequirements}
+				/>
+				</div>
+				<button type="button" on:click={togglePassword}>
+				  <EyeSlashOutline class="absolute top-3 right-10 cursor-pointer  w-5 h-5 text-gray-500" />
+				</button>
+			  {:else}
+			  <div class="flex space-x-2 ">
+				<Input
+				  bind:value={password}
+				  on:input={onPasswordChange}
+				  type="password"
+				  name="password"
+				  placeholder="•••••"
+				  required
+				/>
+				<FieldRequirements
+				requirementsPlacement="right-end"
+				requirementsType="password"
+				popoverButtonId="password-req-popover-btn"
+				satisifedRequirements={satisifedPasswordRequirements}
+				unsatisfiedRequirements={unsatisfiedPasswordRequirements}
+				/>
+				</div>
+				<button type="button" on:click={togglePassword}>
+				  <EyeOutline class="absolute top-3 right-10  cursor-pointer w-5 h-5 text-gray-500" />
+				</button>
+			  {/if}
+			 
+				
+				
 			</div>
 		</Label>
-		<Label class="space-y-2">
+		<Label class="space-y-2 ">
 			<span>Enter your password again</span>
-			<Input
+			<div class="relative">
+				{#if showPassword2}
+				<Input
+				bind:value={confirmedPassword}
+				on:input={onPasswordChange}
+				type="text"
+				name="password"
+				placeholder="•••••"
+				required
+				/>
+				<button type="button" on:click={togglePassword2}>
+				<EyeSlashOutline class=" absolute top-3 right-3 cursor-pointer w-5 h-5 text-gray-500" />
+				</button>
+			{:else}
+				<Input
 				bind:value={confirmedPassword}
 				on:input={onPasswordChange}
 				type="password"
-				name="confirmedPassword"
+				name="password"
 				placeholder="•••••"
 				required
-			/>
+				/>
+				<button type="button" on:click={togglePassword2}>
+				<EyeOutline class="absolute top-3 right-3 cursor-pointer w-5 h-5 text-gray-500" />
+				</button>
+			{/if}
+		
+		    </div>
 		</Label>
 
 		<ProfilePictureUpload />

@@ -9,11 +9,15 @@ import type { IAuthFieldRequirements } from '../types/auth';
 export const getEmailRequirements = (email: string): IAuthFieldRequirements => {
 	const satisfied: string[] = [];
 	const unsatisfied: string[] = [];
-
-	if (email.length < MINIMUM_EMAIL_LENGTH || email.length > MAXIMUM_EMAIL_LENGTH) {
+    
+	if (!email) {
 		unsatisfied.push(EMAIL_REQUIREMENTS['length']);
-	} else {
-		satisfied.push(EMAIL_REQUIREMENTS['length']);
+	  } else {
+		if (email.length < MINIMUM_EMAIL_LENGTH || email.length > MAXIMUM_EMAIL_LENGTH) {
+		  unsatisfied.push(EMAIL_REQUIREMENTS['length']);
+		} else {
+		  satisfied.push(EMAIL_REQUIREMENTS['length']);
+		}
 	}
 
 	return { satisfied, unsatisfied };
