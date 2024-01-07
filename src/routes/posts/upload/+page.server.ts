@@ -22,16 +22,22 @@ const handleUpload: Action = async ({ locals, request }) => {
 	}
 
 	const uploadForm = await request.formData();
+
 	const {
 		description,
 		tags: tagsStr,
 		artists: artistsStr,
-		postPictures
+		postPictures,
 	} = getFormFields<IUploadFormFields>(uploadForm);
 
-	const postImagesArray = Array.from(postPictures);
+	//need this because in form data if multiple images are uploaded there will be several fields with 'postPictures'
+	postPictures; //idk how else to fix this linting error lmao
+	const allPostPictures: File[] = uploadForm.getAll('postPictures');
+
+	const postImagesArray = Array.from(allPostPictures);
 	const tags = transformLabels(tagsStr);
 	const artists = transformLabels(artistsStr);
+
 
 	if (!description || !tags.length || !artists.length || !postImagesArray.length) {
 		return fail(400, {
