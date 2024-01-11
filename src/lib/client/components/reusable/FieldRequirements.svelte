@@ -50,6 +50,10 @@
 				<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
 				The email must be between 1 and 254 characters long
 			</Li>
+			<Li icon>
+				<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
+				The email must have a @ sign and a valid domain after it
+			</Li>
 		{/if}
 		{#if requirementsType == "password"}
 			<Li icon>
@@ -71,10 +75,6 @@
 			<Li icon>
 				<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
 				The password must contain at least one special charcter
-			</Li>
-			<Li icon>
-				<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
-				Passwords should match
 			</Li>
 		{/if}
 	{/if}

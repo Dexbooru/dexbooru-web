@@ -25,9 +25,13 @@ export const getUsernameRequirements = (username: string): IAuthFieldRequirement
 		unsatisfied.push(USERNAME_REQUIREMENTS['spaces']);
 
 	} else {
-		if(!username){
-			unsatisfied.push(USERNAME_REQUIREMENTS['spaces']);
-		}else{
+		if (!username) {
+			return {
+		  	satisfied: [],
+		  	unsatisfied: Array.from(Object.values(USERNAME_REQUIREMENTS))
+			};
+		}
+		else{
 			satisfied.push(USERNAME_REQUIREMENTS['spaces']);
 		}
 			

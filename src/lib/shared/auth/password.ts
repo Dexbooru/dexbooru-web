@@ -6,7 +6,7 @@ import {
 	SPECIAL_CHARACTER_REGEX
 } from '../constants/auth';
 
-export const getPasswordRequirements = (password: string,confirmedPassword:string): IAuthFieldRequirements => {
+export const getPasswordRequirements = (password: string): IAuthFieldRequirements => {
 	const satisifedRequirements: string[] = [];
 	const unsatisfiedRequirements: string[] = [];
 
@@ -69,22 +69,6 @@ export const getPasswordRequirements = (password: string,confirmedPassword:strin
 	} else {
 		unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['special-character']);
 	}
-
- 	const passwordsMatch = (password: string, confirmedPassword: string): boolean => {
-    	return password === confirmedPassword;
-	};
-	
-	if (!passwordsMatch(password, confirmedPassword)) {
-    	unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['match']);
-	}else{
-		if(!password && !confirmedPassword){
-			unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['match']);
-		}else{
-			satisifedRequirements.push(PASSWORD_REQUIREMENTS['match']);
-		}
-		
-	}
-
 
 
 	return {

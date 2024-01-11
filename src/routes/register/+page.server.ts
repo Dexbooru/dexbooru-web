@@ -45,7 +45,7 @@ const handleRegistration: Action = async ({ request }) => {
 		});
 	}
 
-	const { unsatisfied: passwordUnsatisifed } = getPasswordRequirements(password,confirmedPassword);
+	const { unsatisfied: passwordUnsatisifed } = getPasswordRequirements(password);
 	if (passwordUnsatisifed.length > 0) {
 		return fail(400, { email, username, reason: 'The password did not meet the requirements!' });
 	}
