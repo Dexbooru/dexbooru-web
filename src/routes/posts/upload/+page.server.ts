@@ -1,18 +1,18 @@
-import { error, fail } from '@sveltejs/kit';
-import type { Actions, Action, PageServerLoad } from './$types';
+import { uploadBatchToBucket } from '$lib/server/aws/actions/s3';
+import { createPost } from '$lib/server/db/actions/post';
+import { runPostImageTransformationPipelineInBatch } from '$lib/server/helpers/images';
+import { MAXIMUM_IMAGES_PER_POST } from '$lib/shared/constants/images';
 import { getFormFields } from '$lib/shared/helpers/forms';
-import type { IUploadFormFields } from '$lib/shared/types/upload';
+import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import {
 	isArtistValid,
 	isTagValid,
 	isValidDescription,
 	transformLabels
 } from '$lib/shared/helpers/labels';
-import { createPost } from '$lib/server/db/actions/post';
-import { MAXIMUM_IMAGES_PER_POST } from '$lib/shared/constants/images';
-import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
-import { runPostImageTransformationPipelineInBatch } from '$lib/server/helpers/images';
-import { uploadBatchToBucket } from '$lib/server/aws/actions/s3';
+import type { IUploadFormFields } from '$lib/shared/types/upload';
+import { error, fail, redirect } from '@sveltejs/kit';
+import type { Action, Actions, PageServerLoad } from './$types';
 
 const handleUpload: Action = async ({ locals, request }) => {
 	if (!locals.user) {
@@ -26,14 +26,14 @@ const handleUpload: Action = async ({ locals, request }) => {
 		description,
 		tags: tagsStr,
 		artists: artistsStr,
-		postImageFiles
-	} = getFormFields<IUploadFormFields>(uploadForm, ['postImageFiles']);
+		postPictures
+	} = getFormFields<IUploadFormFields>(uploadForm, ['postPictures']);
 
-	const postImagesArray = Array.from(postImageFiles);
+	const postImagesArray = Array.from(postPictures);
 	const tags = transformLabels(tagsStr);
 	const artists = transformLabels(artistsStr);
 
-	if (!description || !tags.length || !artists.length || !postImagesArray.length) {
+	if (!description.length || !tags.length || !artists.length || !postImagesArray.length) {
 		return fail(400, {
 			description,
 			tags,
@@ -112,6 +112,6 @@ export const actions = {
 
 export const load: PageServerLoad = ({ locals }) => {
 	if (!locals.user) {
-		throw error(401);
+		throw redirect(302, '/login');
 	}
 };

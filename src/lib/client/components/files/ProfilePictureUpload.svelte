@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fileToBase64String } from '$lib/client/helpers/images';
 	import { PROFILE_PICTURE_HEIGHT, PROFILE_PICTURE_WIDTH } from '$lib/shared/constants/images';
-	import { Label, Fileupload, ImagePlaceholder, Avatar } from 'flowbite-svelte';
+	import { Avatar, Fileupload, ImagePlaceholder, Label } from 'flowbite-svelte';
 
 	// onMount(() => {
 	// 	profilePictureInput = document.querySelector('#profilePictureInput') as HTMLInputElement | null;

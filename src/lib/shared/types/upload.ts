@@ -1,6 +1,6 @@
 export interface IUploadFormFields {
+	description: string;
 	tags: string;
 	artists: string;
-	description: string;
-	postImageFiles: FileList;
+	postPictures: FileList;
 }

@@ -30,6 +30,8 @@
 		<NavLi data-sveltekit-reload href="/" active={currentPath === '/'}>Home</NavLi>
 		<NavLi href="/tags" active={currentPath === '/tags'}>Tags</NavLi>
 		<NavLi href="/artists" active={currentPath === '/tags'}>Artists</NavLi>
-		<NavLi href="/posts/upload" active={currentPath === '/posts/upload'}>Upload</NavLi>
+		{#if $page.data.user}
+			<NavLi href="/posts/upload" active={currentPath === '/posts/upload'}>Upload</NavLi>
+		{/if}
 	</NavUl>
 </Navbar>

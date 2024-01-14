@@ -40,7 +40,7 @@ export const transformLabel = (label: string): string => {
 
 export const transformLabels = (labels: string | string[] | undefined): string[] => {
 	const convertedLabels: string[] =
-		labels === undefined ? [] : typeof labels === 'string' ? JSON.parse(labels) : labels;
+		labels === undefined ? [] : typeof labels === 'string' ? labels.split(',') : labels;
 	return Array.from(new Set(convertedLabels.map(transformLabel)));
 };
 
