@@ -1,42 +1,33 @@
 <script lang="ts">
-	import { Card, Button, Label, Input, Alert } from 'flowbite-svelte';
-	import type { ActionData } from '../../../../routes/register/$types';
-	import { getUsernameRequirements } from '$lib/shared/auth/username';
-	import { getPasswordRequirements } from '$lib/shared/auth/password';
 	import { getEmailRequirements } from '$lib/shared/auth/email';
-	import FieldRequirements from '../reusable/FieldRequirements.svelte';
+	import { getPasswordRequirements } from '$lib/shared/auth/password';
+	import { getUsernameRequirements } from '$lib/shared/auth/username';
+	import { Alert, Button, Card, Input, Label } from 'flowbite-svelte';
+	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
+	import type { ActionData } from '../../../../routes/register/$types';
 	import ProfilePictureUpload from '../files/ProfilePictureUpload.svelte';
-	import { EyeOutline,EyeSlashOutline} from 'flowbite-svelte-icons'; 
-	let showPassword = false; 
-	let confirmedShowPassword = false; 
-
-
-
+	import FieldRequirements from '../reusable/FieldRequirements.svelte';
 
 	export let form: ActionData;
 
 	const onUsernameChange = () => {
 		const { satisfied, unsatisfied } = getUsernameRequirements(username);
 		satisifedUsernameRequirements = satisfied;
-        unsatisifedUsernameRequirements = unsatisfied;
-		
-    	
+		unsatisifedUsernameRequirements = unsatisfied;
 	};
 
 	const onPasswordChange = () => {
 		const { satisfied, unsatisfied } = getPasswordRequirements(password);
-	  
-        satisifedPasswordRequirements = satisfied;
-        unsatisfiedPasswordRequirements = unsatisfied;
-    	
+
+		satisifedPasswordRequirements = satisfied;
+		unsatisfiedPasswordRequirements = unsatisfied;
 	};
-	
 
 	const onEmailChange = () => {
 		const { satisfied, unsatisfied } = getEmailRequirements(email);
+
 		satisifedEmailRequirements = satisfied;
 		unsatisfiedEmailRequirements = unsatisfied;
-		
 	};
 
 	const registerErrroReason: string | undefined = form?.reason;
@@ -50,6 +41,8 @@
 	let unsatisifedUsernameRequirements: string[] = [];
 	let satisifedPasswordRequirements: string[] = [];
 	let unsatisfiedPasswordRequirements: string[] = [];
+	let showPassword = false;
+	let showConfirmedPassword = false;
 </script>
 
 <Card class="w-full max-w-md mt-20">
@@ -65,7 +58,7 @@
 					on:input={onUsernameChange}
 					type="text"
 					name="username"
-					placeholder="dexboorulover1234"
+					placeholder="Your username"
 					required
 				/>
 				<FieldRequirements
@@ -85,10 +78,10 @@
 					on:input={onEmailChange}
 					type="email"
 					name="email"
-					placeholder="dexbooru@gmail.com"
+					placeholder="Your email"
 					required
 				/>
-	
+
 				<FieldRequirements
 					requirementsPlacement="right-end"
 					requirementsType="email"
@@ -100,88 +93,56 @@
 		</Label>
 		<Label class="space-y-1">
 			<span>Enter your password</span>
-			<div class= "relative">
-				
-				{#if showPassword}
-				<div class="flex space-x-2 ">
-				<Input
-				  bind:value={password}
-				  on:input={onPasswordChange}
-				  type="text"
-				  name="confirmedPassword"
-				  placeholder="•••••"
-				  required
-				/>
-				<FieldRequirements
-				requirementsPlacement="right-end"
-				requirementsType="password"
-				popoverButtonId="password-req-popover-btn"
-				satisifedRequirements={satisifedPasswordRequirements}
-				unsatisfiedRequirements={unsatisfiedPasswordRequirements}
-				/>
-				</div>
-				<button type="button"  on:click={() => (showPassword = !showPassword)}>
-				  <EyeSlashOutline class="absolute top-3 right-10 cursor-pointer  w-5 h-5 text-gray-500" />
-				</button>
-			  {:else}
-			  <div class="flex space-x-2 ">
-				<Input
-				  bind:value={password}
-				  on:input={onPasswordChange}
-				  type="password"
-				  name="confirmedPassword"
-				  placeholder="•••••"
-				  required
-				/>
-				<FieldRequirements
-				requirementsPlacement="right-end"
-				requirementsType="password"
-				popoverButtonId="password-req-popover-btn"
-				satisifedRequirements={satisifedPasswordRequirements}
-				unsatisfiedRequirements={unsatisfiedPasswordRequirements}
-				/>
+			<div class="relative">
+				<div class="flex space-x-2">
+					<Input
+						bind:value={password}
+						on:input={onPasswordChange}
+						type={showPassword ? 'text' : 'password'}
+						name="confirmedPassword"
+						placeholder="•••••"
+						required
+					/>
+					<FieldRequirements
+						requirementsPlacement="right-end"
+						requirementsType="password"
+						popoverButtonId="password-req-popover-btn"
+						satisifedRequirements={satisifedPasswordRequirements}
+						unsatisfiedRequirements={unsatisfiedPasswordRequirements}
+					/>
 				</div>
 				<button type="button" on:click={() => (showPassword = !showPassword)}>
-				  <EyeOutline class="absolute top-3 right-10  cursor-pointer w-5 h-5 text-gray-500" />
+					{#if showPassword}
+						<EyeSlashOutline class="absolute top-3 right-10 cursor-pointer w-5 h-5 text-gray-500" />
+					{:else}
+						<EyeOutline class="absolute top-3 right-10 cursor-pointer w-5 h-5 text-gray-500" />
+					{/if}
 				</button>
-			  {/if}
-			 
-				
-				
 			</div>
 		</Label>
-		<Label class="space-y-2  ">
+		<Label style="margin-top: 0px;" class="space-y-1">
 			<span>Enter your password again</span>
-			<div class="relative ">
-				{#if  confirmedShowPassword}
+			<div class="relative">
 				<Input
-				bind:value={confirmedPassword}
-				on:input={onPasswordChange}
-				type="text"
-				name="confirmedPassword"
-				placeholder="•••••"
-				required
+					bind:value={confirmedPassword}
+					on:input={onPasswordChange}
+					type={showConfirmedPassword ? 'text' : 'password'}
+					name="confirmedPassword"
+					placeholder="•••••"
+					required
 				/>
-				<button type="button"  on:click={() => ( confirmedShowPassword = ! confirmedShowPassword)}>
-				<EyeSlashOutline class=" absolute top-3 right-3 cursor-pointer w-5 h-5 text-gray-500" />
+				<button type="button" on:click={() => (showConfirmedPassword = !showConfirmedPassword)}>
+					{#if showConfirmedPassword}
+						<EyeSlashOutline class=" absolute top-3 right-3 cursor-pointer w-5 h-5 text-gray-500" />
+					{:else}
+						<EyeOutline class="absolute top-3 right-3 cursor-pointer w-5 h-5 text-gray-500" />
+					{/if}
 				</button>
-			{:else}
-				<Input
-				bind:value={confirmedPassword}
-				on:input={onPasswordChange}
-				type="password"
-				name="confirmedPassword"
-				placeholder="•••••"
-				required
-				/>
-				<button on:click={() => ( confirmedShowPassword = ! confirmedShowPassword)}>
-					<EyeOutline class="absolute top-3 right-3 cursor-pointer w-5 h-5 text-gray-500" />
-				</button>
-			{/if}
-			{#if password !== confirmedPassword && confirmedPassword}
-				<p class="text-red-500">Passwords do not match</p>
-			{/if}
-		    </div>
+
+				{#if password !== confirmedPassword && confirmedPassword}
+					<p class="text-red-500">Passwords do not match</p>
+				{/if}
+			</div>
 		</Label>
 
 		<ProfilePictureUpload />
