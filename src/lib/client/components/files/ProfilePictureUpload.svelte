@@ -46,6 +46,4 @@
 	<ImagePlaceholder />
 {:else if profilePictureFile && profilePictureBase64String}
 	<Avatar class="block ml-auto mr-auto" size="xl" src={profilePictureBase64String} />
-	{PROFILE_PICTURE_HEIGHT}
-	{PROFILE_PICTURE_WIDTH}
 {/if}

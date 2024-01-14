@@ -3,13 +3,12 @@
 	import type { ActionData } from '../../../../routes/register/$types';
 	import { getUsernameRequirements } from '$lib/shared/auth/username';
 	import { getPasswordRequirements } from '$lib/shared/auth/password';
-	import { getEmailRequirements, isValidEmail } from '$lib/shared/auth/email';
+	import { getEmailRequirements } from '$lib/shared/auth/email';
 	import FieldRequirements from '../reusable/FieldRequirements.svelte';
 	import ProfilePictureUpload from '../files/ProfilePictureUpload.svelte';
 	import { EyeOutline,EyeSlashOutline} from 'flowbite-svelte-icons'; 
 	let showPassword = false; 
 	let confirmedShowPassword = false; 
-	let validEmailDomain  = false;
 
 
 
@@ -35,12 +34,6 @@
 
 	const onEmailChange = () => {
 		const { satisfied, unsatisfied } = getEmailRequirements(email);
-		if(!isValidEmail){
-			validEmailDomain = true; 
-		}else{
-			validEmailDomain = false;
-		}
-
 		satisifedEmailRequirements = satisfied;
 		unsatisfiedEmailRequirements = unsatisfied;
 		
@@ -104,11 +97,6 @@
 					unsatisfiedRequirements={unsatisfiedEmailRequirements}
 				/>
 			</div>
-			{#if unsatisfiedEmailRequirements.length > 0}
-				{#each unsatisfiedEmailRequirements as requirement (requirement)}
-			  		<p class="text-red-500">{requirement}</p>
-			   {/each}
-		 	{/if}
 		</Label>
 		<Label class="space-y-1">
 			<span>Enter your password</span>
