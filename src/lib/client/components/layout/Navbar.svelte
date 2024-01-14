@@ -8,11 +8,7 @@
 
 <Navbar class="sticky top-0 z-50">
 	<NavBrand href="/">
-		<img
-			src="favicon.png"
-			class="mr-3 h-6 sm:h-9"
-			alt="Dexbooru Logo"
-		/>
+		<img src="favicon.png" class="mr-3 h-6 sm:h-9" alt="Dexbooru Logo" />
 		<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">Dexbooru</span
 		>
 	</NavBrand>
@@ -30,6 +26,8 @@
 		<NavLi data-sveltekit-reload href="/" active={currentPath === '/'}>Home</NavLi>
 		<NavLi href="/tags" active={currentPath === '/tags'}>Tags</NavLi>
 		<NavLi href="/artists" active={currentPath === '/tags'}>Artists</NavLi>
-		<NavLi href="/posts/upload" active={currentPath === '/posts/upload'}>Upload</NavLi>
+		{#if $page.data.user}
+			<NavLi href="/posts/upload" active={currentPath === '/posts/upload'}>Upload</NavLi>
+		{/if}
 	</NavUl>
 </Navbar>

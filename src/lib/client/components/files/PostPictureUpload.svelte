@@ -1,75 +1,77 @@
 <script lang="ts">
 	import { fileToBase64String } from '$lib/client/helpers/images';
-	import { MAXIMUM_IMAGES_PER_POST, PROFILE_PICTURE_WIDTH } from '$lib/shared/constants/images';
-	import { Fileupload, ImagePlaceholder, Label, P } from 'flowbite-svelte';
+	import { MAXIMUM_IMAGES_PER_POST } from '$lib/shared/constants/images';
+	import { Fileupload, Label, P, Spinner } from 'flowbite-svelte';
+	import ImagePreviewModal from '../images/ImagePreviewModal.svelte';
 
-	let pictureBase64Strings: string[] = [];
-	let parsingPicture = false;
-	let pictureFiles: File[] = [];
+	let pictures: { imageBase64: string; file: File }[] = [];
+	let loadingPictures = false;
 	let errorMessage: string | null = null;
+
+	const resetFileUploadState = () => {
+		pictures = [];
+		loadingPictures = false;
+	};
+
+	const handleFileUploadError = (error: Error) => {
+		errorMessage = error.message;
+		resetFileUploadState();
+	};
 
 	const onFileChange = async (event: Event) => {
 		const target = event.target as HTMLInputElement;
-		let files: FileList | null = target.files;
+		const files: FileList | null = target.files;
 		errorMessage = null;
+		resetFileUploadState();
 
-		if (files) {
-			if (files.length > MAXIMUM_IMAGES_PER_POST) {
-				catchError(`Cannot upload more than ${MAXIMUM_IMAGES_PER_POST} files`);
-			} else {
-				for (let i = 0; i < files.length; i++) {
-					if (files[i]) {
-						parsingPicture = true;
-						let base64String: string | null = null;
-						try {
-							base64String = await fileToBase64String(files[i]);
-						} catch (error) {
-							catchError(error);
-							break;
-						}
-						if (base64String) {
-							pictureBase64Strings.push(base64String);
-							pictureFiles.push(files[i]);
-						} else {
-							catchError('Null base64 string detected for an image!');
-							break;
-						}
-						parsingPicture = false;
-					}
-				}
-			}
-		} else {
-			catchError('Did not upload any files');
+		if (!files) {
+			handleFileUploadError(new Error('Did not upload any files'));
+			resetFileUploadState();
+			return;
 		}
-	};
 
-	const catchError = (error: any) => {
-		console.error(error);
-		errorMessage = error;
-		pictureBase64Strings = [];
-		pictureFiles = [];
-		parsingPicture = false;
+		if (files.length > MAXIMUM_IMAGES_PER_POST) {
+			handleFileUploadError(new Error(`Cannot upload more than ${MAXIMUM_IMAGES_PER_POST} files`));
+			resetFileUploadState();
+			return;
+		}
+
+		for (let i = 0; i < files.length; i++) {
+			if (files[i]) {
+				loadingPictures = true;
+				let imageBase64: string | null = null;
+				try {
+					imageBase64 = await fileToBase64String(files[i]);
+				} catch (error) {
+					handleFileUploadError(error as Error);
+					break;
+				}
+				if (imageBase64) {
+					pictures.push({ imageBase64, file: files[i] });
+				} else {
+					handleFileUploadError(new Error('Null base64 string detected for an image!'));
+					break;
+				}
+				loadingPictures = false;
+			}
+		}
 	};
 </script>
 
-<Label class="space-y-2 mx-2.5">
-	<span>Upload Up to {MAXIMUM_IMAGES_PER_POST} images</span>
-	<Fileupload
-		id="PostPictureInput"
-		name="postPictures"
-		accept="image/*"
-		multiple
-		on:change={onFileChange}
-	/>
+<Label class="space-y-2 mx-2.5 mb-2">
+	<span>Upload up to {MAXIMUM_IMAGES_PER_POST} images</span>
+	<Fileupload name="postPictures" accept="image/*" multiple on:change={onFileChange} />
 </Label>
 
-{#if parsingPicture}
-	<ImagePlaceholder />
-{:else if pictureFiles.length && pictureBase64Strings.length && !errorMessage}
-	<P size="2xl" class="text-center mt-5">Image Preview</P>
-	{#each pictureBase64Strings as src}
-		<img class="block ml-auto mr-auto rounded-sm my-5" width={PROFILE_PICTURE_WIDTH} {src} alt="" />
-	{/each}
+{#if loadingPictures}
+	<Spinner class="block ml-auto mr-auto" size="10" />
+{:else if pictures.length && !errorMessage}
+	<P size="2xl" class="text-center mt-5">Images Preview</P>
+	<div class="flex flex-wrap space-x-3">
+		{#each pictures as { imageBase64, file }}
+			<ImagePreviewModal {imageBase64} imageFile={file} />
+		{/each}
+	</div>
 {:else if errorMessage}
 	<P>{errorMessage}</P>
 {/if}
