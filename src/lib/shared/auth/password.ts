@@ -30,9 +30,12 @@ export const getPasswordRequirements = (password: string): IAuthFieldRequirement
 			hasLowercaseCharacter = true;
 		} else if (currentChar >= '0' && currentChar <= '9') {
 			hasNumber = true;
-		} else if (SPECIAL_CHARACTER_REGEX.test(currentChar)) {
+		} 
+		
+		if(SPECIAL_CHARACTER_REGEX.test(password)) {
 			hasSpecialCharacter = true;
 		}
+		
 
 		const charactersChecksPass = [
 			hasLowercaseCharacter,
@@ -66,6 +69,7 @@ export const getPasswordRequirements = (password: string): IAuthFieldRequirement
 	} else {
 		unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['special-character']);
 	}
+
 
 	return {
 		satisfied: satisifedRequirements,

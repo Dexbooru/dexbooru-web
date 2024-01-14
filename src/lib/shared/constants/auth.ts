@@ -13,7 +13,8 @@ export const USERNAME_REQUIREMENTS: TUsernameRequirements = {
 export const MINIMUM_EMAIL_LENGTH = 1;
 export const MAXIMUM_EMAIL_LENGTH = 254;
 export const EMAIL_REQUIREMENTS: TEmailRequirements = {
-	length: `The email must be between ${MINIMUM_EMAIL_LENGTH} and ${MAXIMUM_EMAIL_LENGTH} characters long`
+	length: `The email must be between ${MINIMUM_EMAIL_LENGTH} and ${MAXIMUM_EMAIL_LENGTH} characters long`,
+	'valid-email': 'The email must have a @ sign and a valid domain after it'
 };
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 export const MINIMUM_PASSWORD_LENGTH = 8;

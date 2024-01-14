@@ -34,7 +34,7 @@ export type TPASSWORD_REQUIREMENT_ABV =
 	| 'special-character';
 export type TPasswordRequirements = Record<TPASSWORD_REQUIREMENT_ABV, string>;
 
-type TEMAIL_REQUIREMENT_ABV = 'length';
+type TEMAIL_REQUIREMENT_ABV = 'length' |'valid-email';
 export type TEmailRequirements = Record<TEMAIL_REQUIREMENT_ABV, string>;
 
 type TUSERNAME_REQUIREMENT_ABV = 'length' | 'spaces';
