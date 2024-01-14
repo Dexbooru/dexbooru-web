@@ -59,12 +59,12 @@
 
 	<div class="space-y-1">
 		<p class="text-lg dark:text-white">Tags</p>
-		<LabelContainer labelColor="red" labels={post.tags} />
+		<LabelContainer labelType="tag" labelColor="red" labels={post.tags} />
 	</div>
 
 	<div class="space-y-1">
 		<p class="text-lg dark:text-white">Artists</p>
-		<LabelContainer labelColor="green" labels={post.artists} />
+		<LabelContainer labelType="artist" labelColor="green" labels={post.artists} />
 	</div>
 
 	<div class="space-y-2">
