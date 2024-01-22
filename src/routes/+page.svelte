@@ -5,4 +5,4 @@
 	export let data: PageData;
 </script>
 
-<PostWrapper postProps={data} />
+<PostWrapper postProps={data} postsSection="Home" />

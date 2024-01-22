@@ -1,6 +1,5 @@
 <script lang="ts">
 	import PostContainer from '$lib/client/components/posts/container/PostContainer.svelte';
-	import { getLabelFromOrderby } from '$lib/client/constants/posts';
 	import { postsPageStore } from '$lib/client/stores/posts';
 	import type { IPost, TPostOrderByColumn } from '$lib/shared/types/posts';
 
@@ -10,14 +9,12 @@
 		orderBy: TPostOrderByColumn;
 		ascending: boolean;
 	};
+	export let postsSection: string;
 
 	const { posts, pageNumber, orderBy, ascending } = postProps;
-	postsPageStore.set(posts);
+	const postPageTitle = `${postsSection} - Page ${pageNumber + 1}`;
 
-	const postPageTitle = `Page ${pageNumber + 1} | Ordered by ${getLabelFromOrderby(
-		orderBy,
-		ascending
-	)}`;
+	postsPageStore.set(posts);
 </script>
 
 <svelte:head>

@@ -7,4 +7,4 @@
 </script>
 
 
-<PostWrapper postProps={data} />
+<PostWrapper postProps={data} postsSection="Upload Posts" />
