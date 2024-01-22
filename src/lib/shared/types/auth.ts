@@ -26,6 +26,10 @@ export interface IChangeUsernameFormFields {
 	newUsername: string;
 }
 
+export interface IDeleteAccountFields {
+	deletionConfirmationText: string;
+}
+
 export type TPASSWORD_REQUIREMENT_ABV =
 	| 'length'
 	| 'lowercase'
@@ -34,7 +38,7 @@ export type TPASSWORD_REQUIREMENT_ABV =
 	| 'special-character';
 export type TPasswordRequirements = Record<TPASSWORD_REQUIREMENT_ABV, string>;
 
-type TEMAIL_REQUIREMENT_ABV = 'length' |'valid-email';
+type TEMAIL_REQUIREMENT_ABV = 'length' | 'valid-email';
 export type TEmailRequirements = Record<TEMAIL_REQUIREMENT_ABV, string>;
 
 type TUSERNAME_REQUIREMENT_ABV = 'length' | 'spaces';

@@ -1,7 +1,7 @@
 import type {
+	TEmailRequirements,
 	TPasswordRequirements,
-	TUsernameRequirements,
-	TEmailRequirements
+	TUsernameRequirements
 } from '../types/auth';
 
 export const MINIMUM_USERNAME_LENGTH = 4;
@@ -28,3 +28,4 @@ export const PASSWORD_REQUIREMENTS: TPasswordRequirements = {
 };
 export const SPECIAL_CHARACTER_REGEX = /[\W_]/g;
 export const SALT_ROUNDS = 7;
+export const ACCOUNT_DELETION_CONFIRMATION_TEXT = 'delete my account';
