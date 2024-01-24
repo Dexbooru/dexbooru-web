@@ -2,11 +2,12 @@ import { MAX_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from '$lib/server/db/action
 import { findLikedPostsByAuthorId } from '$lib/server/db/actions/user';
 import { processPostPageParams } from '$lib/server/helpers/pagination';
 import type { TPostOrderByColumn } from '$lib/shared/types/posts';
-import { error, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals, url }) => {
-	if (!locals.user) {
+export const load: PageServerLoad = async ({ url, parent }) => {
+	const { user } = await parent();
+	if (!user) {
 		throw redirect(302, '/');
 	}
 
@@ -14,21 +15,19 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		url.searchParams
 	);
 
-	const posts = await findLikedPostsByAuthorId(
-		convertedPageNumber,
-		MAX_POSTS_PER_PAGE,
-		locals.user.id,
-		orderBy as TPostOrderByColumn,
-		convertedAscending,
-		PUBLIC_POST_SELECTORS
-	);
-
-	if (!posts) {
-		throw error(404, { message: `A user with the id: ${locals.user.id} does not exist!` });
-	}
+	const posts =
+		(await findLikedPostsByAuthorId(
+			convertedPageNumber,
+			MAX_POSTS_PER_PAGE,
+			user.id,
+			orderBy as TPostOrderByColumn,
+			convertedAscending,
+			PUBLIC_POST_SELECTORS
+		)) || [];
 
 	return {
 		posts,
+		likedPosts: posts,
 		pageNumber: convertedPageNumber,
 		ascending: convertedAscending,
 		orderBy: orderBy as TPostOrderByColumn

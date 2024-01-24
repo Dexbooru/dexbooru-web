@@ -2,23 +2,17 @@
 	import PostGrid from '$lib/client/components/posts/container/PostGrid.svelte';
 	import PostPageSidebar from '$lib/client/components/posts/container/PostPageSidebar.svelte';
 	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
-	import { postsPageStore } from '$lib/client/stores/posts';
+	import { originalPostsPageStore, postsPageStore } from '$lib/client/stores/posts';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
-	import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 	import { onDestroy } from 'svelte';
 	import Searchbar from '../../reusable/Searchbar.svelte';
 
 	export let postContainerTitle: string;
-	export let pageNumber: number;
-	export let orderBy: TPostOrderByColumn;
-	export let ascending: boolean;
-
-	const originalPosts = $postsPageStore;
 
 	const onPostSearch = (query: string) => {
 		const cleanedQuery = query.toLocaleLowerCase().trim();
 
-		const filteredPosts = originalPosts.filter((post) => {
+		const filteredPosts = $originalPostsPageStore.filter((post) => {
 			const tagHasQuery = post.tags
 				.map((tag) => tag.name)
 				.find((tagName) => tagName.toLocaleLowerCase().includes(cleanedQuery));
@@ -34,8 +28,8 @@
 		postsPageStore.set(filteredPosts);
 	};
 
-	let uniqueTags = getUniqueLabelsFromPosts(originalPosts, 'tag');
-	let uniqueArtists = getUniqueLabelsFromPosts(originalPosts, 'artist');
+	let uniqueTags: string[] = [];
+	let uniqueArtists: string[] = [];
 
 	const postPageStoreUnsubscribe = postsPageStore.subscribe((updatedPosts) => {
 		uniqueTags = getUniqueLabelsFromPosts(updatedPosts, 'tag');
@@ -49,7 +43,7 @@
 
 <main id="post-container" class="mt-5">
 	<div id="post-container-sidebar">
-		<PostPageSidebar {orderBy} {ascending} {uniqueTags} {uniqueArtists} />
+		<PostPageSidebar {uniqueTags} {uniqueArtists} />
 	</div>
 	<div id="post-container-body" class="space-y-4 mb-5">
 		<div id="post-container-title" class="flex justify-between">
@@ -58,7 +52,7 @@
 		</div>
 
 		<PostGrid />
-		<PostPaginator {pageNumber} {orderBy} />
+		<PostPaginator />
 	</div>
 </main>
 

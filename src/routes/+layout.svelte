@@ -1,8 +1,8 @@
 <script lang="ts">
-	import '../app.postcss';
+	import { page } from '$app/stores';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
 	import Navbar from '$lib/client/components/layout/Navbar.svelte';
-	import { onMount } from 'svelte';
+	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
 	import { getDeviceDetectionDataFromWindow } from '$lib/client/helpers/dom';
 	import {
 		deviceStore,
@@ -10,9 +10,12 @@
 		isMobileStore,
 		isTabletStore
 	} from '$lib/client/stores/device';
+	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
-	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
-
+	import { onMount } from 'svelte';
+	import '../app.postcss';
+	authenticatedUserStore.set($page.data.user || null);
+	
 	onMount(() => {
 		const deviceData = getDeviceDetectionDataFromWindow();
 		deviceStore.set(deviceData);

@@ -11,6 +11,14 @@ export interface ILikePostBody {
 	action: 'like' | 'dislike';
 }
 
+export interface IPostPaginationData {
+	posts: IPost[];
+	likedPosts: IPost[];
+	pageNumber: number;
+	ascending: boolean;
+	orderBy: TPostOrderByColumn;
+}
+
 export type IPost = Post & {
 	id: string;
 	description: string;

@@ -72,7 +72,6 @@
 			{#if labels.length > 0}
 				{#each labels as label}
 					<a
-						data-sveltekit-reload
 						class="text-center inline-flex justify-center space-x-2 border rounded p-2 leading-none dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
 						href="/posts/{labelType}/{label}"
 					>

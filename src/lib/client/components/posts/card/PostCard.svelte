@@ -19,5 +19,5 @@
 		slideDuration={750}
 	/>
 	<PostCardBody {author} {createdAt} {tags} {artists} />
-	<PostCardActions {author} {likes} {postId} />
+	<PostCardActions {post} {author} {likes} {postId} />
 </Card>

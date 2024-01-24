@@ -9,11 +9,9 @@ type TUserSelector = Prisma.UserSelect<DefaultArgs>;
 export const PUBLIC_USER_SELECTORS: TUserSelector = {
 	id: true,
 	username: true,
+	createdAt: true,
 	email: true,
-	profilePictureUrl: true,
-	likedPosts: true,
-	createdComments: true,
-	createdPosts: true
+	profilePictureUrl: true
 };
 
 export async function createSessionForUser(userId: string): Promise<string> {
@@ -65,6 +63,26 @@ export async function findUserBySessionId(
 	if (!sessionToken) return null;
 
 	return sessionToken.user as IUser;
+}
+
+export async function findLikedPostsFromSubset(userId: string, posts: IPost[]): Promise<IPost[]> {
+	const postIds = posts.map((post) => post.id);
+	const likedPostsInSubsetData = await prisma.user.findUnique({
+		where: {
+			id: userId
+		},
+		select: {
+			likedPosts: {
+				where: {
+					id: {
+						in: postIds
+					}
+				}
+			}
+		}
+	});
+
+	return (likedPostsInSubsetData ? likedPostsInSubsetData.likedPosts : []) as IPost[];
 }
 
 export async function findLikedPostsByAuthorId(
