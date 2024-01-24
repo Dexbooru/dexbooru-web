@@ -8,16 +8,20 @@ datasource db {
 }
 
 model User {
-  id                String         @id @default(uuid())
-  username          String         @unique() @db.VarChar(12)
-  createdAt         DateTime       @default(now())
-  email             String         @unique() @db.VarChar(254)
-  profilePictureUrl String
-  password          String
-  sessionTokens     SessionToken[]
-  createdPosts      Post[]         @relation(name: "created posts")
-  likedPosts        Post[]         @relation(name: "liked posts")
-  createdComments   Comment[]
+  id                     String          @id @default(uuid())
+  username               String          @unique() @db.VarChar(12)
+  createdAt              DateTime        @default(now())
+  email                  String          @unique() @db.VarChar(254)
+  profilePictureUrl      String
+  password               String
+  sessionTokens          SessionToken[]
+  createdPosts           Post[]          @relation(name: "created posts")
+  likedPosts             Post[]          @relation(name: "liked posts")
+  createdComments        Comment[]
+  friends                User[]          @relation("user friends")
+  symmetricFriends       User[]          @relation("user friends")
+  sentFriendRequests     FriendRequest[] @relation(name: "friend requests sent")
+  receivedFriendRequests FriendRequest[] @relation(name: "friend requests received")
 
   @@index([id])
 }
@@ -76,6 +80,17 @@ model Artist {
   posts Post[]
 
   @@index([name])
+}
+
+model FriendRequest {
+  sentAt         DateTime @default(now())
+  senderUser     User     @relation(name: "friend requests sent", fields: [senderUserId], references: [id], onDelete: Cascade)
+  senderUserId   String
+  receiverUser   User     @relation(name: "friend requests received", fields: [receiverUserId], references: [id], onDelete: Cascade)
+  receiverUserId String
+
+  @@id([senderUserId, receiverUserId])
+  @@index([senderUserId, receiverUserId])
 }
 
 enum PostReportReviewStatus {
