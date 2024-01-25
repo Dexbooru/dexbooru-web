@@ -8,8 +8,7 @@ export const load: PageServerLoad = async ({ parent, params }) => {
 
 	if (user && user.username === targetUsername) {
 		return {
-			targetUser: user,
-			viewingSelf: true
+			targetUser: user
 		};
 	}
 
@@ -19,7 +18,6 @@ export const load: PageServerLoad = async ({ parent, params }) => {
 	}
 
 	return {
-		targetUser,
-		viewingSelf: false
+		targetUser
 	};
 };

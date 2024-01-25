@@ -1,4 +1,4 @@
-import { MAX_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from '$lib/server/db/actions/post';
+import { MAX_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
 import { findLikedPostsByAuthorId } from '$lib/server/db/actions/user';
 import { processPostPageParams } from '$lib/server/helpers/pagination';
 import type { TPostOrderByColumn } from '$lib/shared/types/posts';

@@ -13,7 +13,7 @@
 
 <p class="text-base dark:text-white">Uploader</p>
 <div class="space-x-2 flex align-middle flex-wrap">
-	<a class="inline-flex align-middle space-x-2" href={authorId && `/profile/${authorId}`}>
+	<a class="inline-flex align-middle space-x-2" href={authorId && `/profile/${authorUsername}`}>
 		<Avatar
 			src={authorProfilePictureUrl}
 			alt={authorId ? `profile picture of ${authorUsername}` : 'default user account'}

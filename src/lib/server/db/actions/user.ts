@@ -1,18 +1,42 @@
+import type { TUserSelector } from '$lib/server/types/users';
 import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { IUser } from '$lib/shared/types/users';
-import type { Prisma } from '@prisma/client';
-import type { DefaultArgs } from '@prisma/client/runtime/library';
 import prisma from '../prisma';
 
-type TUserSelector = Prisma.UserSelect<DefaultArgs>;
 
-export const PUBLIC_USER_SELECTORS: TUserSelector = {
-	id: true,
-	username: true,
-	createdAt: true,
-	email: true,
-	profilePictureUrl: true
-};
+export async function createFriend(senderUserId: string, receiverUserId: string): Promise<boolean> {
+	const modifiedUserRecord = await prisma.user.update({
+		where: {
+			id: senderUserId
+		},
+		data: {
+			friends: {
+				connect: {
+					id: receiverUserId
+				}
+			}
+		}
+	});
+
+	return !!modifiedUserRecord;
+}
+
+export async function deleteFriend(senderUserId: string, receiverUserId: string): Promise<boolean> {
+	const modifiedUserRecord = await prisma.user.update({
+		where: {
+			id: senderUserId
+		},
+		data: {
+			friends: {
+				disconnect: {
+					id: receiverUserId
+				}
+			}
+		}
+	});
+
+	return !!modifiedUserRecord;
+}
 
 export async function createSessionForUser(userId: string): Promise<string> {
 	const { id } = await prisma.sessionToken.create({

@@ -1,8 +1,7 @@
+import { POST_LIKE_ACTIONS } from '$lib/server/constants/posts';
 import { findPostById, likePostById } from '$lib/server/db/actions/post';
 import type { ILikePostBody } from '$lib/shared/types/posts';
 import { error, type RequestHandler } from '@sveltejs/kit';
-
-const actionTypes = ['like', 'dislike'] as const;
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.user) {
@@ -18,9 +17,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 	}
 
-	if (!action || !actionTypes.includes(action)) {
+	if (!action || !POST_LIKE_ACTIONS.includes(action)) {
 		throw error(400, {
-			message: 'The action was invalid. It must either be like or dislike!'
+			message: `The action was invalid. It must be one of ${POST_LIKE_ACTIONS.join(', ')}`
 		});
 	}
 

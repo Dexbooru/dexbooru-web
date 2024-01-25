@@ -1,9 +1,15 @@
 <script lang="ts">
 	import UserProfileCard from '$lib/client/components/auth/UserProfileCard.svelte';
+	import type { IUser } from '$lib/shared/types/users';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const { targetUser, viewingSelf } = data;
+
+	let targetUser: IUser;
+
+	$: {
+		targetUser = data.targetUser;
+	}
 </script>
 
 <svelte:head>
@@ -11,5 +17,5 @@
 </svelte:head>
 
 <main class="grid place-items-center mt-24">
-	<UserProfileCard {targetUser} {viewingSelf} />
+	<UserProfileCard {targetUser} />
 </main>

@@ -6,9 +6,6 @@
 	import { Button, Heading, Input, Label, Textarea } from 'flowbite-svelte';
 	import PostPictureUpload from '../../../lib/client/components/files/PostPictureUpload.svelte';
 	import LabelContainer from '../../../lib/client/components/labels/LabelContainer.svelte';
-	import type { ActionData } from './$types';
-
-	export let form: ActionData;
 
 	let tags: string[] = [];
 	let artists: string[] = [];

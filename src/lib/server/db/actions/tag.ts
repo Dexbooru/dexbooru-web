@@ -1,8 +1,7 @@
+import { MAX_TAGS_PER_PAGE } from '$lib/server/constants/tags';
 import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { Tag } from '@prisma/client';
 import prisma from '../prisma';
-
-export const MAX_TAGS_PER_PAGE = 100;
 
 export async function findPostsByTagName(
 	tagName: string,

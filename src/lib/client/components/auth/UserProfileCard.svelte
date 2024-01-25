@@ -1,18 +1,18 @@
 <script lang="ts">
+	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { IUser } from '$lib/shared/types/users';
 	import { Avatar, Button, Card, Dropdown, DropdownItem } from 'flowbite-svelte';
 	import { DotsHorizontalOutline } from 'flowbite-svelte-icons';
 
 	export let targetUser: IUser;
-	export let viewingSelf: boolean;
 </script>
 
-<Card>
+<Card style="min-width: 300px; max-width: 550px;">
 	<div class="flex justify-end">
 		<DotsHorizontalOutline class="hover:cursor-pointer" />
 		<Dropdown class="w-36">
-			{#if viewingSelf}
+			{#if $authenticatedUserStore && $authenticatedUserStore.id === targetUser.id}
 				<DropdownItem>Export data</DropdownItem>
 			{/if}
 			<DropdownItem>Report account</DropdownItem>
@@ -31,12 +31,14 @@
 			<strong>{targetUser.email}</strong></span
 		>
 		<div class="flex mt-4 space-x-3 rtl:space-x-reverse lg:mt-6">
-			{#if !viewingSelf}
-				<Button>Add friend</Button>
-			{:else}
-				<Button href="/profile/posts/liked" color="red">View liked posts</Button>
+			{#if $authenticatedUserStore}
+				{#if $authenticatedUserStore.id !== targetUser.id}
+					<Button>Add friend</Button>
+				{:else}
+					<Button href="/profile/posts/liked" color="red">View liked posts</Button>
+					<Button href="/profile/posts/uploaded" color="blue">View uploaded posts</Button>
+				{/if}
 			{/if}
-			<Button href="/profile/posts/uploaded" color="blue">View uploaded posts</Button>
 		</div>
 	</div>
 </Card>

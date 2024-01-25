@@ -1,8 +1,5 @@
-import {
-	MAX_COMMENTS_PER_PAGE,
-	PUBLIC_COMMENT_SELECTORS,
-	findCommentsByPostId
-} from '$lib/server/db/actions/comment';
+import { MAX_COMMENTS_PER_PAGE, PUBLIC_COMMENT_SELECTORS } from '$lib/server/constants/comments';
+import { findCommentsByPostId } from '$lib/server/db/actions/comment';
 import type { RequestHandler } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 
@@ -37,7 +34,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 		MAX_COMMENTS_PER_PAGE,
 		PUBLIC_COMMENT_SELECTORS
 	);
-	
+
 	if (!comments) {
 		throw error(400, { message: `There is no post with the id: ${postId} that exists!` });
 	}

@@ -1,8 +1,8 @@
 import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { Artist } from '@prisma/client';
 import prisma from '../prisma';
+import { MAX_ARTISTS_PER_PAGE } from '$lib/server/constants/artists';
 
-export const MAX_ARTISTS_PER_AGE = 100;
 
 export async function findPostsByArtistName(
 	artistName: string,
@@ -49,8 +49,8 @@ export async function getArtistsWithStartingLetter(
 			]
 		},
 		orderBy: { name: 'asc' },
-		skip: pageNumber * MAX_ARTISTS_PER_AGE,
-		take: MAX_ARTISTS_PER_AGE
+		skip: pageNumber * MAX_ARTISTS_PER_PAGE,
+		take: MAX_ARTISTS_PER_PAGE
 	});
 
 	return artists;

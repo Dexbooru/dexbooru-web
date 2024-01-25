@@ -1,6 +1,8 @@
 import type { Post, Prisma } from '@prisma/client';
 import type { DefaultArgs } from '@prisma/client/runtime/library';
 
+export type TPostLikeAction = 'like' | 'dislike';
+
 export interface IDeletePostBody {
 	postId: string;
 	authorId: string;
@@ -8,7 +10,7 @@ export interface IDeletePostBody {
 
 export interface ILikePostBody {
 	postId: string;
-	action: 'like' | 'dislike';
+	action: TPostLikeAction;
 }
 
 export interface IPostPaginationData {
@@ -39,4 +41,4 @@ export type IPost = Post & {
 };
 
 export type TPostSelector = Prisma.PostSelect<DefaultArgs>;
-export type TPostOrderByColumn = 'likes' | 'createdAt';
+export type TPostOrderByColumn = 'likes' | 'createdAt' | 'views';

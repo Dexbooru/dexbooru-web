@@ -15,7 +15,7 @@
 	import { onMount } from 'svelte';
 	import '../app.postcss';
 	authenticatedUserStore.set($page.data.user || null);
-	
+
 	onMount(() => {
 		const deviceData = getDeviceDetectionDataFromWindow();
 		deviceStore.set(deviceData);
