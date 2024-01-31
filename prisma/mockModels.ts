@@ -1,6 +1,6 @@
 import { Faker, en, faker } from '@faker-js/faker';
 import { Artist, Comment, Post, Tag, User } from '@prisma/client';
-import { hashPassword } from '../src/lib/server/auth/password';
+import { hashPassword } from '../src/lib/server/helpers/password';
 import {
 	MAXIMUM_EMAIL_LENGTH,
 	MAXIMUM_USERNAME_LENGTH,
@@ -41,9 +41,9 @@ class FakerMockGenerator {
 		this.modelSettings = modelSettings;
 	}
 
-	private randomUserId(mockUsers: User[]): string {
+	private randomUserId(mockUsers: Partial<User>[]): string {
 		const index = this.enFaker.helpers.rangeToNumber({ min: 0, max: mockUsers.length - 1 });
-		return mockUsers[index].id;
+		return mockUsers[index].id || '';
 	}
 
 	private randomPostId(mockPosts: Post[]): string {
@@ -82,11 +82,11 @@ class FakerMockGenerator {
 		return await hashPassword(realPassword);
 	}
 
-	async generateMockUsers(n: number): Promise<User[]> {
-		const mockUsers: User[] = [];
+	async generateMockUsers(n: number): Promise<Partial<User>[]> {
+		const mockUsers: Partial<User>[] = [];
 
 		for (let i = 0; i < n; i++) {
-			const mockUser: User = {
+			const mockUser: Partial<User> = {
 				id: this.enFaker.string.uuid(),
 				email: this.enFaker.internet.email().slice(0, MAXIMUM_EMAIL_LENGTH),
 				username: this.enFaker.string.alpha({
@@ -107,7 +107,7 @@ class FakerMockGenerator {
 
 	generateMockPosts(
 		n: number,
-		mockUsers: User[],
+		mockUsers: Partial<User>[],
 		mockTags: Tag[],
 		mockArtists: Artist[]
 	): IMockPost[] {
@@ -191,7 +191,7 @@ class FakerMockGenerator {
 		return mockArtists;
 	}
 
-	generateMockComments(n: number, mockUsers: User[], mockPosts: Post[]): IComment[] {
+	generateMockComments(n: number, mockUsers: Partial<User>[], mockPosts: Post[]): IComment[] {
 		const mockComments: IComment[] = [];
 
 		for (let i = 0; i < n; i++) {

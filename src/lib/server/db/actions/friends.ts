@@ -1,4 +1,22 @@
+import type { IFriendRequest, TFriendRequestSelector } from '$lib/shared/types/friends';
 import prisma from '../prisma';
+
+export async function findFriendRequests(
+	receiverUserId: string,
+	selectors?: TFriendRequestSelector
+): Promise<IFriendRequest[]> {
+	const friendRequestsReceived = await prisma.friendRequest.findMany({
+		where: {
+			receiverUserId
+		},
+		select: selectors,
+		orderBy: {
+			sentAt: 'desc'
+		}
+	});
+
+	return friendRequestsReceived as IFriendRequest[];
+}
 
 export async function createFriendRequest(
 	senderUserId: string,
@@ -36,4 +54,18 @@ export async function deleteFriendRequest(
 	});
 
 	return deleteFriendRequestBatchResult.count > 0;
+}
+
+export async function checkIfUserIsFriended(
+	senderUserId: string,
+	receiverUserId: string
+): Promise<boolean> {
+	const friendRequest = await prisma.friendRequest.findFirst({
+		where: {
+			senderUserId,
+			receiverUserId
+		}
+	});
+
+	return !!friendRequest;
 }

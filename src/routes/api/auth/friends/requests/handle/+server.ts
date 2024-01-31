@@ -12,6 +12,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const { senderUserId, action }: IFriendRequestHandleBody = await request.json();
+
 	if (!senderUserId || !action) {
 		throw error(400, {
 			message:

@@ -3,9 +3,29 @@ import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types
 import type { IUser } from '$lib/shared/types/users';
 import prisma from '../prisma';
 
+export async function checkIfUsersAreFriends(
+	senderUserId: string,
+	receiverUserId: string
+): Promise<boolean> {
+	const friendResult = await prisma.user.findUnique({
+		where: {
+			id: senderUserId,
+			friends: {
+				some: {
+					id: receiverUserId
+				}
+			}
+		},
+		select: {
+			id: true
+		}
+	});
+
+	return !!friendResult;
+}
 
 export async function createFriend(senderUserId: string, receiverUserId: string): Promise<boolean> {
-	const modifiedUserRecord = await prisma.user.update({
+	const modifiedSenderUserRecord = await prisma.user.update({
 		where: {
 			id: senderUserId
 		},
@@ -18,11 +38,24 @@ export async function createFriend(senderUserId: string, receiverUserId: string)
 		}
 	});
 
-	return !!modifiedUserRecord;
+	const modifiedReceiverUserRecord = await prisma.user.update({
+		where: {
+			id: receiverUserId
+		},
+		data: {
+			friends: {
+				connect: {
+					id: senderUserId
+				}
+			}
+		}
+	});
+
+	return !!modifiedSenderUserRecord && !!modifiedReceiverUserRecord;
 }
 
 export async function deleteFriend(senderUserId: string, receiverUserId: string): Promise<boolean> {
-	const modifiedUserRecord = await prisma.user.update({
+	const modifiedSenderUserRecord = await prisma.user.update({
 		where: {
 			id: senderUserId
 		},
@@ -35,7 +68,20 @@ export async function deleteFriend(senderUserId: string, receiverUserId: string)
 		}
 	});
 
-	return !!modifiedUserRecord;
+	const modifiedReceiverUserRecord = await prisma.user.update({
+		where: {
+			id: receiverUserId
+		},
+		data: {
+			friends: {
+				disconnect: {
+					id: senderUserId
+				}
+			}
+		}
+	});
+
+	return !!modifiedReceiverUserRecord && !!modifiedSenderUserRecord;
 }
 
 export async function createSessionForUser(userId: string): Promise<string> {

@@ -83,6 +83,7 @@ model Artist {
 }
 
 model FriendRequest {
+  id             String   @unique @default(uuid())
   sentAt         DateTime @default(now())
   senderUser     User     @relation(name: "friend requests sent", fields: [senderUserId], references: [id], onDelete: Cascade)
   senderUserId   String
