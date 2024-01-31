@@ -1,24 +1,25 @@
 <script lang="ts">
 	import PostContainer from '$lib/client/components/posts/container/PostContainer.svelte';
-	import { postsPageStore } from '$lib/client/stores/posts';
-	import type { IPost, TPostOrderByColumn } from '$lib/shared/types/posts';
+	import { postPaginationStore } from '$lib/client/stores/posts';
+	import { onDestroy } from 'svelte';
 
-	export let postProps: {
-		posts: IPost[];
-		pageNumber: number;
-		orderBy: TPostOrderByColumn;
-		ascending: boolean;
-	};
 	export let postsSection: string;
 
-	const { posts, pageNumber, orderBy, ascending } = postProps;
-	const postPageTitle = `${postsSection} - Page ${pageNumber + 1}`;
+	let currentPageTitle: string;
 
-	postsPageStore.set(posts);
+	const postPaginationUnsubscribe = postPaginationStore.subscribe((paginationData) => {
+		if (paginationData) {
+			currentPageTitle = `${postsSection} - Page ${paginationData.pageNumber + 1}`;
+		}
+	});
+
+	onDestroy(() => {
+		postPaginationUnsubscribe();
+	});
 </script>
 
 <svelte:head>
-	<title>{postPageTitle}</title>
+	<title>{currentPageTitle}</title>
 </svelte:head>
 
-<PostContainer postContainerTitle={postPageTitle} {pageNumber} {orderBy} {ascending} />
+<PostContainer postContainerTitle={currentPageTitle} />

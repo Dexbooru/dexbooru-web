@@ -21,7 +21,6 @@
 <div class="flex flex-wrap">
 	{#each labels as label}
 		<Badge
-			data-sveltekit-reload
 			href="/posts/{labelType}/{typeof label === 'object' ? label.name : label}"
 			large={labelsAreLarge}
 			class="ml-1 mr-1 mb-1"
@@ -30,4 +29,3 @@
 		>
 	{/each}
 </div>
-

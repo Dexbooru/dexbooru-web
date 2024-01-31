@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { Card, Button, Label, Input, Checkbox, Alert } from 'flowbite-svelte';
+	import { Alert, Button, Card, Checkbox, Input, Label } from 'flowbite-svelte';
+	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
 	import type { ActionData } from '../../../../routes/login/$types';
-	import { EyeOutline,EyeSlashOutline} from 'flowbite-svelte-icons'; 
-	let showPassword = false; 
+
+	let showPassword = false;
 
 	export let form: ActionData;
 
@@ -27,21 +28,30 @@
 			/>
 		</Label>
 		<Label class="space-y-2">
-            <span>Your password</span>
-            <div class="relative">
-                <Input bind:value={password} type={showPassword ? 'text' : 'password'} name="password" placeholder="•••••" required />
-                {#if showPassword}
-                    <EyeSlashOutline class="absolute top-3 right-3 cursor-pointer text-gray-400 dark:text-gray-500" on:click={() => showPassword = false} />
-                {:else}
-                    <EyeOutline class="absolute top-3 right-3 cursor-pointer text-gray-400 dark:text-gray-500" on:click={() => showPassword = true} />
-                {/if}
-            </div>
-        </Label>
+			<span>Your password</span>
+			<div class="relative">
+				<Input
+					bind:value={password}
+					type={showPassword ? 'text' : 'password'}
+					name="password"
+					placeholder="•••••"
+					required
+				/>
+				{#if showPassword}
+					<EyeSlashOutline
+						class="absolute top-3 right-3 cursor-pointer text-gray-400 dark:text-gray-500"
+						on:click={() => (showPassword = false)}
+					/>
+				{:else}
+					<EyeOutline
+						class="absolute top-3 right-3 cursor-pointer text-gray-400 dark:text-gray-500"
+						on:click={() => (showPassword = true)}
+					/>
+				{/if}
+			</div>
+		</Label>
 		<div class="flex items-start">
-			<Checkbox>Remember me</Checkbox>
-			<a href="/" class="ml-auto text-sm text-primary-700 hover:underline dark:text-primary-500">
-				Lost password?
-			</a>
+			<Checkbox name="rememberMe">Remember me</Checkbox>
 		</div>
 		<Button type="submit" class="w-full">Log in</Button>
 		{#if loginErrorReason}

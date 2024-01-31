@@ -1,15 +1,15 @@
-import { isValidEmail } from '$lib/shared/auth/email';
-import { hashPassword } from '$lib/server/auth/password';
-import type { IRegisterFormFields } from '$lib/shared/types/auth';
-import { getUsernameRequirements } from '$lib/shared/auth/username';
-import { getPasswordRequirements } from '$lib/shared/auth/password';
-import { createUser, findUserByNameOrEmail } from '$lib/server/db/actions/user';
-import { getFormFields } from '$lib/shared/helpers/forms';
-import { fail, redirect } from '@sveltejs/kit';
-import type { Actions, Action } from './$types';
 import { uploadToBucket } from '$lib/server/aws/actions/s3';
-import { isFileImageSmall, isFileImage } from '$lib/shared/helpers/images';
+import { createUser, findUserByNameOrEmail } from '$lib/server/db/actions/user';
 import { runProfileImageTransformationPipeline } from '$lib/server/helpers/images';
+import { hashPassword } from '$lib/server/helpers/password';
+import { isValidEmail } from '$lib/shared/auth/email';
+import { getPasswordRequirements } from '$lib/shared/auth/password';
+import { getUsernameRequirements } from '$lib/shared/auth/username';
+import { getFormFields } from '$lib/shared/helpers/forms';
+import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
+import type { IRegisterFormFields } from '$lib/shared/types/auth';
+import { fail, redirect } from '@sveltejs/kit';
+import type { Action, Actions } from './$types';
 
 const handleRegistration: Action = async ({ request }) => {
 	const registerForm = await request.formData();

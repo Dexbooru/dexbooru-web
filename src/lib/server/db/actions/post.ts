@@ -1,34 +1,6 @@
 import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import prisma from '../prisma';
 
-export const VALID_ORDERBY_COLUMNS: TPostOrderByColumn[] = ['createdAt', 'likes'];
-
-export const MAX_POSTS_PER_PAGE = 25;
-export const PUBLIC_POST_SELECTORS: TPostSelector = {
-	id: true,
-	description: true,
-	createdAt: true,
-	imageUrls: true,
-	likes: true,
-	views: true,
-	author: {
-		select: {
-			id: true,
-			username: true,
-			profilePictureUrl: true
-		}
-	},
-	tags: {
-		select: {
-			name: true
-		}
-	},
-	artists: {
-		select: {
-			name: true
-		}
-	}
-};
 
 export async function deletePostById(postId: string, authorId: string): Promise<boolean> {
 	if (!postId || !authorId) return false;

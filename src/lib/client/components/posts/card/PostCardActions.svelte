@@ -5,7 +5,13 @@
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { normalizeCount } from '$lib/client/helpers/posts';
 	import { modalStore } from '$lib/client/stores/layout';
-	import { postsPageStore } from '$lib/client/stores/posts';
+	import {
+		originalPostsPageStore,
+		postPaginationStore,
+		postsPageStore
+	} from '$lib/client/stores/posts';
+	import { authenticatedUserStore } from '$lib/client/stores/users';
+	import type { IPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button } from 'flowbite-svelte';
 	import {
@@ -16,6 +22,7 @@
 	} from 'flowbite-svelte-icons';
 	import PostCardReportModal from './PostCardReportModal.svelte';
 
+	export let post: IPost;
 	export let postId: string;
 	export let likes: number;
 	export let author: {
@@ -26,8 +33,10 @@
 
 	let postLikeLoading = false;
 	let postDeletionLoading = false;
-	let hasLikedPost = $page.data.user?.likedPosts.map((post) => post.id).includes(postId);
-	const isPostAuthor = $page.data.user && $page.data.user.id === author.id;
+	let hasLikedPost = $postPaginationStore?.likedPosts.map((post) => post.id).includes(postId);
+
+	const pagePathName = $page.url.pathname;
+	const isPostAuthor = $authenticatedUserStore && $authenticatedUserStore.id === author.id;
 
 	const handleModalOpen = () => {
 		modalStore.set({
@@ -37,7 +46,7 @@
 	};
 
 	const handleLikePost = async () => {
-		if (!$page.data.user) {
+		if (!$authenticatedUserStore) {
 			toast.push(
 				'Please sign-in or register for an account to able to like posts',
 				FAILURE_TOAST_OPTIONS
@@ -54,6 +63,32 @@
 				SUCCESS_TOAST_OPTIONS
 			);
 			likes = hasLikedPost ? likes - 1 : likes + 1;
+			postPaginationStore.update((paginationData) => {
+				if (!paginationData) return null;
+
+				if (hasLikedPost) {
+					paginationData.likedPosts = paginationData?.likedPosts.filter(
+						(likedPost) => likedPost.id !== postId
+					);
+				} else {
+					paginationData.likedPosts.push(post);
+				}
+
+				return paginationData;
+			});
+
+			if (
+				(pagePathName === '/profile/posts/liked' || pagePathName === '/profile/posts/liked/') &&
+				hasLikedPost
+			) {
+				postsPageStore.update((previousPosts) =>
+					previousPosts.filter((post) => post.id !== postId)
+				);
+				originalPostsPageStore.update((previousPosts) => {
+					return previousPosts.filter((post) => post.id !== postId);
+				});
+			}
+
 			hasLikedPost = !hasLikedPost;
 		} else {
 			toast.push(
@@ -70,6 +105,17 @@
 
 		if (response.ok) {
 			postsPageStore.update((previousPosts) => previousPosts.filter((post) => post.id !== postId));
+			originalPostsPageStore.update((previousPosts) =>
+				previousPosts.filter((post) => post.id !== postId)
+			);
+			postPaginationStore.update((paginationData) => {
+				if (!paginationData) return null;
+
+				return {
+					...paginationData,
+					posts: paginationData.posts.filter((post) => post.id !== postId)
+				};
+			});
 			toast.push('The post was deleted successfully!', SUCCESS_TOAST_OPTIONS);
 		} else {
 			toast.push('There was an error while deleting the post!', FAILURE_TOAST_OPTIONS);
@@ -83,7 +129,7 @@
 		<span>{normalizeCount(likes)} - Like post</span>
 	</Button>
 
-	<Button class="space-x-2" data-sveltekit-reload href="/posts/{postId}" color="blue">
+	<Button class="space-x-2" href="/posts/{postId}" color="blue">
 		<span>View full post</span>
 		<ArrowRightToBracketSolid />
 	</Button>

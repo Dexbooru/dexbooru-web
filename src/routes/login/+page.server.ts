@@ -1,18 +1,22 @@
-import type { ILoginFormFields } from '$lib/shared/types/auth';
+import { SESSION_ID_KEY } from '$lib/server/constants/cookies';
 import { createSessionForUser, findUserByName } from '$lib/server/db/actions/user';
+import { buildCookieOptions } from '$lib/server/helpers/cookies';
+import { passwordsMatch } from '$lib/server/helpers/password';
 import { getFormFields } from '$lib/shared/helpers/forms';
+import type { ILoginFormFields } from '$lib/shared/types/auth';
 import { fail, redirect } from '@sveltejs/kit';
-import type { Actions, Action } from './$types';
-import { passwordsMatch } from '$lib/server/auth/password';
-import { SESSION_ID_COOKIE_OPTIONS, SESSION_ID_KEY } from '$lib/server/auth/cookies';
+import type { Action, Actions } from './$types';
 
 const handleLogin: Action = async ({ request, cookies }) => {
 	const loginForm = await request.formData();
-	const { username, password } = getFormFields<ILoginFormFields>(loginForm);
+
+	const { username, password, rememberMe } = getFormFields<ILoginFormFields>(loginForm);
 
 	if (!username || !password) {
 		return fail(400, { username, reason: 'At least one of the required fields is missing!' });
 	}
+
+	const finalRememberMe = rememberMe ? rememberMe : 'off';
 
 	const user = await findUserByName(username);
 	if (!user) {
@@ -25,7 +29,7 @@ const handleLogin: Action = async ({ request, cookies }) => {
 	}
 
 	const newSessionId = await createSessionForUser(user.id);
-	cookies.set(SESSION_ID_KEY, newSessionId, SESSION_ID_COOKIE_OPTIONS);
+	cookies.set(SESSION_ID_KEY, newSessionId, buildCookieOptions(finalRememberMe));
 
 	throw redirect(302, '/');
 };

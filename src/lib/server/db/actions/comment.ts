@@ -1,43 +1,6 @@
-import type { Comment, Prisma } from '@prisma/client';
+import type { Comment } from '@prisma/client';
 import prisma from '../prisma';
-import type { DefaultArgs } from '@prisma/client/runtime/library';
-
-type TCommentSelector = Prisma.CommentSelect<DefaultArgs>;
-
-export const MAX_COMMENTS_PER_PAGE = 35;
-export const PUBLIC_COMMENT_SELECTORS: TCommentSelector = {
-	id: true,
-	parentCommentId: true,
-	content: true,
-	createdAt: true,
-	author: {
-		select: {
-			id: true,
-			username: true,
-			profilePictureUrl: true
-		}
-	}
-};
-export const PUBLIC_AUTHOR_COMMENT_SELECTIONS: TCommentSelector = {
-	id: true,
-	postId: true,
-	authorId: true,
-	content: true,
-	createdAt: true,
-	parentComment: {
-		select: {
-			content: true,
-			createdAt: true,
-			author: {
-				select: {
-					id: true,
-					username: true,
-					profilePictureUrl: true
-				}
-			}
-		}
-	}
-};
+import type { TCommentSelector } from '$lib/server/types/comments';
 
 export async function editCommentContentById(
 	commentId: string,

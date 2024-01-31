@@ -9,6 +9,7 @@ export interface IRegisterFormFields {
 export interface ILoginFormFields {
 	username: string;
 	password: string;
+	rememberMe?: string;
 }
 
 export interface IAuthFieldRequirements {

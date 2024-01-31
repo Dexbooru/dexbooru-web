@@ -1,20 +1,88 @@
+import type { TUserSelector } from '$lib/server/types/users';
 import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { IUser } from '$lib/shared/types/users';
-import type { Prisma } from '@prisma/client';
-import type { DefaultArgs } from '@prisma/client/runtime/library';
 import prisma from '../prisma';
 
-type TUserSelector = Prisma.UserSelect<DefaultArgs>;
+export async function checkIfUsersAreFriends(
+	senderUserId: string,
+	receiverUserId: string
+): Promise<boolean> {
+	const friendResult = await prisma.user.findUnique({
+		where: {
+			id: senderUserId,
+			friends: {
+				some: {
+					id: receiverUserId
+				}
+			}
+		},
+		select: {
+			id: true
+		}
+	});
 
-export const PUBLIC_USER_SELECTORS: TUserSelector = {
-	id: true,
-	username: true,
-	email: true,
-	profilePictureUrl: true,
-	likedPosts: true,
-	createdComments: true,
-	createdPosts: true
-};
+	return !!friendResult;
+}
+
+export async function createFriend(senderUserId: string, receiverUserId: string): Promise<boolean> {
+	const modifiedSenderUserRecord = await prisma.user.update({
+		where: {
+			id: senderUserId
+		},
+		data: {
+			friends: {
+				connect: {
+					id: receiverUserId
+				}
+			}
+		}
+	});
+
+	const modifiedReceiverUserRecord = await prisma.user.update({
+		where: {
+			id: receiverUserId
+		},
+		data: {
+			friends: {
+				connect: {
+					id: senderUserId
+				}
+			}
+		}
+	});
+
+	return !!modifiedSenderUserRecord && !!modifiedReceiverUserRecord;
+}
+
+export async function deleteFriend(senderUserId: string, receiverUserId: string): Promise<boolean> {
+	const modifiedSenderUserRecord = await prisma.user.update({
+		where: {
+			id: senderUserId
+		},
+		data: {
+			friends: {
+				disconnect: {
+					id: receiverUserId
+				}
+			}
+		}
+	});
+
+	const modifiedReceiverUserRecord = await prisma.user.update({
+		where: {
+			id: receiverUserId
+		},
+		data: {
+			friends: {
+				disconnect: {
+					id: senderUserId
+				}
+			}
+		}
+	});
+
+	return !!modifiedReceiverUserRecord && !!modifiedSenderUserRecord;
+}
 
 export async function createSessionForUser(userId: string): Promise<string> {
 	const { id } = await prisma.sessionToken.create({
@@ -65,6 +133,26 @@ export async function findUserBySessionId(
 	if (!sessionToken) return null;
 
 	return sessionToken.user as IUser;
+}
+
+export async function findLikedPostsFromSubset(userId: string, posts: IPost[]): Promise<IPost[]> {
+	const postIds = posts.map((post) => post.id);
+	const likedPostsInSubsetData = await prisma.user.findUnique({
+		where: {
+			id: userId
+		},
+		select: {
+			likedPosts: {
+				where: {
+					id: {
+						in: postIds
+					}
+				}
+			}
+		}
+	});
+
+	return (likedPostsInSubsetData ? likedPostsInSubsetData.likedPosts : []) as IPost[];
 }
 
 export async function findLikedPostsByAuthorId(

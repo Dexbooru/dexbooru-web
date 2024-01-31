@@ -11,8 +11,8 @@ import {
 	transformLabels
 } from '$lib/shared/helpers/labels';
 import type { IUploadFormFields } from '$lib/shared/types/upload';
-import { error, fail, redirect } from '@sveltejs/kit';
-import type { Action, Actions, PageServerLoad } from './$types';
+import { error, fail } from '@sveltejs/kit';
+import type { Action, Actions } from './$types';
 
 const handleUpload: Action = async ({ locals, request }) => {
 	if (!locals.user) {
@@ -109,9 +109,3 @@ const handleUpload: Action = async ({ locals, request }) => {
 export const actions = {
 	default: handleUpload
 } satisfies Actions;
-
-export const load: PageServerLoad = ({ locals }) => {
-	if (!locals.user) {
-		throw redirect(302, '/login');
-	}
-};

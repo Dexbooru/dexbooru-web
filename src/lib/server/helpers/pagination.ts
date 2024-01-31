@@ -1,6 +1,6 @@
 import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 import { error } from '@sveltejs/kit';
-import { VALID_ORDERBY_COLUMNS } from '../db/actions/post';
+import { VALID_ORDERBY_COLUMNS } from '../constants/posts';
 
 export const processPageNumberFromParams = (searchParams: URLSearchParams): number => {
 	const rawPageNumber = searchParams.get('pageNumber') || '0';

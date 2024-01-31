@@ -28,8 +28,8 @@
 	images={imagesData}
 	{slideDuration}
 	transition={transitionFunction}
->	
-	<a slot="slide" data-sveltekit-reload href={postHref} let:Slide>
+>
+	<a slot="slide" href={postHref} let:Slide>
 		<Slide class="h-full object-contain" image={imagesData[index]} />
 	</a>
 	{#if imagesData.length > 1}

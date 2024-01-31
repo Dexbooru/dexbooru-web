@@ -1,5 +1,44 @@
 import { MONTHS } from '../constants/dates';
 
+export function getTimeDifferenceString(targetDatetime: Date) {
+	const today = new Date();
+	const timeDifference = today - targetDatetime;
+
+	const minute = 60 * 1000;
+	const hour = 60 * minute;
+	const day = 24 * hour;
+	const month = 30 * day;
+	const year = 365 * day;
+
+	if (timeDifference < minute) {
+		const seconds = Math.floor(timeDifference / 1000);
+		return `${seconds} second${seconds !== 1 ? 's' : ''} ago`;
+	}
+
+	if (timeDifference < hour) {
+		const minutes = Math.floor(timeDifference / minute);
+		return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+	}
+
+	if (timeDifference < day) {
+		const hours = Math.floor(timeDifference / hour);
+		return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+	}
+
+	if (timeDifference < month) {
+		const days = Math.floor(timeDifference / day);
+		return `${days} day${days !== 1 ? 's' : ''} ago`;
+	}
+
+	if (timeDifference < year) {
+		const months = Math.floor(timeDifference / month);
+		return `${months} month${months !== 1 ? 's' : ''} ago`;
+	}
+
+	const years = Math.floor(timeDifference / year);
+	return `${years} year${years !== 1 ? 's' : ''} ago`;
+}
+
 export function formatDate(date: Date): string {
 	const options: Intl.DateTimeFormatOptions = {
 		year: 'numeric',

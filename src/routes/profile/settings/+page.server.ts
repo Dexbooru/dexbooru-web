@@ -1,11 +1,10 @@
-import { SESSION_ID_KEY } from '$lib/server/auth/cookies';
-import { hashPassword, passwordsMatch } from '$lib/server/auth/password';
 import {
 	deleteUserById,
 	editPasswordByUserId,
 	editUsernameByUserId,
 	findUserById
 } from '$lib/server/db/actions/user';
+import { hashPassword, passwordsMatch } from '$lib/server/helpers/password';
 import { getPasswordRequirements } from '$lib/shared/auth/password';
 import { getUsernameRequirements } from '$lib/shared/auth/username';
 import { ACCOUNT_DELETION_CONFIRMATION_TEXT } from '$lib/shared/constants/auth';
@@ -17,6 +16,7 @@ import type {
 } from '$lib/shared/types/auth';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Action, Actions } from './$types';
+import { SESSION_ID_KEY } from '$lib/server/constants/cookies';
 
 const handleAccountDeletion: Action = async ({ locals, cookies, request }) => {
 	if (!locals.user) {
