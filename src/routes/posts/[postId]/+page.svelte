@@ -27,13 +27,13 @@
 
 		<p class="text-lg dark:text-white">
 			Author Username: <span class=" dark:text-gray-400"
-				><a class="underline" href="/profile/{post.author.id}">{post.author.username}</a></span
+				><a class="underline" href="/profile/{post.author.username}">{post.author.username}</a></span
 			>
 		</p>
 
 		<p class="text-lg dark:text-white">
 			Author ID: <span class=" dark:text-gray-400"
-				><a class="underline" href="/profile/{post.author.id}">{post.author.id}</a></span
+				><a class="underline" href="/profile/{post.author.username}">{post.author.id}</a></span
 			>
 		</p>
 
