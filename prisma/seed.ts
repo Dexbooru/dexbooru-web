@@ -35,6 +35,7 @@ async function main() {
 	const { mockUsers, mockPosts, mockArtists, mockTags, mockComments } =
 		await mockGenerator.generateAllModels();
 
+	
 	await client.user.createMany({
 		data: mockUsers
 	});
