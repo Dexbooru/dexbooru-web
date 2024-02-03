@@ -6,6 +6,8 @@
 	import { Button, Heading, Input, Label, Textarea } from 'flowbite-svelte';
 	import PostPictureUpload from '../../../lib/client/components/files/PostPictureUpload.svelte';
 	import LabelContainer from '../../../lib/client/components/labels/LabelContainer.svelte';
+	
+	export let form: FormData;
 
 	let tags: string[] = [];
 	let artists: string[] = [];
@@ -60,6 +62,7 @@
 	<title>Upload a post</title>
 </svelte:head>
 
+<h1 class="text-white">{JSON.stringify(form)}</h1>
 <main class="flex flex-col justify-center items-center mt-5 mb-5">
 	<Heading class="mb-10 px-2.5 text-center">Upload a post!</Heading>
 	<form method="POST" class="flex flex-col space-y-2 max-w-screen-md" enctype="multipart/form-data">
