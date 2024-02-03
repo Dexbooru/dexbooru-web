@@ -14,7 +14,6 @@ model User {
   email                  String          @unique() @db.VarChar(254)
   profilePictureUrl      String
   password               String
-  sessionTokens          SessionToken[]
   createdPosts           Post[]          @relation(name: "created posts")
   likedPosts             Post[]          @relation(name: "liked posts")
   createdComments        Comment[]
@@ -22,15 +21,6 @@ model User {
   symmetricFriends       User[]          @relation("user friends")
   sentFriendRequests     FriendRequest[] @relation(name: "friend requests sent")
   receivedFriendRequests FriendRequest[] @relation(name: "friend requests received")
-
-  @@index([id])
-}
-
-model SessionToken {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
 
   @@index([id])
 }

@@ -1,3 +1,4 @@
+import { SESSION_ID_COOKIE_OPTIONS, SESSION_ID_KEY } from '$lib/server/constants/cookies';
 import {
 	deleteUserById,
 	editPasswordByUserId,
@@ -5,6 +6,7 @@ import {
 	findUserById
 } from '$lib/server/db/actions/user';
 import { hashPassword, passwordsMatch } from '$lib/server/helpers/password';
+import { generateUpdatedUserTokenFromClaims } from '$lib/server/helpers/sessions';
 import { getPasswordRequirements } from '$lib/shared/auth/password';
 import { getUsernameRequirements } from '$lib/shared/auth/username';
 import { ACCOUNT_DELETION_CONFIRMATION_TEXT } from '$lib/shared/constants/auth';
@@ -16,7 +18,6 @@ import type {
 } from '$lib/shared/types/auth';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Action, Actions } from './$types';
-import { SESSION_ID_KEY } from '$lib/server/constants/cookies';
 
 const handleAccountDeletion: Action = async ({ locals, cookies, request }) => {
 	if (!locals.user) {
@@ -45,7 +46,7 @@ const handleAccountDeletion: Action = async ({ locals, cookies, request }) => {
 	throw redirect(302, '/');
 };
 
-const handleChangeUsername: Action = async ({ locals, request }) => {
+const handleChangeUsername: Action = async ({ locals, request, cookies }) => {
 	if (!locals.user) {
 		throw error(401, {
 			message: 'You are not authorized to change a username, without being a signed in user!'
@@ -82,6 +83,12 @@ const handleChangeUsername: Action = async ({ locals, request }) => {
 			reason: `A user with the id: ${locals.user.id} does not exist!`
 		});
 	}
+
+	const updatedUserJwtToken = generateUpdatedUserTokenFromClaims({
+		...locals.user,
+		username: newUsername
+	});
+	cookies.set(SESSION_ID_KEY, updatedUserJwtToken, SESSION_ID_COOKIE_OPTIONS);
 
 	return {
 		message: 'The username was changed successfully!'

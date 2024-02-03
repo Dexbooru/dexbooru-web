@@ -84,57 +84,6 @@ export async function deleteFriend(senderUserId: string, receiverUserId: string)
 	return !!modifiedReceiverUserRecord && !!modifiedSenderUserRecord;
 }
 
-export async function createSessionForUser(userId: string): Promise<string> {
-	const { id } = await prisma.sessionToken.create({
-		data: {
-			userId
-		},
-		select: {
-			id: true
-		}
-	});
-
-	return id;
-}
-
-export async function deleteSessionFromUser(sessionId: string) {
-	if (!sessionId) return;
-
-	await prisma.sessionToken.delete({
-		where: {
-			id: sessionId
-		}
-	});
-}
-
-export async function deleteAllSessionsFromUser(userId: string) {
-	await prisma.sessionToken.deleteMany({
-		where: {
-			id: userId
-		}
-	});
-}
-
-export async function findUserBySessionId(
-	sessionId: string,
-	selectors?: TUserSelector
-): Promise<IUser | null> {
-	const sessionToken = await prisma.sessionToken.findUnique({
-		where: {
-			id: sessionId
-		},
-		include: {
-			user: {
-				select: selectors
-			}
-		}
-	});
-
-	if (!sessionToken) return null;
-
-	return sessionToken.user as IUser;
-}
-
 export async function findLikedPostsFromSubset(userId: string, posts: IPost[]): Promise<IPost[]> {
 	const postIds = posts.map((post) => post.id);
 	const likedPostsInSubsetData = await prisma.user.findUnique({

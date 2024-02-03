@@ -65,7 +65,7 @@
 
 		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Account creation date:
-			<strong>{formatDate(targetUser.createdAt)}</strong></span
+			<strong>{formatDate(new Date(targetUser.createdAt))}</strong></span
 		>
 		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Account email:

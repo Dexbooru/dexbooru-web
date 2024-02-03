@@ -2,7 +2,7 @@ import { MONTHS } from '../constants/dates';
 
 export function getTimeDifferenceString(targetDatetime: Date) {
 	const today = new Date();
-	const timeDifference = today - targetDatetime;
+	const timeDifference = today.getUTCMilliseconds() - targetDatetime.getUTCMilliseconds();
 
 	const minute = 60 * 1000;
 	const hour = 60 * minute;
