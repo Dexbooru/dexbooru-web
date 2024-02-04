@@ -5,7 +5,7 @@
 	"scripts": {
 		"dev": "dotenv -e .env.local -- vite dev",
 		"build": "vite build",
-		"preview": "vite preview",
+		"preview": "dotenv -e .env -- vite preview",
 		"dbseed:dev": "dotenv -e .env.local -- npx prisma db push --force-reset && npx prisma db seed",
 		"dbmigrate:dev": "dotenv -e .env.local -- npx prisma migrate dev",
 		"dbreset:dev": "dotenv -e .env.local -- npx prisma migrate reset",

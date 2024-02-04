@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { getEmailRequirements } from '$lib/shared/auth/email';
-	import { getPasswordRequirements } from '$lib/shared/auth/password';
-	import { getUsernameRequirements } from '$lib/shared/auth/username';
+	import { getEmailRequirements } from '$lib/shared/helpers/auth/email';
+	import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
+	import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
 	import { Input, Label, Toggle } from 'flowbite-svelte';
 	import FieldRequirements from '../reusable/FieldRequirements.svelte';
 

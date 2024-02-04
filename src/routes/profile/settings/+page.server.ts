@@ -7,8 +7,8 @@ import {
 } from '$lib/server/db/actions/user';
 import { hashPassword, passwordsMatch } from '$lib/server/helpers/password';
 import { generateUpdatedUserTokenFromClaims } from '$lib/server/helpers/sessions';
-import { getPasswordRequirements } from '$lib/shared/auth/password';
-import { getUsernameRequirements } from '$lib/shared/auth/username';
+import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
+import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
 import { ACCOUNT_DELETION_CONFIRMATION_TEXT } from '$lib/shared/constants/auth';
 import { getFormFields } from '$lib/shared/helpers/forms';
 import type {

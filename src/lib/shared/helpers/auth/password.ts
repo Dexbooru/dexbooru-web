@@ -1,10 +1,10 @@
-import type { IAuthFieldRequirements } from '../types/auth';
 import {
-	MINIMUM_PASSWORD_LENGTH,
 	MAXIMUM_PASSWORD_LENGTH,
+	MINIMUM_PASSWORD_LENGTH,
 	PASSWORD_REQUIREMENTS,
 	SPECIAL_CHARACTER_REGEX
-} from '../constants/auth';
+} from '$lib/shared/constants/auth';
+import type { IAuthFieldRequirements } from '$lib/shared/types/auth';
 
 export const getPasswordRequirements = (password: string): IAuthFieldRequirements => {
 	const satisifedRequirements: string[] = [];
@@ -30,12 +30,11 @@ export const getPasswordRequirements = (password: string): IAuthFieldRequirement
 			hasLowercaseCharacter = true;
 		} else if (currentChar >= '0' && currentChar <= '9') {
 			hasNumber = true;
-		} 
-		
-		if(SPECIAL_CHARACTER_REGEX.test(password)) {
+		}
+
+		if (SPECIAL_CHARACTER_REGEX.test(password)) {
 			hasSpecialCharacter = true;
 		}
-		
 
 		const charactersChecksPass = [
 			hasLowercaseCharacter,
@@ -69,7 +68,6 @@ export const getPasswordRequirements = (password: string): IAuthFieldRequirement
 	} else {
 		unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['special-character']);
 	}
-
 
 	return {
 		satisfied: satisifedRequirements,

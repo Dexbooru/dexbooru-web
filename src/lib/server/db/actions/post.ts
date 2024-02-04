@@ -1,18 +1,20 @@
 import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import prisma from '../prisma';
 
+export async function deletePostById(postId: string, authorId: string): Promise<IPost | null> {
+	if (!postId) return null;
 
-export async function deletePostById(postId: string, authorId: string): Promise<boolean> {
-	if (!postId || !authorId) return false;
-
-	const deletePostBatchResult = await prisma.post.deleteMany({
+	const deletedPost = await prisma.post.delete({
 		where: {
 			id: postId,
 			authorId
+		},
+		select: {
+			imageUrls: true
 		}
 	});
 
-	return deletePostBatchResult.count > 0;
+	return deletedPost as IPost;
 }
 
 export async function findPostsByPage(
@@ -81,31 +83,23 @@ export async function likePostById(
 			id: postId
 		},
 		data: {
-			likes: action === 'like' ? { increment: 1 } : { decrement: 1 }
-		}
-	});
-
-	const updatedUser = await prisma.user.update({
-		where: {
-			id: actionTriggerUserId
-		},
-		data: {
-			likedPosts: {
+			likes: action === 'like' ? { increment: 1 } : { decrement: 1 },
+			likedBy: {
 				...(action === 'like' && {
 					connect: {
-						id: postId
+						id: actionTriggerUserId
 					}
 				}),
 				...(action === 'dislike' && {
 					disconnect: {
-						id: postId
+						id: actionTriggerUserId
 					}
 				})
 			}
 		}
 	});
 
-	return !!updatedPost && !!updatedUser;
+	return !!updatedPost;
 }
 
 export async function createPost(

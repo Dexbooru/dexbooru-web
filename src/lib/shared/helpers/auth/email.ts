@@ -3,8 +3,8 @@ import {
 	EMAIL_REQUIREMENTS,
 	MAXIMUM_EMAIL_LENGTH,
 	MINIMUM_EMAIL_LENGTH
-} from '../constants/auth';
-import type { IAuthFieldRequirements } from '../types/auth';
+} from '../../constants/auth';
+import type { IAuthFieldRequirements } from '../../types/auth';
 
 export const getEmailRequirements = (email: string): IAuthFieldRequirements => {
 	const satisfied: string[] = [];

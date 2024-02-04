@@ -22,7 +22,9 @@ const generateUserClaims = (userRecord: Partial<IUser>): Partial<IUser> => {
 };
 
 export function generateUpdatedUserTokenFromClaims(userClaims: IUser & JwtPayload): string {
-	const encodedToken = jwt.sign(userClaims as object, JWT_PRIVATE_KEY);
+	const encodedToken = jwt.sign(userClaims as object, JWT_PRIVATE_KEY, {
+		algorithm: 'HS256'
+	});
 	return encodedToken;
 }
 
@@ -32,6 +34,7 @@ export function generateEncodedUserTokenFromRecord(
 ): string {
 	const userClaims = generateUserClaims(userRecord);
 	const encodedToken = jwt.sign(userClaims, JWT_PRIVATE_KEY, {
+		algorithm: 'HS256',
 		expiresIn:
 			rememberMe === 'off' ? SESSION_JWT_EXPIRES_IN_STANDARD_AGE : SESSION_JWT_EXPIRES_IN_SUPER_AGE
 	});

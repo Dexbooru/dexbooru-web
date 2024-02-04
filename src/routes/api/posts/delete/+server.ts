@@ -1,6 +1,6 @@
 import { deleteBatchFromBucket } from '$lib/server/aws/actions/s3';
+import { deletePostById } from '$lib/server/db/actions/post';
 import type { IDeletePostBody } from '$lib/shared/types/posts';
-import { deletePostById, findPostById } from '$lib/server/db/actions/post';
 import { error, type RequestHandler } from '@sveltejs/kit';
 
 export const DELETE: RequestHandler = async ({ locals, request }) => {
@@ -23,7 +23,6 @@ export const DELETE: RequestHandler = async ({ locals, request }) => {
 		});
 	}
 
-	const currentPost = await findPostById(postId, { imageUrls: true });
 	const deletedPost = await deletePostById(postId, locals.user.id);
 	if (!deletedPost) {
 		throw error(404, {
@@ -33,7 +32,7 @@ export const DELETE: RequestHandler = async ({ locals, request }) => {
 
 	await deleteBatchFromBucket(
 		process.env.AWS_POST_PICTURE_BUCKET || '',
-		currentPost ? currentPost.imageUrls : []
+		deletedPost ? deletedPost.imageUrls : []
 	);
 
 	return new Response(
