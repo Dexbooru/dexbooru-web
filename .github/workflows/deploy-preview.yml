@@ -4,8 +4,8 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   DATABASE_URL: ${{ secrets.PREVIEW_DATABASE_URL }}
-  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-  AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID  }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   AWS_PROFILE_PICTURE_BUCKET_NAME: ${{ secrets.PREVIEW_AWS_PROFILE_PICTURE_BUCKET_NAME }}
   AWS_POST_PICTURE_BUCKET_NAME: ${{ secrets.PREVIEW_AWS_POST_PICTURE_BUCKET_NAME }}
@@ -35,8 +35,8 @@ jobs:
         run: |
           vercel deploy --token=$VERCEL_TOKEN \
                         --env DATABASE_URL=$DATABASE_URL \
-                        --env AWS_ACCESS_KEY=$AWS_ACCESS_KEY \
-                        --env AWS_SECRET_KEY=$AWS_SECRET_KEY \
+                        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+                        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
                         --env AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION \
                         --env AWS_PROFILE_PICTURE_BUCKET_NAME=$AWS_PROFILE_PICTURE_BUCKET_NAME \
                         --env AWS_POST_PICTURE_BUCKET_NAME=$AWS_POST_PICTURE_BUCKET_NAME \
