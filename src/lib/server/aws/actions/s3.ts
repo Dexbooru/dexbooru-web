@@ -1,12 +1,13 @@
 import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import awsS3 from '../s3';
 import type { TS3ObjectSource } from '$lib/server/types/aws';
+import { AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL, AWS_CLOUDFRONT_POSTS_BASE_URL } from '$env/static/private';
 
 export const buildObjectUrl = (objectSource: TS3ObjectSource, objectId: string): string => {
 	const baseUrl =
 		objectSource === 'profile_pictures'
-			? process.env.AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL
-			: process.env.AWS_CLOUDFRONT_POSTS_BASE_URL;
+			? AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL
+			: AWS_CLOUDFRONT_POSTS_BASE_URL;
 	return `${baseUrl}/${objectId}`;
 };
 

@@ -13,6 +13,7 @@ import {
 import type { IUploadFormFields } from '$lib/shared/types/upload';
 import { error, fail } from '@sveltejs/kit';
 import type { Action, Actions } from './$types';
+import { AWS_POST_PICTURE_BUCKET } from '$env/static/private';
 
 const handleUpload: Action = async ({ locals, request }) => {
 	if (!locals.user) {
@@ -98,7 +99,7 @@ const handleUpload: Action = async ({ locals, request }) => {
 
 	const postImageFileBuffers = await runPostImageTransformationPipelineInBatch(postImagesArray);
 	const postImageUrls = await uploadBatchToBucket(
-		process.env.AWS_POST_PICTURE_BUCKET || '',
+		AWS_POST_PICTURE_BUCKET,
 		'posts',
 		postImageFileBuffers
 	);

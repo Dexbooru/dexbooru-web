@@ -1,0 +1,44 @@
+name: Vercel Preview Deployment
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  DATABSE_URL: ${{ secrets.PREVIEW_DATABASE_URL }}
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  AWS_PROFILE_PICTURE_BUCKET_NAME: ${{ secrets.PREVIEW_AWS_PROFILE_PICTURE_BUCKET_NAME }}
+  AWS_POST_PICTURE_BUCKET_NAME: ${{ secrets.PREVIEW_AWS_POST_PICTURE_BUCKET_NAME }}
+  AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL: ${{ secrets.PREVIEW_AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL }}
+  AWS_CLOUDFRONT_POSTS_BASE_URL: ${{ secrets.PREVIEW_AWS_CLOUDFRONT_POSTS_BASE_URL }}
+  JWT_PRIVATE_KEY: ${{ secrets.PREVIEW_JWT_PRIVATE_KEY }}
+on:
+  push:
+    branches-ignore:
+      - main
+jobs:
+  Deploy-Preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        run: |
+          vercel deploy --env DATABASE_URL=$DATABASE_URL
+                        --env AWS_ACCESS_KEY=$AWS_ACCESS_KEY
+                        --env AWS_SECRET_KEY=$AWS_SECRET_KEY
+                        --env AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+                        --env AWS_PROFILE_PICTURE_BUCKET_NAME=$AWS_PROFILE_PICTURE_BUCKET_NAME
+                        --env AWS_POST_PICTURE_BUCKET_NAME=$AWS_POST_PICTURE_BUCKET_NAME
+                        --env AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL=$AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL
+                        --env AWS_CLOUDFRONT_POSTS_BASE_URL=$AWS_CLOUDFRONT_POSTS_BASE_URL
+                        --env JWT_PRIVATE_KEY=$JWT_PRIVATE_KEY
+                        --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

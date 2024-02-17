@@ -1,4 +1,5 @@
 import { deleteBatchFromBucket } from '$lib/server/aws/actions/s3';
+import { AWS_POST_PICTURE_BUCKET_NAME } from '$lib/server/constants/aws';
 import { deletePostById } from '$lib/server/db/actions/post';
 import type { IDeletePostBody } from '$lib/shared/types/posts';
 import { error, type RequestHandler } from '@sveltejs/kit';
@@ -31,7 +32,7 @@ export const DELETE: RequestHandler = async ({ locals, request }) => {
 	}
 
 	await deleteBatchFromBucket(
-		process.env.AWS_POST_PICTURE_BUCKET || '',
+		AWS_POST_PICTURE_BUCKET_NAME,
 		deletedPost ? deletedPost.imageUrls : []
 	);
 

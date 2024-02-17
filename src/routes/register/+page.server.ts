@@ -10,6 +10,7 @@ import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import type { IRegisterFormFields } from '$lib/shared/types/auth';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Action, Actions } from './$types';
+import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '$lib/server/constants/aws';
 
 const handleRegistration: Action = async ({ request }) => {
 	const registerForm = await request.formData();
@@ -79,7 +80,7 @@ const handleRegistration: Action = async ({ request }) => {
 
 		const finalProfilePictureBuffer = await runProfileImageTransformationPipeline(profilePicture);
 		const profilePictureObjectUrl = await uploadToBucket(
-			process.env.AWS_PROFILE_PICTURE_BUCKET || '',
+			AWS_PROFILE_PICTURE_BUCKET_NAME,
 			'profile_pictures',
 			finalProfilePictureBuffer
 		);

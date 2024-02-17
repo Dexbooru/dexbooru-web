@@ -3,6 +3,8 @@ node_modules
 /build
 /.svelte-kit
 /package
+.vercel
+.husky
 .env
 .env.*
 !.env.example
