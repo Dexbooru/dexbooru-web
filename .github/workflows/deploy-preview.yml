@@ -43,4 +43,5 @@ jobs:
                         --env AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL=$AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL \
                         --env AWS_CLOUDFRONT_POSTS_BASE_URL=$AWS_CLOUDFRONT_POSTS_BASE_URL \
                         --env JWT_PRIVATE_KEY=$JWT_PRIVATE_KEY \
+                        --prod=false \
                         --prebuilt
