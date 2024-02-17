@@ -43,7 +43,7 @@
 		"postcss-load-config": "^4.0.1",
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.10.1",
-		"prisma": "^5.9.0",
+		"prisma": "^5.9.1",
 		"svelte": "^4.0.5",
 		"svelte-check": "^3.4.3",
 		"tailwindcss": "^3.3.2",
@@ -69,5 +69,8 @@
 	},
 	"prisma": {
 		"seed": "tsx prisma/seed.ts --seed 69420 --user-count 20 --post-count 100 --tag-count 500 --artist-count 250 --comment-count 20000"
+	},
+	"engines": {
+		"node": ">=18.0.0"
 	}
 }
