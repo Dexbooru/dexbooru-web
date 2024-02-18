@@ -29,7 +29,7 @@ jobs:
         run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
 
       - name: Build Project Artifacts
-        run: vercel build --token=$VERCEL_TOKEN
+        run: vercel build --prod=false --token=$VERCEL_TOKEN
 
       - name: Apply All Pending Migrations To The Database
         run: npx prisma migrate deploy

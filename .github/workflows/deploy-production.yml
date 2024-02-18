@@ -2,23 +2,49 @@ name: Vercel Production Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID  }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  AWS_PROFILE_PICTURE_BUCKET_NAME: ${{ secrets.PROD_AWS_PROFILE_PICTURE_BUCKET_NAME }}
+  AWS_POST_PICTURE_BUCKET_NAME: ${{ secrets.PROD_AWS_POST_PICTURE_BUCKET_NAME }}
+  AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL: ${{ secrets.PROD_AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL }}
+  AWS_CLOUDFRONT_POSTS_BASE_URL: ${{ secrets.PROD_AWS_CLOUDFRONT_POSTS_BASE_URL }}
+  JWT_PRIVATE_KEY: ${{ secrets.PROD_JWT_PRIVATE_KEY }}
 on:
   push:
     branches:
       - main
 jobs:
-  Deploy-Production:
+  Deploy-Preview:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
 
       - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        
+        run: vercel build --prod --token=$VERCEL_TOKEN
+
+      - name: Apply All Pending Migrations To The Database
+        run: npx prisma migrate deploy
+
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          vercel deploy --token=$VERCEL_TOKEN \
+                        --env DATABASE_URL=$DATABASE_URL \
+                        --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+                        --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+                        --env AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION \
+                        --env AWS_PROFILE_PICTURE_BUCKET_NAME=$AWS_PROFILE_PICTURE_BUCKET_NAME \
+                        --env AWS_POST_PICTURE_BUCKET_NAME=$AWS_POST_PICTURE_BUCKET_NAME \
+                        --env AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL=$AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL \
+                        --env AWS_CLOUDFRONT_POSTS_BASE_URL=$AWS_CLOUDFRONT_POSTS_BASE_URL \
+                        --env JWT_PRIVATE_KEY=$JWT_PRIVATE_KEY \
+                        --prod \
+                        --prebuilt
