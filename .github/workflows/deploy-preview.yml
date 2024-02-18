@@ -31,6 +31,9 @@ jobs:
       - name: Build Project Artifacts
         run: vercel build --token=$VERCEL_TOKEN
 
+      - name: Apply All Pending Migrations To The Database
+        run: npx prisma migrate deploy
+
       - name: Deploy Project Artifacts to Vercel
         run: |
           vercel deploy --token=$VERCEL_TOKEN \
