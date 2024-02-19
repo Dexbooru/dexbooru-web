@@ -2,17 +2,23 @@
 	import { page } from '$app/stores';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { Button, DarkMode, NavBrand, NavHamburger, NavLi, NavUl, Navbar } from 'flowbite-svelte';
+	import GlobalSearchbar from '../search/GlobalSearchbar.svelte';
 	import ProfileDropdown from './ProfileDropdown.svelte';
 
 	const currentPath = $page.url.pathname;
 </script>
 
 <Navbar class="sticky top-0 z-50">
-	<NavBrand href="/">
-		<img src="/favicon.png" class="mr-3 h-6 sm:h-9 rounded-md" alt="Dexbooru Logo" />
-		<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">Dexbooru</span
-		>
-	</NavBrand>
+	<div class="flex space-x-4">
+		<NavBrand>
+			<img src="/favicon.png" class="mr-3 h-6 sm:h-9 rounded-md" alt="Dexbooru Logo" />
+			<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
+				>Dexbooru</span
+			>
+		</NavBrand>
+		<GlobalSearchbar />
+	</div>
+
 	<div class="flex md:order-2 space-x-2">
 		{#if $authenticatedUserStore}
 			<ProfileDropdown />

@@ -36,6 +36,28 @@ export async function findPostsByPage(
 	return pagePosts as IPost[];
 }
 
+export async function findPostByIdWithUpdatedViewCount(
+	postId: string,
+	selectors?: TPostSelector
+): Promise<IPost | null> {
+	try {
+		const updatedPost = await prisma.post.update({
+			where: {
+				id: postId
+			},
+			data: {
+				views: {
+					increment: 1
+				}
+			},
+			select: selectors
+		});
+		return updatedPost as IPost;
+	} catch (error) {
+		return null;
+	}
+}
+
 export async function findPostById(
 	postId: string,
 	selectors?: TPostSelector

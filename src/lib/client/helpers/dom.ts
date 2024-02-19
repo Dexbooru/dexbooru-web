@@ -1,4 +1,4 @@
-import { footerStore } from '../stores/layout';
+import { footerStore, searchModalActiveStore } from '../stores/layout';
 import type { IDeviceStoreData } from '../types/device';
 
 export const getDeviceDetectionDataFromWindow = (): IDeviceStoreData => {
@@ -18,11 +18,13 @@ export const getDeviceDetectionDataFromWindow = (): IDeviceStoreData => {
 export const registerDocumentEventListeners = () => {
 	document.addEventListener('DOMContentLoaded', onLoadDocument);
 	document.addEventListener('resize', onResizeDocument);
+	document.addEventListener('keydown', onKeyDownDocument);
 };
 
 export const destroyDocumentEventListeners = () => {
 	document.removeEventListener('resize', onResizeDocument);
 	document.removeEventListener('load', onLoadDocument);
+	document.removeEventListener('keydown', onKeyDownDocument);
 };
 
 const onLoadDocument = () => {
@@ -31,6 +33,12 @@ const onLoadDocument = () => {
 
 const onResizeDocument = () => {
 	updateFooterData();
+};
+
+const onKeyDownDocument = (event: KeyboardEvent) => {
+	if (event.ctrlKey && event.key.toLowerCase() === 'k') {
+		searchModalActiveStore.update((active) => !active);
+	}
 };
 
 const updateFooterData = () => {
