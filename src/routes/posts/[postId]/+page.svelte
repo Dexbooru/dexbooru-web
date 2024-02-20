@@ -8,7 +8,11 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const { post } = data;
+	let { post } = data;
+
+	$: {
+		post = data.post;
+	}
 </script>
 
 <svelte:head>

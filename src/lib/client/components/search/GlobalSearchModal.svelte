@@ -45,6 +45,12 @@
 		}
 	}, true);
 
+	const clearResultsOnEmptyQuery = (query: string) => {
+		if (query.length === 0) {
+			currentSearchResults = null;
+		}
+	};
+
 	const debouncedFetchQueryResults = debounce(async (query: string) => {
 		searchResultsLoading = true;
 		queryStore.set(query);
@@ -71,7 +77,8 @@
 			isGlobal
 			width="100%"
 			placeholder="Enter your search query"
-			queryHandler={debouncedFetchQueryResults}
+			queryInputHandler={debouncedFetchQueryResults}
+			queryChangeHandler={clearResultsOnEmptyQuery}
 		/>
 		{#if searchResultsLoading}
 			<Spinner color="pink" class="absolute top-2 right-2" size="7" />

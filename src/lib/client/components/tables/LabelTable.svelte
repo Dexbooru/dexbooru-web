@@ -10,7 +10,7 @@
 	} from 'flowbite-svelte';
 
 	export let labels: IAppSearchResult['tags'] | IAppSearchResult['artists'];
-	export let labelType: 'tags' | 'artists';
+	export let labelType: 'tag' | 'artist';
 </script>
 
 <Table hoverable>
@@ -28,7 +28,7 @@
 				<TableBodyCell>{label.name}</TableBodyCell>
 				<TableBodyCell>
 					<a
-						href="/{labelType}/{label.name}"
+						href="/posts/{labelType}/{label.name}"
 						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
 						>Related posts</a
 					>

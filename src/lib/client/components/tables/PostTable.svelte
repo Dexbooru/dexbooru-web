@@ -10,8 +10,6 @@
 		TableHead,
 		TableHeadCell
 	} from 'flowbite-svelte';
-	import HighlightedText from '../reusable/HighlightedText.svelte';
-	import { queryStore } from '$lib/client/stores/search';
 
 	export let posts: IAppSearchResult['posts'];
 </script>
@@ -30,11 +28,9 @@
 		{#each posts || [] as post}
 			<TableBodyRow>
 				<TableBodyCell>{post.id}</TableBodyCell>
-				<TableBodyCell tdClass="px-1 py-4 whitespace-wrap font-medium"
-					>
-					<HighlightedText fullText={post.description} query={$queryStore} />
-				</TableBodyCell
-				>
+				<TableBodyCell tdClass="px-1 py-4 whitespace-wrap font-medium">
+					{post.description}
+				</TableBodyCell>
 				<TableBodyCell>{formatDate(new Date(post.createdAt))}</TableBodyCell>
 				<TableBodyCell class="text-center">
 					<Avatar

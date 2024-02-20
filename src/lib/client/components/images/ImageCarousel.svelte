@@ -13,6 +13,7 @@
 	let index: number = 0;
 	const imagesData: HTMLImgAttributes[] = imageUrls.map((imageUrl, index) => {
 		return {
+			loading: 'lazy',
 			src: imageUrl,
 			alt: imagesAlt
 				? imagesAlt

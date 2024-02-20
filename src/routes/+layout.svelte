@@ -6,7 +6,6 @@
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
 	import {
-		destroyDocumentEventListeners,
 		getDeviceDetectionDataFromWindow,
 		registerDocumentEventListeners
 	} from '$lib/client/helpers/dom';
@@ -20,7 +19,7 @@
 	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import type { IUserNotifications } from '$lib/shared/types/notifcations';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import '../app.postcss';
 
 	authenticatedUserStore.set($page.data.user || null);
