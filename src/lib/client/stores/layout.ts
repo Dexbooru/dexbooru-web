@@ -11,3 +11,5 @@ export const modalStore = writable<IModalStoreData>({
 	isOpen: false,
 	focusedModalName: null
 });
+
+export const searchModalActiveStore = writable<boolean>(false);

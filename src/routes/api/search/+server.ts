@@ -6,6 +6,7 @@ import {
 	searchForUsers
 } from '$lib/server/db/actions/search';
 import { DEFAULT_RESULTS_LIMIT, VALID_SEARCH_SECTIONS } from '$lib/shared/constants/search';
+import { normalizeQuery } from '$lib/shared/helpers/search';
 import { getUrlFields } from '$lib/shared/helpers/urls';
 import type { IAppSearchParams, IAppSearchResult, TSearchSection } from '$lib/shared/types/search';
 import type { RequestHandler } from '@sveltejs/kit';
@@ -16,13 +17,24 @@ export const GET: RequestHandler = async ({ url }) => {
 		url.searchParams
 	);
 
-	if (!query || !searchSection || !VALID_SEARCH_SECTIONS.includes(searchSection)) {
+	if (!query) {
 		throw error(400, { message: 'At least one of the required fields was missing!' });
+	}
+
+	if (
+		searchSection !== undefined &&
+		(!searchSection.length || !VALID_SEARCH_SECTIONS.includes(searchSection))
+	) {
+		throw error(400, {
+			message: `The search section needs to be one of the following options: ${VALID_SEARCH_SECTIONS.join(
+				', '
+			)}`
+		});
 	}
 
 	const finalLimit = limit ? limit : DEFAULT_RESULTS_LIMIT;
 	const finalSearchSection: TSearchSection = searchSection ? searchSection : 'all';
-	const normalizedQuery = query.toLocaleLowerCase().trim();
+	const normalizedQuery = normalizeQuery(query);
 
 	let finalSearchResults: IAppSearchResult | null = null;
 

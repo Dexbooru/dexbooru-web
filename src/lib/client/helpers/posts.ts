@@ -9,3 +9,7 @@ export function normalizeCount(count: number): string {
 
 	return count.toString();
 }
+
+export function formatNumberWithCommas(target: number): string {
+    return target.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}

@@ -2,13 +2,17 @@
 	import CommentsContainer from '$lib/client/components/comments/CommentsContainer.svelte';
 	import ImageCollection from '$lib/client/components/images/ImageCollection.svelte';
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
-	import { normalizeCount } from '$lib/client/helpers/posts';
+	import { normalizeCount, formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { commentTreeStore } from '$lib/client/stores/comments';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	const { post } = data;
+	let { post } = data;
+
+	$: {
+		post = data.post;
+	}
 </script>
 
 <svelte:head>
@@ -27,7 +31,8 @@
 
 		<p class="text-lg dark:text-white">
 			Author Username: <span class=" dark:text-gray-400"
-				><a class="underline" href="/profile/{post.author.username}">{post.author.username}</a></span
+				><a class="underline" href="/profile/{post.author.username}">{post.author.username}</a
+				></span
 			>
 		</p>
 
@@ -42,11 +47,11 @@
 		</p>
 
 		<p class="text-lg dark:text-white">
-			Likes: <span class=" dark:text-gray-400">{normalizeCount(post.likes)}</span>
+			Likes: <span class=" dark:text-gray-400">{formatNumberWithCommas(post.likes)}</span>
 		</p>
 
 		<p class="text-lg dark:text-white">
-			Views: <span class=" dark:text-gray-400">{normalizeCount(post.views)}</span>
+			Views: <span class=" dark:text-gray-400">{formatNumberWithCommas(post.views)}</span>
 		</p>
 	</div>
 
