@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { dev } from '$app/environment';
 	import { page } from '$app/stores';
 	import { getNotifications } from '$lib/client/api/notifications';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
@@ -18,6 +19,7 @@
 	import { notificationStore } from '$lib/client/stores/notifications';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import type { IUserNotifications } from '$lib/shared/types/notifcations';
+	import { inject as injectAnalytics } from '@vercel/analytics';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import { onMount } from 'svelte';
 	import '../app.postcss';
@@ -25,6 +27,8 @@
 	authenticatedUserStore.set($page.data.user || null);
 
 	onMount(async () => {
+		injectAnalytics({ mode: dev ? 'development' : 'production' });
+
 		registerDocumentEventListeners();
 
 		const deviceData = getDeviceDetectionDataFromWindow();

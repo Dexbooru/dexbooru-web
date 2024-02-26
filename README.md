@@ -39,7 +39,7 @@ brew --version
 # Local development setup
 Firstly as with all projects, clone this repository on your machine:
 ```bash
-git clone https://github.com/t-shah02/dexbooru-rewrite.git
+git clone https://github.com/Dexbooru/dexbooru-web.git
 cd dexbooru-rewrite
 ```
 
@@ -64,8 +64,11 @@ DB_PASSWORD="root"
 DB_SCHEMA="public"
 DB_HOST="host.docker.internal"
 DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=${DB_SCHEMA}"
+DB_REDIS_HOST="localhost"
 DB_REDIS_PORT="6379"
+DB_REDIS_USER="default"
 DB_REDIS_PASSWORD="root"
+DB_REDIS_URL="redis://${DB_REDIS_USER}:${DB_REDIS_PASSWORD}@${DB_REDIS_HOST}:${DB_REDIS_PORT}"
 
 # AWS secrets, base urls and S3 bucket names
 AWS_ACCESS_KEY_ID=
