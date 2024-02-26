@@ -1,30 +1,32 @@
 <script lang="ts">
-	import { getGlobalSearchResults } from '$lib/client/api/search';
-	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import type { IAppSearchResult } from '$lib/shared/types/search';
-	import { toast } from '@zerodevx/svelte-toast';
-	import { Input } from 'flowbite-svelte';
+	import { searchModalActiveStore } from '$lib/client/stores/layout';
+	import { Button, Input, Kbd } from 'flowbite-svelte';
 	import { SearchOutline } from 'flowbite-svelte-icons';
-
-	let currentQuery: string;
-	let currentSearchResults: IAppSearchResult[] = [];
-
-	const handleSearchQueryChange = async (event: Event) => {
-		const target = event.target as HTMLInputElement;
-		currentQuery = target.value;
-
-		const response = await getGlobalSearchResults(currentQuery);
-		if (response.ok) {
-			currentSearchResults = (await response.json()) as IAppSearchResult[];
-		} else {
-			toast.push('An error occured while trying to process that query', FAILURE_TOAST_OPTIONS);
-		}
-	};
 </script>
 
-<div class="hidden relative md:block">
+<div class="hidden relative md:block mt-1" id="global-searchbar">
 	<div class="flex absolute inset-y-0 start-0 items-center ps-3 pointer-events-none">
 		<SearchOutline class="w-4 h-4" />
 	</div>
-	<Input class="ps-10" placeholder="Search..." />
+	<div class="flex space-x-2 absolute inset-y-0 end-11 items-center ps-3 pointer-events-none">
+		<Kbd class="p-1">CTRL</Kbd>
+		<Kbd class="p-1">K</Kbd>
+	</div>
+	<Button
+		on:click={() => searchModalActiveStore.set(true)}
+		color="alternative"
+		class="p-0 border-none opacity-50 hover:opacity-100"
+	>
+		<Input
+			readonly
+			class="ps-10 hover:cursor-pointer border-none outline-none caret-transparent focus:ring-0 focus:ring-offset-0"
+			placeholder="Search"
+		/>
+	</Button>
 </div>
+
+<style>
+	#global-searchbar {
+		width: 250px;
+	}
+</style>

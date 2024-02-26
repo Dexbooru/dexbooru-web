@@ -39,7 +39,11 @@ export function getTimeDifferenceString(targetDatetime: Date) {
 	return `${years} year${years !== 1 ? 's' : ''} ago`;
 }
 
-export function formatDate(date: Date): string {
+export function formatDate(date: Date | string): string {
+	if (typeof date === 'string') {
+		date = new Date(date);
+	}
+	
 	const options: Intl.DateTimeFormatOptions = {
 		year: 'numeric',
 		month: '2-digit',

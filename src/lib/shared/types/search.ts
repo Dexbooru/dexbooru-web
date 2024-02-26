@@ -19,6 +19,8 @@ export type TPostSearchResults = {
 	id: string;
 	description: string;
 	createdAt: Date;
+	uploaderName: string;
+	uploaderProfilePictureUrl: string;
 }[];
 
 export type TUserSearchResults = {

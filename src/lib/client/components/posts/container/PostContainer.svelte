@@ -48,11 +48,11 @@
 	<div id="post-container-body" class="space-y-4 mb-5">
 		<div id="post-container-title" class="flex justify-between">
 			<p class="text-4xl dark:text-white">{postContainerTitle}</p>
-			<Searchbar queryHandler={onPostSearch} placeholder="Search by keyword(s)" />
+			<Searchbar queryInputHandler={onPostSearch} placeholder="Search by keyword(s)" />
 		</div>
 
 		<PostGrid />
-		<PostPaginator />
+		<PostPaginator noPostsLeft={$originalPostsPageStore.length === 0} />
 	</div>
 </main>
 

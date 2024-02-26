@@ -14,7 +14,8 @@ export async function searchForTags(query: string, limit: number): Promise<IAppS
           "Tag" t
       WHERE
           t."searchable" @@ phraseto_tsquery('english', ${Prisma.raw(`'${query}'`)}) OR
-          LOWER(t."name") ILIKE ${Prisma.raw(`'%${query}%'`)}
+          LOWER(t."name") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
+          LOWER(t."id") ILIKE ${Prisma.raw(`'%${query}%'`)}
       LIMIT 
           ${Prisma.raw(limit.toString())}
     `;
@@ -31,7 +32,8 @@ export async function searchForArtists(query: string, limit: number): Promise<IA
           "Artist" a
       WHERE
           a."searchable" @@ phraseto_tsquery('english', ${Prisma.raw(`'${query}'`)}) OR
-          LOWER(a."name") ILIKE ${Prisma.raw(`'%${query}%'`)}
+          LOWER(a."name") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
+          LOWER(a."id") ILIKE ${Prisma.raw(`'%${query}%'`)}
       LIMIT 
           ${Prisma.raw(limit.toString())}
     `;
@@ -43,12 +45,23 @@ export async function searchForArtists(query: string, limit: number): Promise<IA
 export async function searchForPosts(query: string, limit: number): Promise<IAppSearchResult> {
 	const searchStatement = Prisma.sql`
       SELECT
-          p."id", p."description", p."createdAt"
+          p."id", 
+          p."description", 
+          p."createdAt", 
+          u."username" AS "uploaderName",
+          u."profilePictureUrl" AS "uploaderProfilePictureUrl"
       FROM 
           "Post" p
+      INNER JOIN 
+        "User" u
+      ON
+        p."authorId" = u."id"
       WHERE
           p."searchable" @@ phraseto_tsquery('english', ${Prisma.raw(`'${query}'`)}) OR
-          LOWER(p."description") ILIKE ${Prisma.raw(`'%${query}%'`)}
+          LOWER(p."id") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
+          LOWER(p."description") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
+          LOWER(u."username") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
+          LOWER(u."id") ILIKE ${Prisma.raw(`'%${query}%'`)}
       LIMIT 
           ${Prisma.raw(limit.toString())}
     `;
@@ -59,15 +72,16 @@ export async function searchForPosts(query: string, limit: number): Promise<IApp
 
 export async function searchForUsers(query: string, limit: number): Promise<IAppSearchResult> {
 	const searchStatement = Prisma.sql`
-      SELECT
-          u."id", u."username", u."profilePictureUrl", u."createdAt" 
-      FROM 
-          "User" u
-      WHERE
-          u."searchable" @@ phraseto_tsquery('english', ${Prisma.raw(`'${query}'`)}) OR
-          LOWER(u."username") ILIKE ${Prisma.raw(`'%${query}%'`)}
-      LIMIT 
-          ${Prisma.raw(limit.toString())}
+     SELECT
+        u."id", u."username", u."profilePictureUrl", u."createdAt" 
+     FROM 
+        "User" u
+     WHERE
+        u."searchable" @@ phraseto_tsquery('english', ${Prisma.raw(`'${query}'`)}) OR
+        LOWER(u."id") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
+        LOWER(u."username") ILIKE ${Prisma.raw(`'%${query}%'`)}
+     LIMIT 
+        ${Prisma.raw(limit.toString())}
     `;
 
 	const results = (await prisma.$queryRaw(searchStatement)) as TUserSearchResults;

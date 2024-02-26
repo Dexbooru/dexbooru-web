@@ -4,6 +4,7 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+  DATABASE_REDIS_URL: ${{ secrets.PROD_DATABASE_REDIS_URL }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID  }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
@@ -26,7 +27,7 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
 
       - name: Build Project Artifacts
         run: vercel build --prod --token=$VERCEL_TOKEN
@@ -38,6 +39,7 @@ jobs:
         run: |
           vercel deploy --token=$VERCEL_TOKEN \
                         --env DATABASE_URL=$DATABASE_URL \
+                        --env DATABASE_REDIS_URL=$DATABASE_REDIS_URL \
                         --env AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
                         --env AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
                         --env AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION \
