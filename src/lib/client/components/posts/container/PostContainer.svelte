@@ -52,7 +52,7 @@
 		</div>
 
 		<PostGrid />
-		<PostPaginator />
+		<PostPaginator noPostsLeft={$originalPostsPageStore.length === 0} />
 	</div>
 </main>
 
