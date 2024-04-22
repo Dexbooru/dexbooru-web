@@ -1,4 +1,10 @@
 # Dexbooru
+
+Video Demo of Dexbooru:
+
+https://github.com/Dexbooru/dexbooru-web/assets/71118130/bfb8c5f6-fd2d-4c38-adb0-67331de9a4cb
+
+
 Dexbooru is a modern image board, that allows for highly taggable image data, with content related to anime, manga and Japanese pop culture. Authenticated users can upload images, like posts, leave comments and chat with others. 🚀🤖
 
 The tech stack for this project consists of 🍔:
