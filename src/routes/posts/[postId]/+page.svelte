@@ -1,18 +1,30 @@
 <script lang="ts">
+	import CommentTextbox from '$lib/client/components/comments/CommentTextbox.svelte';
 	import CommentsContainer from '$lib/client/components/comments/CommentsContainer.svelte';
 	import ImageCollection from '$lib/client/components/images/ImageCollection.svelte';
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
-	import { normalizeCount, formatNumberWithCommas } from '$lib/client/helpers/posts';
+	import { formatNumberWithCommas, normalizeCount } from '$lib/client/helpers/posts';
 	import { commentTreeStore } from '$lib/client/stores/comments';
+	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { formatDate } from '$lib/shared/helpers/dates';
+	import { onDestroy } from 'svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 	let { post } = data;
+	let totalPostCommentCount: string = '0';
 
 	$: {
 		post = data.post;
 	}
+
+	const commentTreeUnsubscribe = commentTreeStore.subscribe((tree) => {
+		totalPostCommentCount = normalizeCount(tree.getCount());
+	});
+
+	onDestroy(() => {
+		commentTreeUnsubscribe();
+	});
 </script>
 
 <svelte:head>
@@ -73,7 +85,10 @@
 	</div>
 
 	<div class="space-y-2">
-		<p class="text-lg dark:text-white">Comments: {normalizeCount($commentTreeStore.getCount())}</p>
+		<p class="text-lg dark:text-white">Comments: {totalPostCommentCount}</p>
+		{#if $authenticatedUserStore}
+			<CommentTextbox postId={post.id} />
+		{/if}
 		<CommentsContainer postId={post.id} />
 	</div>
 </main>

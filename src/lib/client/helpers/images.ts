@@ -1,5 +1,21 @@
 import { isFileImage } from '$lib/shared/helpers/images';
 
+export function urlIsImage(sourceUrl: string): Promise<boolean> {
+	return new Promise((resolve) => {
+		const img = new Image();
+
+		img.onload = () => {
+			resolve(true);
+		};
+
+		img.onerror = () => {
+			resolve(false);
+		};
+
+		img.src = sourceUrl;
+	});
+}
+
 export function fileToBase64String(file: File): Promise<string | null> {
 	return new Promise((resolve, reject) => {
 		if (!file) {

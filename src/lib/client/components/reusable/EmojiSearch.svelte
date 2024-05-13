@@ -1,0 +1,66 @@
+<script lang="ts">
+	import { Button, Dropdown, DropdownHeader, Search, Spinner } from 'flowbite-svelte';
+	import { FaceGrinSolid } from 'flowbite-svelte-icons';
+	import VirtualizedList from './VirtualizedList.svelte';
+
+	export let handleEmoji: (targetEmoji: string) => void;
+
+	let dropdownOpen = false;
+	let loadingEmojis = false;
+	let emojiEntries: [string, string][] = [];
+	let filteredEmojiEntries = emojiEntries;
+
+	const handleEmojiButtonClick = async () => {
+		dropdownOpen = true;
+
+		if (emojiEntries.length > 0) return;
+		loadingEmojis = true;
+		emojiEntries = Object.entries(await import('$lib/client/assets/emoji-set.json')).filter(
+			(item) => item[0] !== 'default'
+		) as [string, string][];
+		loadingEmojis = false;
+		filteredEmojiEntries = emojiEntries;
+	};
+
+	const handleEmojiClick = (event: Event) => {
+		const target = event.target as HTMLLIElement;
+		handleEmoji(`:${target?.textContent?.split('-')[1].trim()}:`);
+		dropdownOpen = false;
+	};
+
+	const handleOnInput = (event: Event) => {
+		const target = event.target as HTMLInputElement;
+		filteredEmojiEntries = emojiEntries.filter(([name]) =>
+			name.toLowerCase().includes(target.value.toLowerCase())
+		);
+	};
+
+	const transformEmojiListItem = (item: unknown) =>
+		`${(item as [string, string])[1]} - ${(item as [string, string])[0]}`;
+</script>
+
+<Button color="alternative" class="align-middle" on:click={handleEmojiButtonClick}>
+	<FaceGrinSolid class="w-4 h-4" />
+</Button>
+
+<Dropdown
+	open={dropdownOpen}
+	placement="bottom"
+	classContainer="ml-3 text-sm !h-40 sm:w-3/4 md:w-1/2 lg:w-1/3 bg-gray-100 dark:bg-gray-900"
+>
+	<DropdownHeader class="bg-gray-100 dark:bg-gray-900 sticky top-0">
+		<Search size="md" on:input={handleOnInput} />
+	</DropdownHeader>
+
+	{#if loadingEmojis}
+		<Spinner class="ml-2 mt-2" />
+	{/if}
+
+	<VirtualizedList
+		listHeight={85}
+		data={filteredEmojiEntries}
+		handleListItemClick={handleEmojiClick}
+		listItemFn={transformEmojiListItem}
+		listItemClass="rounded hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 align-middle"
+	/>
+</Dropdown>

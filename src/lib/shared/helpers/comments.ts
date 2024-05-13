@@ -14,7 +14,6 @@ class CommentTree {
 			rootComments.push(comment);
 			return;
 		}
-
 		if (!this.data.has(comment.parentCommentId)) {
 			this.data.set(comment.parentCommentId, []);
 		}

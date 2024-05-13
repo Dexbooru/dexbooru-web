@@ -24,10 +24,13 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		});
 	}
 
-	const { id: commentId } = await createComment(authorId, postId, content, parentCommentId);
+	const newComment = await createComment(authorId, postId, content, parentCommentId);
+	const { id: commentId } = newComment;
+
 	return new Response(
 		JSON.stringify({
-			message: `A new comment with the id: ${commentId} was created for the post with the id: ${postId} by an author with the id: ${authorId}!`
+			message: `A new comment with the id: ${commentId} was created for the post with the id: ${postId} by an author with the id: ${authorId}!`,
+			data: newComment
 		})
 	);
 };
