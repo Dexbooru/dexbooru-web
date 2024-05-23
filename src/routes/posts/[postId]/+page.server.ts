@@ -1,11 +1,11 @@
-import { SINGLE_POST_CACHE_TIME_SECONDS } from '$lib/server/constants/sessions';
 import { PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
+import { SINGLE_POST_CACHE_TIME_SECONDS } from '$lib/server/constants/sessions';
 import { findPostByIdWithUpdatedViewCount } from '$lib/server/db/actions/post';
 import { cacheResponse } from '$lib/server/helpers/sessions';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params, setHeaders }) => {
+export const load: PageServerLoad = async ({ params, setHeaders, url }) => {
 	const postId = params.postId;
 	if (!postId) {
 		throw error(400, { message: `The post id is a required parameter!` });
@@ -19,5 +19,7 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 
 	cacheResponse(setHeaders, SINGLE_POST_CACHE_TIME_SECONDS);
 
-	return { post };
+	const uploadedSuccessfully = url.searchParams.get('uploadedSuccessfully');
+
+	return { post, uploadedSuccessfully: uploadedSuccessfully === 'true' ? true : false };
 };

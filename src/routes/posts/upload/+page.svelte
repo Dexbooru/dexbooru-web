@@ -86,7 +86,7 @@
 
 		if (form && form.newPost) {
 			const newPostid = form.newPost.id as string;
-			goto(`/posts/${newPostid}`);
+			goto(`/posts/${newPostid}?uploadedSuccessfully=true`);
 		}
 	});
 </script>
