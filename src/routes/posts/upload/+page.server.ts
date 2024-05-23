@@ -27,9 +27,11 @@ const handleUpload: Action = async ({ locals, request }) => {
 		description,
 		tags: tagsStr,
 		artists: artistsStr,
+		isNsfw,
 		postPictures
 	} = getFormFields<IUploadFormFields>(uploadForm, ['postPictures']);
 
+	const finalIsNsfw = isNsfw === 'true' ? true : false;
 	const postImagesArray = Array.from(postPictures);
 	const tags = transformLabels(tagsStr);
 	const artists = transformLabels(artistsStr);
@@ -39,6 +41,7 @@ const handleUpload: Action = async ({ locals, request }) => {
 			description,
 			tags,
 			artists,
+			isNsfw: finalIsNsfw,
 			reason: 'At least one the required fields was missing!'
 		});
 	}
@@ -48,6 +51,7 @@ const handleUpload: Action = async ({ locals, request }) => {
 			description,
 			tags,
 			artists,
+			isNsfw: finalIsNsfw,
 			reason: 'The description did not meet the requirements!'
 		});
 	}
@@ -57,6 +61,7 @@ const handleUpload: Action = async ({ locals, request }) => {
 			description,
 			tags,
 			artists,
+			isNsfw: finalIsNsfw,
 			reason: 'At least one of the tags did not meet the labelling requirements!'
 		});
 	}
@@ -66,6 +71,7 @@ const handleUpload: Action = async ({ locals, request }) => {
 			description,
 			tags,
 			artists,
+			isNsfw: finalIsNsfw,
 			reason: 'At least one of the artists did not meet the labelling requirements!'
 		});
 	}
@@ -75,6 +81,7 @@ const handleUpload: Action = async ({ locals, request }) => {
 			description,
 			tags,
 			artists,
+			isNsfw: finalIsNsfw,
 			reason: 'The number of images sent exceeded the maximum amount allowed per post!'
 		});
 	}
@@ -84,6 +91,7 @@ const handleUpload: Action = async ({ locals, request }) => {
 			description,
 			tags,
 			artists,
+			isNsfw: finalIsNsfw,
 			reason: 'At least one of the files provided is not an image!'
 		});
 	}
@@ -93,6 +101,7 @@ const handleUpload: Action = async ({ locals, request }) => {
 			description,
 			tags,
 			artists,
+			isNsfw: finalIsNsfw,
 			reason: 'At least one of the images exceeded the maximum file size allowed for an image!'
 		});
 	}
@@ -104,7 +113,14 @@ const handleUpload: Action = async ({ locals, request }) => {
 		postImageFileBuffers
 	);
 
-	const newPost = await createPost(description, tags, artists, postImageUrls, locals.user.id);
+	const newPost = await createPost(
+		description,
+		finalIsNsfw,
+		tags,
+		artists,
+		postImageUrls,
+		locals.user.id
+	);
 	return { newPost };
 };
 

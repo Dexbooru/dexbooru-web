@@ -8,6 +8,7 @@ export const MAXIMUM_POSTS_PER_PAGE = 27;
 export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	id: true,
 	description: true,
+	isNsfw: true,
 	createdAt: true,
 	imageUrls: true,
 	likes: true,

@@ -33,6 +33,9 @@
 		}
 	});
 
+	const firstPageUrl = new URL($page.url.href);
+	firstPageUrl.searchParams.set('pageNumber', '0');
+
 	onDestroy(() => {
 		postPaginationUnsubscribe();
 	});
@@ -41,7 +44,7 @@
 {#if $postPaginationStore}
 	<div id="pagination-container" class="flex space-x-3 justify-center {noPostsLeft && 'mt-5'}">
 		{#if noPostsOnPage}
-			<Button href="/" color="blue">Return to Home</Button>
+			<Button href={firstPageUrl.href} color="blue">Return to Home</Button>
 		{:else}
 			{#if ($postPaginationStore.pageNumber - 1 >= 0 || noPostsLeft) && $postPaginationStore.pageNumber !== 0}
 				<PaginationItem

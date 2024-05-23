@@ -7,13 +7,14 @@
 	export let imageUrls: string[];
 	export let imagesAlt: string | null = null;
 	export let slideDuration: number = 750;
+	export let blurImages: boolean = false;
 	export let transitionFunction: TCarouselTransitionFunction | null = null;
 	export let sliderControlsType: TSliderControlsType = 'controls';
 
 	let index: number = 0;
 	const imagesData: HTMLImgAttributes[] = imageUrls.map((imageUrl, index) => {
 		return {
-			loading: 'lazy',
+			class: `${blurImages && 'blur-md'}`,
 			src: imageUrl,
 			alt: imagesAlt
 				? imagesAlt
@@ -31,7 +32,10 @@
 	transition={transitionFunction}
 >
 	<a slot="slide" href={postHref} let:Slide>
-		<Slide class="h-full object-contain" image={imagesData[index]} />
+		<Slide
+			class="lazyload h-full object-contain {`${blurImages && 'blur-lg'}`}"
+			image={imagesData[index]}
+		/>
 	</a>
 	{#if imagesData.length > 1}
 		{#if sliderControlsType === 'controls'}

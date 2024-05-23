@@ -4,13 +4,15 @@
 	import { MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION } from '$lib/shared/constants/images';
 	import { transformLabel } from '$lib/shared/helpers/labels';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Heading, Input, Label, Textarea } from 'flowbite-svelte';
+	import { Button, Checkbox, Heading, Input, Label, Textarea } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import PostPictureUpload from '../../../lib/client/components/files/PostPictureUpload.svelte';
 	import LabelContainer from '../../../lib/client/components/labels/LabelContainer.svelte';
+	import type { ActionData } from './$types';
 
-	export let form;
+	export let form: ActionData;
 
+	let isNsfw: boolean = false;
 	let tags: string[] = form && form.tags ? form.tags : [];
 	let artists: string[] = form && form.artists ? form.artists : [];
 	let tag: string = '';
@@ -147,6 +149,11 @@
 
 		<div class="mb-20">
 			<PostPictureUpload />
+		</div>
+
+		<div class="mb-5 px-2.5">
+			<Checkbox bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
+			<Input type="hidden" name="isNsfw" value={isNsfw} />
 		</div>
 
 		<Button color="green" type="submit" class="m-2.5">Upload post</Button>

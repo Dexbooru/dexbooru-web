@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { normalizeCount } from '$lib/client/helpers/posts';
-	import type { IPost } from '$lib/shared/types/posts';
+	import type { TPost } from '$lib/shared/types/posts';
 	import LabelContainer from '../../labels/LabelContainer.svelte';
 	import PostAuthorDetails from './PostCardAuthorDetails.svelte';
 
-	export let post: IPost;
+	export let post: TPost;
 	export let tags: { name: string }[];
 	export let artists: { name: string }[];
 	export let author: { id: string; username: string; profilePictureUrl: string } | null;

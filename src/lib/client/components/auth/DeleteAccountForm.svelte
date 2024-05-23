@@ -27,7 +27,11 @@
 				<p transition:slide>We are sad to see you leave 😭</p>
 			{/if}
 		</Label>
-		<Button type="submit" color="red">DELETE YOUR ACCOUNT</Button>
+		<Button
+			type="submit"
+			color="red"
+			disabled={confirmationText !== ACCOUNT_DELETION_CONFIRMATION_TEXT}>DELETE YOUR ACCOUNT</Button
+		>
 
 		{#if error !== null && errorType === 'delete-account'}
 			<Alert dismissable border color="red" class="mt-2">

@@ -6,6 +6,7 @@
 	import { formatNumberWithCommas, normalizeCount } from '$lib/client/helpers/posts';
 	import { commentTreeStore } from '$lib/client/stores/comments';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
+	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import { Button, Modal } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
@@ -78,16 +79,23 @@
 		</p>
 
 		<p class="text-lg dark:text-white">
-			Author Username: <span class=" dark:text-gray-400"
-				><a class="underline" href="/profile/{post.author.username}">{post.author.username}</a
-				></span
-			>
+			Author Username: <span class=" dark:text-gray-400">
+				{#if post.author}
+					<a class="underline" href="/profile/{post.author.username}">{post.author.username}</a>
+				{:else}
+					{DELETED_ACCOUNT_HEADING}
+				{/if}
+			</span>
 		</p>
 
 		<p class="text-lg dark:text-white">
-			Author ID: <span class=" dark:text-gray-400"
-				><a class="underline" href="/profile/{post.author.username}">{post.author.id}</a></span
-			>
+			Author ID: <span class=" dark:text-gray-400">
+				{#if post.author}
+					<a class="underline" href="/profile/{post.author.username}">{post.author.id}</a>
+				{:else}
+					{DELETED_ACCOUNT_HEADING}
+				{/if}
+			</span>
 		</p>
 
 		<p class="text-lg dark:text-white">
@@ -121,10 +129,10 @@
 	</div>
 
 	<div class="space-y-2">
-		<p class="text-lg dark:text-white">Comments Loaded: {totalPostCommentCount}</p>
 		{#if $authenticatedUserStore}
 			<CommentTextbox postId={post.id} />
 		{/if}
+		<p class="text-lg dark:text-white">Comments Loaded: {totalPostCommentCount}</p>
 		<CommentsContainer postId={post.id} />
 	</div>
 </main>

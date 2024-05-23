@@ -48,9 +48,9 @@
 	<div id="post-container-body" class="space-y-4 mb-5">
 		<div id="post-container-title" class="flex justify-between">
 			<p class="text-4xl dark:text-white">{postContainerTitle}</p>
+			<PostPaginator />
 			<Searchbar queryInputHandler={onPostSearch} placeholder="Search by keyword(s)" />
 		</div>
-
 		<PostGrid />
 		<PostPaginator />
 	</div>

@@ -1,8 +1,7 @@
-import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
+import { MAX_ARTISTS_PER_PAGE } from '$lib/server/constants/artists';
+import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { Artist } from '@prisma/client';
 import prisma from '../prisma';
-import { MAX_ARTISTS_PER_PAGE } from '$lib/server/constants/artists';
-
 
 export async function findPostsByArtistName(
 	artistName: string,
@@ -11,7 +10,7 @@ export async function findPostsByArtistName(
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
 	selectors?: TPostSelector
-): Promise<IPost[]> {
+): Promise<TPost[]> {
 	const data = await prisma.artist.findUnique({
 		where: {
 			name: artistName
@@ -30,7 +29,7 @@ export async function findPostsByArtistName(
 
 	if (!data) return [];
 
-	return data.posts as IPost[];
+	return data.posts as TPost[];
 }
 
 export async function getArtistsWithStartingLetter(

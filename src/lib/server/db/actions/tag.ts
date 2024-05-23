@@ -1,5 +1,5 @@
 import { MAX_TAGS_PER_PAGE } from '$lib/server/constants/tags';
-import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
+import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { Tag } from '@prisma/client';
 import prisma from '../prisma';
 
@@ -10,7 +10,7 @@ export async function findPostsByTagName(
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
 	selectors?: TPostSelector
-): Promise<IPost[]> {
+): Promise<TPost[]> {
 	const data = await prisma.tag.findUnique({
 		where: {
 			name: tagName
@@ -29,7 +29,7 @@ export async function findPostsByTagName(
 
 	if (!data) return [];
 
-	return data.posts as IPost[];
+	return data.posts as TPost[];
 }
 
 export async function getTagsWithStartingLetter(

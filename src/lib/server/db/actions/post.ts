@@ -1,7 +1,7 @@
-import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
+import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import prisma from '../prisma';
 
-export async function deletePostById(postId: string, authorId: string): Promise<IPost | null> {
+export async function deletePostById(postId: string, authorId: string): Promise<TPost | null> {
 	if (!postId) return null;
 
 	const deletedPost = await prisma.post.delete({
@@ -14,7 +14,7 @@ export async function deletePostById(postId: string, authorId: string): Promise<
 		}
 	});
 
-	return deletedPost as IPost;
+	return deletedPost as TPost;
 }
 
 export async function findPostsByPage(
@@ -23,7 +23,7 @@ export async function findPostsByPage(
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
 	selectors?: TPostSelector
-): Promise<IPost[]> {
+): Promise<TPost[]> {
 	const pagePosts = await prisma.post.findMany({
 		select: selectors,
 		skip: pageNumber * pageLimit,
@@ -33,13 +33,13 @@ export async function findPostsByPage(
 		}
 	});
 
-	return pagePosts as IPost[];
+	return pagePosts as TPost[];
 }
 
 export async function findPostByIdWithUpdatedViewCount(
 	postId: string,
 	selectors?: TPostSelector
-): Promise<IPost | null> {
+): Promise<TPost | null> {
 	try {
 		const updatedPost = await prisma.post.update({
 			where: {
@@ -52,7 +52,7 @@ export async function findPostByIdWithUpdatedViewCount(
 			},
 			select: selectors
 		});
-		return updatedPost as IPost;
+		return updatedPost as TPost;
 	} catch (error) {
 		return null;
 	}
@@ -61,13 +61,13 @@ export async function findPostByIdWithUpdatedViewCount(
 export async function findPostById(
 	postId: string,
 	selectors?: TPostSelector
-): Promise<IPost | null> {
+): Promise<TPost | null> {
 	return (await prisma.post.findUnique({
 		where: {
 			id: postId
 		},
 		select: selectors
-	})) as IPost | null;
+	})) as TPost | null;
 }
 
 export async function findPostsByAuthorId(
@@ -77,7 +77,7 @@ export async function findPostsByAuthorId(
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
 	selectors?: TPostSelector
-): Promise<IPost[] | null> {
+): Promise<TPost[] | null> {
 	const posts = await prisma.post.findMany({
 		where: {
 			authorId
@@ -90,7 +90,7 @@ export async function findPostsByAuthorId(
 		select: selectors
 	});
 
-	return posts as IPost[] | null;
+	return posts as TPost[] | null;
 }
 
 export async function likePostById(
@@ -126,16 +126,18 @@ export async function likePostById(
 
 export async function createPost(
 	description: string,
+	isNsfw: boolean,
 	tags: string[],
 	artists: string[],
 	imageUrls: string[],
-	authorId: string
-): Promise<IPost> {
+	authorId: string,
+): Promise<TPost> {
 	const newPost = await prisma.post.create({
 		data: {
 			description,
 			authorId,
 			imageUrls,
+			isNsfw,
 			artists: {
 				connectOrCreate: artists.map((artist) => {
 					return {
@@ -155,5 +157,5 @@ export async function createPost(
 		}
 	});
 
-	return newPost as IPost;
+	return newPost as TPost;
 }

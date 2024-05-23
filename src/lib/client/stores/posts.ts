@@ -1,6 +1,6 @@
-import type { IPost, IPostPaginationData } from '$lib/shared/types/posts';
+import type { IPostPaginationData, TPost } from '$lib/shared/types/posts';
 import { writable } from 'svelte/store';
 
 export const postPaginationStore = writable<IPostPaginationData | null>(null);
-export const postsPageStore = writable<IPost[]>([]);
-export const originalPostsPageStore = writable<IPost[]>([]);
+export const postsPageStore = writable<TPost[]>([]);
+export const originalPostsPageStore = writable<TPost[]>([]);

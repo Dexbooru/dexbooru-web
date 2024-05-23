@@ -14,15 +14,16 @@ export interface ILikePostBody {
 }
 
 export interface IPostPaginationData {
-	posts: IPost[];
-	likedPosts: IPost[];
+	posts: TPost[];
+	likedPosts: TPost[];
 	pageNumber: number;
 	ascending: boolean;
 	orderBy: TPostOrderByColumn;
 }
 
-export type IPost = Post & {
+export type TPost = Post & {
 	id: string;
+	isNsfw: boolean;
 	description: string;
 	createdAt: Date;
 	imageUrls: string[];

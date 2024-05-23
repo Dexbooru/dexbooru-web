@@ -29,3 +29,4 @@ export const PASSWORD_REQUIREMENTS: TPasswordRequirements = {
 export const SPECIAL_CHARACTER_REGEX = /[\W_]/g;
 export const SALT_ROUNDS = 7;
 export const ACCOUNT_DELETION_CONFIRMATION_TEXT = 'delete my account';
+export const DELETED_ACCOUNT_HEADING = '[deleted-user]';

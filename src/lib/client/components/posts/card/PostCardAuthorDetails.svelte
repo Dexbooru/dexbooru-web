@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import { Avatar } from 'flowbite-svelte';
 
@@ -18,7 +19,7 @@
 			src={authorProfilePictureUrl}
 			alt={authorId ? `profile picture of ${authorUsername}` : 'default user account'}
 		/>
-		<p class="mt-2">{authorId ? authorUsername : '[deleted-user]'}</p>
+		<p class="mt-2">{authorId ? authorUsername : DELETED_ACCOUNT_HEADING}</p>
 	</a>
 	<p class="text-md mt-2 dark:text-white">
 		&#8226;

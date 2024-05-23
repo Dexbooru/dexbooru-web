@@ -1,5 +1,5 @@
 import type { TUserSelector } from '$lib/server/types/users';
-import type { IPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
+import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { IUser } from '$lib/shared/types/users';
 import prisma from '../prisma';
 
@@ -84,7 +84,7 @@ export async function deleteFriend(senderUserId: string, receiverUserId: string)
 	return !!modifiedReceiverUserRecord && !!modifiedSenderUserRecord;
 }
 
-export async function findLikedPostsFromSubset(userId: string, posts: IPost[]): Promise<IPost[]> {
+export async function findLikedPostsFromSubset(userId: string, posts: TPost[]): Promise<TPost[]> {
 	const postIds = posts.map((post) => post.id);
 	const likedPostsInSubsetData = await prisma.user.findUnique({
 		where: {
@@ -101,7 +101,7 @@ export async function findLikedPostsFromSubset(userId: string, posts: IPost[]): 
 		}
 	});
 
-	return (likedPostsInSubsetData ? likedPostsInSubsetData.likedPosts : []) as IPost[];
+	return (likedPostsInSubsetData ? likedPostsInSubsetData.likedPosts : []) as TPost[];
 }
 
 export async function findLikedPostsByAuthorId(
@@ -111,7 +111,7 @@ export async function findLikedPostsByAuthorId(
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
 	selectors?: TPostSelector
-): Promise<IPost[] | null> {
+): Promise<TPost[] | null> {
 	const data = await prisma.user.findFirst({
 		where: {
 			id: authorId
@@ -130,7 +130,7 @@ export async function findLikedPostsByAuthorId(
 
 	if (!data) return null;
 
-	return data.likedPosts as IPost[];
+	return data.likedPosts as TPost[];
 }
 
 export async function findUserById(id: string, selectors?: TUserSelector): Promise<IUser | null> {

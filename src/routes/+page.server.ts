@@ -2,7 +2,7 @@ import { MAXIMUM_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from '$lib/server/const
 import { findPostsByPage } from '$lib/server/db/actions/post';
 import { findLikedPostsFromSubset } from '$lib/server/db/actions/user';
 import { processPostPageParams } from '$lib/server/helpers/pagination';
-import type { IPost, TPostOrderByColumn } from '$lib/shared/types/posts';
+import type { TPost, TPostOrderByColumn } from '$lib/shared/types/posts';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, parent }) => {
@@ -20,7 +20,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 		PUBLIC_POST_SELECTORS
 	);
 
-	const likedPosts: IPost[] = user ? await findLikedPostsFromSubset(user.id, posts) : [];
+	const likedPosts: TPost[] = user ? await findLikedPostsFromSubset(user.id, posts) : [];
 
 	return {
 		posts,

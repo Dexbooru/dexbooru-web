@@ -31,6 +31,7 @@ model Post {
   id          String       @id @default(uuid())
   createdAt   DateTime     @default(now())
   description String       @db.Text
+  isNsfw      Boolean      @default(false)
   likes       Int          @default(0)
   views       Int          @default(0)
   imageUrls   String[]

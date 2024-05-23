@@ -3,6 +3,7 @@
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { commentTreeStore } from '$lib/client/stores/comments';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
+	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate, getFormalDateTitle, ymdFormat } from '$lib/shared/helpers/dates';
 	import type { IComment } from '$lib/shared/types/comments';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -59,12 +60,16 @@
 				class="inline-flex space-x-2 items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold"
 			>
 				<Avatar
-					src={comment.author.profilePictureUrl}
+					src={comment.author?.profilePictureUrl ?? undefined}
 					alt={comment.authorId
 						? `profile picture of ${comment.author.username}`
 						: 'default user account'}
 				/>
-				<a href="/profile/{comment.author.username}">{comment.author.username}</a>
+				{#if comment.author}
+					<a href="/profile/{comment.author.username}">{comment.author.username}</a>
+				{:else}
+					<h2>{DELETED_ACCOUNT_HEADING}</h2>
+				{/if}
 			</p>
 			<p class="text-sm text-gray-600 dark:text-gray-400">
 				<time datetime={ymdFormat(comment.createdAt)} title={getFormalDateTitle(comment.createdAt)}

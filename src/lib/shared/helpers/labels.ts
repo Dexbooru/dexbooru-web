@@ -5,7 +5,7 @@ import {
 	MAXIMUM_TAG_LENGTH,
 	SEPERATOR_CHARACTER
 } from '../constants/labels';
-import type { IPost } from '../types/posts';
+import type { TPost } from '../types/posts';
 
 export const isLabelAppropriate = (label: string): boolean => {
 	return !BLACKLISTED_LABELS.some((blackListedString) => label.includes(blackListedString));
@@ -46,7 +46,7 @@ export const transformLabels = (labels: string | string[] | undefined): string[]
 	return Array.from(new Set(convertedLabels.map(transformLabel)));
 };
 
-export const getUniqueLabelsFromPosts = (posts: IPost[], labelType: 'tag' | 'artist'): string[] => {
+export const getUniqueLabelsFromPosts = (posts: TPost[], labelType: 'tag' | 'artist'): string[] => {
 	const allLabels = posts.map((post) => {
 		return labelType === 'tag'
 			? post.tags.map((tag) => tag.name)
