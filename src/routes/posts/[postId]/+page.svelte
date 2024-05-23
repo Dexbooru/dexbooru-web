@@ -85,7 +85,7 @@
 	</div>
 
 	<div class="space-y-2">
-		<p class="text-lg dark:text-white">Comments: {totalPostCommentCount}</p>
+		<p class="text-lg dark:text-white">Comments Loaded: {totalPostCommentCount}</p>
 		{#if $authenticatedUserStore}
 			<CommentTextbox postId={post.id} />
 		{/if}

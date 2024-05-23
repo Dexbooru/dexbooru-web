@@ -1,4 +1,4 @@
-import { MAX_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
+import { MAXIMUM_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
 import { findPostsByArtistName } from '$lib/server/db/actions/artist';
 import { findLikedPostsFromSubset } from '$lib/server/db/actions/user';
 import { processPostPageParams } from '$lib/server/helpers/pagination';
@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ params, url, parent }) => {
 	const posts = await findPostsByArtistName(
 		artistName,
 		convertedPageNumber,
-		MAX_POSTS_PER_PAGE,
+		MAXIMUM_POSTS_PER_PAGE,
 		orderBy as TPostOrderByColumn,
 		convertedAscending,
 		PUBLIC_POST_SELECTORS

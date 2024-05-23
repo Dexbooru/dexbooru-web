@@ -4,7 +4,7 @@ export const VALID_ORDERBY_COLUMNS: TPostOrderByColumn[] = ['createdAt', 'likes'
 
 export const POST_LIKE_ACTIONS: TPostLikeAction[] = ['like', 'dislike'] as const;
 
-export const MAX_POSTS_PER_PAGE = 27;
+export const MAXIMUM_POSTS_PER_PAGE = 27;
 export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	id: true,
 	description: true,

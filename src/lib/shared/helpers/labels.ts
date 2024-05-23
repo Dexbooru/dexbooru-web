@@ -39,6 +39,8 @@ export const transformLabel = (label: string): string => {
 };
 
 export const transformLabels = (labels: string | string[] | undefined): string[] => {
+	if (typeof labels === 'string' && labels.length === 0) return [];
+
 	const convertedLabels: string[] =
 		labels === undefined ? [] : typeof labels === 'string' ? labels.split(',') : labels;
 	return Array.from(new Set(convertedLabels.map(transformLabel)));

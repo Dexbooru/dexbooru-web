@@ -18,6 +18,7 @@
 	title="Full image preview of {imageFile.name}"
 	bind:open={modalOpen}
 	autoclose
+	outsideclose
 	on:close={() => (modalOpen = false)}
 >
 	<img src={imageBase64} alt={imageAlt} />

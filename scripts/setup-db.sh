@@ -10,5 +10,4 @@ docker-compose --env-file "../../.env.local" up -d
 
 cd ../../
 echo "Migrating schemas and Seeding the database with mock data"
-yarn dbmigrate:dev
-
+yarn dbseed:dev

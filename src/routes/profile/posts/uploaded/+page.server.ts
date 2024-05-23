@@ -1,4 +1,4 @@
-import { MAX_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
+import { MAXIMUM_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
 import { findPostsByAuthorId } from '$lib/server/db/actions/post';
 import { findLikedPostsFromSubset } from '$lib/server/db/actions/user';
 import { processPostPageParams } from '$lib/server/helpers/pagination';
@@ -19,7 +19,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 	const posts =
 		(await findPostsByAuthorId(
 			convertedPageNumber,
-			MAX_POSTS_PER_PAGE,
+			MAXIMUM_POSTS_PER_PAGE,
 			user.id,
 			orderBy as TPostOrderByColumn,
 			convertedAscending,

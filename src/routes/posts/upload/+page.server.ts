@@ -1,4 +1,5 @@
 import { uploadBatchToBucket } from '$lib/server/aws/actions/s3';
+import { AWS_POST_PICTURE_BUCKET_NAME } from '$lib/server/constants/aws';
 import { createPost } from '$lib/server/db/actions/post';
 import { runPostImageTransformationPipelineInBatch } from '$lib/server/helpers/images';
 import { MAXIMUM_IMAGES_PER_POST } from '$lib/shared/constants/images';
@@ -13,7 +14,6 @@ import {
 import type { IUploadFormFields } from '$lib/shared/types/upload';
 import { error, fail } from '@sveltejs/kit';
 import type { Action, Actions } from './$types';
-import { AWS_POST_PICTURE_BUCKET_NAME } from '$lib/server/constants/aws';
 
 const handleUpload: Action = async ({ locals, request }) => {
 	if (!locals.user) {
@@ -38,7 +38,7 @@ const handleUpload: Action = async ({ locals, request }) => {
 		return fail(400, {
 			description,
 			tags,
-			artists: tagsStr,
+			artists,
 			reason: 'At least one the required fields was missing!'
 		});
 	}
@@ -104,7 +104,8 @@ const handleUpload: Action = async ({ locals, request }) => {
 		postImageFileBuffers
 	);
 
-	await createPost(description, tags, artists, postImageUrls, locals.user.id);
+	const newPost = await createPost(description, tags, artists, postImageUrls, locals.user.id);
+	return { newPost };
 };
 
 export const actions = {

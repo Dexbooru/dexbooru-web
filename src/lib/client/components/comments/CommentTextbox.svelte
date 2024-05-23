@@ -62,7 +62,8 @@
 			});
 
 			onCommentCreate && onCommentCreate();
-
+			commentContent = '';
+			commentContentMarkdown = '';
 		} else {
 			toast.push('An error occured while posting your comment', FAILURE_TOAST_OPTIONS);
 		}
@@ -98,9 +99,15 @@
 	<TabItem>
 		<span slot="title">Preview your markdown comment</span>
 		<div class="z-10 flex flex-col p-4 dark:bg-gray-700 dark:border-gray-600 text-left">
-			<p class="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
-				{@html commentContentMarkdown}
-			</p>
+			{#if commentContentMarkdown.length > 0}
+				<p class="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
+					{@html commentContentMarkdown}
+				</p>
+			{:else}
+				<p class="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
+					Preview will come here
+				</p>
+			{/if}
 		</div>
 	</TabItem>
 </Tabs>

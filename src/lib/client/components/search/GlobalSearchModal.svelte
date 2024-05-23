@@ -23,7 +23,6 @@
 			const globalSearchInput = document.querySelector(
 				`#${GLOBAL_SEARCH_INPUT_ELEMENT_ID}`
 			) as HTMLInputElement | null;
-
 			if (globalSearchInput) {
 				globalSearchInput.focus();
 			}

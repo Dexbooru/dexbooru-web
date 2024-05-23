@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { createPostCommentsPaginator } from '$lib/client/api/comments';
+	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { commentTreeStore } from '$lib/client/stores/comments';
+	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { formatDate, getFormalDateTitle, ymdFormat } from '$lib/shared/helpers/dates';
 	import type { IComment } from '$lib/shared/types/comments';
+	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button } from 'flowbite-svelte';
 	import { MessagesSolid } from 'flowbite-svelte-icons';
 	import { onDestroy } from 'svelte';
@@ -29,6 +32,15 @@
 		loadMoreButtonText = pageNumberResult > 0 ? 'Load more replies' : 'Load replies';
 		pageNumber = pageNumberResult;
 		noMoreComments = noMoreCommentsResult;
+	};
+
+	const handleReplyButtonClick = () => {
+		if (!$authenticatedUserStore) {
+			toast.push('You must be in signed in to reply to comments', FAILURE_TOAST_OPTIONS);
+			return;
+		}
+
+		replyBoxOpen = !replyBoxOpen;
 	};
 
 	const commentTreeUnsubscribe = commentTreeStore.subscribe((commentTree) => {
@@ -67,7 +79,7 @@
 	</p>
 
 	<div class="flex items-center mt-4 space-x-3">
-		<Button class="flex space-x-2" color="green" on:click={() => (replyBoxOpen = !replyBoxOpen)}>
+		<Button class="flex space-x-2" color="green" on:click={handleReplyButtonClick}>
 			<MessagesSolid />
 			<span>{replyBoxOpen ? 'Hide reply' : 'Reply'}</span>
 		</Button>

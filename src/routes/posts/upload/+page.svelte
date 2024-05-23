@@ -1,19 +1,21 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION } from '$lib/shared/constants/images';
 	import { transformLabel } from '$lib/shared/helpers/labels';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Heading, Input, Label, Textarea } from 'flowbite-svelte';
+	import { onMount } from 'svelte';
 	import PostPictureUpload from '../../../lib/client/components/files/PostPictureUpload.svelte';
 	import LabelContainer from '../../../lib/client/components/labels/LabelContainer.svelte';
 
-	export let form: FormData;
+	export let form;
 
-	let tags: string[] = [];
-	let artists: string[] = [];
+	let tags: string[] = form && form.tags ? form.tags : [];
+	let artists: string[] = form && form.artists ? form.artists : [];
 	let tag: string = '';
 	let artist: string = '';
-	let description: string = '';
+	let description: string = form && form.description ? form.description : '';
 
 	const addTag = () => {
 		if (!tag.length) {
@@ -56,6 +58,37 @@
 		artists = Array.from(new Set(artists));
 		artist = '';
 	};
+
+	const removeTag = (event: Event) => {
+		const target = event.target as Element;
+		const badgeDiv = target.closest('div');
+
+		if (badgeDiv) {
+			const removalTag = badgeDiv.textContent?.split(' ')[0];
+			tags = tags.filter((tag) => tag !== removalTag);
+		}
+	};
+
+	const removeArtist = (event: Event) => {
+		const target = event.target as Element;
+		const badgeDiv = target.closest('div');
+
+		if (badgeDiv) {
+			const removalArtist = badgeDiv.textContent?.split(' ')[0];
+			artists = artists.filter((artist) => artist !== removalArtist);
+		}
+	};
+
+	onMount(() => {
+		if (form && form.reason) {
+			toast.push(form.reason, FAILURE_TOAST_OPTIONS);
+		}
+
+		if (form && form.newPost) {
+			const newPostid = form.newPost.id as string;
+			goto(`/posts/${newPostid}`);
+		}
+	});
 </script>
 
 <svelte:head>
@@ -86,7 +119,14 @@
 			<Label>Please enter one or more tags:</Label>
 			<Input bind:value={tag} type="text" placeholder="Enter a tag name" class="my-2.5" />
 			<Button type="button" on:click={addTag} class="my-2.5 w-full">Add tag</Button>
-			<LabelContainer labelColor="red" labelType="tag" labels={tags} />
+			<LabelContainer
+				handleLabelClose={removeTag}
+				labelIsDismissable
+				labelIsLink={false}
+				labelColor="red"
+				labelType="tag"
+				labels={tags}
+			/>
 			<Input type="hidden" name="tags" value={tags.toString()} />
 		</div>
 
@@ -94,7 +134,14 @@
 			<Label>Please specify one or more artists:</Label>
 			<Input bind:value={artist} type="text" placeholder="Enter an artist name" class="my-2.5" />
 			<Button type="button" on:click={addArtist} class="my-2.5 w-full">Add artist</Button>
-			<LabelContainer labelColor="green" labelType="artist" labels={artists} />
+			<LabelContainer
+				handleLabelClose={removeArtist}
+				labelIsDismissable
+				labelIsLink={false}
+				labelColor="green"
+				labelType="artist"
+				labels={artists}
+			/>
 			<Input type="hidden" name="artists" value={artists.toString()} />
 		</div>
 

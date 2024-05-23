@@ -9,19 +9,23 @@ class CommentTree {
 	}
 
 	addComment(comment: IComment) {
-		if (comment.parentCommentId === null) {
-			const rootComments = this.data.get('root') || [];
-			rootComments.push(comment);
-			return;
+		const parentCommentIdKey = comment.parentCommentId !== null ? comment.parentCommentId : 'root';
+
+		if (!this.data.has(parentCommentIdKey)) {
+			this.data.set(parentCommentIdKey, []);
 		}
-		if (!this.data.has(comment.parentCommentId)) {
-			this.data.set(comment.parentCommentId, []);
-		}
+
 		if (!this.data.has(comment.id)) {
 			this.data.set(comment.id, []);
 		}
 
-		this.data.get(comment.parentCommentId)?.push(comment);
+		const associatedComments = this.data.get(parentCommentIdKey) || [];
+		const filteredAssociatedComments = associatedComments.filter(
+			(associatedComment) => associatedComment.id !== comment.id
+		);
+		filteredAssociatedComments.push(comment);
+
+		this.data.set(parentCommentIdKey, filteredAssociatedComments);
 	}
 
 	getReplies(commentId: string): IComment[] {
