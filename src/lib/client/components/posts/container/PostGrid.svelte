@@ -3,6 +3,7 @@
 	import { POSTS_GRID_ANIMATION_DURATION_MS } from '$lib/client/constants/posts';
 	import { postsPageStore } from '$lib/client/stores/posts';
 	import { flip } from 'svelte/animate';
+	import PostPaginator from './PostPaginator.svelte';
 </script>
 
 {#if $postsPageStore.length > 0}
@@ -16,5 +17,8 @@
 {:else}
 	<div class="w-full h-full grid place-items-center">
 		<p class="text-6xl dark:text-white">No posts found</p>
+		{#if $postsPageStore.length === 0}
+			<PostPaginator />
+		{/if}
 	</div>
 {/if}
