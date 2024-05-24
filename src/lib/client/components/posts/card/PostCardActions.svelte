@@ -11,7 +11,7 @@
 		postsPageStore
 	} from '$lib/client/stores/posts';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
-	import type { IPost } from '$lib/shared/types/posts';
+	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button } from 'flowbite-svelte';
 	import {
@@ -22,7 +22,7 @@
 	} from 'flowbite-svelte-icons';
 	import PostCardReportModal from './PostCardReportModal.svelte';
 
-	export let post: IPost;
+	export let post: TPost;
 	export let postId: string;
 	export let likes: number;
 	export let author: {

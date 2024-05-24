@@ -1,11 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
+	import { getPathFromUrl } from '$lib/shared/helpers/urls';
 	import { Button, DarkMode, NavBrand, NavHamburger, NavLi, NavUl, Navbar } from 'flowbite-svelte';
 	import GlobalSearchbar from '../search/GlobalSearchbar.svelte';
 	import ProfileDropdown from './ProfileDropdown.svelte';
 
-	const currentPath = $page.url.pathname;
+	let activeUrl: string;
+
+	$: {
+		activeUrl = getPathFromUrl($page.url.href, true);
+	}
 </script>
 
 <Navbar class="sticky top-0 z-50">
@@ -29,12 +34,12 @@
 		<DarkMode />
 		<NavHamburger />
 	</div>
-	<NavUl class="order-1">
-		<NavLi href="/" active={currentPath === '/'}>Home</NavLi>
-		<NavLi href="/tags" active={currentPath === '/tags'}>Tags</NavLi>
-		<NavLi href="/artists" active={currentPath === '/tags'}>Artists</NavLi>
+	<NavUl class="order-1" {activeUrl}>
+		<NavLi href="/">Home</NavLi>
+		<NavLi href="/tags">Tags</NavLi>
+		<NavLi href="/artists">Artists</NavLi>
 		{#if $authenticatedUserStore}
-			<NavLi href="/posts/upload" active={currentPath === '/posts/upload'}>Upload</NavLi>
+			<NavLi href="/posts/upload">Upload</NavLi>
 		{/if}
 	</NavUl>
 </Navbar>

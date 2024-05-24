@@ -1,9 +1,22 @@
 import { APP_BASE_URL } from '../constants/urls';
 import type { TUrlSearchParams } from '../types/urls';
 
-export const getPathFromUrl = (url: string): string => {
+export const getPathFromUrl = (url: string, trimTrailingSlash: boolean = false): string => {
 	const convertedUrl = new URL(url);
-	return convertedUrl.pathname;
+	const pathname = convertedUrl.pathname;
+
+	if (trimTrailingSlash) {
+		if (pathname === '/') {
+			return pathname;
+		}
+
+		if (pathname.endsWith('/')) {
+			return pathname.slice(0, -1);
+		}
+
+		return pathname;
+	}
+	return pathname;
 };
 
 export function getUrlFields<T>(searchParams: URLSearchParams, getAllFields: (keyof T)[] = []): T {
