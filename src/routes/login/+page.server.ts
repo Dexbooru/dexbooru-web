@@ -1,8 +1,8 @@
-import { SESSION_ID_KEY } from '$lib/server/constants/cookies';
 import { findUserByName } from '$lib/server/db/actions/user';
 import { buildCookieOptions } from '$lib/server/helpers/cookies';
 import { passwordsMatch } from '$lib/server/helpers/password';
 import { generateEncodedUserTokenFromRecord } from '$lib/server/helpers/sessions';
+import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { getFormFields } from '$lib/shared/helpers/forms';
 import type { ILoginFormFields } from '$lib/shared/types/auth';
 import { fail, redirect } from '@sveltejs/kit';
@@ -32,7 +32,7 @@ const handleLogin: Action = async ({ request, cookies }) => {
 	const encodedAuthToken = generateEncodedUserTokenFromRecord(user, finalRememberMe);
 	cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(finalRememberMe));
 
-	throw redirect(302, '/');
+	throw redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
 };
 
 export const actions = {

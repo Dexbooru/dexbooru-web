@@ -1,4 +1,4 @@
-import { SESSION_ID_COOKIE_OPTIONS, SESSION_ID_KEY } from '$lib/server/constants/cookies';
+import { SESSION_ID_COOKIE_OPTIONS } from '$lib/server/constants/cookies';
 import {
 	deleteUserById,
 	editPasswordByUserId,
@@ -7,9 +7,10 @@ import {
 } from '$lib/server/db/actions/user';
 import { hashPassword, passwordsMatch } from '$lib/server/helpers/password';
 import { generateUpdatedUserTokenFromClaims } from '$lib/server/helpers/sessions';
+import { ACCOUNT_DELETION_CONFIRMATION_TEXT } from '$lib/shared/constants/auth';
+import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
 import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
-import { ACCOUNT_DELETION_CONFIRMATION_TEXT } from '$lib/shared/constants/auth';
 import { getFormFields } from '$lib/shared/helpers/forms';
 import type {
 	IChangePasswordFormFields,

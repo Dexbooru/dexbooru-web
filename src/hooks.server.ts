@@ -1,4 +1,4 @@
-import { SESSION_ID_KEY } from '$lib/server/constants/cookies';
+import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { getUserClaimsFromEncodedJWTToken } from '$lib/server/helpers/sessions';
 import type { Handle } from '@sveltejs/kit';
 
