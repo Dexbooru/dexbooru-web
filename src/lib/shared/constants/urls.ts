@@ -1,4 +1,13 @@
-import { dev } from '$app/environment';
+import { dev } from "$app/environment";
 
-const URL_PROTOCOL = dev ? 'http' : 'https';
-export const APP_BASE_URL = `${URL_PROTOCOL}://${import.meta.env.VITE_VERCEL_URL}`;
+export const buildValidUrl = (url: string): string => {	
+	if (url.startsWith('http://') || url.startsWith('https://')) {
+		return url;
+	}
+
+	const finalProtocol = dev ? 'http' : 'https';
+	return `${finalProtocol}://${url}`;
+}
+
+
+export const APP_BASE_URL = buildValidUrl(import.meta.env.VITE_VERCEL_URL ?? '');

@@ -37,6 +37,7 @@ const onResizeDocument = () => {
 
 const onKeyDownDocument = (event: KeyboardEvent) => {
 	if (event.ctrlKey && event.key.toLowerCase() === 'k') {
+		event.preventDefault();
 		searchModalActiveStore.update((active) => !active);
 	}
 };

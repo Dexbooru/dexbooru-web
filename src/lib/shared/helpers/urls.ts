@@ -1,6 +1,7 @@
 import { APP_BASE_URL } from '../constants/urls';
 import type { TUrlSearchParams } from '../types/urls';
 
+
 export const getPathFromUrl = (url: string, trimTrailingSlash: boolean = false): string => {
 	const convertedUrl = new URL(url);
 	const pathname = convertedUrl.pathname;
