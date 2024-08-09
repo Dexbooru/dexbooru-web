@@ -16,4 +16,4 @@
 	}
 </script>
 
-<PostWrapper postsSection="Upload Posts" />
+<PostWrapper postsSection="Uploaded Posts" />

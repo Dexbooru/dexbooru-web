@@ -14,10 +14,6 @@
 	onMount(() => {
 		clearToken();
 		storeToken();
-
-		// fetch('http://localhost:3001/api/auth/misc/health-check')
-		// 	.then((response) => response.json())
-		// 	.then((data) => console.log(data));
 	});
 
 	$: {
