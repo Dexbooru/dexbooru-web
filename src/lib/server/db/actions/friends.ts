@@ -1,4 +1,4 @@
-import type { IFriendRequest, TFriendRequestSelector } from '$lib/shared/types/friends';
+import type { IFriendRequest, TChatFriend, TFriendRequestSelector } from '$lib/shared/types/friends';
 import prisma from '../prisma';
 
 export async function findFriendRequests(
@@ -68,4 +68,23 @@ export async function checkIfUserIsFriended(
 	});
 
 	return !!friendRequest;
+}
+
+export async function findFriendsForUser(userId: string): Promise<TChatFriend[]> {
+	const data = await prisma.user.findFirst({
+		where: {
+			id: userId
+		},
+		select: {
+			friends: {
+				select: {
+					id: true,
+					username: true,
+					profilePictureUrl: true
+				},
+			}
+		}
+	});
+
+	return data?.friends ?? [];
 }

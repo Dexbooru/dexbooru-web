@@ -9,6 +9,12 @@ export type IFriendRequest = FriendRequest & {
 	};
 };
 
+export type TChatFriend = {
+	id: string;
+	username: string;
+	profilePictureUrl: string;
+}
+
 export type TFriendRequestSelector = Prisma.FriendRequestSelect<DefaultArgs>;
 
 export type TFriendRequestAction = 'accept' | 'decline';

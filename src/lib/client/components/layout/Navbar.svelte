@@ -13,7 +13,7 @@
 	}
 </script>
 
-<Navbar class="sticky top-0 z-50">
+<Navbar id="app-navbar" class="sticky top-0 z-50">
 	<div class="flex space-x-4">
 		<NavBrand href="/">
 			<img src="/favicon.png" class="mr-3 h-6 sm:h-9 rounded-md" alt="Dexbooru Logo" />
@@ -40,6 +40,7 @@
 		<NavLi href="/artists">Artists</NavLi>
 		{#if $authenticatedUserStore}
 			<NavLi href="/posts/upload">Upload</NavLi>
+			<NavLi href="/chat">Chat</NavLi>
 		{/if}
 	</NavUl>
 </Navbar>

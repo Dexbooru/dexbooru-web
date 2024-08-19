@@ -7,6 +7,7 @@
 </script>
 
 <Footer
+	id="app-footer"
 	class="sticky flex justify-center space-x-5 h-14 bottom-0 z-50 w-full bg-white dark:bg-gray-900 rounded-none"
 >
 	<FooterLinkGroup
