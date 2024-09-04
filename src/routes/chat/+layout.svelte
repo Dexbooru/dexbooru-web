@@ -5,7 +5,7 @@
 
 	export let data: LayoutData;
 
-	const { friends } = data;
+	const { friends, chatRooms } = data;
 
 	const recomputeChatContainerSize = () => {
 		const appNavbar = document.getElementById('app-navbar');
@@ -19,7 +19,6 @@
 		}
 	};
 
-
 	onMount(() => {
 		recomputeChatContainerSize();
 		window.addEventListener('resize', recomputeChatContainerSize);
@@ -30,7 +29,7 @@
 	});
 </script>
 
-<div id="chat-container" class="flex flex-wrap">
-	<DirectMessageSidebar {friends} />
+<div id="chat-container" class="flex">
+	<DirectMessageSidebar {friends} {chatRooms} />
 	<slot />
 </div>

@@ -81,6 +81,18 @@
 		}
 	};
 
+	const handleLabelKeypress = (event: KeyboardEvent, labelType: 'tag' | 'artist') => {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+
+			if (labelType === 'tag') {
+				addTag();
+			} else if (labelType === 'artist') {
+				addArtist();
+			}
+		}
+	};
+
 	onMount(() => {
 		if (form && form.reason) {
 			toast.push(form.reason, FAILURE_TOAST_OPTIONS);
@@ -99,7 +111,12 @@
 
 <main class="flex flex-col justify-center items-center mt-5 mb-5">
 	<Heading class="mb-10 px-2.5 text-center">Upload a post!</Heading>
-	<form method="POST" class="flex flex-col space-y-2 max-w-screen-md" enctype="multipart/form-data">
+	<form
+		id="upload-form"
+		method="POST"
+		class="flex flex-col space-y-2 max-w-screen-md"
+		enctype="multipart/form-data"
+	>
 		<div id="description" class="mb-5 px-2.5">
 			<Label
 				>Please enter a description for your post (max {MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION} characters)</Label
@@ -119,7 +136,13 @@
 
 		<div class="mb-5 px-2.5">
 			<Label>Please enter one or more tags:</Label>
-			<Input bind:value={tag} type="text" placeholder="Enter a tag name" class="my-2.5" />
+			<Input
+				on:keypress={(event) => handleLabelKeypress(event, 'tag')}
+				bind:value={tag}
+				type="text"
+				placeholder="Enter a tag name"
+				class="my-2.5"
+			/>
 			<Button type="button" on:click={addTag} class="my-2.5 w-full">Add tag</Button>
 			<LabelContainer
 				handleLabelClose={removeTag}
@@ -134,7 +157,13 @@
 
 		<div class="mb-5 px-2.5">
 			<Label>Please specify one or more artists:</Label>
-			<Input bind:value={artist} type="text" placeholder="Enter an artist name" class="my-2.5" />
+			<Input
+				on:keypress={(event) => handleLabelKeypress(event, 'artist')}
+				bind:value={artist}
+				type="text"
+				placeholder="Enter an artist name"
+				class="my-2.5"
+			/>
 			<Button type="button" on:click={addArtist} class="my-2.5 w-full">Add artist</Button>
 			<LabelContainer
 				handleLabelClose={removeArtist}

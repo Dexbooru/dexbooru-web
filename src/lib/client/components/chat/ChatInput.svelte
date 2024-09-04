@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { Button } from "flowbite-svelte";
-	import { Input } from "postcss";
-
-    
+	import { Button, Textarea } from 'flowbite-svelte';
 </script>
 
-<div class="p-4 bg-white border-t">
-    <div class="flex space-x-4">
-        <Input placeholder="Type a message..." class="flex-grow" />
-        <Button color="primary">Send</Button>
-    </div>
+<div
+	class="absolute bottom-0 w-full p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
+>
+	<div class="flex space-x-4">
+		<Textarea rows={1} class="resize-none" placeholder="Type a message..." />
+		<Button color="primary">Send</Button>
+	</div>
 </div>

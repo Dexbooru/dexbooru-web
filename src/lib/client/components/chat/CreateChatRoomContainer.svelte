@@ -16,7 +16,6 @@
 			toast.push('Chat room created successfully', SUCCESS_TOAST_OPTIONS);
 			friends = friends.filter((friend) => friend.id !== recieverUserId);
 		} else {
-			console.log("hello world");
 			toast.push('Failed to create chat room', FAILURE_TOAST_OPTIONS);
 			target.disabled = false;
 		}
@@ -25,24 +24,29 @@
 
 <Popover
 	offset={10}
-	class="texts-sm w-80 h-80 overflow-y-auto"
+	class="texts-sm w-80 h-80 overflow-y-auto z-50"
 	title="Start a DM with a friend"
 	triggeredBy="#new-chat-btn"
 	trigger="click"
 >
-	<Listgroup>
-		{#each friends as friend (friend.id)}
-			<ListgroupItem class="text-base font-semibold gap-2 flex justify-between">
-				<div class="flex space-x-2">
-					<Avatar src={friend.profilePictureUrl} size="sm" />
-					<h2 class="mt-1">{friend.username}</h2>
-				</div>
-				<Button
-					on:click={(event) => onChatRoomCreateClick(event, friend.id)}
-					size="sm"
-					color="green">Start new chat</Button
-				>
-			</ListgroupItem>
-		{/each}
-	</Listgroup>
+	{#if friends.length === 0}
+		<h1 class="text-center text-2xl">:((</h1>
+		<p class="text-center mt-3">No friends to create a chat room for currently!</p>
+	{:else}
+		<Listgroup>
+			{#each friends as friend (friend.id)}
+				<ListgroupItem class="text-base font-semibold gap-2 flex justify-between">
+					<div class="flex space-x-2">
+						<Avatar src={friend.profilePictureUrl} size="sm" />
+						<h2 class="mt-1">{friend.username}</h2>
+					</div>
+					<Button
+						on:click={(event) => onChatRoomCreateClick(event, friend.id)}
+						size="sm"
+						color="green">Start new chat</Button
+					>
+				</ListgroupItem>
+			{/each}
+		</Listgroup>
+	{/if}
 </Popover>

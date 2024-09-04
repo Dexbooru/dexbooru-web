@@ -1,12 +1,23 @@
 <script lang="ts">
 	import { SIDEBAR_WIDTH_STORAGE_KEY } from '$lib/client/helpers/chat';
+	import type { TChatRoom } from '$lib/client/types/core';
+	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TChatFriend } from '$lib/shared/types/friends';
-	import { Button } from 'flowbite-svelte';
+	import { Avatar, Button } from 'flowbite-svelte';
 	import { PlusSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import CreateChatRoomContainer from './CreateChatRoomContainer.svelte';
 
 	export let friends: TChatFriend[] = [];
+	export let chatRooms: TChatRoom[] = [];
+
+	const filteredFriends = friends.filter(
+		(friend) => !chatRooms.some((chatRoom) => chatRoom.participants.includes(friend.id))
+	);
+	const processedRooms = chatRooms.map((chatRoom) => {
+		const friend = friends.find((friend) => chatRoom.participants.includes(friend.id));
+		return { ...friend, ...chatRoom, friendId: friend?.id, chatRoomId: chatRoom.id };
+	});
 
 	const persistSidebarWidth = (sidebarElement: HTMLElement | null) => {
 		if (sidebarElement) {
@@ -34,30 +45,44 @@
 	});
 </script>
 
-<aside id="direct-messages-sidebar" class="col-span-3 bg-gray-800 text-white p-4 shadow-xl">
+<aside
+	id="direct-messages-sidebar"
+	class="col-span-3 bg-white dark:bg-gray-800 text-black dark:text-white p-4 shadow-xl"
+>
 	<section class="flex justify-between mb-4">
 		<h2 class="text-xl font-bold">Direct Messages</h2>
 		<Button id="new-chat-btn" size="sm" color="green">
 			<PlusSolid />
 		</Button>
-		<CreateChatRoomContainer {friends} />
+		<CreateChatRoomContainer friends={filteredFriends} />
 	</section>
+	<hr class="border-gray-300 dark:border-gray-700 mt-2 mb-2" />
 	<ul class="space-y-4">
-		<li class="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">Chat 1</li>
-		<li class="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">Chat 2</li>
-		<li class="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">Chat 3</li>
-		<li class="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">Chat 1</li>
-		<li class="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">Chat 2</li>
-		<li class="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">Chat 3</li>
-		<li class="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">Chat 1</li>
-		<li class="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">Chat 2</li>
-		<li class="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">Chat 3</li>
+		{#each processedRooms as chatRoom (chatRoom.chatRoomId)}
+			<a
+				href="/chat/{chatRoom.chatRoomId}"
+				class="flex flex-wrap justify-between items-center space-x-2 p-2 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
+			>
+				<div class="flex items-center space-x-3">
+					<Avatar
+						src={chatRoom.profilePictureUrl}
+						alt={chatRoom.username}
+						size="md"
+					/>
+					<h3>{chatRoom.username}</h3>
+				</div>
+
+				<span class="text-sm text-gray-500 dark:text-gray-400">
+					{formatDate(new Date(chatRoom?.createdAt))}
+				</span>
+			</a>
+		{/each}
 	</ul>
 </aside>
 
 <style>
 	aside {
-		opacity: 0.0;
+		opacity: 0;
 		resize: horizontal;
 		overflow: auto;
 		height: 100%;

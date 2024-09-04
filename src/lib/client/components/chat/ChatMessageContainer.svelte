@@ -2,9 +2,9 @@
 	export let roomId: string | null = null;
 </script>
 
-<div class="flex-grow p-6 space-y-4 overflow-y-auto">
+<div class="w-full p-6 space-y-4 overflow-y-auto">
 	{#if roomId === null}
-		<p class="text-center text-gray-300 mt-20">Open a chat to start messaging</p>
+		<p class="text-center text-gray-300">Open a chat to start messaging</p>
 	{:else}
 		<div class="flex justify-start">
 			<div class="bg-white p-4 rounded-lg shadow-md">
