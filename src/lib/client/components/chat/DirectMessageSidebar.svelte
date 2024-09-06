@@ -1,29 +1,39 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { SIDEBAR_WIDTH_STORAGE_KEY } from '$lib/client/helpers/chat';
+	import { chatStore } from '$lib/client/stores/chat';
 	import type { TChatRoom } from '$lib/client/types/core';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TChatFriend } from '$lib/shared/types/friends';
 	import { Avatar, Button } from 'flowbite-svelte';
 	import { PlusSolid } from 'flowbite-svelte-icons';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import CreateChatRoomContainer from './CreateChatRoomContainer.svelte';
 
-	export let friends: TChatFriend[] = [];
-	export let chatRooms: TChatRoom[] = [];
+	let filteredFriends: TChatFriend[] = [];
+	let processedRooms: (Partial<TChatRoom> & Partial<TChatFriend> & { chatRoomId: string })[] = [];
 
-	const filteredFriends = friends.filter(
-		(friend) => !chatRooms.some((chatRoom) => chatRoom.participants.includes(friend.id))
-	);
-	const processedRooms = chatRooms.map((chatRoom) => {
-		const friend = friends.find((friend) => chatRoom.participants.includes(friend.id));
-		return { ...friend, ...chatRoom, friendId: friend?.id, chatRoomId: chatRoom.id };
-	});
+	let currentRoomId: string = '';
+	$: {
+		currentRoomId = $page.params.roomId;
+	}
 
 	const persistSidebarWidth = (sidebarElement: HTMLElement | null) => {
 		if (sidebarElement) {
 			localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, sidebarElement.style.width);
 		}
 	};
+
+	const chatStoreUnsubscibe = chatStore.subscribe((data) => {
+		const { friends, rooms } = data;
+		filteredFriends = friends.filter(
+			(friend) => !rooms.some((chatRoom) => chatRoom.participants.includes(friend.id))
+		);
+		processedRooms = rooms.map((chatRoom) => {
+			const friend = friends.find((friend) => chatRoom.participants.includes(friend.id));
+			return { ...friend, ...chatRoom, friendId: friend?.id, chatRoomId: chatRoom.id };
+		});
+	});
 
 	onMount(() => {
 		const directMessagesSidebar = document.getElementById('direct-messages-sidebar');
@@ -43,6 +53,10 @@
 			}
 		};
 	});
+
+	onDestroy(() => {
+		chatStoreUnsubscibe();
+	});
 </script>
 
 <aside
@@ -61,19 +75,18 @@
 		{#each processedRooms as chatRoom (chatRoom.chatRoomId)}
 			<a
 				href="/chat/{chatRoom.chatRoomId}"
-				class="flex flex-wrap justify-between items-center space-x-2 p-2 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
+				class="flex flex-wrap justify-between items-center space-x-2 p-2 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 {chatRoom.chatRoomId ===
+				currentRoomId
+					? 'bg-gray-200 dark:bg-gray-700'
+					: ''}"
 			>
 				<div class="flex items-center space-x-3">
-					<Avatar
-						src={chatRoom.profilePictureUrl}
-						alt={chatRoom.username}
-						size="md"
-					/>
+					<Avatar src={chatRoom.profilePictureUrl} alt={chatRoom.username} size="md" />
 					<h3>{chatRoom.username}</h3>
 				</div>
 
 				<span class="text-sm text-gray-500 dark:text-gray-400">
-					{formatDate(new Date(chatRoom?.createdAt))}
+					{formatDate(new Date(chatRoom?.createdAt ?? 0))}
 				</span>
 			</a>
 		{/each}
@@ -82,7 +95,6 @@
 
 <style>
 	aside {
-		opacity: 0;
 		resize: horizontal;
 		overflow: auto;
 		height: 100%;
@@ -91,6 +103,5 @@
 		max-width: 35%;
 		-ms-overflow-style: none; /* Internet Explorer 10+ */
 		scrollbar-width: none; /* Firefox */
-		transition: opacity 250ms;
 	}
 </style>

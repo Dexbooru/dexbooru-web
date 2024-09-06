@@ -23,6 +23,10 @@ export interface IChangePasswordFormFields {
 	confirmedNewPassword: string;
 }
 
+export interface IChangeProfilePictureFormFields {
+	newProfilePicture: File;
+}
+
 export interface IChangeUsernameFormFields {
 	newUsername: string;
 }

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { handleFriendRequest } from '$lib/client/api/friends';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { chatStore } from '$lib/client/stores/chat';
 	import { notificationStore } from '$lib/client/stores/notifications';
 	import { getTimeDifferenceString } from '$lib/shared/helpers/dates';
 	import type { IFriendRequest, TFriendRequestAction } from '$lib/shared/types/friends';
@@ -8,6 +9,8 @@
 	import { Avatar, Button, DropdownItem } from 'flowbite-svelte';
 
 	export let friendRequest: IFriendRequest;
+
+	console.log(friendRequest);
 
 	let friendshipActionLoading = false;
 
@@ -35,8 +38,19 @@
 
 				return currentNotificationData;
 			});
+
+			if (action === 'accept') {
+				chatStore.update((currentChatData) => {
+					currentChatData.friends.push({
+						id: friendRequest.senderUser.id,
+						username: friendRequest.senderUser.username,
+						profilePictureUrl: friendRequest.senderUser.profilePictureUrl
+					});
+
+					return currentChatData;
+				});
+			}
 		} else {
-			console.log(await response.json());
 			toast.push(
 				'An error occured while trying to accept the friend request!',
 				FAILURE_TOAST_OPTIONS

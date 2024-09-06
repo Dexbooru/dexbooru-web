@@ -2,6 +2,8 @@
 	import { fileToBase64String } from '$lib/client/helpers/images';
 	import { Avatar, Fileupload, ImagePlaceholder, Label } from 'flowbite-svelte';
 
+	export let isChangingProfilePicture: boolean = false;
+
 	const onProfilePictureChange = async (event: Event) => {
 		const target = event.target as HTMLInputElement;
 		if (target.files && target.files.length > 0) {
@@ -27,10 +29,11 @@
 </script>
 
 <Label style="margin-top: 0px;" class="space-y-2">
-	<span>Upload a profile picture (optional)</span>
+	<span>Upload a profile picture{isChangingProfilePicture ? '' : ' (optional)'}</span>
 	<Fileupload
-		id="profilePictureInput"
-		name="profilePicture"
+		required={isChangingProfilePicture}
+		id={isChangingProfilePicture ? 'newProfilePictureInput' : 'profilePictureInput'}
+		name={isChangingProfilePicture ? 'newProfilePicture' : 'profilePicture'}
 		accept="image/*"
 		on:change={onProfilePictureChange}
 	/>

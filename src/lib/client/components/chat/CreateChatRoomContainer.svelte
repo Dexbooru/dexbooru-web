@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { createChatRoom } from '$lib/client/api/coreApi';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { chatStore } from '$lib/client/stores/chat';
+	import type { ICoreApiResponse, TChatRoom } from '$lib/client/types/core';
 	import type { TChatFriend } from '$lib/shared/types/friends';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button, Listgroup, ListgroupItem, Popover } from 'flowbite-svelte';
@@ -15,6 +17,18 @@
 		if (response.ok) {
 			toast.push('Chat room created successfully', SUCCESS_TOAST_OPTIONS);
 			friends = friends.filter((friend) => friend.id !== recieverUserId);
+
+			const responseData: ICoreApiResponse<TChatRoom> = await response.json();
+			const { data: newRoom } = responseData;
+
+			chatStore.update((data) => {
+				if (!newRoom) return data;
+
+				return {
+					...data,
+					rooms: [...data.rooms, newRoom]
+				};
+			});
 		} else {
 			toast.push('Failed to create chat room', FAILURE_TOAST_OPTIONS);
 			target.disabled = false;

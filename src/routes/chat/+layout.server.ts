@@ -10,7 +10,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
     }
 
     const friends = await findFriendsForUser(locals.user.id);
-    const chatRoomsResponse = await getChatRooms(cookies); 
+    const chatRoomsResponse = await getChatRooms(cookies);
     const responseData: ICoreApiResponse<TChatRoom[]> = await chatRoomsResponse.json();
     const { data: chatRooms = [] } = responseData;
 

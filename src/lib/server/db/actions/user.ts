@@ -187,6 +187,19 @@ export async function editUsernameByUserId(userId: string, newUsername: string):
 	return updateUsernameBatchResult.count > 0;
 }
 
+export async function editProfilePictureByUserId(userId: string, newProfilePictureUrl: string): Promise<boolean> {
+	const updatedProfilePictureBatchResult = await prisma.user.updateMany({
+		where: {
+			id: userId
+		},
+		data: {
+			profilePictureUrl: newProfilePictureUrl
+		}
+	});
+
+	return updatedProfilePictureBatchResult.count > 0;
+}
+
 export async function deleteUserById(userId: string): Promise<boolean> {
 	if (!userId) return false;
 

@@ -1,24 +1,32 @@
+import { deleteFromBucket, uploadToBucket } from '$lib/server/aws/actions/s3';
+import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '$lib/server/constants/aws';
 import { SESSION_ID_COOKIE_OPTIONS } from '$lib/server/constants/cookies';
 import {
 	deleteUserById,
 	editPasswordByUserId,
+	editProfilePictureByUserId,
 	editUsernameByUserId,
 	findUserById
 } from '$lib/server/db/actions/user';
+import { runProfileImageTransformationPipeline } from '$lib/server/helpers/images';
 import { hashPassword, passwordsMatch } from '$lib/server/helpers/password';
 import { generateUpdatedUserTokenFromClaims } from '$lib/server/helpers/sessions';
 import { ACCOUNT_DELETION_CONFIRMATION_TEXT } from '$lib/shared/constants/auth';
+import { MAXIMUM_IMAGE_UPLOAD_SIZE_MB } from '$lib/shared/constants/images';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
 import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
 import { getFormFields } from '$lib/shared/helpers/forms';
+import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import type {
 	IChangePasswordFormFields,
+	IChangeProfilePictureFormFields,
 	IChangeUsernameFormFields,
 	IDeleteAccountFields
 } from '$lib/shared/types/auth';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Action, Actions } from './$types';
+
 
 const handleAccountDeletion: Action = async ({ locals, cookies, request }) => {
 	if (!locals.user) {
@@ -45,6 +53,58 @@ const handleAccountDeletion: Action = async ({ locals, cookies, request }) => {
 	cookies.delete(SESSION_ID_KEY, { path: '/' });
 
 	throw redirect(302, '/');
+};
+
+const handleChangeProfilePicture: Action = async ({ locals, request, cookies }) => {
+	if (!locals.user) {
+		throw error(401, {
+			message: 'You are not authorized to change a profile picture, without being a signed in user!'
+		});
+	}
+
+	const changeProfilePictureForm = await request.formData();
+	const { newProfilePicture } = getFormFields<IChangeProfilePictureFormFields>(changeProfilePictureForm);
+
+	if (newProfilePicture.size === 0) {
+		return fail(400, {
+			reason: 'The uploaded profile picture file was empty!',
+			type: 'profile-picture'
+		});
+	}
+
+	if (!isFileImage(newProfilePicture)) {
+		return fail(400, {
+			reason: 'The provided profile picture file is not an image!',
+			type: 'profile-picture',
+		});
+	}
+
+	if (!isFileImageSmall(newProfilePicture)) {
+		return fail(400, {
+			reason: `The maximum image file upload size is ${MAXIMUM_IMAGE_UPLOAD_SIZE_MB} MB`,
+			type: 'profile-picture',
+		});
+	}
+
+	deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, locals.user.profilePictureUrl)
+
+	const newProfilePictureFileBuffer = await runProfileImageTransformationPipeline(newProfilePicture);
+	const updatedProfilePictureObjectUrl = await uploadToBucket(
+		AWS_PROFILE_PICTURE_BUCKET_NAME,
+		'profile_pictures',
+		newProfilePictureFileBuffer
+	);
+	await editProfilePictureByUserId(locals.user.id, updatedProfilePictureObjectUrl);
+
+	const updatedUserJwtToken = generateUpdatedUserTokenFromClaims({
+		...locals.user,
+		profilePictureUrl: updatedProfilePictureObjectUrl,
+	});
+	cookies.set(SESSION_ID_KEY, updatedUserJwtToken, SESSION_ID_COOKIE_OPTIONS);
+
+	return {
+		message: 'The profile picture was updated successfully'
+	};
 };
 
 const handleChangeUsername: Action = async ({ locals, request, cookies }) => {
@@ -165,5 +225,6 @@ const handleChangePassword: Action = async ({ locals, request }) => {
 export const actions: Actions = {
 	deleteAccount: handleAccountDeletion,
 	username: handleChangeUsername,
-	password: handleChangePassword
+	password: handleChangePassword,
+	profilePicture: handleChangeProfilePicture,
 };
