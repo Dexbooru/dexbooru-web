@@ -4,7 +4,7 @@
 	import CommentTree from '$lib/shared/helpers/comments';
 	import type { IComment } from '$lib/shared/types/comments';
 	import { Button } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import Comment from './Comment.svelte';
 
 	export let postId: string;
@@ -28,6 +28,10 @@
 
 	const commentTreeUnsubscribe = commentTreeStore.subscribe((currentCommentTree) => {
 		topLevelComments = currentCommentTree.getReplies('root');
+	});
+
+	onMount(() => {
+		handleLoadMoreCommentsClick();
 	});
 
 	onDestroy(() => {
