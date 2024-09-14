@@ -67,10 +67,12 @@
 			>Account creation date:
 			<strong>{formatDate(new Date(targetUser.createdAt))}</strong></span
 		>
-		<span class="text-sm text-gray-500 dark:text-gray-400"
-			>Account email:
-			<strong>{targetUser.email}</strong></span
-		>
+		{#if $authenticatedUserStore && $authenticatedUserStore.id === targetUser.id}
+			<span class="text-sm text-gray-500 dark:text-gray-400"
+				>Account email:
+				<strong>{targetUser.email}</strong></span
+			>
+		{/if}
 		<div class="flex mt-4 space-x-3 rtl:space-x-reverse lg:mt-6">
 			{#if $authenticatedUserStore}
 				{#if $authenticatedUserStore.id !== targetUser.id}

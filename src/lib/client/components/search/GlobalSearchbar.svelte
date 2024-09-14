@@ -8,7 +8,7 @@
 	<div class="flex absolute inset-y-0 start-0 items-center ps-3 pointer-events-none">
 		<SearchOutline class="w-4 h-4" />
 	</div>
-	<div class="flex space-x-2 absolute inset-y-0 end-8 items-center ps-3 pointer-events-none">
+	<div class="flex space-x-2 absolute inset-y-0 end-10 items-center ps-3 pointer-events-none">
 		<Kbd class="p-1">CTRL</Kbd>
 		<Kbd class="p-1">K</Kbd>
 	</div>

@@ -18,6 +18,9 @@
 	let totalPostCommentCount: string = '0';
 	let uploadSuccessModalOpen = true;
 
+	const tagNames = post.tags.map((tag) => tag.name);
+	const artistNames = post.artists.map((artist) => artist.name);
+
 	$: {
 		post = data.post;
 		uploadedSuccessfully = data.uploadedSuccessfully;
@@ -41,6 +44,19 @@
 
 <svelte:head>
 	<title>{post.description} - {post.id}</title>
+	<meta property="og:title" content={post.description} />
+	<meta
+		property="og:description"
+		content="Tags: {tagNames.join(', ')} Artists: {artistNames.join(', ')} Author: {post.author
+			? post.author.username
+			: DELETED_ACCOUNT_HEADING}"
+	/>
+	<meta property="og:image" content={post.imageUrls[0]} />
+	<meta
+		property="og:author"
+		content={post.author ? post.author.username : DELETED_ACCOUNT_HEADING}
+	/>
+	<meta property="article:published_time" content={formatDate(post.createdAt)} />
 </svelte:head>
 
 {#if uploadedSuccessfully && $authenticatedUserStore && $authenticatedUserStore.id === post.author.id}

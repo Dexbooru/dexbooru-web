@@ -4,10 +4,13 @@
 	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
 	import { originalPostsPageStore, postsPageStore } from '$lib/client/stores/posts';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import Searchbar from '../../reusable/Searchbar.svelte';
 
 	export let postContainerTitle: string;
+
+	const CLEAR_INPUT_INTERVAL_MS: number = 1000;
 
 	const onPostSearch = (query: string) => {
 		const cleanedQuery = query.toLocaleLowerCase().trim();
@@ -34,6 +37,22 @@
 	const postPageStoreUnsubscribe = postsPageStore.subscribe((updatedPosts) => {
 		uniqueTags = getUniqueLabelsFromPosts(updatedPosts, 'tag');
 		uniqueArtists = getUniqueLabelsFromPosts(updatedPosts, 'artist');
+	});
+
+	onMount(() => {
+		const searchInput = document.querySelector(
+			'input[placeholder="Search by keyword(s)"]'
+		) as HTMLInputElement;
+
+		const postSearchResetTimeoutId = setInterval(() => {
+			if (searchInput && !searchInput.value) {
+				postsPageStore.set(get(originalPostsPageStore));
+			}
+		}, CLEAR_INPUT_INTERVAL_MS);
+
+		return () => {
+			clearInterval(postSearchResetTimeoutId);
+		};
 	});
 
 	onDestroy(() => {

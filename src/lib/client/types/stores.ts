@@ -1,5 +1,6 @@
 import type { TChatFriend } from "$lib/shared/types/friends";
-import type { TChatRoom } from "./core";
+import type { ChatManager } from "../helpers/chat";
+import type { TChatMessage, TChatRoom } from "./core";
 
 export interface IFooterStoreData {
 	height: number;
@@ -16,4 +17,6 @@ export interface IModalStoreData {
 export interface IChatStoreData {
 	rooms: TChatRoom[];
 	friends: TChatFriend[];
+	manager: ChatManager | null;
+	messages: Map<string, TChatMessage[]>
 }

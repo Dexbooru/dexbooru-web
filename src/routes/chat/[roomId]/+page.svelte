@@ -16,7 +16,7 @@
 	<title>Chatting with {friend.username}</title>
 </svelte:head>
 
-<section class="w-full relative flex flex-col dark:bg-gray-700">
+<section class="w-full h-full relative flex flex-col dark:bg-gray-700">
 	<ChatMessageContainer {roomId} />
-	<ChatInput />
+	<ChatInput {roomId} {friend} />
 </section>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { SIDEBAR_WIDTH_STORAGE_KEY } from '$lib/client/helpers/chat';
+	import { SIDEBAR_WIDTH_STORAGE_KEY } from '$lib/client/constants/chat';
 	import { chatStore } from '$lib/client/stores/chat';
 	import type { TChatRoom } from '$lib/client/types/core';
 	import { formatDate } from '$lib/shared/helpers/dates';
@@ -64,7 +64,7 @@
 	class="col-span-3 bg-white dark:bg-gray-800 text-black dark:text-white p-4 shadow-xl"
 >
 	<section class="flex justify-between mb-4">
-		<h2 class="text-xl font-bold">Direct Messages</h2>
+		<h2 class="text-xl font-bold mt-1">Direct Messages</h2>
 		<Button id="new-chat-btn" size="sm" color="green">
 			<PlusSolid />
 		</Button>

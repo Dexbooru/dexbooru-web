@@ -45,6 +45,13 @@
 	});
 </script>
 
+<svelte:head>
+	<meta property="og:site_name" content="Dexbooru" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content={$page.url.href} />
+	<meta property="og:locale" content="en_US" />
+</svelte:head>
+
 <Navbar />
 <div style="flex:1">
 	<slot />

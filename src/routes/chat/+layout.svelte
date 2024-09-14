@@ -1,7 +1,10 @@
 <script lang="ts">
 	import DirectMessageSidebar from '$lib/client/components/chat/DirectMessageSidebar.svelte';
+	import { ChatManager } from '$lib/client/helpers/chat';
 	import { chatStore } from '$lib/client/stores/chat';
+	import type { TChatMessage } from '$lib/client/types/core';
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
@@ -9,7 +12,9 @@
 	const { friends, chatRooms } = data;
 	chatStore.set({
 		friends,
-		rooms: chatRooms
+		rooms: chatRooms,
+		manager: new ChatManager(),
+		messages: new Map<string, TChatMessage[]>()
 	});
 
 	const recomputeChatContainerSize = () => {
@@ -25,11 +30,16 @@
 	};
 
 	onMount(() => {
+		const { manager } = get(chatStore);
+		manager?.registerIntervals();
+		manager?.registerListeners();
+
 		recomputeChatContainerSize();
 		window.addEventListener('resize', recomputeChatContainerSize);
 
 		return () => {
 			window.removeEventListener('resize', recomputeChatContainerSize);
+			manager?.cleanup();
 		};
 	});
 </script>

@@ -8,6 +8,7 @@
 	export let errorPageType: TErrorPageType;
 
 	const errorMessage = $page.error?.message;
+	const pageResponseStatus = $page.status;
 	const pageRoute = $page.url.pathname;
 </script>
 
