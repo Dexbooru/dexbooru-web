@@ -47,9 +47,11 @@
 	<meta property="og:title" content={post.description} />
 	<meta
 		property="og:description"
-		content="Tags: {tagNames.join(', ')} Artists: {artistNames.join(', ')} Author: {post.author
+		content="Tags: {tagNames.join(', ')} | Artists: {artistNames.join(', ')} | Author: {post.author
 			? post.author.username
-			: DELETED_ACCOUNT_HEADING}"
+			: DELETED_ACCOUNT_HEADING} | Views: {normalizeCount(post.views)} | Likes: {normalizeCount(
+			post.likes
+		)}"
 	/>
 	<meta property="og:image" content={post.imageUrls[0]} />
 	<meta
