@@ -66,6 +66,7 @@
 		"jsonwebtoken": "^9.0.2",
 		"markdown-it": "^14.1.0",
 		"markdown-it-emoji": "^3.0.0",
+		"redis": "^4.7.0",
 		"sanitize-html": "^2.13.0",
 		"sharp": "^0.32.6",
 		"svelte-tiny-virtual-list": "^2.1.0"
