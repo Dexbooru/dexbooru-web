@@ -9,6 +9,7 @@ export const clearToken = () => {
 	const loggedOut = searchParams.get(LOGGED_OUT_URL_PARAM_NAME) === 'true';
 	if (loggedOut) {
 		localStorage.removeItem(SESSION_ID_KEY);
+		history.replaceState(null, '', page.url.pathname);
 	}
 };
 

@@ -4,6 +4,7 @@
 	import ChangeUsernameForm from '$lib/client/components/auth/ChangeUsernameForm.svelte';
 	import DeleteAccountForm from '$lib/client/components/auth/DeleteAccountForm.svelte';
 	import { SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Heading } from 'flowbite-svelte';
 	import type { ActionData } from './$types';
@@ -13,9 +14,14 @@
 	const errorReason = form ? form.reason : null;
 	const errorType = form ? form.type : null;
 	const message = form ? form.message : null;
+	const newAuthToken = form ? form.newAuthToken : null;
 
 	if (message) {
 		toast.push(message, SUCCESS_TOAST_OPTIONS);
+	}
+
+	if (typeof newAuthToken === 'string' && newAuthToken.length > 0) {
+		localStorage.setItem(SESSION_ID_KEY, newAuthToken);
 	}
 </script>
 

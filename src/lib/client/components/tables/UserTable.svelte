@@ -29,7 +29,7 @@
 				<TableBodyCell>{user.id}</TableBodyCell>
                 <TableBodyCell class="text-center">
 					<Avatar
-						class="ml-auto mr-auto"
+						class="ml-auto mr-auto post-card-avatar"
 						src={user.profilePictureUrl}
 						alt="profile picture of {user.username}"
 					/>

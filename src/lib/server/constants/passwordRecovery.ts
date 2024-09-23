@@ -1,0 +1,3 @@
+
+export const MAXIMUM_CHAR_CODE_VALUE = 65535;
+export const MAXIMUM_SHIFTING_POSITIONS = 25;

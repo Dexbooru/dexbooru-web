@@ -16,6 +16,9 @@
 <div class="space-x-2 flex align-middle flex-wrap">
 	<a class="inline-flex align-middle space-x-2" href={authorId && `/profile/${authorUsername}`}>
 		<Avatar
+			size="md"
+			class="post-card-avatar"
+			on:error={() => console.log('hello world')}
 			src={authorProfilePictureUrl}
 			alt={authorId ? `profile picture of ${authorUsername}` : 'default user account'}
 		/>

@@ -34,7 +34,7 @@
 				<TableBodyCell>{formatDate(new Date(post.createdAt))}</TableBodyCell>
 				<TableBodyCell class="text-center">
 					<Avatar
-						class="ml-auto mr-auto"
+						class="ml-auto mr-auto post-card-avatar"
 						src={post.uploaderProfilePictureUrl}
 						alt="profile picture of {post.uploaderName}"
 					/>

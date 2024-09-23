@@ -81,7 +81,7 @@
 					: ''}"
 			>
 				<div class="flex items-center space-x-3">
-					<Avatar src={chatRoom.profilePictureUrl} alt={chatRoom.username} size="md" />
+					<Avatar class="post-card-avatar" src={chatRoom.profilePictureUrl} alt={chatRoom.username} size="md" />
 					<h3>{chatRoom.username}</h3>
 				</div>
 

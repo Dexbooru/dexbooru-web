@@ -53,7 +53,7 @@ const handleRegistration: Action = async ({ request }) => {
 
 	const user = await findUserByNameOrEmail(email, username);
 	if (user) {
-		return fail(400, {
+		return fail(409, {
 			email,
 			username,
 			reason: 'An account with this username or email already exists!'

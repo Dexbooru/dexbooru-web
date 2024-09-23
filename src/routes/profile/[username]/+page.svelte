@@ -38,7 +38,7 @@
 
 <main class="grid place-items-center mt-24">
 	<UserProfileCard {targetUser} {friendStatus} />
+	{#if !$authenticatedUserStore || $authenticatedUserStore.id !== targetUser.id}
+		<PostWrapper overrideTitle={false} postsSection="Posts created by {targetUser.username}" />
+	{/if}
 </main>
-{#if !$authenticatedUserStore || $authenticatedUserStore.id !== targetUser.id}
-	<PostWrapper overrideTitle={false} postsSection="Posts created by {targetUser.username}" />
-{/if}

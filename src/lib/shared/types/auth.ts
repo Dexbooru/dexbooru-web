@@ -35,6 +35,10 @@ export interface IDeleteAccountFields {
 	deletionConfirmationText: string;
 }
 
+export interface IAccountRecoveryFormFields {
+	email: string;
+}
+
 export type TPASSWORD_REQUIREMENT_ABV =
 	| 'length'
 	| 'lowercase'

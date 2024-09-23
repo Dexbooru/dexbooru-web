@@ -15,14 +15,19 @@
 		isMobileStore,
 		isTabletStore
 	} from '$lib/client/stores/device';
+	import { searchModalActiveStore } from '$lib/client/stores/layout';
 	import { notificationStore } from '$lib/client/stores/notifications';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import type { IUserNotifications } from '$lib/shared/types/notifcations';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import '../app.postcss';
 
 	authenticatedUserStore.set($page.data.user || null);
+
+	const pageUnsubscribe = page.subscribe((_) => {
+		searchModalActiveStore.set(false);
+	});
 
 	onMount(async () => {
 		registerDocumentEventListeners();
@@ -42,6 +47,10 @@
 				notificationStore.set(notificationData);
 			}
 		}
+	});
+
+	onDestroy(() => {
+		pageUnsubscribe();
 	});
 </script>
 

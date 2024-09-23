@@ -60,13 +60,23 @@
 				{loginErrorReason}
 			</Alert>
 		{/if}
-		<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-			Not registered? <a
-				href="/register"
-				class="text-primary-700 hover:underline dark:text-primary-500"
-			>
-				Create account
-			</a>
+		<div class="flex-col space-y-1">
+			<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+				Not registered? <a
+					href="/register"
+					class="text-primary-700 hover:underline dark:text-primary-500"
+				>
+					Create account
+				</a>
+			</div>
+			<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+				Having trouble logging in? <a
+					href="/forgot-password"
+					class="text-primary-700 hover:underline dark:text-primary-500"
+				>
+					Forgot password
+				</a>
+			</div>
 		</div>
 	</form>
 </Card>

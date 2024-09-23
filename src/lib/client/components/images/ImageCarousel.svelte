@@ -32,10 +32,7 @@
 	transition={transitionFunction}
 >
 	<a slot="slide" href={postHref} let:Slide>
-		<Slide
-			class="lazyload h-full object-contain {`${blurImages && 'blur-lg'}`}"
-			image={imagesData[index]}
-		/>
+		<Slide class="lazyload h-full {`${blurImages && 'blur-lg'}`}" image={imagesData[index]} />
 	</a>
 	{#if imagesData.length > 1}
 		{#if sliderControlsType === 'controls'}

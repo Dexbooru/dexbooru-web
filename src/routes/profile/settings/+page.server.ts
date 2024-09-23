@@ -6,7 +6,8 @@ import {
 	editPasswordByUserId,
 	editProfilePictureByUserId,
 	editUsernameByUserId,
-	findUserById
+	findUserById,
+	findUserByName
 } from '$lib/server/db/actions/user';
 import { runProfileImageTransformationPipeline } from '$lib/server/helpers/images';
 import { hashPassword, passwordsMatch } from '$lib/server/helpers/password';
@@ -103,7 +104,8 @@ const handleChangeProfilePicture: Action = async ({ locals, request, cookies }) 
 	cookies.set(SESSION_ID_KEY, updatedUserJwtToken, SESSION_ID_COOKIE_OPTIONS);
 
 	return {
-		message: 'The profile picture was updated successfully'
+		message: 'The profile picture was updated successfully',
+		newAuthToken: updatedUserJwtToken,
 	};
 };
 
@@ -135,10 +137,19 @@ const handleChangeUsername: Action = async ({ locals, request, cookies }) => {
 		});
 	}
 
+	const existingUser = await findUserByName(newUsername);
+	if (existingUser) {
+		return fail(409, {
+			newUsername,
+			type: 'username',
+			reason: 'A user with that name already exists!',
+		})
+	}
+
 	const updatedUsername = await editUsernameByUserId(locals.user.id, newUsername);
 
 	if (!updatedUsername) {
-		return fail(400, {
+		return fail(404, {
 			newUsername,
 			type: 'username',
 			reason: `A user with the id: ${locals.user.id} does not exist!`
@@ -152,7 +163,8 @@ const handleChangeUsername: Action = async ({ locals, request, cookies }) => {
 	cookies.set(SESSION_ID_KEY, updatedUserJwtToken, SESSION_ID_COOKIE_OPTIONS);
 
 	return {
-		message: 'The username was changed successfully!'
+		message: 'The username was changed successfully!',
+		newAuthToken: updatedUserJwtToken,
 	};
 };
 
@@ -184,7 +196,7 @@ const handleChangePassword: Action = async ({ locals, request }) => {
 	const signedInUser = await findUserById(locals.user.id, { password: true });
 
 	if (!signedInUser) {
-		return fail(400, {
+		return fail(404, {
 			type: 'password',
 			reason: `A user with the id: ${locals.user.id} does not exist!`
 		});
@@ -211,7 +223,7 @@ const handleChangePassword: Action = async ({ locals, request }) => {
 	const updatedPassword = await editPasswordByUserId(locals.user.id, hashedNewPassword);
 
 	if (!updatedPassword) {
-		return fail(400, {
+		return fail(404, {
 			type: 'password',
 			reason: `A user with the id: ${locals.user.id} does not exist!`
 		});

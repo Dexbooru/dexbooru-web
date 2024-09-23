@@ -16,9 +16,9 @@
 
 	const rootLevelCommentLoader = createPostCommentsPaginator(postId, null);
 
-	const handleLoadMoreCommentsClick = async () => {
+	const handleLoadMoreCommentsClick = async (isInitialLoad: boolean = false) => {
 		commentsLoading = true;
-		const paginationData = await rootLevelCommentLoader();
+		const paginationData = await rootLevelCommentLoader(isInitialLoad);
 		commentsLoading = false;
 
 		const { pageNumber, noMoreComments: noMoreCommentsResult } = paginationData;
@@ -31,7 +31,7 @@
 	});
 
 	onMount(() => {
-		handleLoadMoreCommentsClick();
+		handleLoadMoreCommentsClick(true);
 	});
 
 	onDestroy(() => {
@@ -42,11 +42,11 @@
 
 <section class="ml-2">
 	{#each topLevelComments as comment (comment.id)}
-		<Comment {comment} />
+		<Comment currentDepth={1} {comment} />
 	{/each}
 
 	{#if !noMoreComments}
-		<Button on:click={handleLoadMoreCommentsClick} color="blue" class="mt-2"
+		<Button on:click={() => handleLoadMoreCommentsClick(false)} color="blue" class="mt-2"
 			>{loadMoreButtonText}</Button
 		>
 	{/if}
