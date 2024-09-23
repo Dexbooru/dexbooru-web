@@ -5,8 +5,8 @@ import { sendEmail } from "$lib/server/helpers/email";
 import { buildPasswordRecoveryEmailTemplate } from "$lib/server/helpers/passwordRecovery";
 import { getFormFields } from "$lib/shared/helpers/forms";
 import type { IAccountRecoveryFormFields } from "$lib/shared/types/auth";
-import { fail, redirect } from "@sveltejs/kit";
-import type { Action, Actions, PageServerLoad } from "./$types";
+import { fail } from "@sveltejs/kit";
+import type { Action, Actions } from "./$types";
 
 const sendAccountRecoveryEmail: Action = async ({ request, getClientAddress }) => {
     const passwordRecoveryForm = await request.formData();
@@ -35,11 +35,6 @@ const sendAccountRecoveryEmail: Action = async ({ request, getClientAddress }) =
     };
 };
 
-export const load: PageServerLoad = async ({ locals }) => {
-    if (locals.user) {
-        throw redirect(302, '/');
-    }
-};
 
 export const actions: Actions = {
     default: sendAccountRecoveryEmail,

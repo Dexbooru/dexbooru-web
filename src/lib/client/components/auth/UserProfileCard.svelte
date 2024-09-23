@@ -64,6 +64,10 @@
 		<h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{targetUser.username}</h5>
 
 		<span class="text-sm text-gray-500 dark:text-gray-400"
+			>Account id:
+			<strong>{targetUser.id}</strong></span
+		>
+		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Account creation date:
 			<strong>{formatDate(new Date(targetUser.createdAt))}</strong></span
 		>

@@ -8,6 +8,7 @@ import { JWT_PRIVATE_KEY } from '../constants/sessions';
 import { PUBLIC_USER_SELECTORS } from '../constants/users';
 import type { TSetHeadersFunction } from '../types/sessions';
 
+
 const generateUserClaims = (userRecord: Partial<IUser>): Partial<IUser> => {
 	const userClaims: Partial<IUser> = {};
 

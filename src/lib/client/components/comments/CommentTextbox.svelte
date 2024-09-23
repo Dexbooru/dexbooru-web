@@ -5,6 +5,7 @@
 	import { commentTreeStore } from '$lib/client/stores/comments';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { COMMENT_TEXT_AREA_ROWS, MAXIMUM_CONTENT_LENGTH } from '$lib/shared/constants/comments';
+	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { IComment } from '$lib/shared/types/comments';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, TabItem, Tabs, Textarea } from 'flowbite-svelte';
@@ -39,7 +40,6 @@
 		commentCreating = true;
 		const response = await createComment({
 			postId,
-			authorId: $authenticatedUserStore?.id,
 			content: commentContentMarkdown,
 			parentCommentId
 		});
@@ -48,8 +48,8 @@
 		if (response.ok) {
 			toast.push('The comment was posted successfully', SUCCESS_TOAST_OPTIONS);
 
-			const responseData = await response.json();
-			const newComment: IComment = responseData.data;
+			const responseData: TApiResponse<IComment> = await response.json();
+			const newComment = responseData.data;
 
 			commentTreeStore.update((commentTree) => {
 				commentTree.addComment({

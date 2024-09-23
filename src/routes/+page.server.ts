@@ -1,32 +1,7 @@
-import { MAXIMUM_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
-import { findPostsByPage } from '$lib/server/db/actions/post';
-import { findLikedPostsFromSubset } from '$lib/server/db/actions/user';
-import { processPostPageParams } from '$lib/server/helpers/pagination';
-import type { TPost, TPostOrderByColumn } from '$lib/shared/types/posts';
+import { handleGetPosts } from '$lib/server/controllers/posts';
+import type { IPostPaginationData } from '$lib/shared/types/posts';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url, parent }) => {
-	const { user } = await parent();
-
-	const { convertedAscending, orderBy, convertedPageNumber } = processPostPageParams(
-		url.searchParams
-	);
-
-	const posts = await findPostsByPage(
-		convertedPageNumber,
-		MAXIMUM_POSTS_PER_PAGE,
-		orderBy as TPostOrderByColumn,
-		convertedAscending,
-		PUBLIC_POST_SELECTORS
-	);
-
-	const likedPosts: TPost[] = user ? await findLikedPostsFromSubset(user.id, posts) : [];
-
-	return {
-		posts,
-		likedPosts,
-		pageNumber: convertedPageNumber,
-		ascending: convertedAscending,
-		orderBy: orderBy as TPostOrderByColumn
-	};
+export const load: PageServerLoad = async (event) => {
+	return await handleGetPosts(event, 'page-server-load', 'general') as IPostPaginationData;
 };

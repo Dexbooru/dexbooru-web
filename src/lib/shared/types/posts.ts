@@ -3,10 +3,6 @@ import type { DefaultArgs } from '@prisma/client/runtime/library';
 
 export type TPostLikeAction = 'like' | 'dislike';
 
-export interface IDeletePostBody {
-	postId: string;
-	authorId: string;
-}
 
 export interface ILikePostBody {
 	postId: string;

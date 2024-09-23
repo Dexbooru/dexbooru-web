@@ -1,20 +1,13 @@
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import prisma from '../prisma';
 
-export async function deletePostById(postId: string, authorId: string): Promise<TPost | null> {
-	if (!postId) return null;
-
-	const deletedPost = await prisma.post.delete({
+export async function deletePostById(postId: string, authorId: string) {
+	await prisma.post.delete({
 		where: {
 			id: postId,
 			authorId
 		},
-		select: {
-			imageUrls: true
-		}
 	});
-
-	return deletedPost as TPost;
 }
 
 export async function findPostsByPage(

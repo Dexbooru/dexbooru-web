@@ -3,6 +3,7 @@ import type {
 	TPasswordRequirements,
 	TUsernameRequirements
 } from '../types/auth';
+import type { IUser } from '../types/users';
 
 export const MINIMUM_USERNAME_LENGTH = 4;
 export const MAXIMUM_USERNAME_LENGTH = 12;
@@ -30,3 +31,12 @@ export const SPECIAL_CHARACTER_REGEX = /[\W_]/g;
 export const SALT_ROUNDS = 7;
 export const ACCOUNT_DELETION_CONFIRMATION_TEXT = 'delete my account';
 export const DELETED_ACCOUNT_HEADING = '[deleted-user]';
+export const NONEXISTENT_USER_ID = 'non-existent-id';
+export const NULLABLE_USER: IUser = {
+	id: NONEXISTENT_USER_ID,
+	createdAt: new Date(0),
+	password: '',
+	profilePictureUrl: '',
+	username: '',
+	email: '',
+};

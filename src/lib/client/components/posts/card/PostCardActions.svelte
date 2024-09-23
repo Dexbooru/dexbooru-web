@@ -100,7 +100,7 @@
 
 	const handleDeletePost = async () => {
 		postDeletionLoading = true;
-		const response = await deletePost({ postId, authorId: author.id });
+		const response = await deletePost(postId);
 		postDeletionLoading = false;
 
 		if (response.ok) {

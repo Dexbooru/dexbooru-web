@@ -14,6 +14,7 @@
 	import { onDestroy } from 'svelte';
 	import Searchbar from '../reusable/Searchbar.svelte';
 	import SearchResultsContainer from './SearchResultsContainer.svelte';
+	import type { TApiResponse } from '$lib/shared/types/api';
 
 	let currentSearchResults: IAppSearchResult | null = null;
 	let searchResultsLoading = false;
@@ -34,7 +35,8 @@
 	const fetchQueryResults = memoize(async (query: string) => {
 		const response = await getGlobalSearchResults(query);
 		if (response.ok) {
-			return (await response.json()) as IAppSearchResult;
+			const responseData: TApiResponse<IAppSearchResult> = await response.json();
+			return responseData.data;
 		} else {
 			toast.push(
 				'An unexpected error occured while retrieving the search results',

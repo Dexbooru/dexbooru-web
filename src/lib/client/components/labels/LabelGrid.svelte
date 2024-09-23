@@ -3,6 +3,7 @@
 	import { getTags } from '$lib/client/api/tags';
 	import { CHAR_OPTIONS } from '$lib/client/constants/labels';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Spinner } from 'flowbite-svelte';
@@ -35,7 +36,8 @@
 				: await getArtists(letter, pageNumber);
 
 		if (response.ok) {
-			const rawLabels: (Tag & Artist)[] = await response.json();
+			const responseData: TApiResponse<(Tag & Artist)[]> = await response.json();
+			const rawLabels: (Tag & Artist)[] = responseData.data;
 			const rawLabelNames = rawLabels.map((rawLabel) => rawLabel.name);
 			labels = !pressedLoadingMore ? rawLabelNames : [...labels, ...rawLabelNames];
 			pageNumber++;

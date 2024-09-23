@@ -3,8 +3,8 @@ import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ parent }) => {
-	const { user } = await parent();
-	if (user.id !== NULLABLE_USER.id) {
-		throw redirect(302, '/');
-	}
+    const { user } = await parent();
+    if (user.id === NULLABLE_USER.id) {
+        throw redirect(302, '/');
+    }
 };

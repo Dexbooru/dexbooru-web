@@ -1,5 +1,8 @@
+import { PAGE_NUMBER_URL_PARAMETER, PARENT_COMMENT_ID_URL_PARAMETER } from '$lib/shared/constants/comments';
+import { POST_ID_URL_PARAMETER_NAME } from '$lib/shared/constants/posts';
 import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
 import { buildUrl } from '$lib/shared/helpers/urls';
+import type { TApiResponse } from '$lib/shared/types/api';
 import type { IComment, ICommentCreateBody } from '$lib/shared/types/comments';
 import { toast } from '@zerodevx/svelte-toast';
 import { FAILURE_TOAST_OPTIONS } from '../constants/toasts';
@@ -11,11 +14,12 @@ export const getComments = async (
 	pageNumber: number
 ): Promise<Response> => {
 	const params = {
-		pageNumber,
-		parentCommentId: parentCommentId === null ? 'null' : parentCommentId
+		[POST_ID_URL_PARAMETER_NAME]: postId,
+		[PAGE_NUMBER_URL_PARAMETER]: pageNumber,
+		[PARENT_COMMENT_ID_URL_PARAMETER]: parentCommentId === null ? 'null' : parentCommentId
 	};
 
-	const finalUrl = buildUrl(`/api/comments/find/post/${postId}`, params);
+	const finalUrl = buildUrl(`/api/post/comments`, params);
 	return await fetch(finalUrl);
 };
 
@@ -31,8 +35,9 @@ export const createPostCommentsPaginator = (postId: string, parentCommentId: str
 		const response = await getComments(postId, parentCommentId, pageNumber);
 
 		if (response.ok) {
+			const responseData: TApiResponse<IComment[]> = await response.json();
 			const comments: IComment[] = convertDataStructureToIncludeDatetimes<IComment>(
-				(await response.json()) as IComment[],
+				responseData.data,
 				['createdAt']
 			);
 
@@ -62,7 +67,7 @@ export const createPostCommentsPaginator = (postId: string, parentCommentId: str
 };
 
 export const createComment = async (body: ICommentCreateBody) => {
-	return await fetch('/api/comments/create', {
+	return await fetch('/api/post/comments', {
 		method: 'POST',
 		body: JSON.stringify(body)
 	});

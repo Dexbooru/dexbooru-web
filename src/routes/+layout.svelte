@@ -18,12 +18,14 @@
 	import { searchModalActiveStore } from '$lib/client/stores/layout';
 	import { notificationStore } from '$lib/client/stores/notifications';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
+	import { NONEXISTENT_USER_ID } from '$lib/shared/constants/auth';
+	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { IUserNotifications } from '$lib/shared/types/notifcations';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import { onDestroy, onMount } from 'svelte';
 	import '../app.postcss';
 
-	authenticatedUserStore.set($page.data.user || null);
+	authenticatedUserStore.set($page.data.user.id !== NONEXISTENT_USER_ID ? $page.data.user : null);
 
 	const pageUnsubscribe = page.subscribe((_) => {
 		searchModalActiveStore.set(false);
@@ -43,7 +45,8 @@
 		if ($authenticatedUserStore) {
 			const notificationResponse = await getNotifications();
 			if (notificationResponse.ok) {
-				const notificationData: IUserNotifications = await notificationResponse.json();
+				const responseData: TApiResponse<IUserNotifications> = await notificationResponse.json();
+				const notificationData: IUserNotifications = responseData.data;
 				notificationStore.set(notificationData);
 			}
 		}
