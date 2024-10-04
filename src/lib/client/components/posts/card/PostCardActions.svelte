@@ -54,7 +54,7 @@
 			return;
 		}
 		postLikeLoading = true;
-		const response = await likePost({ postId, action: hasLikedPost ? 'dislike' : 'like' });
+		const response = await likePost(postId, { action: hasLikedPost ? 'dislike' : 'like' });
 		postLikeLoading = false;
 
 		if (response.ok) {

@@ -15,5 +15,6 @@
 		originalPostsPageStore.set(data.posts);
 	}
 </script>
-
-<PostWrapper postsSection="Uploaded Posts" />
+<!-- 
+<PostWrapper postsSection="Uploaded Posts" /> -->
+{JSON.stringify(data)}

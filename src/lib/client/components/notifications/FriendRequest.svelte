@@ -9,9 +9,7 @@
 	import { Avatar, Button, DropdownItem } from 'flowbite-svelte';
 
 	export let friendRequest: IFriendRequest;
-
-	console.log(friendRequest);
-
+	
 	let friendshipActionLoading = false;
 
 	const handleFriendshipAction = async (action: TFriendRequestAction) => {

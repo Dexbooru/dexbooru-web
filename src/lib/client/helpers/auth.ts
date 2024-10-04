@@ -24,11 +24,11 @@ export const storeToken = () => {
 	history.replaceState(null, '', page.url.pathname);
 };
 
-export const getCoreApiAuthHeaders = (): HeadersInit => {
+export const getApiAuthHeaders = (): HeadersInit => {
 	const token = localStorage.getItem(SESSION_ID_KEY);
 	if (!token) return {};
 
 	return {
-		Authorization: `Bearer ${token}`
+		Authorization: `Bearer: ${token}`
 	};
 };

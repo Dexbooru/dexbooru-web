@@ -88,11 +88,9 @@ export async function findPostsByAuthorId(
 
 export async function likePostById(
 	postId: string,
-	action: string,
-	actionTriggerUserId: string
+	action: 'like' | 'dislike',
+	userId: string
 ): Promise<boolean> {
-	if (!postId || !['like', 'dislike'].includes(action)) return false;
-
 	const updatedPost = await prisma.post.update({
 		where: {
 			id: postId
@@ -102,12 +100,12 @@ export async function likePostById(
 			likedBy: {
 				...(action === 'like' && {
 					connect: {
-						id: actionTriggerUserId
+						id: userId
 					}
 				}),
 				...(action === 'dislike' && {
 					disconnect: {
-						id: actionTriggerUserId
+						id: userId
 					}
 				})
 			}

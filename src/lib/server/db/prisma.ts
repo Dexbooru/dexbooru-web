@@ -33,7 +33,7 @@ const prismaClientSingleton = () => {
 					const cachedSelectQueryResults = redis.isOpen ? await redis.get(selectQueryKey) : null;
 					if (cachedSelectQueryResults) {
 						const convertedResults = JSON.parse(cachedSelectQueryResults);
-						const adjustedConvertedResults = convertDataStructureToIncludeDatetimes(Array.isArray(convertedResults) ? convertedResults : [convertedResults], ['createdAt', 'updatedAt'])
+						const adjustedConvertedResults = convertDataStructureToIncludeDatetimes(convertedResults);
 						return adjustedConvertedResults;
 					}
 
@@ -49,6 +49,7 @@ const prismaClientSingleton = () => {
 			}
 		}
 	});
+
 	return client;
 };
 

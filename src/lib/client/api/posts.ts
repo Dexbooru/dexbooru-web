@@ -1,21 +1,17 @@
-import { POST_ID_URL_PARAMETER_NAME } from '$lib/shared/constants/posts';
-import { buildUrl } from '$lib/shared/helpers/urls';
-import type { ILikePostBody } from '$lib/shared/types/posts';
+import type { ILikePutBody } from '$lib/shared/types/posts';
+import { getApiAuthHeaders } from '../helpers/auth';
 
 export const deletePost = async (postId: string): Promise<Response> => {
-	const params = {
-		[POST_ID_URL_PARAMETER_NAME]: postId,
-	}
-
-	const finalUrl = buildUrl('/api/post', params);
-	return await fetch(finalUrl, {
+	return await fetch(`/api/post/${postId}`, {
 		method: 'DELETE',
+		headers: getApiAuthHeaders(),
 	});
 };
 
-export const likePost = async (body: ILikePostBody): Promise<Response> => {
-	return await fetch('/api/posts/like', {
-		method: 'POST',
-		body: JSON.stringify(body)
+export const likePost = async (postId: string, body: ILikePutBody): Promise<Response> => {
+	return await fetch(`/api/post/${postId}/like`, {
+		method: 'PUT',
+		body: JSON.stringify(body),
+		headers: getApiAuthHeaders(),
 	});
 };

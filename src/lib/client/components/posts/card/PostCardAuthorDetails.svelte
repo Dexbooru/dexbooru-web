@@ -18,7 +18,6 @@
 		<Avatar
 			size="md"
 			class="post-card-avatar"
-			on:error={() => console.log('hello world')}
 			src={authorProfilePictureUrl}
 			alt={authorId ? `profile picture of ${authorUsername}` : 'default user account'}
 		/>

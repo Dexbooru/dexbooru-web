@@ -1,54 +1,57 @@
-import { DEFAULT_RESULTS_LIMIT, VALID_SEARCH_SECTIONS } from "$lib/shared/constants/search";
+import { DEFAULT_RESULTS_LIMIT } from "$lib/shared/constants/search";
 import { normalizeQuery } from "$lib/shared/helpers/search";
-import { getUrlFields } from "$lib/shared/helpers/urls";
-import type { IAppSearchParams, IAppSearchResult, TSearchSection } from "$lib/shared/types/search";
+import type { IAppSearchResult } from "$lib/shared/types/search";
 import type { RequestEvent } from "@sveltejs/kit";
+import { z } from "zod";
 import { searchAllSections, searchForArtists, searchForPosts, searchForTags, searchForUsers } from "../db/actions/search";
-import { createErrorResponse, createSuccessResponse } from "../helpers/controllers";
+import { createErrorResponse, createSuccessResponse, validateAndHandleRequest } from "../helpers/controllers";
+import type { TRequestSchema } from "../types/controllers";
 
-export const getSearchResults = async ({ url }: RequestEvent) => {
-    const { query, limit, searchSection }: IAppSearchParams = getUrlFields<IAppSearchParams>(
-        url.searchParams
-    );
 
-    if (query === null || query === undefined) {
-        return createErrorResponse('api-route', 400, 'At least one of the required fields was missing');
-    }
+const GetSearchResultsSchema = {
+    urlSearchParams: z.object({
+        query: z.string().min(1, 'The query length needs to be least one character one long'),
+        limit: z
+            .string()
+            .optional()
+            .default(`${DEFAULT_RESULTS_LIMIT}`)
+            .transform((val) => parseInt(val, 10))
+            .refine((val) => !isNaN(val), { message: 'Invalid limit, must be a number' }),
+        searchSection: z.union([z.literal('posts'), z.literal('tags'), z.literal('artists'), z.literal('users'), z.literal('all')]).default('all'),
+    })
+} satisfies TRequestSchema;
 
-    if (query.length === 0) {
-        return createErrorResponse('api-route', 400, 'The search query cannot be empty');
-    }
+export const handleGetSearchResults = async (event: RequestEvent) => {
+    return await validateAndHandleRequest(event, 'api-route', GetSearchResultsSchema,
+        async data => {
+            const { query, limit, searchSection } = data.urlSearchParams
+            const normalizedQuery = normalizeQuery(query);
 
-    if (
-        searchSection !== undefined &&
-        (!searchSection.length || !VALID_SEARCH_SECTIONS.includes(searchSection))
-    ) {
-        return createErrorResponse('api-route', 400, `The search section needs to be one of the following options: ${VALID_SEARCH_SECTIONS.join(', ')}`);
-    }
+            try {
+                let finalSearchResults: IAppSearchResult | null = null;
 
-    const finalLimit = limit ? limit : DEFAULT_RESULTS_LIMIT;
-    const finalSearchSection: TSearchSection = searchSection ? searchSection : 'all';
-    const normalizedQuery = normalizeQuery(query);
+                switch (searchSection) {
+                    case 'all':
+                        finalSearchResults = await searchAllSections(normalizedQuery, limit);
+                        break;
+                    case 'artists':
+                        finalSearchResults = await searchForArtists(normalizedQuery, limit);
+                        break;
+                    case 'tags':
+                        finalSearchResults = await searchForTags(normalizedQuery, limit);
+                        break;
+                    case 'users':
+                        finalSearchResults = await searchForUsers(normalizedQuery, limit);
+                        break;
+                    case 'posts':
+                        finalSearchResults = await searchForPosts(normalizedQuery, limit);
+                        break;
+                }
 
-    let finalSearchResults: IAppSearchResult | null = null;
-
-    switch (finalSearchSection) {
-        case 'all':
-            finalSearchResults = await searchAllSections(normalizedQuery, finalLimit);
-            break;
-        case 'artists':
-            finalSearchResults = await searchForArtists(normalizedQuery, finalLimit);
-            break;
-        case 'tags':
-            finalSearchResults = await searchForTags(normalizedQuery, finalLimit);
-            break;
-        case 'users':
-            finalSearchResults = await searchForUsers(normalizedQuery, finalLimit);
-            break;
-        case 'posts':
-            finalSearchResults = await searchForPosts(normalizedQuery, finalLimit);
-            break;
-    }
-
-    return createSuccessResponse('api-route', `Successfully retrieved ${finalLimit} search results for the query: ${query}`, finalSearchResults);
-};  
+                return createSuccessResponse('api-route', `Successfully retrieved ${limit} search results for the query: ${query}`, finalSearchResults);
+            } catch (error) {
+                return createErrorResponse('api-route', 500, 'An unexpected error occured while fetching the search results');
+            }
+        }
+    )
+};

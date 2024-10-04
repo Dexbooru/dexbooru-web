@@ -2,7 +2,7 @@ import type { TPostLikeAction, TPostOrderByColumn, TPostSelector } from '$lib/sh
 
 export const VALID_ORDERBY_COLUMNS: TPostOrderByColumn[] = ['createdAt', 'likes', 'views'];
 
-export const POST_LIKE_ACTIONS: TPostLikeAction[] = ['like', 'dislike'] as const;
+export const POST_LIKE_ACTIONS: TPostLikeAction[] = ['like', 'dislike'];
 
 export const MAXIMUM_POSTS_PER_PAGE = 27;
 export const PUBLIC_POST_SELECTORS: TPostSelector = {
@@ -22,11 +22,13 @@ export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	},
 	tags: {
 		select: {
+			id: true,
 			name: true
 		}
 	},
 	artists: {
 		select: {
+			id: true,
 			name: true
 		}
 	}

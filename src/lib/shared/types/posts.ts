@@ -4,8 +4,7 @@ import type { DefaultArgs } from '@prisma/client/runtime/library';
 export type TPostLikeAction = 'like' | 'dislike';
 
 
-export interface ILikePostBody {
-	postId: string;
+export interface ILikePutBody {
 	action: TPostLikeAction;
 }
 

@@ -29,7 +29,7 @@ export async function findPostsByArtistName(
 
 	if (!data) return [];
 
-	return data.posts as TPost[];
+	return (data.posts ?? []) as TPost[];
 }
 
 export async function getArtistsWithStartingLetter(

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import PostWrapper from '$lib/client/components/posts/container/PostWrapper.svelte';
 	import {
 		originalPostsPageStore,
 		postPaginationStore,
@@ -16,4 +15,6 @@
 	}
 </script>
 
-<PostWrapper postsSection="Liked Posts" />
+<!-- 
+<PostWrapper postsSection="Liked Posts" /> -->
+{JSON.stringify(data)}

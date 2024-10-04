@@ -1,34 +1,100 @@
+import { NULLABLE_USER } from "$lib/shared/constants/auth";
 import { MAXIMUM_IMAGES_PER_POST } from "$lib/shared/constants/images";
-import { POST_FETCH_CATEGORIES, POST_FETCH_CATEGORY_URL_PARAMETER_NAME, POST_FETCH_USER_ID_URL_PARAMETER_NAME, POST_ID_URL_PARAMETER_NAME, POST_PICTURE_FORM_FIELD } from "$lib/shared/constants/posts";
+import { POST_PICTURE_FORM_FIELD } from "$lib/shared/constants/posts";
 import { getFormFields } from "$lib/shared/helpers/forms";
 import { isFileImage, isFileImageSmall } from "$lib/shared/helpers/images";
 import { isArtistValid, isTagValid, isValidDescription, transformLabels } from "$lib/shared/helpers/labels";
 import type { TPost, TPostOrderByColumn } from "$lib/shared/types/posts";
 import type { IUploadFormFields } from "$lib/shared/types/upload";
-import type { RequestEvent } from "@sveltejs/kit";
+import { redirect, type RequestEvent } from "@sveltejs/kit";
+import { z } from "zod";
 import { deleteBatchFromBucket, uploadBatchToBucket } from "../aws/actions/s3";
 import { AWS_POST_PICTURE_BUCKET_NAME } from "../constants/aws";
 import { MAXIMUM_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from "../constants/posts";
 import { SINGLE_POST_CACHE_TIME_SECONDS } from "../constants/sessions";
-import { createPost, deletePostById, findPostById, findPostByIdWithUpdatedViewCount, findPostsByAuthorId, findPostsByPage } from "../db/actions/post";
+import { findPostsByArtistName } from "../db/actions/artist";
+import { createPost, deletePostById, findPostById, findPostByIdWithUpdatedViewCount, findPostsByAuthorId, findPostsByPage, likePostById } from "../db/actions/post";
+import { findPostsByTagName } from "../db/actions/tag";
 import { findLikedPostsByAuthorId, findLikedPostsFromSubset } from "../db/actions/user";
-import { createErrorResponse, createSuccessResponse } from "../helpers/controllers";
+import { createErrorResponse, createSuccessResponse, validateAndHandleRequest } from "../helpers/controllers";
 import { runPostImageTransformationPipelineInBatch } from "../helpers/images";
-import { processPostPageParams } from "../helpers/pagination";
 import { cacheResponse } from "../helpers/sessions";
-import { parseUser } from "../helpers/users";
-import type { TControllerHandlerVariant, TPostFetchCategory } from "../types/controllers";
+import type { TControllerHandlerVariant, TPostFetchCategory, TRequestSchema } from "../types/controllers";
+
+const GetPostSchema = {
+    urlSearchParams: z.object({
+        uploadedSuccessfully: z.string().optional(),
+    }),
+    pathParams: z.object({
+        postId: z.string().uuid(),
+    })
+} satisfies TRequestSchema;
+
+const GetPostsSchema = {
+    urlSearchParams: z.object({
+        userId: z.string().uuid().optional(),
+        category: z.union([z.literal('general'), z.literal('liked'), z.literal('uploaded')]).default('general'),
+        ascending: z.union([z.literal('true'), z.literal('false')]).optional().default('false').transform(val => val === 'true' ? true : false),
+        orderBy: z.union([z.literal('views'), z.literal('likes'), z.literal('createdAt')]).default('createdAt'),
+        pageNumber: z
+            .string()
+            .optional()
+            .default('0')
+            .transform((val) => parseInt(val, 10))
+            .refine((val) => !isNaN(val), { message: 'Invalid pageNumber, must be a number' }),
+    })
+} satisfies TRequestSchema;
+
+const DeletePostSchema = {
+    pathParams: z.object({
+        postId: z.string().uuid(),
+    }),
+} satisfies TRequestSchema;
+
+const LikePostSchema = {
+    pathParams: z.object({
+        postId: z.string().uuid(),
+    }),
+    body: z.object({
+        action: z.union([z.literal('like'), z.literal('dislike')]),
+    }),
+} satisfies TRequestSchema;
+
+const GetPostsWithTagNameSchema = {
+    pathParams: z.object({
+        name: z.string().min(1, 'The tag name needs to be least one character long')
+    }),
+    urlSearchParams: z.object({
+        ascending: z.union([z.literal('true'), z.literal('false')]).optional().default('false').transform(val => val === 'true' ? true : false),
+        orderBy: z.union([z.literal('views'), z.literal('likes'), z.literal('createdAt')]).default('createdAt'),
+        pageNumber: z
+            .string()
+            .optional()
+            .default('0')
+            .transform((val) => parseInt(val, 10))
+            .refine((val) => !isNaN(val), { message: 'Invalid pageNumber, must be a number' }),
+    }),
+} satisfies TRequestSchema;
+
+const GetPostsWithArtistNameSchema = {
+    pathParams: z.object({
+        name: z.string().min(1, 'The tag name needs to be least one character long')
+    }),
+    urlSearchParams: z.object({
+        ascending: z.union([z.literal('true'), z.literal('false')]).optional().default('false').transform(val => val === 'true' ? true : false),
+        orderBy: z.union([z.literal('views'), z.literal('likes'), z.literal('createdAt')]).default('createdAt'),
+        pageNumber: z
+            .string()
+            .optional()
+            .default('0')
+            .transform((val) => parseInt(val, 10))
+            .refine((val) => !isNaN(val), { message: 'Invalid pageNumber, must be a number' }),
+    }),
+} satisfies TRequestSchema;
 
 const createPostFormErrorData = (errorData: Record<string, unknown>, message: string) => {
     return {
         ...errorData,
-        reason: message,
-    }
-};
-
-const createDeletePostErrorData = (postId: string | null, message: string) => {
-    return {
-        postId,
         reason: message,
     }
 };
@@ -115,158 +181,254 @@ export const handleCreatePost = async ({ locals, request }: RequestEvent, handle
 };
 
 
-export const handleGetPost = async ({ url, params, setHeaders }: RequestEvent, handlerType: TControllerHandlerVariant) => {
-    const postId = handlerType === 'api-route' ? url.searchParams.get(POST_ID_URL_PARAMETER_NAME) : params[POST_ID_URL_PARAMETER_NAME] ?? '';
+export const handleGetPost = async (event: RequestEvent, handlerType: TControllerHandlerVariant) => {
+    return await validateAndHandleRequest(event, handlerType, GetPostSchema,
+        async data => {
+            const postId = data.pathParams.postId;
 
-    if (postId === null) {
-        return createErrorResponse(handlerType, 400, 'Missing required field: postId');
-    }
+            try {
+                const post = handlerType === 'api-route' ? await findPostById(postId, PUBLIC_POST_SELECTORS)
+                    : await findPostByIdWithUpdatedViewCount(postId, PUBLIC_POST_SELECTORS);
+                if (!post) {
+                    const error = createErrorResponse(handlerType, 404, `Post with id ${postId} not found`);
+                    if (handlerType === 'page-server-load') {
+                        throw error;
+                    }
+                    return error;
+                }
 
-    if (postId.length === 0) {
-        return createErrorResponse(handlerType, 400, 'Required field: postId cannot be an empty string');
-    }
+                if (handlerType === 'page-server-load') {
+                    cacheResponse(event.setHeaders, SINGLE_POST_CACHE_TIME_SECONDS);
+                }
 
-    try {
-        const post = handlerType === 'api-route' ? await findPostById(postId, PUBLIC_POST_SELECTORS)
-            : await findPostByIdWithUpdatedViewCount(postId, PUBLIC_POST_SELECTORS);
-        if (!post) {
-            const error = createErrorResponse(handlerType, 404, `Post with id ${postId} not found`);
-            if (handlerType === 'page-server-load') {
-                throw error;
+                const uploadedSuccessfully = data.urlSearchParams.uploadedSuccessfully;
+                const finalData = handlerType === 'api-route' ? post : { post, uploadedSuccessfully: uploadedSuccessfully === 'true' }
+                return createSuccessResponse(handlerType, `Successfully fetched post with id: ${postId}`, finalData);
+            } catch (error) {
+                return createErrorResponse(handlerType, 500, 'An error occurred while fetching the post');
             }
-            return error;
         }
-
-        if (handlerType === 'page-server-load') {
-            cacheResponse(setHeaders, SINGLE_POST_CACHE_TIME_SECONDS);
-        }
-
-        const uploadedSuccessfully = url.searchParams.get('uploadedSuccessfully');
-        const finalData = handlerType === 'api-route' ? post : { post, uploadedSuccessfully: uploadedSuccessfully === 'true' }
-        return createSuccessResponse(handlerType, `Successfully fetched post with id: ${postId}`, finalData);
-    } catch (error) {
-        return createErrorResponse(handlerType, 500, 'An error occurred while fetching the post');
-    }
+    )
 };
 
-
-export const handleGetPosts = async ({ url, locals }: RequestEvent, handlerType: TControllerHandlerVariant, overrideCategory?: TPostFetchCategory) => {
-    const category = overrideCategory ?? url.searchParams.get(POST_FETCH_CATEGORY_URL_PARAMETER_NAME) as TPostFetchCategory;
-
-    if (category === undefined || category === null) {
-        return createErrorResponse(handlerType, 400, `Missing required field: ${POST_FETCH_CATEGORY_URL_PARAMETER_NAME}`);
-    }
-
-    if (category.length === 0) {
-        return createErrorResponse(handlerType, 400, `Required field: ${POST_FETCH_CATEGORY_URL_PARAMETER_NAME} cannot be empty`);
-    }
-
-    if (!POST_FETCH_CATEGORIES.includes(category)) {
-        return createErrorResponse(handlerType, 400, `Invalid post category for fetching`);
-    }
-
-    const user = parseUser(locals);
-    const { convertedAscending, orderBy, convertedPageNumber } = processPostPageParams(
-        url.searchParams
-    );
-    const userId = url.searchParams.get(POST_FETCH_USER_ID_URL_PARAMETER_NAME);
-
-    if (!user && category === 'liked') {
-        return createErrorResponse(handlerType, 401, 'Cannot fetch liked posts of unauthenticated user');
-    }
-
-    let posts: TPost[] = [];
-    switch (category) {
-        case 'general':
-            posts = await findPostsByPage(convertedPageNumber, MAXIMUM_POSTS_PER_PAGE, orderBy as TPostOrderByColumn, convertedAscending, PUBLIC_POST_SELECTORS);
-            break;
-        case 'liked':
-            posts =
-                (await findLikedPostsByAuthorId(
-                    convertedPageNumber,
+export const handleGetPostsWithArtistName = async (event: RequestEvent, handlerType: TControllerHandlerVariant) => {
+    return await validateAndHandleRequest(event, handlerType, GetPostsWithArtistNameSchema,
+        async data => {
+            const user = event.locals.user;
+            const artistName = data.pathParams.name;
+            const { ascending, orderBy, pageNumber } = data.urlSearchParams;
+            try {
+                const posts = await findPostsByArtistName(
+                    artistName,
+                    pageNumber,
                     MAXIMUM_POSTS_PER_PAGE,
-                    user?.id ?? '',
                     orderBy as TPostOrderByColumn,
-                    convertedAscending,
+                    ascending,
                     PUBLIC_POST_SELECTORS
-                )) ?? [];
-            break;
-        case 'uploaded':
-            posts = (await findPostsByAuthorId(
-                convertedPageNumber,
-                MAXIMUM_POSTS_PER_PAGE,
-                userId ?? user?.id ?? '',
-                orderBy as TPostOrderByColumn,
-                convertedAscending,
-                PUBLIC_POST_SELECTORS
-            )) ?? [];
-            break;
-    }
+                );
+                const likedPosts = user.id !== NULLABLE_USER.id ? await findLikedPostsFromSubset(user.id, posts) : [];
 
-    if (handlerType === 'api-route') {
-        const data = {
-            posts,
-            pageNumber: convertedPageNumber,
-            ascending: convertedAscending,
-            orderBy,
+                const responseData = {
+                    posts,
+                    likedPosts,
+                    pageNumber,
+                    ascending,
+                    orderBy: orderBy as TPostOrderByColumn
+                };
+                return createSuccessResponse(handlerType, `Successfully fetched the posts with the artist name of: ${artistName}`, responseData);
+            } catch (error) {
+                console.error(error);
+                const errorResponse = createErrorResponse(handlerType, 500, 'An unexpected error occured while fetching the posts with artists with a certain name');
+                if (handlerType === 'page-server-load') {
+                    throw errorResponse;
+                }
+
+                return errorResponse;
+            }
         }
-        return createSuccessResponse(handlerType, 'Successfully fetched paginated posts', data);
-    }
-
-    const likedPosts = user && category !== 'liked' ? await findLikedPostsFromSubset(user.id, posts) : posts;
-    const data = {
-        posts,
-        likedPosts: user !== null ? likedPosts : [],
-        pageNumber: convertedPageNumber,
-        ascending: convertedAscending,
-        orderBy,
-    }
-
-    return createSuccessResponse(handlerType, 'Successfully fetched paginated posts', data);
+    )
 };
 
-export const handleDeletePost = async ({ locals, url }: RequestEvent, handlerType: TControllerHandlerVariant) => {
-    const postId = url.searchParams.get(POST_ID_URL_PARAMETER_NAME);
+export const handleGetPostsWithTagName = async (event: RequestEvent, handlerType: TControllerHandlerVariant) => {
+    return await validateAndHandleRequest(event, handlerType, GetPostsWithTagNameSchema,
+        async data => {
+            const user = event.locals.user;
+            const tagName = data.pathParams.name;
+            const { ascending, orderBy, pageNumber } = data.urlSearchParams;
 
-    if (postId === null) {
-        const message = 'Missing required field: postId';
-        return createErrorResponse(handlerType, 400, message, createDeletePostErrorData(postId, message));
-    }
+            try {
+                const posts = await findPostsByTagName(
+                    tagName,
+                    pageNumber,
+                    MAXIMUM_POSTS_PER_PAGE,
+                    orderBy as TPostOrderByColumn,
+                    ascending,
+                    PUBLIC_POST_SELECTORS
+                );
+                const likedPosts = user.id !== NULLABLE_USER.id ? await findLikedPostsFromSubset(user.id, posts) : [];
 
-    if (postId.length === 0) {
-        const message = 'Required field: postId cannot be an empty string';
-        return createErrorResponse(handlerType, 400, message, createDeletePostErrorData(postId, message));
-    }
+                const responseData = {
+                    posts,
+                    likedPosts,
+                    pageNumber,
+                    ascending,
+                    orderBy: orderBy as TPostOrderByColumn
+                };
+                return createSuccessResponse(handlerType, `Successfully fetched the posts with the artist name of: ${tagName}`, responseData);
+            } catch (error) {
+                const errorResponse = createErrorResponse(handlerType, 500, 'An unexpected error occured while fetching the posts with tags with a certain name');
+                if (handlerType === 'page-server-load') {
+                    throw errorResponse;
+                }
 
-    try {
-        const post = await findPostById(postId, PUBLIC_POST_SELECTORS);
-
-        if (!post) {
-            const message = `A post with the following id: ${postId} does not exist`;
-            return createErrorResponse(handlerType, 404, message, createDeletePostErrorData(postId, message));
+                return errorResponse;
+            }
         }
-
-        if (locals.user.id !== post.authorId) {
-            const message = 'You are not authorized to delete this post, as you are not the author';
-            return createErrorResponse(handlerType, 401, message, createDeletePostErrorData(postId, message));
-        }
-
-        await deletePostById(postId, locals.user.id);
-
-        if (post.imageUrls.length > 0) {
-            await deleteBatchFromBucket(
-                AWS_POST_PICTURE_BUCKET_NAME,
-                post.imageUrls,
-            );
-        }
-
-        const successMessage = `A post with the id: ${postId} and its corresponding comments and images were deleted successfully!`;
-        return createSuccessResponse(handlerType, successMessage, post);
-
-    } catch (error) {
-        console.error('Error deleting post:', error);
-        const message = 'An error occurred while deleting the post';
-        return createErrorResponse(handlerType, 500, message, createDeletePostErrorData(postId, message));
-    }
+    )
 };
 
+export const handleGetPosts = async (event: RequestEvent, handlerType: TControllerHandlerVariant, overrideCategory?: TPostFetchCategory) => {
+    return await validateAndHandleRequest(event, handlerType, GetPostsSchema,
+        async data => {
+            const category = overrideCategory ?? data.urlSearchParams.category;
+            const { ascending, orderBy, pageNumber, userId } = data.urlSearchParams;
+            const user = event.locals.user;
+
+            if (user.id === NULLABLE_USER.id && ['uploaded', 'liked'].includes(category)) {
+                throw redirect(302, '/');
+            }
+
+
+            if (user.id === NULLABLE_USER.id && category === 'liked') {
+                const errorResponse = createErrorResponse(handlerType, 401, 'Cannot fetch liked posts of unauthenticated user');
+                if (handlerType === 'page-server-load') {
+                    throw errorResponse;
+                }
+            }
+
+            try {
+                let posts: TPost[] = [];
+                switch (category) {
+                    case 'general':
+                        posts = await findPostsByPage(pageNumber, MAXIMUM_POSTS_PER_PAGE, orderBy as TPostOrderByColumn, ascending, PUBLIC_POST_SELECTORS);
+                        break;
+                    case 'liked':
+                        posts =
+                            (await findLikedPostsByAuthorId(
+                                pageNumber,
+                                MAXIMUM_POSTS_PER_PAGE,
+                                user.id,
+                                orderBy as TPostOrderByColumn,
+                                ascending,
+                                PUBLIC_POST_SELECTORS
+                            )) ?? [];
+                        break;
+                    case 'uploaded':
+                        posts = (await findPostsByAuthorId(
+                            pageNumber,
+                            MAXIMUM_POSTS_PER_PAGE,
+                            userId ?? user.id,
+                            orderBy as TPostOrderByColumn,
+                            ascending,
+                            PUBLIC_POST_SELECTORS
+                        )) ?? [];
+                        break;
+                }
+
+                if (handlerType === 'api-route') {
+                    const responseData = {
+                        posts,
+                        pageNumber,
+                        ascending,
+                        orderBy,
+                    }
+                    return createSuccessResponse(handlerType, 'Successfully fetched paginated posts', responseData);
+                }
+
+                const likedPosts = user.id !== NULLABLE_USER.id && category !== 'liked' ? await findLikedPostsFromSubset(user.id, posts) : posts;
+                const responseData = {
+                    posts,
+                    likedPosts: user.id !== NULLABLE_USER.id ? likedPosts : [],
+                    pageNumber,
+                    ascending,
+                    orderBy,
+                };
+
+                return createSuccessResponse(handlerType, 'Successfully fetched paginated posts', responseData);
+            } catch (error) {
+                const errorResponse = createErrorResponse(handlerType, 500, 'An error occurred while fetching the posts');
+                if (handlerType === 'page-server-load') {
+                    throw errorResponse;
+                }
+
+                return errorResponse;
+            }
+        }
+    );
+};
+
+export const handleDeletePost = async (event: RequestEvent) => {
+    return await validateAndHandleRequest(event, 'api-route', DeletePostSchema,
+        async data => {
+            const postId = data.pathParams.postId;
+
+            try {
+                const post = await findPostById(postId, PUBLIC_POST_SELECTORS);
+                if (!post) {
+                    return createErrorResponse('api-route', 404, `A post with the following id: ${postId} does not exist`);
+                }
+
+                if (event.locals.user.id !== post.author.id) {
+                    return createErrorResponse('api-route', 401, 'You are not authorized to delete this post, as you are not the author');
+                }
+
+                await deletePostById(postId, event.locals.user.id);
+
+                if (post.imageUrls.length > 0) {
+                    await deleteBatchFromBucket(
+                        AWS_POST_PICTURE_BUCKET_NAME,
+                        post.imageUrls,
+                    );
+                }
+
+                const successMessage = `A post with the id: ${postId} and its corresponding comments and images were deleted successfully!`;
+                return createSuccessResponse('api-route', successMessage, post);
+
+            } catch (error) {
+                return createErrorResponse('api-route', 500, 'An error occurred while deleting the post');
+            }
+        },
+        true,
+    );
+};
+
+export const handleLikePost = async (event: RequestEvent) => {
+    return await validateAndHandleRequest(event, 'api-route', LikePostSchema,
+        async data => {
+            const postId = data.pathParams.postId;
+            const action = data.body.action;
+
+            try {
+                const post = await findPostById(postId, { likes: true });
+                if (!post) {
+                    return createErrorResponse('api-route', 404, `A post with the id: ${postId} does not exist`);
+                }
+
+                if (post.likes - 1 < 0 && action === 'dislike') {
+                    return createErrorResponse('api-route', 409, `The post with the id: ${postId} has 0 likes, and cannot be disliked further`);
+                }
+
+                const likedPost = await likePostById(postId, action, event.locals.user.id);
+                if (!likedPost) {
+                    return createErrorResponse('api-route', 500, 'An unexpected error occured while liking the post');
+                }
+
+                return createSuccessResponse('api-route', `The post with the id: ${postId} was successfully ${action === 'like' ? 'liked' : 'disliked'}`);
+            }
+            catch (error) {
+                return createErrorResponse('api-route', 500, 'An error occured while liking the post');
+            }
+        },
+        true,
+    );
+};

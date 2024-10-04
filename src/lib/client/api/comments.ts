@@ -1,5 +1,4 @@
 import { PAGE_NUMBER_URL_PARAMETER, PARENT_COMMENT_ID_URL_PARAMETER } from '$lib/shared/constants/comments';
-import { POST_ID_URL_PARAMETER_NAME } from '$lib/shared/constants/posts';
 import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
 import { buildUrl } from '$lib/shared/helpers/urls';
 import type { TApiResponse } from '$lib/shared/types/api';
@@ -14,12 +13,11 @@ export const getComments = async (
 	pageNumber: number
 ): Promise<Response> => {
 	const params = {
-		[POST_ID_URL_PARAMETER_NAME]: postId,
 		[PAGE_NUMBER_URL_PARAMETER]: pageNumber,
 		[PARENT_COMMENT_ID_URL_PARAMETER]: parentCommentId === null ? 'null' : parentCommentId
 	};
 
-	const finalUrl = buildUrl(`/api/post/comments`, params);
+	const finalUrl = buildUrl(`/api/post/${postId}/comments`, params);
 	return await fetch(finalUrl);
 };
 
@@ -36,10 +34,9 @@ export const createPostCommentsPaginator = (postId: string, parentCommentId: str
 
 		if (response.ok) {
 			const responseData: TApiResponse<IComment[]> = await response.json();
-			const comments: IComment[] = convertDataStructureToIncludeDatetimes<IComment>(
+			const comments = convertDataStructureToIncludeDatetimes(
 				responseData.data,
-				['createdAt']
-			);
+			) as IComment[];
 
 			commentTreeStore.update((currentCommentTree) => {
 				comments.forEach((comment) => {

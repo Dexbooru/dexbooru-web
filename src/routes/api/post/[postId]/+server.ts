@@ -12,6 +12,6 @@ export const GET: RequestHandler = async (request) => {
 };
 
 export const DELETE: RequestHandler = async (request) => {
-    const response = handleDeletePost(request, 'api-route');
+    const response = handleDeletePost(request);
     return response as ReturnType<RequestHandler>;
 };
