@@ -10,4 +10,4 @@ export const buildValidUrl = (url: string): string => {
 }
 
 
-export const APP_BASE_URL = buildValidUrl(import.meta.env.VITE_VERCEL_URL ?? '');
+export const APP_BASE_URL = buildValidUrl(import.meta.env.VITE_APP_URL ?? '');

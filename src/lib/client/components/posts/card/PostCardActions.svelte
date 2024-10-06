@@ -8,7 +8,7 @@
 	import {
 		originalPostsPageStore,
 		postPaginationStore,
-		postsPageStore
+		postsPageStore,
 	} from '$lib/client/stores/posts';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import type { TPost } from '$lib/shared/types/posts';
@@ -18,7 +18,7 @@
 		ArrowRightToBracketSolid,
 		ExclamationCircleSolid,
 		HeartSolid,
-		TrashBinSolid
+		TrashBinSolid,
 	} from 'flowbite-svelte-icons';
 	import PostCardReportModal from './PostCardReportModal.svelte';
 
@@ -41,7 +41,7 @@
 	const handleModalOpen = () => {
 		modalStore.set({
 			isOpen: true,
-			focusedModalName: REPORT_MODAL_NAME
+			focusedModalName: REPORT_MODAL_NAME,
 		});
 	};
 
@@ -49,7 +49,7 @@
 		if (!$authenticatedUserStore) {
 			toast.push(
 				'Please sign-in or register for an account to able to like posts',
-				FAILURE_TOAST_OPTIONS
+				FAILURE_TOAST_OPTIONS,
 			);
 			return;
 		}
@@ -60,7 +60,7 @@
 		if (response.ok) {
 			toast.push(
 				`${hasLikedPost ? 'Disliked' : 'Liked'} the post successfully!`,
-				SUCCESS_TOAST_OPTIONS
+				SUCCESS_TOAST_OPTIONS,
 			);
 			likes = hasLikedPost ? likes - 1 : likes + 1;
 			postPaginationStore.update((paginationData) => {
@@ -68,7 +68,7 @@
 
 				if (hasLikedPost) {
 					paginationData.likedPosts = paginationData?.likedPosts.filter(
-						(likedPost) => likedPost.id !== postId
+						(likedPost) => likedPost.id !== postId,
 					);
 				} else {
 					paginationData.likedPosts.push(post);
@@ -77,12 +77,9 @@
 				return paginationData;
 			});
 
-			if (
-				(pagePathName === '/profile/posts/liked' || pagePathName === '/profile/posts/liked/') &&
-				hasLikedPost
-			) {
+			if (pagePathName === '/posts/liked' && hasLikedPost) {
 				postsPageStore.update((previousPosts) =>
-					previousPosts.filter((post) => post.id !== postId)
+					previousPosts.filter((post) => post.id !== postId),
 				);
 				originalPostsPageStore.update((previousPosts) => {
 					return previousPosts.filter((post) => post.id !== postId);
@@ -93,7 +90,7 @@
 		} else {
 			toast.push(
 				`There was an error while ${hasLikedPost ? 'disliking' : 'liking'}  the post!`,
-				FAILURE_TOAST_OPTIONS
+				FAILURE_TOAST_OPTIONS,
 			);
 		}
 	};
@@ -106,14 +103,14 @@
 		if (response.ok) {
 			postsPageStore.update((previousPosts) => previousPosts.filter((post) => post.id !== postId));
 			originalPostsPageStore.update((previousPosts) =>
-				previousPosts.filter((post) => post.id !== postId)
+				previousPosts.filter((post) => post.id !== postId),
 			);
 			postPaginationStore.update((paginationData) => {
 				if (!paginationData) return null;
 
 				return {
 					...paginationData,
-					posts: paginationData.posts.filter((post) => post.id !== postId)
+					posts: paginationData.posts.filter((post) => post.id !== postId),
 				};
 			});
 			toast.push('The post was deleted successfully!', SUCCESS_TOAST_OPTIONS);

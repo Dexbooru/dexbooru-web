@@ -1,26 +1,28 @@
-import type {
-	IFriendRemoveBody,
-	IFriendRequestHandleBody,
-	IFriendRequestSendBody
-} from '$lib/shared/types/friends';
+import { buildUrl } from '$lib/shared/helpers/urls';
+import type { IFriendRequestHandleBody } from '$lib/shared/types/friends';
+import { getApiAuthHeaders } from '../helpers/auth';
 
-export const addFriend = async (body: IFriendRequestSendBody): Promise<Response> => {
-	return await fetch('/api/friends/requests/send', {
+export const addFriend = async (username: string): Promise<Response> => {
+	return await fetch(`/api/user/${username}/friend-requests`, {
 		method: 'POST',
-		body: JSON.stringify(body)
+		headers: getApiAuthHeaders(),
 	});
 };
 
-export const handleFriendRequest = async (body: IFriendRequestHandleBody): Promise<Response> => {
-	return await fetch('/api/friends/requests/handle', {
-		method: 'POST',
-		body: JSON.stringify(body)
+export const handleFriendRequest = async (
+	username: string,
+	body: IFriendRequestHandleBody,
+): Promise<Response> => {
+	const url = buildUrl(`/api/user/${username}/friend-requests`, { action: body.action });
+	return await fetch(url, {
+		method: 'DELETE',
+		headers: getApiAuthHeaders(),
 	});
 };
 
-export const deleteFriend = async (body: IFriendRemoveBody): Promise<Response> => {
-	return await fetch('/api/friends/remove', {
-		method: 'POST',
-		body: JSON.stringify(body)
+export const deleteFriend = async (username: string): Promise<Response> => {
+	return await fetch(`/api/user/${username}/friends`, {
+		method: 'DELETE',
+		headers: getApiAuthHeaders(),
 	});
 };

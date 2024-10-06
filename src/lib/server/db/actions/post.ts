@@ -1,13 +1,27 @@
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
+import type { Prisma } from '@prisma/client';
 import prisma from '../prisma';
 
 export async function deletePostById(postId: string, authorId: string) {
 	await prisma.post.delete({
 		where: {
 			id: postId,
-			authorId
+			authorId,
 		},
 	});
+}
+
+export async function updatePost(postId: string, newData: Prisma.PostUpdateInput) {
+	const updatedPost = await prisma.post.update({
+		where: {
+			id: postId,
+		},
+		data: {
+			...newData,
+			updatedAt: new Date(),
+		},
+	});
+	return updatedPost;
 }
 
 export async function findPostsByPage(
@@ -15,15 +29,15 @@ export async function findPostsByPage(
 	pageLimit: number,
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
-	selectors?: TPostSelector
+	selectors?: TPostSelector,
 ): Promise<TPost[]> {
 	const pagePosts = await prisma.post.findMany({
 		select: selectors,
 		skip: pageNumber * pageLimit,
 		take: pageLimit,
 		orderBy: {
-			[orderBy]: ascending ? 'asc' : 'desc'
-		}
+			[orderBy]: ascending ? 'asc' : 'desc',
+		},
 	});
 
 	return pagePosts as TPost[];
@@ -31,19 +45,19 @@ export async function findPostsByPage(
 
 export async function findPostByIdWithUpdatedViewCount(
 	postId: string,
-	selectors?: TPostSelector
+	selectors?: TPostSelector,
 ): Promise<TPost | null> {
 	try {
 		const updatedPost = await prisma.post.update({
 			where: {
-				id: postId
+				id: postId,
 			},
 			data: {
 				views: {
-					increment: 1
-				}
+					increment: 1,
+				},
 			},
-			select: selectors
+			select: selectors,
 		});
 		return updatedPost as TPost;
 	} catch (error) {
@@ -53,13 +67,13 @@ export async function findPostByIdWithUpdatedViewCount(
 
 export async function findPostById(
 	postId: string,
-	selectors?: TPostSelector
+	selectors?: TPostSelector,
 ): Promise<TPost | null> {
 	return (await prisma.post.findUnique({
 		where: {
-			id: postId
+			id: postId,
 		},
-		select: selectors
+		select: selectors,
 	})) as TPost | null;
 }
 
@@ -69,18 +83,27 @@ export async function findPostsByAuthorId(
 	authorId: string,
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
-	selectors?: TPostSelector
+	selectors?: TPostSelector,
 ): Promise<TPost[] | null> {
 	const posts = await prisma.post.findMany({
 		where: {
-			authorId
+			OR: [
+				{
+					authorId,
+				},
+				{
+					author: {
+						username: authorId,
+					},
+				},
+			],
 		},
 		skip: pageNumber * pageLimit,
 		take: pageLimit,
 		orderBy: {
-			[orderBy]: ascending ? 'asc' : 'desc'
+			[orderBy]: ascending ? 'asc' : 'desc',
 		},
-		select: selectors
+		select: selectors,
 	});
 
 	return posts as TPost[] | null;
@@ -89,27 +112,28 @@ export async function findPostsByAuthorId(
 export async function likePostById(
 	postId: string,
 	action: 'like' | 'dislike',
-	userId: string
+	userId: string,
 ): Promise<boolean> {
 	const updatedPost = await prisma.post.update({
 		where: {
-			id: postId
+			id: postId,
 		},
 		data: {
+			updatedAt: new Date(),
 			likes: action === 'like' ? { increment: 1 } : { decrement: 1 },
 			likedBy: {
 				...(action === 'like' && {
 					connect: {
-						id: userId
-					}
+						id: userId,
+					},
 				}),
 				...(action === 'dislike' && {
 					disconnect: {
-						id: userId
-					}
-				})
-			}
-		}
+						id: userId,
+					},
+				}),
+			},
+		},
 	});
 
 	return !!updatedPost;
@@ -133,19 +157,19 @@ export async function createPost(
 				connectOrCreate: artists.map((artist) => {
 					return {
 						where: { name: artist },
-						create: { name: artist }
+						create: { name: artist },
 					};
-				})
+				}),
 			},
 			tags: {
 				connectOrCreate: tags.map((tag) => {
 					return {
 						where: { name: tag },
-						create: { name: tag }
+						create: { name: tag },
 					};
-				})
-			}
-		}
+				}),
+			},
+		},
 	});
 
 	return newPost as TPost;

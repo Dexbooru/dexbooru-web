@@ -121,6 +121,10 @@ const validateRequest = <T extends TRequestSchema>(
 	return { success: true, data: result as TInferRequestSchema<T> };
 };
 
+export const isRedirectObject = (error: unknown) => {
+	return error && typeof error === 'object' && 'status' in error && 'location' in error;
+};
+
 export const validateAndHandleRequest = async <T extends TRequestSchema>(
 	event: RequestEvent,
 	handlerType: TControllerHandlerVariant,

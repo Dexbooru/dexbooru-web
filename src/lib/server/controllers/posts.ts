@@ -11,6 +11,7 @@ import { z } from 'zod';
 import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { MAXIMUM_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from '../constants/posts';
+import { boolStrSchema, postPaginationSchema } from '../constants/reusableSchemas';
 import { SINGLE_POST_CACHE_TIME_SECONDS } from '../constants/sessions';
 import { findPostsByArtistName } from '../db/actions/artist';
 import {
@@ -21,6 +22,7 @@ import {
 	findPostsByAuthorId,
 	findPostsByPage,
 	likePostById,
+	updatePost,
 } from '../db/actions/post';
 import { findPostsByTagName } from '../db/actions/tag';
 import { findLikedPostsByAuthorId, findLikedPostsFromSubset } from '../db/actions/user';
@@ -37,6 +39,20 @@ import type {
 	TRequestSchema,
 } from '../types/controllers';
 
+const descriptionSchema = z
+	.string()
+	.min(1, 'The description must be at least a single character long')
+	.refine((val) => isLabelAppropriate(val, 'description'), {
+		message: 'The provided description was not appropriate',
+	});
+
+const GetPostsByAuthorSchema = {
+	pathParams: z.object({
+		username: z.string(),
+	}),
+	urlSearchParams: postPaginationSchema,
+} satisfies TRequestSchema;
+
 const GetPostSchema = {
 	urlSearchParams: z.object({
 		uploadedSuccessfully: z.string().optional(),
@@ -47,26 +63,11 @@ const GetPostSchema = {
 } satisfies TRequestSchema;
 
 const GetPostsSchema = {
-	urlSearchParams: z.object({
-		userId: z.string().uuid().optional(),
-		category: z
-			.union([z.literal('general'), z.literal('liked'), z.literal('uploaded')])
-			.default('general'),
-		ascending: z
-			.union([z.literal('true'), z.literal('false')])
-			.optional()
-			.default('false')
-			.transform((val) => (val === 'true' ? true : false)),
-		orderBy: z
-			.union([z.literal('views'), z.literal('likes'), z.literal('createdAt')])
-			.default('createdAt'),
-		pageNumber: z
-			.string()
-			.optional()
-			.default('0')
-			.transform((val) => parseInt(val, 10))
-			.refine((val) => !isNaN(val), { message: 'Invalid pageNumber, must be a number' }),
-	}),
+	urlSearchParams: z
+		.object({
+			userId: z.string().uuid().optional(),
+		})
+		.merge(postPaginationSchema),
 } satisfies TRequestSchema;
 
 const DeletePostSchema = {
@@ -88,54 +89,19 @@ const GetPostsWithTagNameSchema = {
 	pathParams: z.object({
 		name: z.string().min(1, 'The tag name needs to be least one character long'),
 	}),
-	urlSearchParams: z.object({
-		ascending: z
-			.union([z.literal('true'), z.literal('false')])
-			.optional()
-			.default('false')
-			.transform((val) => (val === 'true' ? true : false)),
-		orderBy: z
-			.union([z.literal('views'), z.literal('likes'), z.literal('createdAt')])
-			.default('createdAt'),
-		pageNumber: z
-			.string()
-			.optional()
-			.default('0')
-			.transform((val) => parseInt(val, 10))
-			.refine((val) => !isNaN(val), { message: 'Invalid pageNumber, must be a number' }),
-	}),
+	urlSearchParams: postPaginationSchema,
 } satisfies TRequestSchema;
 
 const GetPostsWithArtistNameSchema = {
 	pathParams: z.object({
 		name: z.string().min(1, 'The tag name needs to be least one character long'),
 	}),
-	urlSearchParams: z.object({
-		ascending: z
-			.union([z.literal('true'), z.literal('false')])
-			.optional()
-			.default('false')
-			.transform((val) => (val === 'true' ? true : false)),
-		orderBy: z
-			.union([z.literal('views'), z.literal('likes'), z.literal('createdAt')])
-			.default('createdAt'),
-		pageNumber: z
-			.string()
-			.optional()
-			.default('0')
-			.transform((val) => parseInt(val, 10))
-			.refine((val) => !isNaN(val), { message: 'Invalid pageNumber, must be a number' }),
-	}),
+	urlSearchParams: postPaginationSchema,
 } satisfies TRequestSchema;
 
 const CreatePostSchema = {
 	form: z.object({
-		description: z
-			.string()
-			.min(1, 'The description must be at least a single character long')
-			.refine((val) => isLabelAppropriate(val, 'description'), {
-				message: 'The provided description was not appropriate',
-			}),
+		description: descriptionSchema,
 		postPictures: z
 			.union([z.instanceof(globalThis.File), z.array(z.instanceof(globalThis.File))])
 			.transform((val) => Array.from(val instanceof File ? [val] : val))
@@ -148,10 +114,7 @@ const CreatePostSchema = {
 					message: `At least one of the uploaded post picture was not an image format, exceeded the maximum size of ${MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB} or the total number of images exceeded the maximum allowed size per post of ${MAXIMUM_IMAGES_PER_POST}`,
 				},
 			),
-		isNsfw: z
-			.union([z.literal('true'), z.literal('false')])
-			.default('false')
-			.transform((val) => val === 'true'),
+		isNsfw: boolStrSchema,
 		tags: z
 			.string()
 			.min(1, 'The comma-seperated tag string must be at least a single character long')
@@ -185,11 +148,121 @@ const CreatePostSchema = {
 	}),
 } satisfies TRequestSchema;
 
+const PostUpdateSchema = {
+	pathParams: z.object({
+		postId: z.string().uuid(),
+	}),
+	body: z.object({
+		description: descriptionSchema.optional(),
+		isNsfw: boolStrSchema.optional(),
+	}),
+} satisfies TRequestSchema;
+
 const createPostFormErrorData = (errorData: Record<string, unknown>, message: string) => {
 	return {
 		...errorData,
 		reason: message,
 	};
+};
+
+export const handleUpdatePost = async (
+	event: RequestEvent,
+	handlerType: TControllerHandlerVariant,
+) => {
+	return await validateAndHandleRequest(
+		event,
+		handlerType,
+		PostUpdateSchema,
+		async (data) => {
+			const { postId } = data.pathParams;
+
+			try {
+				const currentPost = await findPostById(postId, { authorId: true });
+				if (!currentPost) {
+					return createErrorResponse(
+						handlerType,
+						404,
+						`A post with the id: ${postId} does not exist`,
+					);
+				}
+
+				if (event.locals.user.id !== currentPost.authorId) {
+					return createErrorResponse(
+						handlerType,
+						401,
+						`The currently authenticated user id does not match the post's author id: ${currentPost.authorId}`,
+					);
+				}
+
+				const updatedPost = await updatePost(postId, data.body);
+				return createSuccessResponse(
+					handlerType,
+					`Successfully updated the post with id: ${postId}`,
+					updatedPost,
+				);
+			} catch {
+				return createErrorResponse(
+					handlerType,
+					500,
+					'An unexpected error occured while trying to update the post',
+				);
+			}
+		},
+		true,
+	);
+};
+
+export const handleGetPostsByAuthor = async (
+	event: RequestEvent,
+	handlerType: TControllerHandlerVariant,
+) => {
+	return await validateAndHandleRequest(
+		event,
+		handlerType,
+		GetPostsByAuthorSchema,
+		async (data) => {
+			const { pageNumber, orderBy, ascending } = data.urlSearchParams;
+			const { username } = data.pathParams;
+
+			try {
+				const posts =
+					(await findPostsByAuthorId(
+						pageNumber,
+						MAXIMUM_POSTS_PER_PAGE,
+						username,
+						orderBy as TPostOrderByColumn,
+						ascending,
+						PUBLIC_POST_SELECTORS,
+					)) ?? [];
+
+				const likedPosts =
+					event.locals.user.id !== NULLABLE_USER.id && handlerType !== 'api-route'
+						? await findLikedPostsFromSubset(event.locals.user.id, posts)
+						: [];
+				const responseData = {
+					posts,
+					...(handlerType !== 'api-route' && { likedPosts }),
+					pageNumber,
+					ascending,
+					orderBy: orderBy as TPostOrderByColumn,
+					author: username,
+				};
+				return createSuccessResponse(
+					handlerType,
+					`Successfully fetched the posts with the author username of: ${username}`,
+					responseData,
+				);
+			} catch {
+				const errorResponse = createErrorResponse(
+					handlerType,
+					500,
+					'An unexpected error occured while fetching the author posts',
+				);
+				if (handlerType === 'page-server-load') throw errorResponse;
+				return errorResponse;
+			}
+		},
+	);
 };
 
 export const handleCreatePost = async (
@@ -276,7 +349,14 @@ export const handleGetPost = async (
 				finalData,
 			);
 		} catch (error) {
-			return createErrorResponse(handlerType, 500, 'An error occurred while fetching the post');
+			const errorResponse = createErrorResponse(
+				handlerType,
+				500,
+				'An error occurred while fetching the post',
+			);
+			if (handlerType === 'page-server-load') throw errorResponse;
+
+			return errorResponse;
 		}
 	});
 };
@@ -303,11 +383,13 @@ export const handleGetPostsWithArtistName = async (
 					PUBLIC_POST_SELECTORS,
 				);
 				const likedPosts =
-					user.id !== NULLABLE_USER.id ? await findLikedPostsFromSubset(user.id, posts) : [];
+					user.id !== NULLABLE_USER.id && handlerType !== 'api-route'
+						? await findLikedPostsFromSubset(user.id, posts)
+						: [];
 
 				const responseData = {
 					posts,
-					likedPosts,
+					...(handlerType !== 'api-route' && { likedPosts }),
 					pageNumber,
 					ascending,
 					orderBy: orderBy as TPostOrderByColumn,
@@ -318,7 +400,6 @@ export const handleGetPostsWithArtistName = async (
 					responseData,
 				);
 			} catch (error) {
-				console.error(error);
 				const errorResponse = createErrorResponse(
 					handlerType,
 					500,
@@ -357,11 +438,13 @@ export const handleGetPostsWithTagName = async (
 					PUBLIC_POST_SELECTORS,
 				);
 				const likedPosts =
-					user.id !== NULLABLE_USER.id ? await findLikedPostsFromSubset(user.id, posts) : [];
+					user.id !== NULLABLE_USER.id && handlerType !== 'api-route'
+						? await findLikedPostsFromSubset(user.id, posts)
+						: [];
 
 				const responseData = {
 					posts,
-					likedPosts,
+					...(handlerType !== 'api-route' && { likedPosts }),
 					pageNumber,
 					ascending,
 					orderBy: orderBy as TPostOrderByColumn,

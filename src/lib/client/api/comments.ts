@@ -1,20 +1,20 @@
-import { PAGE_NUMBER_URL_PARAMETER, PARENT_COMMENT_ID_URL_PARAMETER } from '$lib/shared/constants/comments';
 import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
 import { buildUrl } from '$lib/shared/helpers/urls';
 import type { TApiResponse } from '$lib/shared/types/api';
 import type { IComment, ICommentCreateBody } from '$lib/shared/types/comments';
 import { toast } from '@zerodevx/svelte-toast';
 import { FAILURE_TOAST_OPTIONS } from '../constants/toasts';
+import { getApiAuthHeaders } from '../helpers/auth';
 import { commentTreeStore } from '../stores/comments';
 
 export const getComments = async (
 	postId: string,
 	parentCommentId: string | null,
-	pageNumber: number
+	pageNumber: number,
 ): Promise<Response> => {
 	const params = {
-		[PAGE_NUMBER_URL_PARAMETER]: pageNumber,
-		[PARENT_COMMENT_ID_URL_PARAMETER]: parentCommentId === null ? 'null' : parentCommentId
+		pageNumber,
+		parentCommentId: parentCommentId === null ? 'null' : parentCommentId,
 	};
 
 	const finalUrl = buildUrl(`/api/post/${postId}/comments`, params);
@@ -34,9 +34,7 @@ export const createPostCommentsPaginator = (postId: string, parentCommentId: str
 
 		if (response.ok) {
 			const responseData: TApiResponse<IComment[]> = await response.json();
-			const comments = convertDataStructureToIncludeDatetimes(
-				responseData.data,
-			) as IComment[];
+			const comments = convertDataStructureToIncludeDatetimes(responseData.data) as IComment[];
 
 			commentTreeStore.update((currentCommentTree) => {
 				comments.forEach((comment) => {
@@ -55,7 +53,7 @@ export const createPostCommentsPaginator = (postId: string, parentCommentId: str
 		} else {
 			toast.push(
 				'There was an error that occured while loading the comments',
-				FAILURE_TOAST_OPTIONS
+				FAILURE_TOAST_OPTIONS,
 			);
 		}
 
@@ -63,9 +61,10 @@ export const createPostCommentsPaginator = (postId: string, parentCommentId: str
 	};
 };
 
-export const createComment = async (body: ICommentCreateBody) => {
-	return await fetch('/api/post/comments', {
+export const createComment = async (postId: string, body: ICommentCreateBody) => {
+	return await fetch(`/api/post/${postId}/comments`, {
 		method: 'POST',
-		body: JSON.stringify(body)
+		body: JSON.stringify(body),
+		headers: getApiAuthHeaders(),
 	});
 };

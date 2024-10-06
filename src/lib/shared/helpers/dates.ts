@@ -19,7 +19,7 @@ export function getTimeDifferenceString(targetDatetime: Date) {
 		{ limit: day, label: 'day' },
 		{ limit: hour, label: 'hour' },
 		{ limit: minute, label: 'minute' },
-		{ limit: 1000, label: 'second' }
+		{ limit: 1000, label: 'second' },
 	];
 
 	for (const { limit, label } of times) {
@@ -39,7 +39,7 @@ export function formatDate(date: Date): string {
 		hour: '2-digit',
 		minute: '2-digit',
 		hour12: false,
-		timeZoneName: 'short'
+		timeZoneName: 'short',
 	};
 
 	const formatter = new Intl.DateTimeFormat('en-US', options);
@@ -77,7 +77,6 @@ export function getFormalDateTitle(date: Date) {
 	return `${month} ${formattedDay}, ${year}`;
 }
 
-
 const tryDateConvert = (key: string, target: unknown): Date | unknown => {
 	try {
 		if (!DATE_KEYS.includes(key)) return target;
@@ -90,7 +89,11 @@ const tryDateConvert = (key: string, target: unknown): Date | unknown => {
 };
 
 export const convertDataStructureToIncludeDatetimes = (target: object) => {
-	const convertedObject = Array.isArray(target) ? [] as unknown[] : {} as Record<string, unknown>;
+	if (target === null) return target;
+
+	const convertedObject = Array.isArray(target)
+		? ([] as unknown[])
+		: ({} as Record<string, unknown>);
 
 	for (const [key, value] of Object.entries(target)) {
 		let convertedValue;
@@ -109,5 +112,3 @@ export const convertDataStructureToIncludeDatetimes = (target: object) => {
 
 	return convertedObject;
 };
-
-

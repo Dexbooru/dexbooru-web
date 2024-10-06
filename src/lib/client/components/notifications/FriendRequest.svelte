@@ -9,14 +9,13 @@
 	import { Avatar, Button, DropdownItem } from 'flowbite-svelte';
 
 	export let friendRequest: IFriendRequest;
-	
+
 	let friendshipActionLoading = false;
 
 	const handleFriendshipAction = async (action: TFriendRequestAction) => {
 		friendshipActionLoading = true;
-		const response = await handleFriendRequest({
-			senderUserId: friendRequest.senderUser.id,
-			action
+		const response = await handleFriendRequest(friendRequest.senderUser.username, {
+			action,
 		});
 		friendshipActionLoading = false;
 
@@ -31,7 +30,7 @@
 				if (!currentNotificationData) return null;
 
 				currentNotificationData.friendRequests = currentNotificationData.friendRequests.filter(
-					(currentFriendRequest) => currentFriendRequest.id !== friendRequest.id
+					(currentFriendRequest) => currentFriendRequest.id !== friendRequest.id,
 				);
 
 				return currentNotificationData;
@@ -42,7 +41,7 @@
 					currentChatData.friends.push({
 						id: friendRequest.senderUser.id,
 						username: friendRequest.senderUser.username,
-						profilePictureUrl: friendRequest.senderUser.profilePictureUrl
+						profilePictureUrl: friendRequest.senderUser.profilePictureUrl,
 					});
 
 					return currentChatData;
@@ -51,7 +50,7 @@
 		} else {
 			toast.push(
 				'An error occured while trying to accept the friend request!',
-				FAILURE_TOAST_OPTIONS
+				FAILURE_TOAST_OPTIONS,
 			);
 		}
 	};

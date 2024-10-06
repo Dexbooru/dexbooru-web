@@ -13,6 +13,7 @@ model User {
   id                       String                    @id @default(uuid())
   username                 String                    @unique() @db.VarChar(12)
   createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @default(now())
   email                    String                    @unique() @db.VarChar(254)
   profilePictureUrl        String
   password                 String
@@ -31,6 +32,7 @@ model User {
 model Post {
   id          String       @id @default(uuid())
   createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now())
   description String       @db.Text
   isNsfw      Boolean      @default(false)
   likes       Int          @default(0)
@@ -45,11 +47,13 @@ model Post {
   postReports PostReport[]
 
   @@index([id])
+  @@index([authorId])
 }
 
 model Comment {
   id              String    @id @default(uuid())
   createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now())
   content         String    @db.VarChar(1500)
   replies         Comment[] @relation(name: "replies")
   post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -58,6 +62,9 @@ model Comment {
   parentCommentId String?
   author          User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId        String?
+
+  @@index([authorId])
+  @@index([postId])
 }
 
 model Tag {

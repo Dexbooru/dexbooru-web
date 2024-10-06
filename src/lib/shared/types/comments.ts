@@ -1,7 +1,6 @@
 import type { Comment } from '@prisma/client';
 
 export interface ICommentCreateBody {
-	postId: string;
 	parentCommentId: string | null;
 	content: string;
 }

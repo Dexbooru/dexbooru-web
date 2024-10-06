@@ -7,15 +7,15 @@
 	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
 	import {
 		getDeviceDetectionDataFromWindow,
-		registerDocumentEventListeners
+		registerDocumentEventListeners,
 	} from '$lib/client/helpers/dom';
 	import {
 		deviceStore,
 		isDesktopStore,
 		isMobileStore,
-		isTabletStore
+		isTabletStore,
 	} from '$lib/client/stores/device';
-	import { searchModalActiveStore } from '$lib/client/stores/layout';
+	import { scrollToTopButtonActiveStore, searchModalActiveStore } from '$lib/client/stores/layout';
 	import { notificationStore } from '$lib/client/stores/notifications';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { NONEXISTENT_USER_ID } from '$lib/shared/constants/auth';
@@ -24,6 +24,8 @@
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import { onDestroy, onMount } from 'svelte';
 	import '../app.postcss';
+	import { Button } from 'flowbite-svelte';
+	import { ArrowUpOutline } from 'flowbite-svelte-icons';
 
 	authenticatedUserStore.set($page.data.user.id !== NONEXISTENT_USER_ID ? $page.data.user : null);
 
@@ -66,6 +68,17 @@
 
 <Navbar />
 <div style="flex:1">
+	<div class="relative">
+		{#if $scrollToTopButtonActiveStore}
+			<Button
+				on:click={() => window.scroll({ top: 0, behavior: 'smooth' })}
+				pill={true}
+				size="xl"
+				class="!p-2 !absolute right-0 bottom-0"><ArrowUpOutline class="w-6 h-6" /></Button
+			>
+		{/if}
+	</div>
+
 	<slot />
 </div>
 <Footer />

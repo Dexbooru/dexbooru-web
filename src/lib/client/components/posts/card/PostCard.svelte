@@ -5,6 +5,8 @@
 	import { Card, Toast } from 'flowbite-svelte';
 	import { ExclamationCircleSolid } from 'flowbite-svelte-icons';
 	import PostCardActions from './PostCardActions.svelte';
+	import { scale } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 
 	export let post: TPost;
 
@@ -28,8 +30,9 @@
 		postHref="/posts/{postId}"
 		{imageUrls}
 		imagesAlt={description}
-		slideDuration={750}
+		slideDuration={350}
 		blurImages={isNsfw}
+		transitionFunction={(x) => scale(x, { duration: 500, easing: quintOut })}
 	/>
 	<PostCardBody {post} {author} {createdAt} {tags} {artists} />
 	<PostCardActions {post} {author} {likes} {postId} />

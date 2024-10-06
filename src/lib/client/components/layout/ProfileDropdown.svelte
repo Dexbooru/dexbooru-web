@@ -41,12 +41,6 @@
 	<AngleDownSolid size="sm" class="!mr-2" />
 </Button>
 <Dropdown triggeredBy="#navbar-profile-picture">
-	<div slot="header" class="px-4 py-2">
-		<span class="block text-sm text-gray-900 dark:text-white"
-			>{$authenticatedUserStore?.username}</span
-		>
-		<span class="block truncate text-sm font-medium">{$authenticatedUserStore?.email}</span>
-	</div>
 	<DropdownItem href="/profile/{$authenticatedUserStore?.username}">Your Profile</DropdownItem>
 	<DropdownItem href="/posts/uploaded">Your Posts</DropdownItem>
 	<DropdownItem href="/posts/liked">Liked Posts</DropdownItem>

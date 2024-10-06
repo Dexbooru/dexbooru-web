@@ -1,7 +1,12 @@
 import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.png';
-import { footerStore, searchModalActiveStore } from '../stores/layout';
+import {
+	footerStore,
+	scrollToTopButtonActiveStore,
+	searchModalActiveStore,
+} from '../stores/layout';
 import type { IDeviceStoreData } from '../types/device';
 
+const scrollThreshold = 0.75;
 
 export const getDeviceDetectionDataFromWindow = (): IDeviceStoreData => {
 	const windowWidth = window.innerWidth;
@@ -13,7 +18,7 @@ export const getDeviceDetectionDataFromWindow = (): IDeviceStoreData => {
 	return {
 		isMobile,
 		isTablet,
-		isDesktop
+		isDesktop,
 	};
 };
 
@@ -26,12 +31,24 @@ export const registerDocumentEventListeners = () => {
 
 	document.addEventListener('resize', onResizeDocument);
 	document.addEventListener('keydown', onKeyDownDocument);
+	document.addEventListener('scroll', onDocumentScroll);
 };
 
 export const destroyDocumentEventListeners = () => {
 	document.removeEventListener('resize', onResizeDocument);
 	document.removeEventListener('DOMContentLoaded', onLoadDocument);
 	document.removeEventListener('keydown', onKeyDownDocument);
+	document.removeEventListener('scroll', onDocumentScroll);
+};
+
+const onDocumentScroll = () => {
+	const scrollPosition = window.scrollY;
+	const documentHeight = document.body.scrollHeight;
+
+	// console.log(scrollPosition, documentHeight);
+	// console.log(scrollPosition > documentHeight * scrollThreshold);
+
+	scrollToTopButtonActiveStore.set(scrollPosition > documentHeight * scrollThreshold);
 };
 
 const onLoadDocument = () => {
@@ -53,11 +70,11 @@ const onKeyDownDocument = (event: KeyboardEvent) => {
 
 const lazyLoadImages = () => {
 	const images = document.querySelectorAll('img');
-	images.forEach(img => img.setAttribute('loading', 'lazy'));
+	images.forEach((img) => img.setAttribute('loading', 'lazy'));
 
 	const observer = new MutationObserver((mutations) => {
-		mutations.forEach(mutation => {
-			mutation.addedNodes.forEach(node => {
+		mutations.forEach((mutation) => {
+			mutation.addedNodes.forEach((node) => {
 				if (node.nodeName.toLowerCase() === 'img') {
 					(node as HTMLElement).setAttribute('loading', 'lazy');
 				}
@@ -66,18 +83,18 @@ const lazyLoadImages = () => {
 	});
 
 	observer.observe(document.body, { childList: true, subtree: true });
-}
+};
 
 const loadErrorProfilePictureImageAvatars = () => {
 	const postCardAvatars = Array.from(
-		document.getElementsByClassName('post-card-avatar')
+		document.getElementsByClassName('post-card-avatar'),
 	) as HTMLImageElement[];
 	postCardAvatars.forEach((postCardAvatar) => {
 		postCardAvatar.onerror = () => {
 			postCardAvatar.src = DefaultProfilePicture;
 		};
 	});
-}
+};
 
 const updateFooterData = () => {
 	const footerElement = document.querySelector('#app-footer') as HTMLElement;
@@ -89,7 +106,7 @@ const updateFooterData = () => {
 		footerStore.set({
 			height: footerHeight,
 			bottom: screenHeight - footerHeight,
-			element: footerElement
+			element: footerElement,
 		});
 	}
 };

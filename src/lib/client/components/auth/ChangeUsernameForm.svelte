@@ -1,11 +1,24 @@
 <script lang="ts">
+	import { changeUsernameFormAuthRequirementsStore } from '$lib/client/stores/forms';
 	import { Alert, Button, Card } from 'flowbite-svelte';
+	import { onDestroy } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 
 	export let error: string | null = null;
 	export let errorType: string | null = null;
 
 	let newUsername: string = '';
+	let changeUsernameButtonDisabled = true;
+
+	const changeUsernameFormAuthRequirementsUnsubscribe =
+		changeUsernameFormAuthRequirementsStore.subscribe((data) => {
+			const disabledCheck = newUsername.length > 0 && data.username?.unsatisfied.length === 0;
+			changeUsernameButtonDisabled = !disabledCheck;
+		});
+
+	onDestroy(() => {
+		changeUsernameFormAuthRequirementsUnsubscribe();
+	});
 </script>
 
 <Card>
@@ -19,8 +32,9 @@
 			inputName="newUsername"
 			labelTitle="Enter your new username"
 			labelStyling="margin-bottom: 10px;"
+			formStore={changeUsernameFormAuthRequirementsStore}
 		/>
-		<Button disabled={newUsername.length === 0} type="submit">Change Username</Button>
+		<Button disabled={changeUsernameButtonDisabled} type="submit">Change Username</Button>
 
 		{#if error !== null && errorType === 'username'}
 			<Alert dismissable border color="red" class="mt-2">

@@ -3,13 +3,18 @@
 	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
 	import type { ActionData } from '../../../../routes/login/$types';
 
-	let showPassword = false;
-
 	export let form: ActionData;
+
+	let showPassword = false;
 
 	const loginErrorReason: string | undefined = form?.reason;
 	let username: string = form?.username || '';
 	let password: string = '';
+	let loginFormButtonDisabled = true;
+
+	$: {
+		loginFormButtonDisabled = !(username.length > 0 && password.length > 0);
+	}
 </script>
 
 <Card class="w-full max-w-md mt-20">
@@ -53,7 +58,7 @@
 		<div class="flex items-start">
 			<Checkbox name="rememberMe">Remember me</Checkbox>
 		</div>
-		<Button type="submit" class="w-full">Log in</Button>
+		<Button disabled={loginFormButtonDisabled} type="submit" class="w-full">Log in</Button>
 		{#if loginErrorReason}
 			<Alert color="red">
 				<span class="font-medium">Login error!</span>

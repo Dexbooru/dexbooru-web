@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { changePasswordFormAuthRequirementsStore } from '$lib/client/stores/forms';
 	import { Alert, Button, Card } from 'flowbite-svelte';
+	import { onDestroy } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 
 	export let error: string | null = null;
@@ -11,13 +13,20 @@
 
 	let changePasswordButtonDiabled = true;
 
-	$: {
-		changePasswordButtonDiabled = !(
-			oldPassword.length > 0 &&
-			newPassword.length > 0 &&
-			confirmedNewPassword.length > 0
-		);
-	}
+	const changePasswordFormAuthRequirementsUnsubscribe =
+		changePasswordFormAuthRequirementsStore.subscribe((data) => {
+			const disabledCheck =
+				oldPassword.length > 0 &&
+				newPassword.length > 0 &&
+				confirmedNewPassword.length > 0 &&
+				data.password?.unsatisfied.length === 0 &&
+				data.confirmedPassword === true;
+			changePasswordButtonDiabled = !disabledCheck;
+		});
+
+	onDestroy(() => {
+		changePasswordFormAuthRequirementsUnsubscribe();
+	});
 </script>
 
 <Card>
@@ -37,12 +46,15 @@
 			labelTitle="Enter your new password"
 			inputFieldType="password"
 			inputName="newPassword"
+			formStore={changePasswordFormAuthRequirementsStore}
 		/>
 		<AuthInput
 			bind:input={confirmedNewPassword}
+			bind:comparisonInput={newPassword}
 			labelTitle="Confirm your new password"
 			inputFieldType="password-confirm"
 			inputName="confirmedNewPassword"
+			formStore={changePasswordFormAuthRequirementsStore}
 		/>
 		<Button disabled={changePasswordButtonDiabled} type="submit">Change Password</Button>
 

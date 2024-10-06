@@ -13,19 +13,23 @@ export type TChatFriend = {
 	id: string;
 	username: string;
 	profilePictureUrl: string;
-}
+};
 
 export type TFriendRequestSelector = Prisma.FriendRequestSelect<DefaultArgs>;
 
 export type TFriendRequestAction = 'accept' | 'decline';
-export type TFriendStatus = 'not-friends' | 'request-pending' | 'are-friends' | 'is-self';
+export type TFriendStatus =
+	| 'not-friends'
+	| 'request-pending'
+	| 'are-friends'
+	| 'is-self'
+	| 'irrelevant';
 
 export interface IFriendRequestSendBody {
-	receiverUserId: string;
+	receiverUsername: string;
 }
 
 export interface IFriendRequestHandleBody {
-	senderUserId: string;
 	action: TFriendRequestAction;
 }
 

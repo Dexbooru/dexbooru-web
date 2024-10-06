@@ -38,10 +38,9 @@
 		if (commentContent.length > MAXIMUM_CONTENT_LENGTH) return;
 
 		commentCreating = true;
-		const response = await createComment({
-			postId,
+		const response = await createComment(postId, {
 			content: commentContentMarkdown,
-			parentCommentId
+			parentCommentId,
 		});
 		commentCreating = false;
 
@@ -56,7 +55,7 @@
 					...newComment,
 					createdAt: new Date(newComment.createdAt),
 					authorId: $authenticatedUserStore?.id,
-					author: $authenticatedUserStore
+					author: $authenticatedUserStore,
 				});
 				return commentTree;
 			});

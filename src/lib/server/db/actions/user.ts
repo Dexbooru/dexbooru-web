@@ -5,20 +5,20 @@ import prisma from '../prisma';
 
 export async function checkIfUsersAreFriends(
 	senderUserId: string,
-	receiverUserId: string
+	receiverUserId: string,
 ): Promise<boolean> {
 	const friendResult = await prisma.user.findUnique({
 		where: {
 			id: senderUserId,
 			friends: {
 				some: {
-					id: receiverUserId
-				}
-			}
+					id: receiverUserId,
+				},
+			},
 		},
 		select: {
-			id: true
-		}
+			id: true,
+		},
 	});
 
 	return !!friendResult;
@@ -27,28 +27,28 @@ export async function checkIfUsersAreFriends(
 export async function createFriend(senderUserId: string, receiverUserId: string): Promise<boolean> {
 	const modifiedSenderUserRecord = await prisma.user.update({
 		where: {
-			id: senderUserId
+			id: senderUserId,
 		},
 		data: {
 			friends: {
 				connect: {
-					id: receiverUserId
-				}
-			}
-		}
+					id: receiverUserId,
+				},
+			},
+		},
 	});
 
 	const modifiedReceiverUserRecord = await prisma.user.update({
 		where: {
-			id: receiverUserId
+			id: receiverUserId,
 		},
 		data: {
 			friends: {
 				connect: {
-					id: senderUserId
-				}
-			}
-		}
+					id: senderUserId,
+				},
+			},
+		},
 	});
 
 	return !!modifiedSenderUserRecord && !!modifiedReceiverUserRecord;
@@ -57,28 +57,28 @@ export async function createFriend(senderUserId: string, receiverUserId: string)
 export async function deleteFriend(senderUserId: string, receiverUserId: string): Promise<boolean> {
 	const modifiedSenderUserRecord = await prisma.user.update({
 		where: {
-			id: senderUserId
+			id: senderUserId,
 		},
 		data: {
 			friends: {
 				disconnect: {
-					id: receiverUserId
-				}
-			}
-		}
+					id: receiverUserId,
+				},
+			},
+		},
 	});
 
 	const modifiedReceiverUserRecord = await prisma.user.update({
 		where: {
-			id: receiverUserId
+			id: receiverUserId,
 		},
 		data: {
 			friends: {
 				disconnect: {
-					id: senderUserId
-				}
-			}
-		}
+					id: senderUserId,
+				},
+			},
+		},
 	});
 
 	return !!modifiedReceiverUserRecord && !!modifiedSenderUserRecord;
@@ -88,17 +88,17 @@ export async function findLikedPostsFromSubset(userId: string, posts: TPost[]): 
 	const postIds = posts.map((post) => post.id);
 	const likedPostsInSubsetData = await prisma.user.findUnique({
 		where: {
-			id: userId
+			id: userId,
 		},
 		select: {
 			likedPosts: {
 				where: {
 					id: {
-						in: postIds
-					}
-				}
-			}
-		}
+						in: postIds,
+					},
+				},
+			},
+		},
 	});
 
 	return (likedPostsInSubsetData ? likedPostsInSubsetData.likedPosts : []) as TPost[];
@@ -110,22 +110,22 @@ export async function findLikedPostsByAuthorId(
 	authorId: string,
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
-	selectors?: TPostSelector
+	selectors?: TPostSelector,
 ): Promise<TPost[] | null> {
 	const data = await prisma.user.findFirst({
 		where: {
-			id: authorId
+			id: authorId,
 		},
 		select: {
 			likedPosts: {
 				select: selectors,
 				orderBy: {
-					[orderBy]: ascending ? 'asc' : 'desc'
+					[orderBy]: ascending ? 'asc' : 'desc',
 				},
 				skip: pageNumber * pageLimit,
-				take: pageLimit
-			}
-		}
+				take: pageLimit,
+			},
+		},
 	});
 
 	if (!data) return null;
@@ -136,39 +136,44 @@ export async function findLikedPostsByAuthorId(
 export async function findUserById(id: string, selectors?: TUserSelector): Promise<IUser | null> {
 	return (await prisma.user.findUnique({
 		where: {
-			id
+			id,
 		},
-		select: selectors
+		select: selectors,
 	})) as IUser;
 }
 
-export async function findUserByName(username: string): Promise<IUser | null> {
+export async function findUserByName(
+	username: string,
+	selectors?: TUserSelector,
+): Promise<IUser | null> {
 	return (await prisma.user.findFirst({
 		where: {
-			username
-		}
-	})) as IUser;
+			username,
+		},
+		select: selectors,
+	})) as IUser | null;
 }
 
 export async function findUserByNameOrEmail(
 	email: string,
-	username: string
+	username: string,
 ): Promise<IUser | null> {
 	return (await prisma.user.findFirst({
 		where: {
-			OR: [{ email }, { username }]
-		}
+			OR: [{ email }, { username }],
+		},
 	})) as IUser;
 }
 
 export async function editPasswordByUserId(userId: string, newPassword: string): Promise<boolean> {
 	const updateUserPasswordBatchResult = await prisma.user.updateMany({
 		where: {
-			id: userId
+			id: userId,
 		},
 		data: {
-			password: newPassword
-		}
+			password: newPassword,
+			updatedAt: new Date(),
+		},
 	});
 
 	return updateUserPasswordBatchResult.count > 0;
@@ -177,24 +182,29 @@ export async function editPasswordByUserId(userId: string, newPassword: string):
 export async function editUsernameByUserId(userId: string, newUsername: string): Promise<boolean> {
 	const updateUsernameBatchResult = await prisma.user.updateMany({
 		where: {
-			id: userId
+			id: userId,
 		},
 		data: {
-			username: newUsername
-		}
+			username: newUsername,
+			updatedAt: new Date(),
+		},
 	});
 
 	return updateUsernameBatchResult.count > 0;
 }
 
-export async function editProfilePictureByUserId(userId: string, newProfilePictureUrl: string): Promise<boolean> {
+export async function editProfilePictureByUserId(
+	userId: string,
+	newProfilePictureUrl: string,
+): Promise<boolean> {
 	const updatedProfilePictureBatchResult = await prisma.user.updateMany({
 		where: {
-			id: userId
+			id: userId,
 		},
 		data: {
-			profilePictureUrl: newProfilePictureUrl
-		}
+			profilePictureUrl: newProfilePictureUrl,
+			updatedAt: new Date(),
+		},
 	});
 
 	return updatedProfilePictureBatchResult.count > 0;
@@ -205,8 +215,8 @@ export async function deleteUserById(userId: string): Promise<boolean> {
 
 	const deleteUserBatchResult = await prisma.user.deleteMany({
 		where: {
-			id: userId
-		}
+			id: userId,
+		},
 	});
 
 	return deleteUserBatchResult.count > 0;
@@ -216,16 +226,16 @@ export async function createUser(
 	username: string,
 	email: string,
 	password: string,
-	profilePictureUrl: string
-): Promise<IUser | null> {
+	profilePictureUrl: string,
+): Promise<IUser> {
 	const newUser = await prisma.user.create({
 		data: {
 			email,
 			username,
 			password,
-			profilePictureUrl
-		}
+			profilePictureUrl,
+		},
 	});
 
-	return newUser as IUser;
+	return newUser;
 }

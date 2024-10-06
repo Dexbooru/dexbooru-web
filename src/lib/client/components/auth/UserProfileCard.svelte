@@ -19,7 +19,7 @@
 		if (!$authenticatedUserStore || $authenticatedUserStore.id === targetUser.id) return;
 
 		addFriendLoading = true;
-		const response = await addFriend({ receiverUserId: targetUser.id });
+		const response = await addFriend(targetUser.username);
 		addFriendLoading = false;
 
 		if (response.ok) {
@@ -28,7 +28,7 @@
 		} else {
 			toast.push(
 				'An error occured while trying to send a friend request to this user',
-				FAILURE_TOAST_OPTIONS
+				FAILURE_TOAST_OPTIONS,
 			);
 		}
 	};
@@ -37,7 +37,7 @@
 		if (!$authenticatedUserStore || $authenticatedUserStore.id === targetUser.id) return;
 
 		deleteFriendLoading = true;
-		const response = await deleteFriend({ receiverUserId: targetUser.id });
+		const response = await deleteFriend(targetUser.username);
 		deleteFriendLoading = false;
 
 		if (response.ok) {
@@ -90,9 +90,13 @@
 						>
 						<Button disabled={deleteFriendLoading} on:click={handleDeleteFriend}>Unfriend</Button>
 					{/if}
+
+					<Button href="/posts/uploaded/{targetUser.username}" color="blue"
+						>View uploaded posts</Button
+					>
 				{:else}
-					<Button href="/profile/posts/liked" color="red">View liked posts</Button>
-					<Button href="/profile/posts/uploaded" color="blue">View uploaded posts</Button>
+					<Button href="/posts/liked" color="red">View liked posts</Button>
+					<Button href="/posts/uploaded" color="blue">View uploaded posts</Button>
 				{/if}
 			{/if}
 		</div>

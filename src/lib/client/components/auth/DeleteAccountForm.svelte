@@ -2,10 +2,12 @@
 	import { ACCOUNT_DELETION_CONFIRMATION_TEXT } from '$lib/shared/constants/auth';
 	import { Alert, Button, Card, Input, Label } from 'flowbite-svelte';
 	import { slide } from 'svelte/transition';
+	import AuthInput from './AuthInput.svelte';
 
 	export let error: string | null = null;
 	export let errorType: string | null = null;
 
+	let confirmedPassword: string = '';
 	let confirmationText: string = '';
 </script>
 
@@ -23,6 +25,13 @@
 				placeholder={ACCOUNT_DELETION_CONFIRMATION_TEXT}
 				required
 			/>
+			<AuthInput
+				bind:input={confirmedPassword}
+				bind:comparisonInput={confirmedPassword}
+				labelTitle="Confirm your password"
+				inputFieldType="password-confirm"
+				inputName="confirmedNewPassword"
+			/>
 			{#if confirmationText === ACCOUNT_DELETION_CONFIRMATION_TEXT}
 				<p transition:slide>We are sad to see you leave 😭</p>
 			{/if}
@@ -30,7 +39,8 @@
 		<Button
 			type="submit"
 			color="red"
-			disabled={confirmationText !== ACCOUNT_DELETION_CONFIRMATION_TEXT}>DELETE YOUR ACCOUNT</Button
+			disabled={confirmationText !== ACCOUNT_DELETION_CONFIRMATION_TEXT ||
+				confirmedPassword.length === 0}>DELETE YOUR ACCOUNT</Button
 		>
 
 		{#if error !== null && errorType === 'delete-account'}
