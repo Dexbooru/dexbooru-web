@@ -1,77 +1,128 @@
 <script lang="ts">
-	import { fileToBase64String } from '$lib/client/helpers/images';
-	import { MAXIMUM_IMAGES_PER_POST } from '$lib/shared/constants/images';
+	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { filesToBase64Strings } from '$lib/client/helpers/images';
+	import {
+		MAXIMUM_IMAGES_PER_POST,
+		MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB,
+	} from '$lib/shared/constants/images';
+	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
+	import { toast } from '@zerodevx/svelte-toast';
 	import { Fileupload, Label, P, Spinner } from 'flowbite-svelte';
+	import { onMount } from 'svelte';
 	import ImagePreviewModal from '../images/ImagePreviewModal.svelte';
 
-	let pictures: { imageBase64: string; file: File }[] = [];
+	export let images: { imageBase64: string; file: File }[] = [];
+
 	let loadingPictures = false;
-	let errorMessage: string | null = null;
 
-	const resetFileUploadState = () => {
-		pictures = [];
+	const resetFileUploadState = (
+		target: HTMLInputElement,
+		startedChangingFiles: boolean = false,
+	) => {
+		images = [];
 		loadingPictures = false;
-	};
-
-	const handleFileUploadError = (error: Error) => {
-		errorMessage = error.message;
-		resetFileUploadState();
+		target.files = null;
+		if (!startedChangingFiles) {
+			target.value = '';
+		}
 	};
 
 	const onFileChange = async (event: Event) => {
 		const target = event.target as HTMLInputElement;
-		const files: FileList | null = target.files;
-		errorMessage = null;
-		resetFileUploadState();
+		const files = Array.from(target.files ?? []);
+		resetFileUploadState(target, true);
+
+		loadingPictures = true;
 
 		if (!files) {
-			handleFileUploadError(new Error('Did not upload any files'));
-			resetFileUploadState();
+			toast.push('Unable to process the selected file(s)', FAILURE_TOAST_OPTIONS);
+			resetFileUploadState(target);
+			return;
+		}
+
+		if (files.length === 0) {
+			toast.push('There were no image files selected!', FAILURE_TOAST_OPTIONS);
+			resetFileUploadState(target);
 			return;
 		}
 
 		if (files.length > MAXIMUM_IMAGES_PER_POST) {
-			handleFileUploadError(new Error(`Cannot upload more than ${MAXIMUM_IMAGES_PER_POST} files`));
-			resetFileUploadState();
+			toast.push(
+				`Cannot upload more than ${MAXIMUM_IMAGES_PER_POST} files per post`,
+				FAILURE_TOAST_OPTIONS,
+			);
+			resetFileUploadState(target);
 			return;
 		}
 
-		for (let i = 0; i < files.length; i++) {
-			if (files[i]) {
-				loadingPictures = true;
-				let imageBase64: string | null = null;
-				try {
-					imageBase64 = await fileToBase64String(files[i]);
-				} catch (error) {
-					handleFileUploadError(error as Error);
-					break;
-				}
-				if (imageBase64) {
-					pictures.push({ imageBase64, file: files[i] });
-				} else {
-					handleFileUploadError(new Error('Null base64 string detected for an image!'));
-					break;
-				}
-				loadingPictures = false;
-			}
+		if (files.find((file) => file.size === 0)) {
+			toast.push('At least one of the files contained empty data', FAILURE_TOAST_OPTIONS);
+			resetFileUploadState(target);
+			return;
 		}
+
+		if (files.find((file) => !isFileImageSmall(file))) {
+			toast.push(
+				`At least one of the image files exceeded the maximum upload size of ${MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB} MB`,
+				FAILURE_TOAST_OPTIONS,
+			);
+			resetFileUploadState(target);
+			return;
+		}
+
+		if (files.find((file) => !isFileImage(file))) {
+			toast.push(
+				'At least one of the image files was not a proper image format',
+				FAILURE_TOAST_OPTIONS,
+			);
+			resetFileUploadState(target);
+			return;
+		}
+
+		const { failedFiles, results } = await filesToBase64Strings(files);
+		if (failedFiles.length > 0) {
+			toast.push(failedFiles.join(', '), FAILURE_TOAST_OPTIONS);
+			resetFileUploadState(target);
+			return;
+		}
+
+		images = results;
+		loadingPictures = false;
 	};
+
+	onMount(() => {
+		const postPicturesInput = document.querySelector(
+			'#postPicturesInput',
+		) as HTMLInputElement | null;
+		if (postPicturesInput) {
+			postPicturesInput.value = '';
+			postPicturesInput.files = null;
+		}
+	});
 </script>
 
-<Label class="space-y-2 mx-2.5 mb-2">
-	<span>Upload up to {MAXIMUM_IMAGES_PER_POST} images</span>
-	<Fileupload name="postPictures" accept="image/*" multiple on:change={onFileChange} />
+<Label class="space-y-2">
+	<span
+		>Upload up to {MAXIMUM_IMAGES_PER_POST} images, each of which should not exceed {MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB}
+		MB</span
+	>
+	<Fileupload
+		id="postPicturesInput"
+		required
+		name="postPictures"
+		accept="image/*"
+		multiple
+		on:change={onFileChange}
+	/>
 </Label>
 
 {#if loadingPictures}
 	<Spinner class="block ml-auto mr-auto" size="10" />
-{:else if pictures.length && !errorMessage}
+{:else if images.length > 0}
 	<P size="2xl" class="text-center mt-5">Images Preview</P>
 	<div class="flex flex-wrap space-x-3">
-		{#each pictures as { imageBase64, file }}
+		{#each images as { imageBase64, file }}
 			<ImagePreviewModal {imageBase64} imageFile={file} />
 		{/each}
 	</div>
-{:else if errorMessage}
-	<P>{errorMessage}</P>
 {/if}

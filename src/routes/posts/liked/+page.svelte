@@ -15,6 +15,7 @@
 		originalPostsPageStore.set(data.posts);
 	}
 </script>
-<!-- 
-<PostWrapper postsSection="Uploaded Posts" /> -->
-{JSON.stringify(data)}
+
+
+<PostWrapper postsSection="Liked Posts" />
+

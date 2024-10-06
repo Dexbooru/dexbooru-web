@@ -4,6 +4,8 @@
 
 	export let error: string | null = null;
 	export let errorType: string | null = null;
+
+	let profilePictureFile: File | null = null;
 </script>
 
 <Card>
@@ -16,8 +18,8 @@
 		enctype="multipart/form-data"
 		class="flex flex-col space-y-3"
 	>
-		<ProfilePictureUpload isChangingProfilePicture />
-		<Button type="submit">Change Profile Picture</Button>
+		<ProfilePictureUpload bind:profilePictureFile isChangingProfilePicture />
+		<Button disabled={profilePictureFile === null} type="submit">Change Profile Picture</Button>
 
 		{#if error !== null && errorType === 'profile-picture'}
 			<Alert dismissable border color="red" class="mt-2">

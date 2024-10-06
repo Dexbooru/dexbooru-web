@@ -29,6 +29,6 @@ export const getApiAuthHeaders = (): HeadersInit => {
 	if (!token) return {};
 
 	return {
-		Authorization: `Bearer: ${token}`
+		Authorization: `Bearer ${token}`,
 	};
 };

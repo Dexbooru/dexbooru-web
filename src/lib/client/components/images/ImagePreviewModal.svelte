@@ -10,7 +10,7 @@
 
 <Button
 	color="alternative"
-	style="width: 200px; height: 200px; background-image: url({imageBase64}); background-repeat: no-repeat; background-size: cover;"
+	style="width: 200px; height: 200px; background-image: url({imageBase64}); background-repeat: no-repeat; background-size: cover; background-position: center;"
 	on:click={() => (modalOpen = true)}
 />
 

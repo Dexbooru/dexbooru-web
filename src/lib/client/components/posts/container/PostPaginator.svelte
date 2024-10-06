@@ -43,7 +43,7 @@
 
 {#if $postPaginationStore}
 	<div id="pagination-container" class="flex space-x-3 justify-center {noPostsLeft && 'mt-5'}">
-		{#if noPostsOnPage}
+		{#if noPostsOnPage && !!!['uploaded', 'liked'].find(item => $page.url.href.includes(item))}
 			<Button href={firstPageUrl.href} color="blue">Return to Home</Button>
 		{:else}
 			{#if ($postPaginationStore.pageNumber - 1 >= 0 || noPostsLeft) && $postPaginationStore.pageNumber !== 0}

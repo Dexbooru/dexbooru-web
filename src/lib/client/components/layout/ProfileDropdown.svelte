@@ -48,8 +48,8 @@
 		<span class="block truncate text-sm font-medium">{$authenticatedUserStore?.email}</span>
 	</div>
 	<DropdownItem href="/profile/{$authenticatedUserStore?.username}">Your Profile</DropdownItem>
-	<DropdownItem href="/profile/posts/uploaded">Your Posts</DropdownItem>
-	<DropdownItem href="/profile/posts/liked">Liked Posts</DropdownItem>
+	<DropdownItem href="/posts/uploaded">Your Posts</DropdownItem>
+	<DropdownItem href="/posts/liked">Liked Posts</DropdownItem>
 	<DropdownItem href="/profile/settings">Settings</DropdownItem>
 	<DropdownItem href="/profile/logout" slot="footer">Sign out</DropdownItem>
 </Dropdown>

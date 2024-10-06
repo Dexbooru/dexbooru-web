@@ -20,7 +20,7 @@
 			labelTitle="Enter your new username"
 			labelStyling="margin-bottom: 10px;"
 		/>
-		<Button type="submit">Change Username</Button>
+		<Button disabled={newUsername.length === 0} type="submit">Change Username</Button>
 
 		{#if error !== null && errorType === 'username'}
 			<Alert dismissable border color="red" class="mt-2">

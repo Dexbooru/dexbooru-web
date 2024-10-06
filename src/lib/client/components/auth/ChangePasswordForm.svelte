@@ -8,6 +8,16 @@
 	let oldPassword: string = '';
 	let newPassword: string = '';
 	let confirmedNewPassword: string = '';
+
+	let changePasswordButtonDiabled = true;
+
+	$: {
+		changePasswordButtonDiabled = !(
+			oldPassword.length > 0 &&
+			newPassword.length > 0 &&
+			confirmedNewPassword.length > 0
+		);
+	}
 </script>
 
 <Card>
@@ -34,7 +44,7 @@
 			inputFieldType="password-confirm"
 			inputName="confirmedNewPassword"
 		/>
-		<Button type="submit">Change Password</Button>
+		<Button disabled={changePasswordButtonDiabled} type="submit">Change Password</Button>
 
 		{#if error !== null && errorType === 'password'}
 			<Alert dismissable border color="red" class="mt-2">

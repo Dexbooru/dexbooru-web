@@ -7,13 +7,13 @@ import {
 	editProfilePictureByUserId,
 	editUsernameByUserId,
 	findUserById,
-	findUserByName
+	findUserByName,
 } from '$lib/server/db/actions/user';
 import { runProfileImageTransformationPipeline } from '$lib/server/helpers/images';
 import { hashPassword, passwordsMatch } from '$lib/server/helpers/password';
 import { generateUpdatedUserTokenFromClaims } from '$lib/server/helpers/sessions';
 import { ACCOUNT_DELETION_CONFIRMATION_TEXT } from '$lib/shared/constants/auth';
-import { MAXIMUM_IMAGE_UPLOAD_SIZE_MB } from '$lib/shared/constants/images';
+import { MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB } from '$lib/shared/constants/images';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
 import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
@@ -23,16 +23,15 @@ import type {
 	IChangePasswordFormFields,
 	IChangeProfilePictureFormFields,
 	IChangeUsernameFormFields,
-	IDeleteAccountFields
+	IDeleteAccountFields,
 } from '$lib/shared/types/auth';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Action, Actions } from './$types';
 
-
 const handleAccountDeletion: Action = async ({ locals, cookies, request }) => {
 	if (!locals.user) {
 		throw error(401, {
-			message: 'You are not authorized to delete your account, without being a signed in user!'
+			message: 'You are not authorized to delete your account, without being a signed in user!',
 		});
 	}
 
@@ -42,7 +41,7 @@ const handleAccountDeletion: Action = async ({ locals, cookies, request }) => {
 	if (deletionConfirmationText !== ACCOUNT_DELETION_CONFIRMATION_TEXT) {
 		return fail(400, {
 			type: 'delete-account',
-			message: 'The account deletion confirmation text is incorrect'
+			message: 'The account deletion confirmation text is incorrect',
 		});
 	}
 
@@ -59,17 +58,19 @@ const handleAccountDeletion: Action = async ({ locals, cookies, request }) => {
 const handleChangeProfilePicture: Action = async ({ locals, request, cookies }) => {
 	if (!locals.user) {
 		throw error(401, {
-			message: 'You are not authorized to change a profile picture, without being a signed in user!'
+			message:
+				'You are not authorized to change a profile picture, without being a signed in user!',
 		});
 	}
 
 	const changeProfilePictureForm = await request.formData();
-	const { newProfilePicture } = getFormFields<IChangeProfilePictureFormFields>(changeProfilePictureForm);
+	const { newProfilePicture } =
+		getFormFields<IChangeProfilePictureFormFields>(changeProfilePictureForm);
 
 	if (newProfilePicture.size === 0) {
 		return fail(400, {
 			reason: 'The uploaded profile picture file was empty!',
-			type: 'profile-picture'
+			type: 'profile-picture',
 		});
 	}
 
@@ -82,18 +83,20 @@ const handleChangeProfilePicture: Action = async ({ locals, request, cookies }) 
 
 	if (!isFileImageSmall(newProfilePicture)) {
 		return fail(400, {
-			reason: `The maximum image file upload size is ${MAXIMUM_IMAGE_UPLOAD_SIZE_MB} MB`,
+			reason: `The maximum image file upload size is ${MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB} MB`,
 			type: 'profile-picture',
 		});
 	}
 
-	deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, locals.user.profilePictureUrl)
+	deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, locals.user.profilePictureUrl);
 
-	const newProfilePictureFileBuffer = await runProfileImageTransformationPipeline(newProfilePicture);
+	const newProfilePictureFileBuffer = await runProfileImageTransformationPipeline(
+		newProfilePicture,
+	);
 	const updatedProfilePictureObjectUrl = await uploadToBucket(
 		AWS_PROFILE_PICTURE_BUCKET_NAME,
 		'profile_pictures',
-		newProfilePictureFileBuffer
+		newProfilePictureFileBuffer,
 	);
 	await editProfilePictureByUserId(locals.user.id, updatedProfilePictureObjectUrl);
 
@@ -112,7 +115,7 @@ const handleChangeProfilePicture: Action = async ({ locals, request, cookies }) 
 const handleChangeUsername: Action = async ({ locals, request, cookies }) => {
 	if (!locals.user) {
 		throw error(401, {
-			message: 'You are not authorized to change a username, without being a signed in user!'
+			message: 'You are not authorized to change a username, without being a signed in user!',
 		});
 	}
 
@@ -123,7 +126,7 @@ const handleChangeUsername: Action = async ({ locals, request, cookies }) => {
 		return fail(400, {
 			newUsername,
 			type: 'username',
-			reason: 'At least one of the required fields was missing!'
+			reason: 'At least one of the required fields was missing!',
 		});
 	}
 
@@ -133,7 +136,7 @@ const handleChangeUsername: Action = async ({ locals, request, cookies }) => {
 		return fail(400, {
 			newUsername,
 			type: 'username',
-			reason: 'The username did not meet the requirements!'
+			reason: 'The username did not meet the requirements!',
 		});
 	}
 
@@ -143,7 +146,7 @@ const handleChangeUsername: Action = async ({ locals, request, cookies }) => {
 			newUsername,
 			type: 'username',
 			reason: 'A user with that name already exists!',
-		})
+		});
 	}
 
 	const updatedUsername = await editUsernameByUserId(locals.user.id, newUsername);
@@ -152,13 +155,13 @@ const handleChangeUsername: Action = async ({ locals, request, cookies }) => {
 		return fail(404, {
 			newUsername,
 			type: 'username',
-			reason: `A user with the id: ${locals.user.id} does not exist!`
+			reason: `A user with the id: ${locals.user.id} does not exist!`,
 		});
 	}
 
 	const updatedUserJwtToken = generateUpdatedUserTokenFromClaims({
 		...locals.user,
-		username: newUsername
+		username: newUsername,
 	});
 	cookies.set(SESSION_ID_KEY, updatedUserJwtToken, SESSION_ID_COOKIE_OPTIONS);
 
@@ -171,7 +174,7 @@ const handleChangeUsername: Action = async ({ locals, request, cookies }) => {
 const handleChangePassword: Action = async ({ locals, request }) => {
 	if (!locals.user) {
 		throw error(401, {
-			message: 'You are not authorized to change a password, without being a signed in user!'
+			message: 'You are not authorized to change a password, without being a signed in user!',
 		});
 	}
 
@@ -182,14 +185,14 @@ const handleChangePassword: Action = async ({ locals, request }) => {
 	if (!oldPassword || !newPassword || !confirmedNewPassword) {
 		return fail(400, {
 			type: 'password',
-			reason: 'At least one of the required fields is missing!'
+			reason: 'At least one of the required fields is missing!',
 		});
 	}
 
 	if (newPassword !== confirmedNewPassword) {
 		return fail(400, {
 			type: 'password',
-			reason: 'The new password does not match the confirmed new password!'
+			reason: 'The new password does not match the confirmed new password!',
 		});
 	}
 
@@ -198,7 +201,7 @@ const handleChangePassword: Action = async ({ locals, request }) => {
 	if (!signedInUser) {
 		return fail(404, {
 			type: 'password',
-			reason: `A user with the id: ${locals.user.id} does not exist!`
+			reason: `A user with the id: ${locals.user.id} does not exist!`,
 		});
 	}
 
@@ -206,7 +209,7 @@ const handleChangePassword: Action = async ({ locals, request }) => {
 	if (!passwordsMatch(oldPassword, actualHashedPassword)) {
 		return fail(400, {
 			type: 'password',
-			reason: 'The old password does not match the actual password!'
+			reason: 'The old password does not match the actual password!',
 		});
 	}
 
@@ -215,7 +218,7 @@ const handleChangePassword: Action = async ({ locals, request }) => {
 	if (unsatisfied.length > 0) {
 		return fail(400, {
 			type: 'password',
-			reason: 'The password did not meet the requirements!'
+			reason: 'The password did not meet the requirements!',
 		});
 	}
 
@@ -225,12 +228,12 @@ const handleChangePassword: Action = async ({ locals, request }) => {
 	if (!updatedPassword) {
 		return fail(404, {
 			type: 'password',
-			reason: `A user with the id: ${locals.user.id} does not exist!`
+			reason: `A user with the id: ${locals.user.id} does not exist!`,
 		});
 	}
 
 	return {
-		message: 'The password was changed successfully!'
+		message: 'The password was changed successfully!',
 	};
 };
 

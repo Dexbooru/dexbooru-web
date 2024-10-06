@@ -32,6 +32,7 @@ export type TInferRequestSchema<T extends TRequestSchema> = {
 export type TValidationError = {
     path: (string | number)[];
     message: string;
+    code: z.ZodIssue['code']
 };
 
 
