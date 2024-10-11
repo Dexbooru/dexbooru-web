@@ -4,13 +4,14 @@
 	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
-	import type { IUser } from '$lib/shared/types/users';
+	import type { IUser, TUserStatistics } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button, Card, Dropdown, DropdownItem } from 'flowbite-svelte';
 	import { DotsHorizontalOutline } from 'flowbite-svelte-icons';
 
 	export let targetUser: IUser;
 	export let friendStatus: TFriendStatus;
+	export let userStatistics: TUserStatistics;
 
 	let addFriendLoading = false;
 	let deleteFriendLoading = false;
@@ -73,10 +74,37 @@
 		>
 		{#if $authenticatedUserStore && $authenticatedUserStore.id === targetUser.id}
 			<span class="text-sm text-gray-500 dark:text-gray-400"
+				>Account last updated at date:
+				<strong>{formatDate(new Date(targetUser.updatedAt))}</strong></span
+			>
+			<span class="text-sm text-gray-500 dark:text-gray-400"
 				>Account email:
-				<strong>{targetUser.email}</strong></span
+				<strong>{targetUser.email.toLocaleLowerCase()}</strong></span
 			>
 		{/if}
+		<hr class="border-0 h-px bg-gray-300 dark:bg-gray-600 my-6" />
+
+		<span class="text-sm text-gray-500 dark:text-gray-400"
+			>Total posts:
+			<strong>{userStatistics.totalPosts}</strong></span
+		>
+		<span class="text-sm text-gray-500 dark:text-gray-400"
+			>Total views on all posts:
+			<strong>{userStatistics.totalViews}</strong></span
+		>
+		<span class="text-sm text-gray-500 dark:text-gray-400"
+			>Average views on all posts:
+			<strong>{userStatistics.averageViews}</strong></span
+		>
+		<span class="text-sm text-gray-500 dark:text-gray-400"
+			>Total likes on all posts:
+			<strong>{userStatistics.totalLikes}</strong></span
+		>
+		<span class="text-sm text-gray-500 dark:text-gray-400"
+			>Average likes on all posts:
+			<strong>{userStatistics.averageViews}</strong></span
+		>
+
 		<div class="flex mt-4 space-x-3 rtl:space-x-reverse lg:mt-6">
 			{#if $authenticatedUserStore}
 				{#if $authenticatedUserStore.id !== targetUser.id}

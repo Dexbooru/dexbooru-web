@@ -3,7 +3,6 @@ import type { DefaultArgs } from '@prisma/client/runtime/library';
 
 export type TPostLikeAction = 'like' | 'dislike';
 
-
 export interface ILikePutBody {
 	action: TPostLikeAction;
 }
@@ -34,6 +33,7 @@ export type TPost = Post & {
 	artists: {
 		name: string;
 	}[];
+	commentCount: number;
 };
 
 export type TPostSelector = Prisma.PostSelect<DefaultArgs>;

@@ -1,6 +1,7 @@
 services:
   redis:
     image: redis:latest
+    restart: always
     command: redis-server --requirepass ${DB_REDIS_PASSWORD}
     ports:
       - "${DB_REDIS_PORT}:6379"

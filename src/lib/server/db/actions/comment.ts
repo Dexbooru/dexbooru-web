@@ -27,11 +27,26 @@ export async function editCommentContentById(
 	return updateCommentBatchResult.count > 0;
 }
 
-export async function deleteCommentById(commentId: string, authorId: string): Promise<boolean> {
+export async function deleteCommentById(
+	commentId: string,
+	authorId: string,
+	postId: string,
+): Promise<boolean> {
 	const deletedComment = await prisma.comment.delete({
 		where: {
 			id: commentId,
 			authorId,
+		},
+	});
+
+	await prisma.post.update({
+		where: {
+			id: postId,
+		},
+		data: {
+			commentCount: {
+				decrement: 1,
+			},
 		},
 	});
 
@@ -94,6 +109,17 @@ export async function createComment(
 			postId,
 			content,
 			parentCommentId,
+		},
+	});
+
+	await prisma.post.update({
+		where: {
+			id: postId,
+		},
+		data: {
+			commentCount: {
+				increment: 1,
+			},
 		},
 	});
 

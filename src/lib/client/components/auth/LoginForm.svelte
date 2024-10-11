@@ -10,6 +10,8 @@
 	const loginErrorReason: string | undefined = form?.reason;
 	let username: string = form?.username || '';
 	let password: string = '';
+	let rememberMe: boolean = false;
+
 	let loginFormButtonDisabled = true;
 
 	$: {
@@ -56,7 +58,8 @@
 			</div>
 		</Label>
 		<div class="flex items-start">
-			<Checkbox name="rememberMe">Remember me</Checkbox>
+			<Checkbox bind:checked={rememberMe}>Remember me</Checkbox>
+			<Input type="hidden" name="rememberMe" value={rememberMe} />
 		</div>
 		<Button disabled={loginFormButtonDisabled} type="submit" class="w-full">Log in</Button>
 		{#if loginErrorReason}

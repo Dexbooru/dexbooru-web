@@ -21,5 +21,8 @@
 	<p class="text-base dark:text-white">Views</p>
 	<h2>{normalizeCount(post.views)}</h2>
 
+	<p class="text-base dark:text-white">Comment count</p>
+	<h2>{normalizeCount(post.commentCount)}</h2>
+
 	<PostAuthorDetails {author} {createdAt} />
 </div>

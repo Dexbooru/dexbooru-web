@@ -104,7 +104,7 @@ export const handleDeletePostComments = async (event: RequestEvent) => {
 					);
 				}
 
-				await deleteCommentById(commentId, event.locals.user.id);
+				await deleteCommentById(commentId, event.locals.user.id, postId);
 
 				return createSuccessResponse(
 					'api-route',
@@ -201,7 +201,6 @@ export const handleGetPostComments = async (event: RequestEvent) => {
 
 			return createSuccessResponse('api-route', 'Comments fetched successfully', comments);
 		} catch (error) {
-			console.log(error);
 			return createErrorResponse(
 				'api-route',
 				500,

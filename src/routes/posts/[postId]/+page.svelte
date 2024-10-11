@@ -50,7 +50,7 @@
 		content="Tags: {tagNames.join(', ')} | Artists: {artistNames.join(', ')} | Author: {post.author
 			? post.author.username
 			: DELETED_ACCOUNT_HEADING} | Views: {normalizeCount(post.views)} | Likes: {normalizeCount(
-			post.likes
+			post.likes,
 		)}"
 	/>
 	<meta property="og:image" content={post.imageUrls[0]} />
@@ -94,6 +94,10 @@
 
 		<p class="text-lg dark:text-white">
 			Uploaded at: <span class=" dark:text-gray-400">{formatDate(post.createdAt)}</span>
+		</p>
+
+		<p class="text-lg dark:text-white">
+			Last updated at: <span class=" dark:text-gray-400">{formatDate(post.updatedAt)}</span>
 		</p>
 
 		<p class="text-lg dark:text-white">
@@ -150,7 +154,7 @@
 		{#if $authenticatedUserStore}
 			<CommentTextbox postId={post.id} />
 		{/if}
-		<p class="text-lg dark:text-white">Comments Loaded: {totalPostCommentCount}</p>
-		<CommentsContainer postId={post.id} />
+		<p class="text-lg dark:text-white">Comments: {totalPostCommentCount}</p>
+		<CommentsContainer postCommentCount={post.commentCount} postId={post.id} />
 	</div>
 </main>

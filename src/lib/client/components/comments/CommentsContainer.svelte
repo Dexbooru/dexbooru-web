@@ -3,11 +3,12 @@
 	import { commentTreeStore } from '$lib/client/stores/comments';
 	import CommentTree from '$lib/shared/helpers/comments';
 	import type { IComment } from '$lib/shared/types/comments';
-	import { Button } from 'flowbite-svelte';
+	import { Button, Spinner } from 'flowbite-svelte';
 	import { onDestroy, onMount } from 'svelte';
 	import Comment from './Comment.svelte';
 
 	export let postId: string;
+	export let postCommentCount: number;
 
 	let noMoreComments = false;
 	let topLevelComments: IComment[] = [];
@@ -31,7 +32,7 @@
 	});
 
 	onMount(() => {
-		handleLoadMoreCommentsClick(true);
+		postCommentCount > 0 && handleLoadMoreCommentsClick(true);
 	});
 
 	onDestroy(() => {
@@ -40,14 +41,24 @@
 	});
 </script>
 
-<section class="ml-2">
-	{#each topLevelComments as comment (comment.id)}
-		<Comment currentDepth={1} {comment} />
-	{/each}
+{#if commentsLoading}
+	<Spinner size="lg" />
+{:else if postCommentCount > 0 || $commentTreeStore.getCount() > 0}
+	<section class="ml-2">
+		{#each topLevelComments as comment (comment.id)}
+			<Comment currentDepth={1} {comment} />
+		{/each}		
 
-	{#if !noMoreComments}
-		<Button on:click={() => handleLoadMoreCommentsClick(false)} color="blue" class="mt-2"
-			>{loadMoreButtonText}</Button
-		>
-	{/if}
-</section>
+		{#if !noMoreComments}
+			<Button on:click={() => handleLoadMoreCommentsClick(false)} color="blue" class="mt-2"
+				>{loadMoreButtonText}</Button
+			>
+		{/if}
+	</section>
+{:else if postCommentCount === 0}
+	<div class="flex justify-left p-2">
+		<p class="text-gray-500 dark:text-gray-400 text-lg italic">
+			No comments found. Be the first to comment!
+		</p>
+	</div>
+{/if}

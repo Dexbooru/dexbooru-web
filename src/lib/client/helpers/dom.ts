@@ -45,9 +45,6 @@ const onDocumentScroll = () => {
 	const scrollPosition = window.scrollY;
 	const documentHeight = document.body.scrollHeight;
 
-	// console.log(scrollPosition, documentHeight);
-	// console.log(scrollPosition > documentHeight * scrollThreshold);
-
 	scrollToTopButtonActiveStore.set(scrollPosition > documentHeight * scrollThreshold);
 };
 

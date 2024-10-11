@@ -4,7 +4,7 @@ import { redirect } from '@sveltejs/kit';
 import type { Action, Actions, PageServerLoad } from './$types';
 
 const handleLogin: Action = async (event) => {
-	return handleUserOauth2AuthFlowForm(event);
+	return await handleUserOauth2AuthFlowForm(event);
 };
 
 export const actions = {

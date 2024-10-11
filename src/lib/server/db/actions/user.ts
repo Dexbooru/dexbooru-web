@@ -1,7 +1,45 @@
+import { roundNumber } from '$lib/client/helpers/posts';
 import type { TUserSelector } from '$lib/server/types/users';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { IUser } from '$lib/shared/types/users';
 import prisma from '../prisma';
+
+export async function getUserStatistics(userId: string) {
+	const totalPostsPromise = prisma.post.count({
+		where: { authorId: userId },
+	});
+
+	const totalCommentsPromise = prisma.comment.count({
+		where: { authorId: userId },
+	});
+
+	const postAggregatesPromise = prisma.post.aggregate({
+		where: { authorId: userId },
+		_sum: {
+			likes: true,
+			views: true,
+		},
+		_avg: {
+			likes: true,
+			views: true,
+		},
+	});
+
+	const [totalPosts, totalComments, postAggregates] = await Promise.all([
+		totalPostsPromise,
+		totalCommentsPromise,
+		postAggregatesPromise,
+	]);
+
+	return {
+		totalPosts,
+		totalComments,
+		totalLikes: roundNumber(postAggregates._sum.likes ?? 0, 2),
+		averageLikes: roundNumber(postAggregates._avg.likes ?? 0, 2),
+		totalViews: roundNumber(postAggregates._sum.views ?? 0, 2),
+		averageViews: roundNumber(postAggregates._avg.views ?? 0, 2),
+	};
+}
 
 export async function checkIfUsersAreFriends(
 	senderUserId: string,

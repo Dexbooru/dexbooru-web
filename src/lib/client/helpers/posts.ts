@@ -11,5 +11,9 @@ export function normalizeCount(count: number): string {
 }
 
 export function formatNumberWithCommas(target: number): string {
-    return target.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+	return target.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+export function roundNumber(target: number, places: number = 0) {
+	return Number(target.toFixed(places));
 }

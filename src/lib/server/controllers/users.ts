@@ -18,6 +18,7 @@ import { z } from 'zod';
 import { deleteFromBucket, uploadToBucket } from '../aws/actions/s3';
 import { SESSION_ID_COOKIE_OPTIONS } from '../constants/cookies';
 import { boolStrSchema } from '../constants/reusableSchemas';
+import { SINGLE_USER_CACHE_TIME_SECONDS } from '../constants/sessions';
 import { checkIfUserIsFriended } from '../db/actions/friends';
 import {
 	checkIfUsersAreFriends,
@@ -29,6 +30,7 @@ import {
 	findUserById,
 	findUserByName,
 	findUserByNameOrEmail,
+	getUserStatistics,
 } from '../db/actions/user';
 import {
 	createErrorResponse,
@@ -40,6 +42,7 @@ import { buildCookieOptions } from '../helpers/cookies';
 import { runProfileImageTransformationPipeline } from '../helpers/images';
 import { doPasswordsMatch, hashPassword } from '../helpers/password';
 import {
+	cacheResponse,
 	generateEncodedUserTokenFromRecord,
 	generateUpdatedUserTokenFromClaims,
 } from '../helpers/sessions';
@@ -199,22 +202,15 @@ export const handleGetUser = async (
 		const targetUsername = data.pathParams.username;
 		let friendStatus: TFriendStatus = 'not-friends';
 
-		if (user.id !== NULLABLE_USER.id && user.username === targetUsername) {
-			return createSuccessResponse(
-				handlerType,
-				`Successfully fetched user profile details for ${targetUsername}`,
-				{
-					targetUser: user,
-					friendStatus: 'is-self' as TFriendStatus,
-				},
-			);
-		}
-
 		const targetUser = await findUserByName(targetUsername, {
 			id: true,
 			username: true,
 			profilePictureUrl: true,
 			createdAt: true,
+			...(user.id !== NULLABLE_USER.id && {
+				updatedAt: true,
+				email: true,
+			}),
 		});
 		if (!targetUser) {
 			const errorResponse = createErrorResponse(
@@ -239,12 +235,19 @@ export const handleGetUser = async (
 			}
 		}
 
+		const userStatistics = await getUserStatistics(targetUser.id);
+
+		if (targetUser.id !== user.id && handlerType === 'page-server-load') {
+			cacheResponse(event.setHeaders, SINGLE_USER_CACHE_TIME_SECONDS);
+		}
+
 		return createSuccessResponse(
 			handlerType,
 			`Successfully fetched user profile details for ${targetUsername}`,
 			{
 				targetUser,
 				friendStatus: (user.id !== NULLABLE_USER.id ? friendStatus : 'irrelevant') as TFriendStatus,
+				userStatistics,
 			},
 		);
 	});

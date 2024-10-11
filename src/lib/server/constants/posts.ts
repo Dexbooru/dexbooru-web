@@ -13,23 +13,24 @@ export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	imageUrls: true,
 	likes: true,
 	views: true,
+	commentCount: true,
 	author: {
 		select: {
 			id: true,
 			username: true,
-			profilePictureUrl: true
-		}
+			profilePictureUrl: true,
+		},
 	},
 	tags: {
 		select: {
 			id: true,
-			name: true
-		}
+			name: true,
+		},
 	},
 	artists: {
 		select: {
 			id: true,
-			name: true
-		}
-	}
+			name: true,
+		},
+	},
 };
