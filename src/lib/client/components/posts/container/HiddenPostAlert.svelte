@@ -18,7 +18,7 @@
 		const { nsfwPosts, blacklistedPosts } = data;
 
 		if (nsfwPosts.length > 0) {
-			updatedTitleParts.push(`${nsfwPosts.length} nsfw`);
+			updatedTitleParts.push(`${nsfwPosts.length} NSFW`);
 		}
 
 		if (blacklistedPosts.length > 0) {

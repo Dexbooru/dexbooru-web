@@ -1,16 +1,30 @@
+import { dev } from '$app/environment';
 import {
 	AWS_CLOUDFRONT_POSTS_BASE_URL,
 	AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL,
 } from '$env/static/private';
+import {
+	AWS_LOCAL_POSTS_BASE_URL,
+	AWS_LOCAL_PROFILE_PICTURE_BASE_URL,
+} from '$lib/server/constants/aws';
 import type { TS3ObjectSource } from '$lib/server/types/aws';
 import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import awsS3 from '../s3';
 
+const getObjectBaseUrl = (objectSource: TS3ObjectSource): string => {
+	if (dev) {
+		return objectSource === 'profile_pictures'
+			? AWS_LOCAL_PROFILE_PICTURE_BASE_URL
+			: AWS_LOCAL_POSTS_BASE_URL;
+	}
+
+	return objectSource === 'profile_pictures'
+		? AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL
+		: AWS_CLOUDFRONT_POSTS_BASE_URL;
+};
+
 export const buildObjectUrl = (objectSource: TS3ObjectSource, objectId: string): string => {
-	const baseUrl =
-		objectSource === 'profile_pictures'
-			? AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL
-			: AWS_CLOUDFRONT_POSTS_BASE_URL;
+	const baseUrl = getObjectBaseUrl(objectSource);
 	return `${baseUrl}/${objectId}`;
 };
 
