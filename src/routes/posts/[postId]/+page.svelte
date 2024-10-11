@@ -125,6 +125,10 @@
 		</p>
 
 		<p class="text-lg dark:text-white">
+			Is Nsfw?: <span class=" dark:text-gray-400">{post.isNsfw ? 'Yes' : 'No'}</span>
+		</p>
+
+		<p class="text-lg dark:text-white">
 			Likes: <span class=" dark:text-gray-400">{formatNumberWithCommas(post.likes)}</span>
 		</p>
 

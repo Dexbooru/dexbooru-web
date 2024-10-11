@@ -8,7 +8,7 @@ const scriptArgumentOptions = {
 	'comment-count': { type: 'string' },
 	'tag-count': { type: 'string' },
 	'artist-count': { type: 'string' },
-	seed: { type: 'string' }
+	seed: { type: 'string' },
 } as const;
 
 const client = new PrismaClient();
@@ -28,24 +28,31 @@ async function main() {
 			numberOfComments,
 			numberOfTags,
 			numberOfPosts,
-			numberOfUsers
+			numberOfUsers,
 		},
-		seed
+		seed,
 	});
 	const { mockUsers, mockPosts, mockArtists, mockTags, mockComments } =
 		await mockGenerator.generateAllModels();
 
-	
 	await client.user.createMany({
-		data: mockUsers
+		data: mockUsers,
 	});
 
 	await client.tag.createMany({
-		data: mockTags
+		data: mockTags,
 	});
 
 	await client.artist.createMany({
-		data: mockArtists
+		data: mockArtists,
+	});
+
+	await client.userPreference.createMany({
+		data: mockUsers.map((user) => {
+			return {
+				userId: user.id,
+			};
+		}),
 	});
 
 	const postCreationPromises = mockPosts.map((mockPost) => {
@@ -56,26 +63,26 @@ async function main() {
 					connectOrCreate: mockPost.artists.map((artist) => {
 						return {
 							where: { name: artist.name },
-							create: { id: artist.id, name: artist.name }
+							create: { id: artist.id, name: artist.name },
 						};
-					})
+					}),
 				},
 				tags: {
 					connectOrCreate: mockPost.tags.map((tag) => {
 						return {
 							where: { name: tag.name },
-							create: { id: tag.id, name: tag.name }
+							create: { id: tag.id, name: tag.name },
 						};
-					})
-				}
-			}
+					}),
+				},
+			},
 		});
 	});
 
 	await client.$transaction(postCreationPromises);
 
 	await client.comment.createMany({
-		data: mockComments
+		data: mockComments,
 	});
 }
 

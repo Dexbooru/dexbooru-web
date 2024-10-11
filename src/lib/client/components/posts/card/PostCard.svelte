@@ -1,12 +1,13 @@
 <script lang="ts">
 	import ImageCarousel from '$lib/client/components/images/ImageCarousel.svelte';
 	import PostCardBody from '$lib/client/components/posts/card/PostCardBody.svelte';
+	import { userPreferenceStore } from '$lib/client/stores/users';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { Card, Toast } from 'flowbite-svelte';
 	import { ExclamationCircleSolid } from 'flowbite-svelte-icons';
-	import PostCardActions from './PostCardActions.svelte';
-	import { scale } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
+	import { scale } from 'svelte/transition';
+	import PostCardActions from './PostCardActions.svelte';
 
 	export let post: TPost;
 
@@ -15,7 +16,7 @@
 </script>
 
 <Card>
-	{#if isNsfw}
+	{#if isNsfw && $userPreferenceStore.autoBlurNsfw}
 		<Toast
 			dismissable={false}
 			divClass="w-full max-w-xs p-4 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3 mt-2 mb-2"
@@ -31,7 +32,7 @@
 		{imageUrls}
 		imagesAlt={description}
 		slideDuration={350}
-		blurImages={isNsfw}
+		blurImages={isNsfw && $userPreferenceStore.autoBlurNsfw}
 		transitionFunction={(x) => scale(x, { duration: 500, easing: quintOut })}
 	/>
 	<PostCardBody {post} {author} {createdAt} {tags} {artists} />

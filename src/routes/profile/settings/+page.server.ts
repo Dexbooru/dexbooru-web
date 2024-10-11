@@ -3,6 +3,8 @@ import {
 	handleChangeProfilePicture,
 	handleChangeUsername,
 	handleDeleteUser,
+	handleUpdatePostPreferences,
+	handleUpdateUserInterfacePreferences,
 } from '$lib/server/controllers/users';
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { redirect } from '@sveltejs/kit';
@@ -24,11 +26,21 @@ const handleAccountChangePassword: Action = async (event) => {
 	return await handleChangePassword(event);
 };
 
+const handleChangePostPreferences: Action = async (event) => {
+	return await handleUpdatePostPreferences(event);
+};
+
+const handleChangeUserInterfacePreferences: Action = async (event) => {
+	return await handleUpdateUserInterfacePreferences(event);
+};
+
 export const actions: Actions = {
 	deleteAccount: handleAccountDeletion,
 	username: handleAccountChangeUsername,
 	password: handleAccountChangePassword,
 	profilePicture: handleAccountChangeProfilePicture,
+	postPreferences: handleChangePostPreferences,
+	userInterfacePreferences: handleChangeUserInterfacePreferences,
 };
 
 export const load: PageServerLoad = async ({ locals }) => {

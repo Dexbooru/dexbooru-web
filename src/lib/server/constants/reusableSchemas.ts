@@ -27,7 +27,12 @@ export const postPaginationSchema = z.object({
 		.default('general'),
 	ascending: boolStrSchema,
 	orderBy: z
-		.union([z.literal('views'), z.literal('likes'), z.literal('createdAt')])
+		.union([
+			z.literal('views'),
+			z.literal('likes'),
+			z.literal('createdAt'),
+			z.literal('commentCount'),
+		])
 		.default('createdAt'),
 	pageNumber: pageNumberSchema,
 });

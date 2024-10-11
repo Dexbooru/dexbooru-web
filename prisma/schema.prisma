@@ -26,8 +26,21 @@ model User {
   receivedFriendRequests   FriendRequest[]           @relation(name: "friend requests received")
   passwordRecoveryAttempts PasswordRecoveryAttempt[]
   postCollections          PostCollection[]          @relation(name: "post collection author")
+  preferences              UserPreference?           @relation(name: "user profile preferences")
 
   @@index([id])
+}
+
+model UserPreference {
+  browseInSafeMode   Boolean  @default(false)
+  autoBlurNsfw       Boolean  @default(true)
+  blacklistedTags    String[] @default([]) @db.Text
+  blacklistedArtists String[] @default([]) @db.Text
+  customSideWideCss  String   @default("") @db.Text
+  user               User?    @relation(name: "user profile preferences", fields: [userId], references: [id], onDelete: Cascade)
+  userId             String   @unique
+
+  @@id([userId])
 }
 
 model Post {

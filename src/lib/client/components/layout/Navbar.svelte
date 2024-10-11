@@ -38,6 +38,7 @@
 		<NavLi href="/">Home</NavLi>
 		<NavLi href="/tags">Tags</NavLi>
 		<NavLi href="/artists">Artists</NavLi>
+		<NavLi href="/collections">Collections</NavLi>
 		{#if $authenticatedUserStore}
 			<NavLi href="/posts/upload">Upload</NavLi>
 			<NavLi href="/chat">Chat</NavLi>

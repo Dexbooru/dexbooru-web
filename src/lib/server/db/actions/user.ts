@@ -180,6 +180,18 @@ export async function findUserById(id: string, selectors?: TUserSelector): Promi
 	})) as IUser;
 }
 
+export async function findUserByEmail(
+	email: string,
+	selectors?: TUserSelector,
+): Promise<IUser | null> {
+	return (await prisma.user.findFirst({
+		where: {
+			email,
+		},
+		select: selectors,
+	})) as IUser | null;
+}
+
 export async function findUserByName(
 	username: string,
 	selectors?: TUserSelector,

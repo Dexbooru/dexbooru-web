@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { validateUserAuthToken } from '$lib/client/api/auth';
 	import { getNotifications } from '$lib/client/api/notifications';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
 	import Navbar from '$lib/client/components/layout/Navbar.svelte';
+	import HiddenPostModal from '$lib/client/components/posts/container/HiddenPostModal.svelte';
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
 	import {
@@ -17,23 +19,42 @@
 	} from '$lib/client/stores/device';
 	import { scrollToTopButtonActiveStore, searchModalActiveStore } from '$lib/client/stores/layout';
 	import { notificationStore } from '$lib/client/stores/notifications';
-	import { authenticatedUserStore } from '$lib/client/stores/users';
-	import { NONEXISTENT_USER_ID } from '$lib/shared/constants/auth';
+	import { displayHiddenPostModalStore } from '$lib/client/stores/posts';
+	import { authenticatedUserStore, userPreferenceStore } from '$lib/client/stores/users';
+	import { NULLABLE_USER } from '$lib/shared/constants/auth';
+	import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { IUserNotifications } from '$lib/shared/types/notifcations';
+	import { redirect } from '@sveltejs/kit';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
-	import { onDestroy, onMount } from 'svelte';
-	import '../app.postcss';
 	import { Button } from 'flowbite-svelte';
 	import { ArrowUpOutline } from 'flowbite-svelte-icons';
+	import { onDestroy, onMount } from 'svelte';
+	import '../app.postcss';
+	import type { LayoutData } from './$types';
 
-	authenticatedUserStore.set($page.data.user.id !== NONEXISTENT_USER_ID ? $page.data.user : null);
+	export let data: LayoutData;
+
+	let validateTokenIntervalId: NodeJS.Timeout;
+	const AUTH_CHECK_INTERVAL_SIZE = 60 * 2.5 * 1000;
+
+	authenticatedUserStore.set(data.user.id !== NULLABLE_USER.id ? data.user : null);
+	userPreferenceStore.set(data.userPreferences);
 
 	const pageUnsubscribe = page.subscribe((_) => {
 		searchModalActiveStore.set(false);
+		displayHiddenPostModalStore.set(false);
 	});
 
 	onMount(async () => {
+		validateTokenIntervalId = setInterval(async () => {
+			const response = await validateUserAuthToken();
+			if (!response.ok) {
+				localStorage.removeItem(SESSION_ID_KEY);
+				redirect(302, '/');
+			}
+		}, AUTH_CHECK_INTERVAL_SIZE);
+
 		registerDocumentEventListeners();
 
 		const deviceData = getDeviceDetectionDataFromWindow();
@@ -56,6 +77,7 @@
 
 	onDestroy(() => {
 		pageUnsubscribe();
+		clearInterval(validateTokenIntervalId);
 	});
 </script>
 
@@ -84,3 +106,4 @@
 <Footer />
 <SvelteToast options={TOAST_DEFAULT_OPTIONS} />
 <GlobalSearchModal />
+<HiddenPostModal />

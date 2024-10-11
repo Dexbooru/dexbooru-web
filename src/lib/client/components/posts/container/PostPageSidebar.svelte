@@ -3,21 +3,20 @@
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/posts';
 	import { postPaginationStore } from '$lib/client/stores/posts';
-	import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 	import {
 		Sidebar,
 		SidebarDropdownItem,
 		SidebarDropdownWrapper,
 		SidebarGroup,
-		SidebarWrapper
+		SidebarWrapper,
 	} from 'flowbite-svelte';
 	import {
 		ListOrdoredSolid as OrderedListSolid,
 		PalleteSolid,
-		TagSolid
+		TagSolid,
 	} from 'flowbite-svelte-icons';
+	import HiddenPostAlert from './HiddenPostAlert.svelte';
 
-	
 	export let uniqueTags: string[] = [];
 	export let uniqueArtists: string[] = [];
 
@@ -66,6 +65,8 @@
 					/>
 				</SidebarDropdownWrapper>
 			</SidebarGroup>
+
+			<HiddenPostAlert />
 		</SidebarWrapper>
 	</Sidebar>
 {/if}

@@ -7,6 +7,11 @@ export interface ILikePutBody {
 	action: TPostLikeAction;
 }
 
+export type THiddenPagePostData = {
+	nsfwPosts: TPost[];
+	blacklistedPosts: TPost[];
+};
+
 export interface IPostPaginationData {
 	posts: TPost[];
 	likedPosts: TPost[];
@@ -37,4 +42,4 @@ export type TPost = Post & {
 };
 
 export type TPostSelector = Prisma.PostSelect<DefaultArgs>;
-export type TPostOrderByColumn = 'likes' | 'createdAt' | 'views';
+export type TPostOrderByColumn = 'likes' | 'createdAt' | 'views' | 'commentCount';

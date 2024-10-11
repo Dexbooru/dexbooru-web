@@ -13,6 +13,7 @@ import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
 import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
 import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import type { TFriendStatus } from '$lib/shared/types/friends';
+import type { IUser } from '$lib/shared/types/users';
 import { redirect, type RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { deleteFromBucket, uploadToBucket } from '../aws/actions/s3';
@@ -20,6 +21,7 @@ import { SESSION_ID_COOKIE_OPTIONS } from '../constants/cookies';
 import { boolStrSchema } from '../constants/reusableSchemas';
 import { SINGLE_USER_CACHE_TIME_SECONDS } from '../constants/sessions';
 import { checkIfUserIsFriended } from '../db/actions/friends';
+import { createUserPreferences, updateUserPreferences } from '../db/actions/preferences';
 import {
 	checkIfUsersAreFriends,
 	createUser,
@@ -27,6 +29,7 @@ import {
 	editPasswordByUserId,
 	editProfilePictureByUserId,
 	editUsernameByUserId,
+	findUserByEmail,
 	findUserById,
 	findUserByName,
 	findUserByNameOrEmail,
@@ -54,6 +57,57 @@ const usernamePasswordSchema = z.object({
 	rememberMe: boolStrSchema,
 });
 
+const usernameRequirementSchema = z
+	.string()
+	.min(1, 'The username cannot be empty')
+	.refine(
+		(val) => {
+			const { unsatisfied: usernameUnsatisfied } = getUsernameRequirements(val);
+			return usernameUnsatisfied.length === 0;
+		},
+		{
+			message: `The username did not meet the following requirements: ${Object.values(
+				USERNAME_REQUIREMENTS,
+			).join(', ')}`,
+		},
+	);
+
+const passwordRequirementSchema = z
+	.string()
+	.min(1, 'The password cannot be empty')
+	.refine(
+		(val) => {
+			const { unsatisfied: passwordUnsatisifed } = getPasswordRequirements(val);
+			return passwordUnsatisifed.length === 0;
+		},
+		{
+			message: `The password did not meet the following requirements: ${Object.values(
+				PASSWORD_REQUIREMENTS,
+			).join(', ')}`,
+		},
+	);
+
+const profilePictureRefinementError = {
+	message: `The provided file was either not in an image format or exceeded the maximum allowed size for a profile picture of: ${MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB}`,
+};
+
+const emailRequirementSchema = z
+	.string()
+	.email()
+	.trim()
+	.transform((val) => val.toLocaleLowerCase())
+	.refine(
+		(val) => {
+			const { unsatisfied: emailUnsatisfied } = getEmailRequirements(val);
+			return emailUnsatisfied.length === 0;
+		},
+		{
+			message: `The email did not meet the following requirements: ${Object.values(
+				EMAIL_REQUIREMENTS,
+			).join(', ')}`,
+		},
+	);
+
 const UserOauth2SchemaEndpoint = {
 	body: usernamePasswordSchema,
 } satisfies TRequestSchema;
@@ -64,64 +118,18 @@ const UserOauth2SchemaForm = {
 
 const UserCreateSchema = {
 	form: z.object({
-		username: z
-			.string()
-			.min(1, 'The username cannot be empty')
-			.refine(
-				(val) => {
-					const { unsatisfied: usernameUnsatisfied } = getUsernameRequirements(val);
-					return usernameUnsatisfied.length === 0;
-				},
-				{
-					message: `The username did not meet the following requirements: ${Object.values(
-						USERNAME_REQUIREMENTS,
-					).join(', ')}`,
-				},
-			),
-		email: z
-			.string()
-			.email()
-			.trim()
-			.transform((val) => val.toLocaleLowerCase())
-			.refine(
-				(val) => {
-					const { unsatisfied: emailUnsatisfied } = getEmailRequirements(val);
-					return emailUnsatisfied.length === 0;
-				},
-				{
-					message: `The email did not meet the following requirements: ${Object.values(
-						EMAIL_REQUIREMENTS,
-					).join(', ')}`,
-				},
-			),
-		password: z
-			.string()
-			.min(1, 'The password cannot be empty')
-			.refine(
-				(val) => {
-					const { unsatisfied: passwordUnsatisifed } = getPasswordRequirements(val);
-					return passwordUnsatisifed.length === 0;
-				},
-				{
-					message: `The password did not meet the following requirements: ${Object.values(
-						PASSWORD_REQUIREMENTS,
-					).join(', ')}`,
-				},
-			),
+		username: usernameRequirementSchema,
+		email: emailRequirementSchema,
+		password: passwordRequirementSchema,
 		confirmedPassword: z.string().min(1, 'The confirmed password cannot be empty'),
 		profilePicture: z
 			.instanceof(globalThis.File)
 			.transform((val) => (val.size > 0 ? val : DEFAULT_PROFILE_PICTURE_URL))
-			.refine(
-				(val) => {
-					if (typeof val === 'string') return true;
+			.refine((val) => {
+				if (typeof val === 'string') return true;
 
-					return isFileImage(val) && isFileImageSmall(val, false);
-				},
-				{
-					message: `The provided file was either not in an image format or exceeded the maximum allowed size for a profile picture of: ${MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB}`,
-				},
-			),
+				return isFileImage(val) && isFileImageSmall(val, false);
+			}, profilePictureRefinementError),
 	}),
 } satisfies TRequestSchema;
 
@@ -134,16 +142,11 @@ const UserDeleteSchema = {
 
 const UserChangeProfilePictureSchema = {
 	form: z.object({
-		newProfilePicture: z.instanceof(globalThis.File).refine(
-			(val) => {
-				if (val.size === 0) return false;
+		newProfilePicture: z.instanceof(globalThis.File).refine((val) => {
+			if (val.size === 0) return false;
 
-				return isFileImage(val) && isFileImageSmall(val, false);
-			},
-			{
-				message: `The provided file was either not in an image format or exceeded the maximum allowed size for a profile picture of: ${MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB}`,
-			},
-		),
+			return isFileImage(val) && isFileImageSmall(val, false);
+		}, profilePictureRefinementError),
 	}),
 } satisfies TRequestSchema;
 
@@ -151,39 +154,13 @@ const UserChangePasswordSchema = {
 	form: z.object({
 		oldPassword: z.string().min(1, 'The old password cannot be empty'),
 		confirmedNewPassword: z.string().min(1, 'The confirmed new password cannot be empty'),
-		newPassword: z
-			.string()
-			.min(1, 'The password cannot be empty')
-			.refine(
-				(val) => {
-					const { unsatisfied: passwordUnsatisifed } = getPasswordRequirements(val);
-					return passwordUnsatisifed.length === 0;
-				},
-				{
-					message: `The password did not meet the following requirements: ${Object.values(
-						PASSWORD_REQUIREMENTS,
-					).join(', ')}`,
-				},
-			),
+		newPassword: passwordRequirementSchema,
 	}),
 } satisfies TRequestSchema;
 
 const UserChangeUsernameSchema = {
 	form: z.object({
-		newUsername: z
-			.string()
-			.min(1, 'The username cannot be empty')
-			.refine(
-				(val) => {
-					const { unsatisfied: usernameUnsatisfied } = getUsernameRequirements(val);
-					return usernameUnsatisfied.length === 0;
-				},
-				{
-					message: `The username did not meet the following requirements: ${Object.values(
-						USERNAME_REQUIREMENTS,
-					).join(', ')}`,
-				},
-			),
+		newUsername: usernameRequirementSchema,
 	}),
 } satisfies TRequestSchema;
 
@@ -192,6 +169,132 @@ const GetUserSchema = {
 		username: z.string().min(1, 'The username cannot be empty'),
 	}),
 } satisfies TRequestSchema;
+
+const UpdateUserPersonalPreferencesSchema = {
+	form: z.object({
+		autoBlurNsfw: boolStrSchema.optional(),
+		browseInSafeMode: boolStrSchema.optional(),
+		blacklistedTags: z
+			.string()
+			.transform((val) => val.toLocaleLowerCase().split('\n'))
+			.optional(),
+		blacklistedArtists: z
+			.string()
+			.transform((val) => val.toLocaleLowerCase().split('\n'))
+			.optional(),
+	}),
+} satisfies TRequestSchema;
+
+const UpdateUserUserInterfacePreferencesSchema = {
+	form: z.object({
+		customSiteWideCss: z.string().optional(),
+	}),
+} satisfies TRequestSchema;
+
+export const handleUpdateUserInterfacePreferences = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'form-action',
+		UpdateUserUserInterfacePreferencesSchema,
+		async (data) => {
+			const { customSiteWideCss } = data.form;
+
+			try {
+				await updateUserPreferences(event.locals.user.id, {
+					customSideWideCss: customSiteWideCss ?? '',
+				});
+
+				return createSuccessResponse(
+					'form-action',
+					'Successfully updated the user interface preferences of the user',
+				);
+			} catch {
+				return createErrorResponse(
+					'form-action',
+					500,
+					'An unexpected error occured while updating the user interface preferences of the user',
+				);
+			}
+		},
+		true,
+	);
+};
+
+export const handleUpdatePostPreferences = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'form-action',
+		UpdateUserPersonalPreferencesSchema,
+		async (data) => {
+			const { autoBlurNsfw, browseInSafeMode, blacklistedArtists, blacklistedTags } = data.form;
+
+			try {
+				await updateUserPreferences(event.locals.user.id, {
+					blacklistedArtists: blacklistedArtists ?? [],
+					blacklistedTags: blacklistedTags ?? [],
+					browseInSafeMode: browseInSafeMode ?? false,
+					autoBlurNsfw: autoBlurNsfw ?? false,
+				});
+
+				return createSuccessResponse(
+					'form-action',
+					'Successfully updated the post preferences of the user',
+				);
+			} catch {
+				return createErrorResponse(
+					'form-action',
+					500,
+					'An unexpected error occured while updating the post preferences of the user',
+				);
+			}
+		},
+		true,
+	);
+};
+
+export const handleUserOauth2AuthFlowValidate = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'api-route',
+		{} satisfies TRequestSchema,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		async (data) => {
+			const user = event.locals.user;
+			let isValidUser = true;
+			let error: unknown;
+
+			if (user.id === NULLABLE_USER.id) {
+				isValidUser = false;
+				error = createErrorResponse('api-route', 401, 'Invalid user');
+			}
+
+			const users = await Promise.all([
+				findUserByName(user.username),
+				findUserById(user.id),
+				findUserByEmail(user.email),
+			]);
+			let dbUser: IUser | null = user;
+			for (const resultUser of users) {
+				if (resultUser === null || resultUser.id !== user.id) {
+					dbUser = null;
+				}
+			}
+
+			if (!dbUser) {
+				isValidUser = false;
+				error = createErrorResponse('api-route', 404, 'User does not exist');
+			}
+
+			if (!isValidUser) {
+				event.cookies.delete(SESSION_ID_KEY, { path: '/' });
+				return error;
+			}
+
+			return createSuccessResponse('api-route', 'The authentication token of the user is valid');
+		},
+		true,
+	);
+};
 
 export const handleGetUser = async (
 	event: RequestEvent,
@@ -520,6 +623,8 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			const newUser = await createUser(username, email, hashedPassword, finalProfilePictureUrl);
 			const encodedAuthToken = generateEncodedUserTokenFromRecord(newUser, true);
 			event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(true));
+
+			await createUserPreferences(newUser.id);
 
 			throw redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
 		} catch (error) {

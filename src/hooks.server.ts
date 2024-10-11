@@ -8,7 +8,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 
 export const handleError: HandleServerError = async ({ error }) => {
-	console.error(error);
 	const errorMessage = process.env.NODE_ENV?.startsWith('dev') ? (error as Error).toString() : 'Internal Server Error';
 	return {
 		message: errorMessage

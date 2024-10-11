@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Footer, FooterCopyright, FooterLink, FooterLinkGroup } from 'flowbite-svelte';
-	import { DiscordSolid, GithubSolid } from 'flowbite-svelte-icons';
+	import { GithubSolid } from 'flowbite-svelte-icons';
 
 	const currentDate = new Date(Date.now());
 	const currentYear = currentDate.getFullYear();
@@ -15,11 +15,8 @@
 	>
 		<FooterCopyright id="footer-copyright" href="/" by="Dexbooru" year={currentYear} />
 
-		<FooterLink href="https://github.com/t-shah02/dexbooru-rewrite" target="_blank">
+		<FooterLink href="https://github.com/Dexbooru/dexbooru-web" target="_blank">
 			<GithubSolid />
-		</FooterLink>
-		<FooterLink href="https://discord.com" target="_blank">
-			<DiscordSolid />
 		</FooterLink>
 	</FooterLinkGroup>
 </Footer>

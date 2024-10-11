@@ -41,7 +41,7 @@
 
 	onMount(() => {
 		const searchInput = document.querySelector(
-			'input[placeholder="Search by keyword(s)"]'
+			'input[placeholder="Search by keyword(s)"]',
 		) as HTMLInputElement;
 
 		const postSearchResetTimeoutId = setInterval(() => {

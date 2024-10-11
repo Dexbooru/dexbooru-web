@@ -1,9 +1,11 @@
 import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.png';
+import { get } from 'svelte/store';
 import {
 	footerStore,
 	scrollToTopButtonActiveStore,
 	searchModalActiveStore,
 } from '../stores/layout';
+import { authenticatedUserStore, userPreferenceStore } from '../stores/users';
 import type { IDeviceStoreData } from '../types/device';
 
 const scrollThreshold = 0.75;
@@ -49,9 +51,22 @@ const onDocumentScroll = () => {
 };
 
 const onLoadDocument = () => {
+	applyCustomSiteWideCss();
 	updateFooterData();
 	lazyLoadImages();
 	loadErrorProfilePictureImageAvatars();
+};
+
+const applyCustomSiteWideCss = () => {
+	const user = get(authenticatedUserStore);
+	if (!user) return;
+
+	const { customSideWideCss } = get(userPreferenceStore);
+	if (typeof customSideWideCss === 'string' && customSideWideCss.length > 0) {
+		const customSideWideStylesheet = document.createElement('style');
+		customSideWideStylesheet.innerText = customSideWideCss;
+		document.head.appendChild(customSideWideStylesheet);
+	}
 };
 
 const onResizeDocument = () => {
