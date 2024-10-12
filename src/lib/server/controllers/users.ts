@@ -8,6 +8,7 @@ import {
 } from '$lib/shared/constants/auth';
 import { MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB } from '$lib/shared/constants/images';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
+import { TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
 import { getEmailRequirements } from '$lib/shared/helpers/auth/email';
 import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
 import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
@@ -21,7 +22,11 @@ import { SESSION_ID_COOKIE_OPTIONS } from '../constants/cookies';
 import { boolStrSchema } from '../constants/reusableSchemas';
 import { SINGLE_USER_CACHE_TIME_SECONDS } from '../constants/sessions';
 import { checkIfUserIsFriended } from '../db/actions/friends';
-import { createUserPreferences, updateUserPreferences } from '../db/actions/preferences';
+import {
+	createUserPreferences,
+	getUserPreferences,
+	updateUserPreferences,
+} from '../db/actions/preferences';
 import {
 	checkIfUsersAreFriends,
 	createUser,
@@ -49,6 +54,13 @@ import {
 	generateEncodedUserTokenFromRecord,
 	generateUpdatedUserTokenFromClaims,
 } from '../helpers/sessions';
+import {
+	createTotpChallenge,
+	deleteTotpChallenge,
+	generateTotpDataUri,
+	getTotpChallenge,
+	isValidOtpCode,
+} from '../helpers/totp';
 import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
 const usernamePasswordSchema = z.object({
@@ -108,11 +120,51 @@ const emailRequirementSchema = z
 		},
 	);
 
-const UserOauth2SchemaEndpoint = {
+const UserGetTotpSchema = {
+	pathParams: z.object({
+		challengeId: z.string().uuid(),
+	}),
+} satisfies TRequestSchema;
+
+const UserProcessTotpSchema = {
+	form: z.object({
+		otpCode: z.string().length(TOTP_CODE_LENGTH, {
+			message: `The OTP code needs to be exactly ${TOTP_CODE_LENGTH} numeric digits long`,
+		}),
+		username: z.string().min(1, 'The username cannot be empty'),
+		rememberMe: boolStrSchema,
+	}),
+	pathParams: z.object({
+		challengeId: z.string().uuid(),
+	}),
+} satisfies TRequestSchema;
+
+const User2faEnableSchema = {
+	form: z.object({
+		otpCode: z
+			.string()
+			.length(TOTP_CODE_LENGTH, {
+				message: `The OTP code needs to be exactly ${TOTP_CODE_LENGTH} numeric digits long`,
+			})
+			.refine((val) => {
+				const parsedCode = parseInt(val);
+				return !isNaN(parsedCode);
+			})
+			.optional(),
+	}),
+} satisfies TRequestSchema;
+
+const UserOtpGenerateSchema = {
+	body: z.object({
+		password: z.string().min(1, 'The password cannot be empty'),
+	}),
+} satisfies TRequestSchema;
+
+const UserOauth2SchemaEndpointSchema = {
 	body: usernamePasswordSchema,
 } satisfies TRequestSchema;
 
-const UserOauth2SchemaForm = {
+const UserOauth2SchemaFormSchema = {
 	form: usernamePasswordSchema,
 } satisfies TRequestSchema;
 
@@ -638,11 +690,99 @@ export const handleCreateUser = async (event: RequestEvent) => {
 	});
 };
 
+export const handleProcessUserTotp = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'form-action',
+		UserProcessTotpSchema,
+		async (data) => {
+			const { challengeId } = data.pathParams;
+			const { username, rememberMe, otpCode } = data.form;
+
+			try {
+				const totpChallenge = await getTotpChallenge(challengeId);
+				if (!totpChallenge) {
+					throw redirect(302, '/login');
+				}
+
+				const ipAddress = event.getClientAddress();
+				if (ipAddress !== totpChallenge.ipAddress) {
+					throw redirect(302, '/login');
+				}
+
+				const user = await findUserByName(username);
+				if (!user) {
+					throw redirect(302, '/login');
+				}
+
+				const isTotpCodeValid = isValidOtpCode(user.username, otpCode);
+				if (!isTotpCodeValid) {
+					return createErrorResponse('form-action', 401, 'The provided TOTP code was incorrect', {
+						reason: 'The provided code was incorrect, please try again!',
+					});
+				}
+
+				const encodedAuthToken = generateEncodedUserTokenFromRecord(user, rememberMe);
+				event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(rememberMe));
+
+				deleteTotpChallenge(challengeId);
+
+				throw redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
+			} catch (error) {
+				console.log(error);
+
+				if (isRedirectObject(error)) throw error;
+
+				return createErrorResponse(
+					'form-action',
+					500,
+					'An unexpected error occured while submitting the user OTP',
+				);
+			}
+		},
+	);
+};
+
+export const handleGetUserTotp = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'page-server-load',
+		UserGetTotpSchema,
+		async (data) => {
+			const { challengeId } = data.pathParams;
+			try {
+				const challengeData = await getTotpChallenge(challengeId);
+				if (!challengeData) {
+					throw redirect(302, '/login');
+				}
+
+				const ipAddress = event.getClientAddress();
+				if (ipAddress !== challengeData.ipAddress) {
+					throw redirect(302, '/login');
+				}
+
+				return createSuccessResponse(
+					'page-server-load',
+					'Successfully fetched the login TOTP challenge id',
+					{ challengeData },
+				);
+			} catch (error) {
+				if (isRedirectObject(error)) throw error;
+				throw createErrorResponse(
+					'page-server-load',
+					500,
+					'An unexpected error occured while fetching the TOTP form',
+				);
+			}
+		},
+	);
+};
+
 export const handleUserOauth2AuthFlowForm = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
 		event,
 		'form-action',
-		UserOauth2SchemaForm,
+		UserOauth2SchemaFormSchema,
 		async (data) => {
 			const { username, password, rememberMe } = data.form;
 			const errorData = {
@@ -653,12 +793,23 @@ export const handleUserOauth2AuthFlowForm = async (event: RequestEvent) => {
 			try {
 				const user = await findUserByName(username);
 				if (!user) {
-					return createErrorResponse('form-action', 400, 'The authentication failed', errorData);
+					return createErrorResponse('form-action', 401, 'The authentication failed', errorData);
 				}
 
 				const passwordMatchConfirmed = await doPasswordsMatch(password, user.password);
 				if (!passwordMatchConfirmed) {
-					return createErrorResponse('form-action', 400, 'The authentication failed', errorData);
+					return createErrorResponse('form-action', 401, 'The authentication failed', errorData);
+				}
+
+				const preferences = await getUserPreferences(user.id);
+				if (preferences && preferences.twoFactorAuthenticationEnabled) {
+					const ipAddress = event.getClientAddress();
+					const newTotpChallengeId = await createTotpChallenge(
+						user.username,
+						ipAddress,
+						rememberMe,
+					);
+					throw redirect(302, `/login/totp/${newTotpChallengeId}`);
 				}
 
 				const encodedAuthToken = generateEncodedUserTokenFromRecord(user, rememberMe);
@@ -681,7 +832,7 @@ export const handleUserOauth2AuthFlowEndpoint = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
 		event,
 		'api-route',
-		UserOauth2SchemaEndpoint,
+		UserOauth2SchemaEndpointSchema,
 		async (data) => {
 			const { username, password, rememberMe } = data.body;
 
@@ -717,5 +868,94 @@ export const handleUserOauth2AuthFlowEndpoint = async (event: RequestEvent) => {
 				);
 			}
 		},
+	);
+};
+
+export const handleGenerateUserTotpData = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'api-route',
+		UserOtpGenerateSchema,
+		async (data) => {
+			const { password } = data.body;
+
+			try {
+				const user = await findUserById(event.locals.user.id);
+				if (!user) {
+					return createErrorResponse(
+						'api-route',
+						404,
+						`A user with the id: ${event.locals.user.id} does not exist`,
+					);
+				}
+
+				const passwordsMatch = await doPasswordsMatch(password, user.password);
+				if (!passwordsMatch) {
+					return createErrorResponse(
+						'api-route',
+						401,
+						`The provided password for ${user.id} was incorrect`,
+					);
+				}
+
+				const totpUri = await generateTotpDataUri(user.username);
+
+				cacheResponse(event.setHeaders, 10);
+
+				return createSuccessResponse(
+					'api-route',
+					'Successfully generated TOTP data uri for the user',
+					{
+						totpUri,
+					},
+				);
+			} catch (error) {
+				return createErrorResponse(
+					'api-route',
+					500,
+					'An unexpected error occured while generating the TOTP data for the user',
+				);
+			}
+		},
+		true,
+	);
+};
+
+export const handleToggleUserTwoFactorAuthentication = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'form-action',
+		User2faEnableSchema,
+		async (data) => {
+			const { otpCode } = data.form;
+
+			try {
+				let twoFactorEnabled = false;
+
+				if (otpCode) {
+					const isValidCode = isValidOtpCode(event.locals.user.email, otpCode);
+					if (!isValidCode) {
+						return createErrorResponse('form-action', 401, 'Incorrect OTP code', {
+							message: 'Incorrect OTP code provided',
+						});
+					}
+
+					twoFactorEnabled = true;
+				}
+
+				await updateUserPreferences(event.locals.user.id, {
+					twoFactorAuthenticationEnabled: twoFactorEnabled,
+				});
+
+				return createSuccessResponse(
+					'form-action',
+					'Successfully updated thw two factor authentication settings for this user',
+				);
+			} catch {
+				const errorMessage = 'An unexpected error occured while trying to update the OTP settings';
+				return createErrorResponse('form-action', 500, errorMessage, { message: errorMessage });
+			}
+		},
+		true,
 	);
 };

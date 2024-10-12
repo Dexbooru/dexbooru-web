@@ -3,6 +3,7 @@ import {
 	handleChangeProfilePicture,
 	handleChangeUsername,
 	handleDeleteUser,
+	handleToggleUserTwoFactorAuthentication,
 	handleUpdatePostPreferences,
 	handleUpdateUserInterfacePreferences,
 } from '$lib/server/controllers/users';
@@ -34,6 +35,10 @@ const handleChangeUserInterfacePreferences: Action = async (event) => {
 	return await handleUpdateUserInterfacePreferences(event);
 };
 
+const handleChange2fa: Action = async (event) => {
+	return await handleToggleUserTwoFactorAuthentication(event);
+};
+
 export const actions: Actions = {
 	deleteAccount: handleAccountDeletion,
 	username: handleAccountChangeUsername,
@@ -41,6 +46,7 @@ export const actions: Actions = {
 	profilePicture: handleAccountChangeProfilePicture,
 	postPreferences: handleChangePostPreferences,
 	userInterfacePreferences: handleChangeUserInterfacePreferences,
+	twoFactorAuthentication: handleChange2fa,
 };
 
 export const load: PageServerLoad = async ({ locals }) => {

@@ -89,6 +89,28 @@ const parseKeyValueStore = (store: FormData | URLSearchParams): Record<string, u
 	return parsedObject;
 };
 
+const parseRequestBodies = async (event: RequestEvent, isFormContentType: string | undefined) => {
+	let formData: FormData;
+	let body: unknown;
+
+	try {
+		formData = isFormContentType ? await event.request.formData() : new FormData();
+	} catch {
+		formData = new FormData();
+	}
+
+	try {
+		body = await event.request.json().catch(() => {});
+	} catch {
+		body = {};
+	}
+
+	return {
+		formData,
+		body,
+	};
+};
+
 const validateRequest = <T extends TRequestSchema>(
 	rawRequestData: TRequestData,
 	requestSchema: T,
@@ -145,11 +167,12 @@ export const validateAndHandleRequest = async <T extends TRequestSchema>(
 		requestContentType.trim().toLocaleLowerCase().includes(formContentType),
 	);
 
+	const { formData, body } = await parseRequestBodies(event, isFormContentType);
 	const rawRequestData: TRequestData = {
-		form: isFormContentType ? await event.request.formData() : new FormData(),
+		form: formData,
 		urlSearchParams: event.url.searchParams,
 		pathParams: event.params,
-		body: await event.request.json().catch(() => ({})),
+		body: body,
 	};
 
 	const validationResult = validateRequest(rawRequestData, requestSchema);

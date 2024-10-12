@@ -9,6 +9,7 @@
 	import ChangeProfilePicture from './ChangeProfilePicture.svelte';
 	import ChangeUsernameForm from './ChangeUsernameForm.svelte';
 	import DeleteAccountForm from './DeleteAccountForm.svelte';
+	import Enable2faForm from './Enable2faForm.svelte';
 	import PostPreferencesForm from './PostPreferencesForm.svelte';
 	import UserInterfacePreferenceForm from './UserInterfacePreferenceForm.svelte';
 
@@ -17,7 +18,7 @@
 	const errorReason = form ? form.reason : null;
 	const errorType = form ? form.type : null;
 
-	const validTabNames = ['personal', 'preferences'] as const;
+	const validTabNames = ['personal', 'preferences', 'security'] as const;
 	let currentTab: string = 'personal';
 
 	const handleTabClick = (tabName: string) => {
@@ -65,6 +66,15 @@
 		<section class="flex flex-wrap gap-4 items-start">
 			<PostPreferencesForm error={errorReason} {errorType} />
 			<UserInterfacePreferenceForm error={errorReason} {errorType} />
+		</section>
+	</TabItem>
+	<TabItem
+		open={currentTab === 'security'}
+		on:click={() => handleTabClick('security')}
+		title="Security"
+	>
+		<section class="flex flex-wrap gap-4 items-start">
+			<Enable2faForm error={errorReason} {errorType} />
 		</section>
 	</TabItem>
 </Tabs>

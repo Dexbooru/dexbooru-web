@@ -2,14 +2,19 @@ import { populateAuthenticatedUser } from '$lib/server/helpers/controllers';
 import type { Handle, HandleServerError } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	populateAuthenticatedUser(event, event.url.pathname.includes('/api') ? 'api-route' : 'page-server-load');
+	populateAuthenticatedUser(
+		event,
+		event.url.pathname.includes('/api') ? 'api-route' : 'page-server-load',
+	);
 	return await resolve(event);
 };
 
-
 export const handleError: HandleServerError = async ({ error }) => {
-	const errorMessage = process.env.NODE_ENV?.startsWith('dev') ? (error as Error).toString() : 'Internal Server Error';
+	console.log(error);
+	const errorMessage = process.env.NODE_ENV?.startsWith('dev')
+		? (error as Error).toString()
+		: 'Internal Server Error';
 	return {
-		message: errorMessage
+		message: errorMessage,
 	};
 };

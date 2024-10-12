@@ -17,7 +17,7 @@
 	export let comparisonInput: string | null = null;
 	export let labelTitle: string;
 	export let labelStyling: string = '';
-	export let inputFieldType: 'username' | 'email' | 'password' | 'password-confirm';
+	export let inputFieldType: 'username' | 'email' | 'password' | 'password-confirm' | 'otp-code';
 	export let showRequirements: boolean = true;
 	export let formStore: Writable<IAuthFormRequirementData> | null = null;
 
@@ -170,5 +170,17 @@
 				{unsatisfiedRequirements}
 			/>
 		</div>
+	{:else if inputFieldType === 'otp-code'}
+		<span>{labelTitle}</span>
+		<Input
+			id="otpCode"
+			name="otpCode"
+			type="text"
+			maxlength={6}
+			pattern="[0-9]*"
+			bind:value={input}
+			placeholder="Enter the code from your app"
+			required
+		/>
 	{/if}
 </Label>
