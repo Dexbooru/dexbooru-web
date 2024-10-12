@@ -1,3 +1,4 @@
+import { dev } from "$app/environment";
 import { createClient } from "redis";
 
 const redisClientSingleton = async () => {
@@ -15,6 +16,6 @@ const globalForPrisma = globalThis as unknown as {
 
 const redis = globalForPrisma.redis ?? await redisClientSingleton();
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.redis = redis;
+if (dev) globalForPrisma.redis = redis;
 
 export default redis;

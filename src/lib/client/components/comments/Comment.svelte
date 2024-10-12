@@ -69,7 +69,7 @@
 				class="inline-flex space-x-2 items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold"
 			>
 				<Avatar
-					class="post-card-avatar"
+					class="booru-avatar"
 					src={comment.author?.profilePictureUrl ?? undefined}
 					alt={comment.authorId
 						? `profile picture of ${comment.author.username}`

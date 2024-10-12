@@ -1,4 +1,4 @@
-import { buildUrl } from '$lib/shared/helpers/urls';
+import { buildUrl } from '$lib/client/helpers/urls';
 import type { IFriendRequestHandleBody } from '$lib/shared/types/friends';
 import { getApiAuthHeaders } from '../helpers/auth';
 

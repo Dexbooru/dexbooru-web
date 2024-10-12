@@ -1,14 +1,16 @@
-import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.png';
+import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
+import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 import { get } from 'svelte/store';
-import {
-	footerStore,
-	scrollToTopButtonActiveStore,
-	searchModalActiveStore,
-} from '../stores/layout';
+import { footerStore, searchModalActiveStore } from '../stores/layout';
 import { authenticatedUserStore, userPreferenceStore } from '../stores/users';
 import type { IDeviceStoreData } from '../types/device';
 
-const scrollThreshold = 0.75;
+const LAZY_LOADABLE_IMAGES = ['booru-avatar', 'post-carousel-image', 'whole-post-image'];
+const LAZY_LOADABLE_IMAGE_DEFAULT_MAP = {
+	'booru-avatar': DefaultProfilePicture,
+	'post-carousel-image': DefaultPostPicture,
+	'whole-post-image': DefaultPostPicture,
+};
 
 export const getDeviceDetectionDataFromWindow = (): IDeviceStoreData => {
 	const windowWidth = window.innerWidth;
@@ -33,28 +35,18 @@ export const registerDocumentEventListeners = () => {
 
 	document.addEventListener('resize', onResizeDocument);
 	document.addEventListener('keydown', onKeyDownDocument);
-	document.addEventListener('scroll', onDocumentScroll);
 };
 
 export const destroyDocumentEventListeners = () => {
 	document.removeEventListener('resize', onResizeDocument);
 	document.removeEventListener('DOMContentLoaded', onLoadDocument);
 	document.removeEventListener('keydown', onKeyDownDocument);
-	document.removeEventListener('scroll', onDocumentScroll);
-};
-
-const onDocumentScroll = () => {
-	const scrollPosition = window.scrollY;
-	const documentHeight = document.body.scrollHeight;
-
-	scrollToTopButtonActiveStore.set(scrollPosition > documentHeight * scrollThreshold);
 };
 
 const onLoadDocument = () => {
 	applyCustomSiteWideCss();
 	updateFooterData();
 	lazyLoadImages();
-	loadErrorProfilePictureImageAvatars();
 };
 
 const applyCustomSiteWideCss = () => {
@@ -82,13 +74,15 @@ const onKeyDownDocument = (event: KeyboardEvent) => {
 
 const lazyLoadImages = () => {
 	const images = document.querySelectorAll('img');
-	images.forEach((img) => img.setAttribute('loading', 'lazy'));
+	images.forEach((image) => {
+		lazyLoadImage(image);
+	});
 
 	const observer = new MutationObserver((mutations) => {
 		mutations.forEach((mutation) => {
 			mutation.addedNodes.forEach((node) => {
 				if (node.nodeName.toLowerCase() === 'img') {
-					(node as HTMLElement).setAttribute('loading', 'lazy');
+					lazyLoadImage(node as HTMLImageElement);
 				}
 			});
 		});
@@ -97,15 +91,29 @@ const lazyLoadImages = () => {
 	observer.observe(document.body, { childList: true, subtree: true });
 };
 
-const loadErrorProfilePictureImageAvatars = () => {
-	const postCardAvatars = Array.from(
-		document.getElementsByClassName('post-card-avatar'),
-	) as HTMLImageElement[];
-	postCardAvatars.forEach((postCardAvatar) => {
-		postCardAvatar.onerror = () => {
-			postCardAvatar.src = DefaultProfilePicture;
-		};
-	});
+const lazyLoadImage = (image: HTMLImageElement) => {
+	const imageClassList = Array.from(image.classList);
+	const matchingLazyLoadableClassName = LAZY_LOADABLE_IMAGES.find((className) =>
+		imageClassList.includes(className),
+	);
+	if (!matchingLazyLoadableClassName) return;
+
+	image.setAttribute('loading', 'lazy');
+
+	image.style.transition = 'filter 0.5s ease, opacity 0.5s ease';
+	image.style.filter = 'blur(5px)';
+	image.style.opacity = '0';
+
+	image.onload = () => {
+		image.style.filter = 'blur(0px)';
+		image.style.opacity = '1';
+	};
+	image.onerror = () => {
+		image.src =
+			LAZY_LOADABLE_IMAGE_DEFAULT_MAP[
+				matchingLazyLoadableClassName as keyof typeof LAZY_LOADABLE_IMAGE_DEFAULT_MAP
+			] ?? '';
+	};
 };
 
 const updateFooterData = () => {

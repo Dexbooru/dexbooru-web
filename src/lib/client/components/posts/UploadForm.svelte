@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION } from '$lib/shared/constants/images';
 	import {
@@ -31,6 +30,7 @@
 		imageBase64: string;
 		file: File;
 	}[] = [];
+	let loadingPostPictures = false;
 
 	const addLabel = (labelType: 'tag' | 'artist') => {
 		const label = labelType === 'tag' ? tag : artist;
@@ -108,15 +108,11 @@
 		if (form?.reason) {
 			toast.push(form.reason, FAILURE_TOAST_OPTIONS);
 		}
-
-		if (form?.newPost) {
-			const newPostId = form.newPost.id as string;
-			goto(`/posts/${newPostId}?uploadedSuccessfully=true`);
-		}
 	});
 
 	$: {
 		const isValidForm =
+			!loadingPostPictures &&
 			isLabelAppropriate(description, 'description') &&
 			tags.length > 0 &&
 			artists.length > 0 &&
@@ -225,7 +221,7 @@
 			</div>
 			<Input type="hidden" name="artists" value={artists.join(',')} />
 
-			<PostPictureUpload bind:images={postImages} />
+			<PostPictureUpload bind:loadingPictures={loadingPostPictures} bind:images={postImages} />
 
 			<Checkbox bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
 			<Input type="hidden" name="isNsfw" value={isNsfw} />

@@ -29,6 +29,7 @@ import { findLikedPostsByAuthorId, findLikedPostsFromSubset } from '../db/action
 import {
 	createErrorResponse,
 	createSuccessResponse,
+	isRedirectObject,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import { runPostImageTransformationPipelineInBatch } from '../helpers/images';
@@ -299,8 +300,13 @@ export const handleCreatePost = async (
 					event.locals.user.id,
 				);
 
+				if (handlerType === 'form-action') {
+					throw redirect(302, `/posts/${newPost.id}?uploadedSuccessfully=true`);
+				}
+
 				return createSuccessResponse(handlerType, 'Post created successfully', { newPost }, 201);
 			} catch (error) {
+				if (isRedirectObject(error)) throw error;
 				const message = 'An unexpected error occurred while creating the post';
 				return createErrorResponse(
 					handlerType,

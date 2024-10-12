@@ -7,16 +7,7 @@
 	import HiddenPostModal from '$lib/client/components/posts/container/HiddenPostModal.svelte';
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
-	import {
-		getDeviceDetectionDataFromWindow,
-		registerDocumentEventListeners,
-	} from '$lib/client/helpers/dom';
-	import {
-		deviceStore,
-		isDesktopStore,
-		isMobileStore,
-		isTabletStore,
-	} from '$lib/client/stores/device';
+	import { registerDocumentEventListeners } from '$lib/client/helpers/dom';
 	import { scrollToTopButtonActiveStore, searchModalActiveStore } from '$lib/client/stores/layout';
 	import { notificationStore } from '$lib/client/stores/notifications';
 	import { displayHiddenPostModalStore } from '$lib/client/stores/posts';
@@ -56,14 +47,6 @@
 		}, AUTH_CHECK_INTERVAL_SIZE);
 
 		registerDocumentEventListeners();
-
-		const deviceData = getDeviceDetectionDataFromWindow();
-		deviceStore.set(deviceData);
-
-		const { isMobile, isDesktop, isTablet } = deviceData;
-		isMobileStore.set(isMobile);
-		isDesktopStore.set(isDesktop);
-		isTabletStore.set(isTablet);
 
 		if ($authenticatedUserStore) {
 			const notificationResponse = await getNotifications();

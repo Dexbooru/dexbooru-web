@@ -1,3 +1,4 @@
+import { dev } from '$app/environment';
 import { populateAuthenticatedUser } from '$lib/server/helpers/controllers';
 import type { Handle, HandleServerError } from '@sveltejs/kit';
 
@@ -10,10 +11,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 export const handleError: HandleServerError = async ({ error }) => {
-	console.log(error);
-	const errorMessage = process.env.NODE_ENV?.startsWith('dev')
-		? (error as Error).toString()
-		: 'Internal Server Error';
+	const errorMessage = dev ? (error as Error).toString() : 'Internal Server Error';
 	return {
 		message: errorMessage,
 	};

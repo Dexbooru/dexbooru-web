@@ -61,7 +61,7 @@
 		</Dropdown>
 	</div>
 	<div class="flex flex-col items-center pb-4">
-		<Avatar size="lg" class="post-card-avatar" src={targetUser.profilePictureUrl} />
+		<Avatar size="lg" class="booru-avatar" src={targetUser.profilePictureUrl} />
 		<h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{targetUser.username}</h5>
 
 		<span class="text-sm text-gray-500 dark:text-gray-400"

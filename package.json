@@ -5,7 +5,7 @@
 	"scripts": {
 		"dev": "dotenv -e .env.local -- vite dev",
 		"build": "prisma generate && vite build",
-		"preview": "dotenv -e .env -- vite preview",
+		"preview": "dotenv -e .env.local -- vite preview",
 		"postinstall": "prisma generate",
 		"dbseed:dev": "dotenv -e .env.local -- prisma db push --force-reset && prisma db seed",
 		"dbmigrate:dev": "dotenv -e .env.local -- prisma migrate dev",

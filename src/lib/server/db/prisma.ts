@@ -1,3 +1,4 @@
+import { dev } from '$app/environment';
 import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
 import { PrismaClient } from '@prisma/client';
 import redis from './redis';
@@ -62,6 +63,6 @@ const globalForPrisma = globalThis as unknown as {
 
 const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+if (dev) globalForPrisma.prisma = prisma;
 
 export default prisma;

@@ -26,7 +26,7 @@
 
 				return {
 					...data,
-					rooms: [...data.rooms, newRoom]
+					rooms: [...data.rooms, newRoom],
 				};
 			});
 		} else {
@@ -51,7 +51,7 @@
 			{#each friends as friend (friend.id)}
 				<ListgroupItem class="text-base font-semibold gap-2 flex justify-between">
 					<div class="flex space-x-2">
-						<Avatar class="post-card-avatar" src={friend.profilePictureUrl} size="sm" />
+						<Avatar class="booru-avatar" src={friend.profilePictureUrl} size="sm" />
 						<h2 class="mt-1">{friend.username}</h2>
 					</div>
 					<Button

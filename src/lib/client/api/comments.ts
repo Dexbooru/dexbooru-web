@@ -1,5 +1,5 @@
 import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
-import { buildUrl } from '$lib/shared/helpers/urls';
+import { buildUrl } from '$lib/client/helpers/urls';
 import type { TApiResponse } from '$lib/shared/types/api';
 import type { IComment, ICommentCreateBody } from '$lib/shared/types/comments';
 import { toast } from '@zerodevx/svelte-toast';

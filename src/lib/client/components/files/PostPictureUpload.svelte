@@ -12,8 +12,7 @@
 	import ImagePreviewModal from '../images/ImagePreviewModal.svelte';
 
 	export let images: { imageBase64: string; file: File }[] = [];
-
-	let loadingPictures = false;
+	export let loadingPictures: boolean = false;
 
 	const resetFileUploadState = (
 		target: HTMLInputElement,

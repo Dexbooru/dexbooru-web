@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { buildUrl } from '$lib/client/helpers/urls';
 	import { postPaginationStore } from '$lib/client/stores/posts';
 	import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
-	import { buildUrl } from '$lib/shared/helpers/urls';
 	import { Button, PaginationItem } from 'flowbite-svelte';
 	import { ArrowLeftSolid, ArrowRightSolid } from 'flowbite-svelte-icons';
 	import { onDestroy } from 'svelte';
@@ -20,21 +20,22 @@
 			const previousPageLinkParams = {
 				pageNumber: paginationData.pageNumber - 1,
 				orderBy: paginationData.orderBy,
-				ascending: paginationData.ascending
+				ascending: paginationData.ascending,
 			};
-
 			const nextPageLinkParams = {
 				pageNumber: paginationData.pageNumber + 1,
 				orderBy: paginationData.orderBy,
-				ascending: paginationData.ascending
+				ascending: paginationData.ascending,
 			};
+
 			previousPageUrl = buildUrl($page.url.pathname, previousPageLinkParams);
 			nextPageUrl = buildUrl($page.url.pathname, nextPageLinkParams);
 		}
 	});
 
-	const firstPageUrl = new URL($page.url.href);
-	firstPageUrl.searchParams.set('pageNumber', '0');
+	const firstPageUrl = buildUrl('/', {
+		pageNumber: '0',
+	});
 
 	onDestroy(() => {
 		postPaginationUnsubscribe();
@@ -43,7 +44,7 @@
 
 {#if $postPaginationStore}
 	<div id="pagination-container" class="flex space-x-3 justify-center {noPostsLeft && 'mt-5'}">
-		{#if noPostsOnPage && !!!['uploaded', 'liked'].find(item => $page.url.href.includes(item))}
+		{#if noPostsOnPage && !!!['uploaded', 'liked'].find((item) => $page.url.href.includes(item))}
 			<Button href={firstPageUrl.href} color="blue">Return to Home</Button>
 		{:else}
 			{#if ($postPaginationStore.pageNumber - 1 >= 0 || noPostsLeft) && $postPaginationStore.pageNumber !== 0}

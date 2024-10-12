@@ -27,7 +27,7 @@
 	const chatStoreUnsubscibe = chatStore.subscribe((data) => {
 		const { friends, rooms } = data;
 		filteredFriends = friends.filter(
-			(friend) => !rooms.some((chatRoom) => chatRoom.participants.includes(friend.id))
+			(friend) => !rooms.some((chatRoom) => chatRoom.participants.includes(friend.id)),
 		);
 		processedRooms = rooms.map((chatRoom) => {
 			const friend = friends.find((friend) => chatRoom.participants.includes(friend.id));
@@ -81,7 +81,12 @@
 					: ''}"
 			>
 				<div class="flex items-center space-x-3">
-					<Avatar class="post-card-avatar" src={chatRoom.profilePictureUrl} alt={chatRoom.username} size="md" />
+					<Avatar
+						class="booru-avatar"
+						src={chatRoom.profilePictureUrl}
+						alt={chatRoom.username}
+						size="md"
+					/>
 					<h3>{chatRoom.username}</h3>
 				</div>
 

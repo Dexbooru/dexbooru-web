@@ -1,4 +1,4 @@
-import { AWS_PROFILE_PICTURE_BUCKET_NAME, DEFAULT_PROFILE_PICTURE_URL } from '$env/static/private';
+import { DEFAULT_PROFILE_PICTURE_URL } from '$env/static/private';
 import {
 	ACCOUNT_DELETION_CONFIRMATION_TEXT,
 	EMAIL_REQUIREMENTS,
@@ -18,6 +18,7 @@ import type { IUser } from '$lib/shared/types/users';
 import { redirect, type RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { deleteFromBucket, uploadToBucket } from '../aws/actions/s3';
+import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { SESSION_ID_COOKIE_OPTIONS } from '../constants/cookies';
 import { boolStrSchema } from '../constants/reusableSchemas';
 import { SINGLE_USER_CACHE_TIME_SECONDS } from '../constants/sessions';
@@ -729,8 +730,6 @@ export const handleProcessUserTotp = async (event: RequestEvent) => {
 
 				throw redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
 			} catch (error) {
-				console.log(error);
-
 				if (isRedirectObject(error)) throw error;
 
 				return createErrorResponse(

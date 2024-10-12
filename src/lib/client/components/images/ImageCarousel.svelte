@@ -10,12 +10,23 @@
 	export let blurImages: boolean = false;
 	export let transitionFunction: TCarouselTransitionFunction | null = null;
 
-	const imagesData: HTMLImgAttributes[] = imageUrls.map((imageUrl, index) => {
+	const imagesData: HTMLImgAttributes[] = imageUrls.map((_, index) => {
 		return {
-			src: imageUrl,
-			alt: imagesAlt ?? `image content id of ${crypto.randomUUID()} in carousel slide ${index + 1}`,
+			src: null,
+			alt: imagesAlt
+				? `${index + 1} - ${imagesAlt}`
+				: `image content id of ${crypto.randomUUID()} in carousel slide ${index + 1}`,
+			loading: 'lazy',
 		};
 	});
+
+	const downloadSlideImage = (slideIndex: number) => {
+		const image = imagesData[slideIndex];
+		if (image.src !== null) return image;
+
+		image.src = imageUrls[slideIndex];
+		return image;
+	};
 </script>
 
 <Carousel
@@ -27,8 +38,8 @@
 >
 	<a slot="slide" href={postHref} let:Slide let:index>
 		<Slide
-			class={`${blurImages && '!blur-md'} object-cover object-center`}
-			image={imagesData[index]}
+			class={`${blurImages && '!blur-md'} object-contain post-carousel-image`}
+			image={downloadSlideImage(index)}
 		/>
 	</a>
 

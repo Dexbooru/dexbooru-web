@@ -4,8 +4,7 @@
 </script>
 
 <div class="flex flex-wrap">
-{#each imageUrls as imageUrl}
-	<img class="m-2" src={imageUrl} alt={imagesAlt} />
-{/each}
+	{#each imageUrls as imageUrl}
+		<img class="m-2 whole-post-image" src={imageUrl} alt={imagesAlt} />
+	{/each}
 </div>
-
