@@ -7,6 +7,7 @@
 	import { commentTreeStore } from '$lib/client/stores/comments';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
+	import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import { Button, Modal } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
@@ -20,6 +21,10 @@
 
 	const tagNames = post.tags.map((tag) => tag.name);
 	const artistNames = post.artists.map((artist) => artist.name);
+
+	const originalSizedImageUrls = post.imageUrls.filter((imageUrl) =>
+		imageUrl.includes(ORIGINAL_IMAGE_SUFFIX),
+	);
 
 	$: {
 		post = data.post;
@@ -139,9 +144,9 @@
 
 	<div class="space-y-2">
 		<p class="text-lg dark:text-white">
-			Total images in post: <span class=" dark:text-gray-400">{post.imageUrls.length}</span>
+			Total images in post: <span class=" dark:text-gray-400">{originalSizedImageUrls.length}</span>
 		</p>
-		<ImageCollection imageUrls={post.imageUrls} imagesAlt={post.description} />
+		<ImageCollection imageUrls={originalSizedImageUrls} imagesAlt={post.description} />
 	</div>
 
 	<div class="space-y-1">

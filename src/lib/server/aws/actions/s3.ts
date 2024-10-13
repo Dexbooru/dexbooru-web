@@ -38,8 +38,9 @@ export async function uploadToBucket(
 	objectSource: TS3ObjectSource,
 	fileBuffer: Buffer,
 	contentType: string = 'webp',
+	overrideObjectId: string = '',
 ): Promise<string> {
-	const objectId = crypto.randomUUID();
+	const objectId = overrideObjectId.length > 0 ? overrideObjectId : crypto.randomUUID();
 	const uploadParams = {
 		Bucket: bucketName,
 		Key: objectId,
@@ -74,10 +75,11 @@ export async function uploadBatchToBucket(
 	objectSources: TS3ObjectSource,
 	fileBuffers: Buffer[],
 	contentType: string = 'webp',
+	objectIds: string[] = [],
 ): Promise<string[]> {
 	const objectUrls = await Promise.all(
-		fileBuffers.map((fileBuffer) =>
-			uploadToBucket(bucketName, objectSources, fileBuffer, contentType),
+		fileBuffers.map((fileBuffer, index) =>
+			uploadToBucket(bucketName, objectSources, fileBuffer, contentType, objectIds[index]),
 		),
 	);
 	return objectUrls;

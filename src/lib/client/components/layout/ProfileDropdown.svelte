@@ -35,7 +35,7 @@
 	<Avatar
 		src={$authenticatedUserStore?.profilePictureUrl}
 		alt="profile picture of {$authenticatedUserStore?.username}"
-		class="mr-2 booru-avatar"
+		class="mr-2 booru-avatar hide-alt-text"
 	/>
 	{$authenticatedUserStore?.username}
 	<AngleDownSolid size="sm" class="!mr-2" />

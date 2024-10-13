@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { TCarouselTransitionFunction } from '$lib/client/types/images';
+	import { POST_PICTURE_PREVIEW_HEIGHT, POST_PICTURE_PREVIEW_WIDTH } from '$lib/shared/constants/images';
 	import { Carousel } from 'flowbite-svelte';
 	import type { HTMLImgAttributes } from 'svelte/elements';
 
@@ -7,11 +8,12 @@
 	export let imageUrls: string[];
 	export let imagesAlt: string | null = null;
 	export let slideDuration: number = 750;
-	export let blurImages: boolean = false;
 	export let transitionFunction: TCarouselTransitionFunction | null = null;
 
 	const imagesData: HTMLImgAttributes[] = imageUrls.map((_, index) => {
 		return {
+			width: POST_PICTURE_PREVIEW_WIDTH,
+			height: POST_PICTURE_PREVIEW_HEIGHT,
 			src: null,
 			alt: imagesAlt
 				? `${index + 1} - ${imagesAlt}`
@@ -29,22 +31,21 @@
 	};
 </script>
 
-<Carousel
-	let:Controls
-	let:Indicators
-	images={imagesData}
-	{slideDuration}
-	transition={transitionFunction}
->
-	<a slot="slide" href={postHref} let:Slide let:index>
-		<Slide
-			class={`${blurImages && '!blur-md'} object-contain post-carousel-image`}
-			image={downloadSlideImage(index)}
-		/>
-	</a>
+{#if imageUrls.length > 0}
+	<Carousel
+		let:Controls
+		let:Indicators
+		images={imagesData}
+		{slideDuration}
+		transition={transitionFunction}
+	>
+		<a slot="slide" href={postHref} let:Slide let:index>
+			<Slide class="object-cover post-carousel-image" image={downloadSlideImage(index)} />
+		</a>
 
-	{#if imagesData.length > 1}
-		<Controls />
-		<Indicators />
-	{/if}
-</Carousel>
+		{#if imagesData.length > 1}
+			<Controls />
+			<Indicators />
+		{/if}
+	</Carousel>
+{/if}

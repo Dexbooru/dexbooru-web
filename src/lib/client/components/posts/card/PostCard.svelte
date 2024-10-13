@@ -2,17 +2,45 @@
 	import ImageCarousel from '$lib/client/components/images/ImageCarousel.svelte';
 	import PostCardBody from '$lib/client/components/posts/card/PostCardBody.svelte';
 	import { userPreferenceStore } from '$lib/client/stores/users';
+	import {
+		IMAGE_FILTER_EXCLUSION_BASE_URLS,
+		NSFW_PREVIEW_IMAGE_SUFFIX,
+		PREVIEW_IMAGE_SUFFIX,
+	} from '$lib/shared/constants/images';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { Card, Toast } from 'flowbite-svelte';
 	import { ExclamationCircleSolid } from 'flowbite-svelte-icons';
+	import { onDestroy } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
 	import PostCardActions from './PostCardActions.svelte';
 
 	export let post: TPost;
 
-	const { id: postId, description, author, tags, artists, imageUrls, createdAt, isNsfw } = post;
+	const { id: postId, description, author, tags, artists, createdAt, isNsfw } = post;
+	let imageUrls = post.imageUrls;
 	let likes = post.likes;
+
+	const userPreferenceUnsubsribe = userPreferenceStore.subscribe((data) => {
+		const blurImages = isNsfw && data.autoBlurNsfw;
+		imageUrls = imageUrls.filter((imageUrl) => {
+			if (
+				IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionBaseUrl) =>
+					imageUrl.includes(exclusionBaseUrl),
+				)
+			) {
+				return true;
+			}
+
+			return blurImages
+				? imageUrl.endsWith(NSFW_PREVIEW_IMAGE_SUFFIX)
+				: imageUrl.endsWith(PREVIEW_IMAGE_SUFFIX) && !imageUrl.endsWith(NSFW_PREVIEW_IMAGE_SUFFIX);
+		});
+	});
+
+	onDestroy(() => {
+		userPreferenceUnsubsribe();
+	});
 </script>
 
 <Card>
@@ -32,7 +60,6 @@
 		{imageUrls}
 		imagesAlt={description}
 		slideDuration={350}
-		blurImages={isNsfw && $userPreferenceStore.autoBlurNsfw}
 		transitionFunction={(x) => scale(x, { duration: 500, easing: quintOut })}
 	/>
 	<PostCardBody {post} {author} {createdAt} {tags} {artists} />

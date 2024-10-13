@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { toast } from '@zerodevx/svelte-toast';
 	import { TabItem, Tabs } from 'flowbite-svelte';
 	import { GridSolid, UserCircleSolid } from 'flowbite-svelte-icons';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/profile/settings/$types';
 	import ChangePasswordForm from './ChangePasswordForm.svelte';
 	import ChangeProfilePicture from './ChangeProfilePicture.svelte';
@@ -12,6 +14,7 @@
 	import Enable2faForm from './Enable2faForm.svelte';
 	import PostPreferencesForm from './PostPreferencesForm.svelte';
 	import UserInterfacePreferenceForm from './UserInterfacePreferenceForm.svelte';
+	import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 
 	export let form: ActionData;
 
@@ -20,6 +23,12 @@
 
 	const validTabNames = ['personal', 'preferences', 'security'] as const;
 	let currentTab: string = 'personal';
+
+	const message = form ? form.message : null;
+
+	if (message) {
+		toast.push(message, SUCCESS_TOAST_OPTIONS);
+	}
 
 	const handleTabClick = (tabName: string) => {
 		if (currentTab === tabName) return;
@@ -33,6 +42,14 @@
 		const tabName = searchParams.get('tab') as 'personal' | 'preferences';
 		if (tabName) {
 			currentTab = validTabNames.includes(tabName) ? tabName : 'personal';
+		}
+	});
+
+	onMount(() => {
+		const newAuthToken = form ? form.newAuthToken : null;
+
+		if (typeof newAuthToken === 'string' && newAuthToken.length > 0) {
+			localStorage.setItem(SESSION_ID_KEY, newAuthToken);
 		}
 	});
 

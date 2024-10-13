@@ -32,7 +32,10 @@ import {
 	isRedirectObject,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
-import { runPostImageTransformationPipelineInBatch } from '../helpers/images';
+import {
+	flattenPostImageBuffers,
+	runPostImageTransformationPipelineInBatch,
+} from '../helpers/images';
 import { cacheResponse } from '../helpers/sessions';
 import type {
 	TControllerHandlerVariant,
@@ -284,11 +287,18 @@ export const handleCreatePost = async (
 			};
 
 			try {
-				const postImageFileBuffers = await runPostImageTransformationPipelineInBatch(postPictures);
+				const postImageBufferMaps = await runPostImageTransformationPipelineInBatch(
+					postPictures,
+					isNsfw,
+				);
+				const { fileObjectIds, fileBuffers: postImageFileBuffers } =
+					flattenPostImageBuffers(postImageBufferMaps);
 				const postImageUrls = await uploadBatchToBucket(
 					AWS_POST_PICTURE_BUCKET_NAME,
 					'posts',
 					postImageFileBuffers,
+					'webp',
+					fileObjectIds,
 				);
 
 				const newPost = await createPost(

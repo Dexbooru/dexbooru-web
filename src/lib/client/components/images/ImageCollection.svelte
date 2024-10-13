@@ -3,8 +3,6 @@
 	export let imagesAlt: string;
 </script>
 
-<div class="flex flex-wrap">
-	{#each imageUrls as imageUrl}
-		<img class="m-2 whole-post-image" src={imageUrl} alt={imagesAlt} />
-	{/each}
-</div>
+{#each imageUrls as imageUrl}
+	<img class="m-2 whole-post-image" src={imageUrl} alt={imagesAlt} />
+{/each}
