@@ -1,28 +1,29 @@
 <script lang="ts">
 	import { getGlobalSearchResults } from '$lib/client/api/search';
+	import { GLOBAL_SEARCH_MODAL_NAME } from '$lib/client/constants/layout';
 	import {
 		GLOBAL_SEARCH_INPUT_ELEMENT_ID,
-		SEARCH_DEBOUNCE_TIMEOUT_MS
+		SEARCH_DEBOUNCE_TIMEOUT_MS,
 	} from '$lib/client/constants/search';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { debounce, memoize } from '$lib/client/helpers/util';
-	import { searchModalActiveStore } from '$lib/client/stores/layout';
+	import { modalStore } from '$lib/client/stores/layout';
 	import { queryStore } from '$lib/client/stores/search';
+	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { IAppSearchResult } from '$lib/shared/types/search';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Modal, Spinner } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 	import Searchbar from '../reusable/Searchbar.svelte';
 	import SearchResultsContainer from './SearchResultsContainer.svelte';
-	import type { TApiResponse } from '$lib/shared/types/api';
 
 	let currentSearchResults: IAppSearchResult | null = null;
 	let searchResultsLoading = false;
 
-	const searchModalUnsubsribe = searchModalActiveStore.subscribe((active) => {
-		if (active) {
+	const modalStoreUnsubscribe = modalStore.subscribe((data) => {
+		if (data.focusedModalName === GLOBAL_SEARCH_MODAL_NAME) {
 			const globalSearchInput = document.querySelector(
-				`#${GLOBAL_SEARCH_INPUT_ELEMENT_ID}`
+				`#${GLOBAL_SEARCH_INPUT_ELEMENT_ID}`,
 			) as HTMLInputElement | null;
 			if (globalSearchInput) {
 				globalSearchInput.focus();
@@ -40,7 +41,7 @@
 		} else {
 			toast.push(
 				'An unexpected error occured while retrieving the search results',
-				FAILURE_TOAST_OPTIONS
+				FAILURE_TOAST_OPTIONS,
 			);
 			return null;
 		}
@@ -60,17 +61,17 @@
 	}, SEARCH_DEBOUNCE_TIMEOUT_MS) as (query: string) => void;
 
 	onDestroy(() => {
-		searchModalUnsubsribe();
+		modalStoreUnsubscribe();
 	});
 </script>
 
 <Modal
 	title="Find tags, artists, users and posts"
-	open={$searchModalActiveStore}
+	open={$modalStore.isOpen && $modalStore.focusedModalName === GLOBAL_SEARCH_MODAL_NAME}
 	outsideclose
 	class="w-screen"
 	placement="top-center"
-	on:close={() => searchModalActiveStore.set(false)}
+	on:close={() => modalStore.set({ isOpen: false, focusedModalName: null })}
 >
 	<div class="flex relative">
 		<Searchbar

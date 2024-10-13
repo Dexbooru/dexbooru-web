@@ -48,10 +48,12 @@ export const updatePostStores = (postPaginationData: IPostPaginationData) => {
 			canDisplayPost = true;
 		} else {
 			blacklistedPosts.push(post);
+			canDisplayPost = false;
 		}
 
 		if (browseInSafeMode && post.isNsfw) {
 			nsfwPosts.push(post);
+			canDisplayPost = false;
 		} else {
 			canDisplayPost = true;
 		}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { deletePost, likePost } from '$lib/client/api/posts';
-	import { REPORT_MODAL_NAME } from '$lib/client/constants/layout';
+	import { likePost } from '$lib/client/api/posts';
+	import { DELETE_POST_MODAL_NAME, REPORT_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { normalizeCount } from '$lib/client/helpers/posts';
 	import { modalStore } from '$lib/client/stores/layout';
@@ -20,7 +20,6 @@
 		HeartSolid,
 		TrashBinSolid,
 	} from 'flowbite-svelte-icons';
-	import PostCardReportModal from './PostCardReportModal.svelte';
 
 	export let post: TPost;
 	export let postId: string;
@@ -32,16 +31,16 @@
 	};
 
 	let postLikeLoading = false;
-	let postDeletionLoading = false;
 	let hasLikedPost = $postPaginationStore?.likedPosts.map((post) => post.id).includes(postId);
 
 	const pagePathName = $page.url.pathname;
 	const isPostAuthor = $authenticatedUserStore && $authenticatedUserStore.id === author.id;
 
-	const handleModalOpen = () => {
+	const handleModalOpen = (focusedModalName: string, data: unknown) => {
 		modalStore.set({
 			isOpen: true,
-			focusedModalName: REPORT_MODAL_NAME,
+			focusedModalName: focusedModalName,
+			modalData: data,
 		});
 	};
 
@@ -94,30 +93,6 @@
 			);
 		}
 	};
-
-	const handleDeletePost = async () => {
-		postDeletionLoading = true;
-		const response = await deletePost(postId);
-		postDeletionLoading = false;
-
-		if (response.ok) {
-			postsPageStore.update((previousPosts) => previousPosts.filter((post) => post.id !== postId));
-			originalPostsPageStore.update((previousPosts) =>
-				previousPosts.filter((post) => post.id !== postId),
-			);
-			postPaginationStore.update((paginationData) => {
-				if (!paginationData) return null;
-
-				return {
-					...paginationData,
-					posts: paginationData.posts.filter((post) => post.id !== postId),
-				};
-			});
-			toast.push('The post was deleted successfully!', SUCCESS_TOAST_OPTIONS);
-		} else {
-			toast.push('There was an error while deleting the post!', FAILURE_TOAST_OPTIONS);
-		}
-	};
 </script>
 
 <div class="flex flex-col space-y-3">
@@ -130,15 +105,18 @@
 		<span>View full post</span>
 		<ArrowRightToBracketSolid />
 	</Button>
-	<Button on:click={handleModalOpen} class="space-x-2" color="yellow">
+	<Button
+		on:click={() => handleModalOpen(REPORT_MODAL_NAME, { postId })}
+		class="space-x-2"
+		color="yellow"
+	>
 		<span>Report post</span>
 		<ExclamationCircleSolid />
 	</Button>
 	{#if isPostAuthor}
 		<Button
 			class="space-x-2"
-			disabled={postDeletionLoading}
-			on:click={handleDeletePost}
+			on:click={() => handleModalOpen(DELETE_POST_MODAL_NAME, { post })}
 			color="red"
 		>
 			<span>Delete post</span>
@@ -146,5 +124,3 @@
 		</Button>
 	{/if}
 </div>
-
-<PostCardReportModal {postId} />

@@ -7,7 +7,10 @@
 	import { commentTreeStore } from '$lib/client/stores/comments';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
-	import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
+	import {
+		IMAGE_FILTER_EXCLUSION_BASE_URLS,
+		ORIGINAL_IMAGE_SUFFIX,
+	} from '$lib/shared/constants/images';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import { Button, Modal } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
@@ -22,9 +25,12 @@
 	const tagNames = post.tags.map((tag) => tag.name);
 	const artistNames = post.artists.map((artist) => artist.name);
 
-	const originalSizedImageUrls = post.imageUrls.filter((imageUrl) =>
-		imageUrl.includes(ORIGINAL_IMAGE_SUFFIX),
-	);
+	const originalSizedImageUrls = post.imageUrls.filter((imageUrl) => {
+		if (IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))) {
+			return true;
+		}
+		return imageUrl.includes(ORIGINAL_IMAGE_SUFFIX);
+	});
 
 	$: {
 		post = data.post;

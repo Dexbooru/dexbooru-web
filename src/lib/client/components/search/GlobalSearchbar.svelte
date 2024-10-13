@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { searchModalActiveStore } from '$lib/client/stores/layout';
+	import { GLOBAL_SEARCH_MODAL_NAME } from '$lib/client/constants/layout';
+	import { modalStore } from '$lib/client/stores/layout';
 	import { Button, Input, Kbd } from 'flowbite-svelte';
 	import { SearchOutline } from 'flowbite-svelte-icons';
 </script>
@@ -13,7 +14,7 @@
 		<Kbd class="p-1">K</Kbd>
 	</div>
 	<Button
-		on:click={() => searchModalActiveStore.set(true)}
+		on:click={() => modalStore.set({ isOpen: true, focusedModalName: GLOBAL_SEARCH_MODAL_NAME })}
 		color="alternative"
 		class="p-0 border-none opacity-50 hover:opacity-100"
 	>

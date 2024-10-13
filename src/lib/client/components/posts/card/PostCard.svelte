@@ -1,6 +1,8 @@
 <script lang="ts">
 	import ImageCarousel from '$lib/client/components/images/ImageCarousel.svelte';
 	import PostCardBody from '$lib/client/components/posts/card/PostCardBody.svelte';
+	import { HIDDEN_POSTS_MODAL_NAME } from '$lib/client/constants/layout';
+	import { modalStore } from '$lib/client/stores/layout';
 	import { userPreferenceStore } from '$lib/client/stores/users';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
@@ -44,7 +46,7 @@
 </script>
 
 <Card>
-	{#if isNsfw && $userPreferenceStore.autoBlurNsfw}
+	{#if isNsfw && $userPreferenceStore.autoBlurNsfw && $modalStore.focusedModalName !== HIDDEN_POSTS_MODAL_NAME}
 		<Toast
 			dismissable={false}
 			divClass="w-full max-w-xs p-4 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3 mt-2 mb-2"

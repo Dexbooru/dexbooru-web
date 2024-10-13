@@ -12,6 +12,7 @@ export interface IFooterStoreData {
 export interface IModalStoreData {
 	isOpen: boolean;
 	focusedModalName: string | null;
+	modalData?: unknown;
 }
 
 export interface IChatStoreData {

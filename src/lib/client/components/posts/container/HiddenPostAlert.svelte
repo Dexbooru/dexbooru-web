@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { HIDDEN_POSTS_MODAL_NAME } from '$lib/client/constants/layout';
+	import { modalStore } from '$lib/client/stores/layout';
 	import {
 		blacklistedPostPageStore,
-		displayHiddenPostModalStore,
 		hiddenPostsPageStore,
 		nsfwPostPageStore,
 	} from '$lib/client/stores/posts';
@@ -32,7 +33,7 @@
 		const hiddenPostAlert = document.getElementById('hidden-posts-page-alert');
 		if (hiddenPostAlert) {
 			hiddenPostAlert.addEventListener('click', () => {
-				displayHiddenPostModalStore.set(true);
+				modalStore.set({ isOpen: true, focusedModalName: HIDDEN_POSTS_MODAL_NAME });
 			});
 		}
 	});

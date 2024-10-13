@@ -2,15 +2,17 @@
 	import { page } from '$app/stores';
 	import { validateUserAuthToken } from '$lib/client/api/auth';
 	import { getNotifications } from '$lib/client/api/notifications';
+	import ImagePreviewModal from '$lib/client/components/images/ImagePreviewModal.svelte';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
 	import Navbar from '$lib/client/components/layout/Navbar.svelte';
+	import DeletePostConfirmationModal from '$lib/client/components/posts/card/DeletePostConfirmationModal.svelte';
+	import PostCardReportModal from '$lib/client/components/posts/card/PostCardReportModal.svelte';
 	import HiddenPostModal from '$lib/client/components/posts/container/HiddenPostModal.svelte';
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
 	import { registerDocumentEventListeners } from '$lib/client/helpers/dom';
-	import { scrollToTopButtonActiveStore, searchModalActiveStore } from '$lib/client/stores/layout';
+	import { modalStore, scrollToTopButtonActiveStore } from '$lib/client/stores/layout';
 	import { notificationStore } from '$lib/client/stores/notifications';
-	import { displayHiddenPostModalStore } from '$lib/client/stores/posts';
 	import { authenticatedUserStore, userPreferenceStore } from '$lib/client/stores/users';
 	import { NULLABLE_USER } from '$lib/shared/constants/auth';
 	import { SESSION_ID_KEY } from '$lib/shared/constants/session';
@@ -33,8 +35,7 @@
 	userPreferenceStore.set(data.userPreferences);
 
 	const pageUnsubscribe = page.subscribe((_) => {
-		searchModalActiveStore.set(false);
-		displayHiddenPostModalStore.set(false);
+		modalStore.set({ isOpen: false, focusedModalName: null });
 	});
 
 	onMount(async () => {
@@ -90,3 +91,6 @@
 <SvelteToast options={TOAST_DEFAULT_OPTIONS} />
 <GlobalSearchModal />
 <HiddenPostModal />
+<PostCardReportModal />
+<DeletePostConfirmationModal />
+<ImagePreviewModal />

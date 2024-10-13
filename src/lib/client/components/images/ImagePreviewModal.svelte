@@ -1,25 +1,36 @@
 <script lang="ts">
-	import { Button, Modal } from 'flowbite-svelte';
+	import { IMAGE_PREVIEW_MODAL_NAME } from '$lib/client/constants/layout';
+	import { modalStore } from '$lib/client/stores/layout';
+	import { Modal } from 'flowbite-svelte';
+	import { onDestroy } from 'svelte';
 
-	export let imageBase64: string;
-	export let imageFile: File;
+	let imageBase64: string;
+	let imageFile: File;
+	let imageAlt = '';
 
-	const imageAlt = `${imageFile.name}-${Date.now()}`;
-	let modalOpen = false;
+	const modalStoreUnsubscribe = modalStore.subscribe((data) => {
+		if (data.focusedModalName === IMAGE_PREVIEW_MODAL_NAME) {
+			const { imageBase64: incomingImageBase64, imageFile: incomingImageFile } = data.modalData as {
+				imageBase64: string;
+				imageFile: File;
+			};
+			imageBase64 = incomingImageBase64;
+			imageFile = incomingImageFile;
+			imageAlt = `${incomingImageFile.name}-${Date.now()}`;
+		}
+	});
+
+	onDestroy(() => {
+		modalStoreUnsubscribe();
+	});
 </script>
 
-<Button
-	color="alternative"
-	style="width: 200px; height: 200px; background-image: url({imageBase64}); background-repeat: no-repeat; background-size: cover; background-position: center;"
-	on:click={() => (modalOpen = true)}
-/>
-
 <Modal
-	title="Full image preview of {imageFile.name}"
-	bind:open={modalOpen}
+	title="Full image preview of {imageFile && imageFile.name}"
 	autoclose
 	outsideclose
-	on:close={() => (modalOpen = false)}
+	open={$modalStore.isOpen && $modalStore.focusedModalName === IMAGE_PREVIEW_MODAL_NAME}
+	on:close={() => modalStore.set({ isOpen: false, focusedModalName: null })}
 >
 	<img src={imageBase64} alt={imageAlt} />
 </Modal>

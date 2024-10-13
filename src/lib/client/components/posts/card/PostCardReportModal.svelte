@@ -4,11 +4,22 @@
 	import { REPORT_REASON_CATEGORIES } from '$lib/shared/constants/reports';
 	import type { ReportReasonCategory } from '$lib/shared/types/reports';
 	import { Button, Label, Modal, Select, Textarea } from 'flowbite-svelte';
+	import { onDestroy } from 'svelte';
 
-	export let postId: string;
-
+	let postId: string;
 	let reportVerbalReason = '';
 	let selectedReportReasonCategory: ReportReasonCategory;
+
+	const modalStoreUnsubscribe = modalStore.subscribe((data) => {
+		if (data.focusedModalName === REPORT_MODAL_NAME) {
+			const { postId: focusedPostId } = data.modalData as { postId: string };
+			postId = focusedPostId;
+		}
+	});
+
+	onDestroy(() => {
+		modalStoreUnsubscribe();
+	});
 </script>
 
 <Modal
@@ -31,7 +42,7 @@
 			items={REPORT_REASON_CATEGORIES.map((category) => {
 				return {
 					name: category,
-					value: category
+					value: category,
 				};
 			})}
 		/>

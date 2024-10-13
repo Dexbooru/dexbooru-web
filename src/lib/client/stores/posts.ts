@@ -10,4 +10,3 @@ export const hiddenPostsPageStore = writable<THiddenPagePostData>({
 	nsfwPosts: [],
 	blacklistedPosts: [],
 });
-export const displayHiddenPostModalStore = writable<boolean>(false);

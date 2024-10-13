@@ -1,9 +1,7 @@
 <script lang="ts">
-	import {
-		blacklistedPostPageStore,
-		displayHiddenPostModalStore,
-		nsfwPostPageStore,
-	} from '$lib/client/stores/posts';
+	import { HIDDEN_POSTS_MODAL_NAME } from '$lib/client/constants/layout';
+	import { modalStore } from '$lib/client/stores/layout';
+	import { blacklistedPostPageStore, nsfwPostPageStore } from '$lib/client/stores/posts';
 	import { authenticatedUserStore, userPreferenceStore } from '$lib/client/stores/users';
 	import { Button, Modal, TabItem, Tabs } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
@@ -40,7 +38,7 @@
 {#if $authenticatedUserStore && ($blacklistedPostPageStore.length > 0 || $nsfwPostPageStore.length > 0)}
 	<Modal
 		title="Hidden posts on this page based on your preferences"
-		bind:open={$displayHiddenPostModalStore}
+		open={$modalStore.isOpen && $modalStore.focusedModalName === HIDDEN_POSTS_MODAL_NAME}
 		outsideclose
 	>
 		<Tabs style="underline">
@@ -69,7 +67,9 @@
 		</Tabs>
 
 		<svelte:fragment slot="footer">
-			<Button on:click={() => displayHiddenPostModalStore.set(false)}>Close</Button>
+			<Button on:click={() => modalStore.set({ isOpen: false, focusedModalName: null })}
+				>Close</Button
+			>
 		</svelte:fragment>
 	</Modal>
 {/if}

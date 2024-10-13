@@ -1,7 +1,8 @@
 import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
 import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 import { get } from 'svelte/store';
-import { footerStore, searchModalActiveStore } from '../stores/layout';
+import { GLOBAL_SEARCH_MODAL_NAME } from '../constants/layout';
+import { footerStore, modalStore } from '../stores/layout';
 import { authenticatedUserStore, userPreferenceStore } from '../stores/users';
 import type { IDeviceStoreData } from '../types/device';
 
@@ -68,7 +69,7 @@ const onResizeDocument = () => {
 const onKeyDownDocument = (event: KeyboardEvent) => {
 	if (event.ctrlKey && event.key.toLowerCase() === 'k') {
 		event.preventDefault();
-		searchModalActiveStore.update((active) => !active);
+		modalStore.set({ isOpen: true, focusedModalName: GLOBAL_SEARCH_MODAL_NAME });
 	}
 };
 

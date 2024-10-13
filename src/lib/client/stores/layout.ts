@@ -12,6 +12,4 @@ export const modalStore = writable<IModalStoreData>({
 	focusedModalName: null,
 });
 
-export const searchModalActiveStore = writable<boolean>(false);
-
 export const scrollToTopButtonActiveStore = writable<boolean>(false);
