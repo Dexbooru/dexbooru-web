@@ -142,6 +142,7 @@ const UserProcessTotpSchema = {
 
 const User2faEnableSchema = {
 	form: z.object({
+		password: z.string().min(1, 'The password cannot be empty').optional(),
 		otpCode: z
 			.string()
 			.length(TOTP_CODE_LENGTH, {
@@ -926,7 +927,7 @@ export const handleToggleUserTwoFactorAuthentication = async (event: RequestEven
 		'form-action',
 		User2faEnableSchema,
 		async (data) => {
-			const { otpCode } = data.form;
+			const { otpCode, password } = data.form;
 
 			try {
 				let twoFactorEnabled = false;
@@ -940,6 +941,24 @@ export const handleToggleUserTwoFactorAuthentication = async (event: RequestEven
 					}
 
 					twoFactorEnabled = true;
+				} else {
+					const user = await findUserById(event.locals.user.id, { password: true });
+					if (!user) {
+						return createErrorResponse(
+							'form-action',
+							404,
+							`The user called ${event.locals.user.username} does not exist`,
+						);
+					}
+
+					const passwordsMatch = await doPasswordsMatch(password ?? '', user.password);
+					if (!passwordsMatch) {
+						return createErrorResponse(
+							'form-action',
+							401,
+							`The provided password for was incorrect`,
+						);
+					}
 				}
 
 				await updateUserPreferences(event.locals.user.id, {

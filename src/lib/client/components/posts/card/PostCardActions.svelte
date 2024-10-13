@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { likePost } from '$lib/client/api/posts';
-	import { DELETE_POST_MODAL_NAME, REPORT_MODAL_NAME } from '$lib/client/constants/layout';
+	import {
+		DELETE_POST_MODAL_NAME,
+		EDIT_POST_MODAL_NAME,
+		REPORT_MODAL_NAME,
+	} from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { normalizeCount } from '$lib/client/helpers/posts';
 	import { modalStore } from '$lib/client/stores/layout';
@@ -18,6 +22,7 @@
 		ArrowRightToBracketSolid,
 		ExclamationCircleSolid,
 		HeartSolid,
+		PenSolid,
 		TrashBinSolid,
 	} from 'flowbite-svelte-icons';
 
@@ -76,7 +81,7 @@
 				return paginationData;
 			});
 
-			if (pagePathName === '/posts/liked' && hasLikedPost) {
+			if (pagePathName.includes('/posts/liked') && hasLikedPost) {
 				postsPageStore.update((previousPosts) =>
 					previousPosts.filter((post) => post.id !== postId),
 				);
@@ -114,6 +119,14 @@
 		<ExclamationCircleSolid />
 	</Button>
 	{#if isPostAuthor}
+		<Button
+			color="green"
+			class="space-x-2"
+			on:click={() => handleModalOpen(EDIT_POST_MODAL_NAME, { post })}
+		>
+			<span>Edit post</span>
+			<PenSolid />
+		</Button>
 		<Button
 			class="space-x-2"
 			on:click={() => handleModalOpen(DELETE_POST_MODAL_NAME, { post })}

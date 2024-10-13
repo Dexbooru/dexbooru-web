@@ -145,6 +145,8 @@ export async function createPost(
 	tags: string[],
 	artists: string[],
 	imageUrls: string[],
+	imageWidths: number[],
+	imageHeights: number[],
 	authorId: string,
 ): Promise<TPost> {
 	const newPost = await prisma.post.create({
@@ -152,6 +154,8 @@ export async function createPost(
 			description,
 			authorId,
 			imageUrls,
+			imageHeights,
+			imageWidths,
 			isNsfw,
 			artists: {
 				connectOrCreate: artists.map((artist) => {

@@ -3,7 +3,7 @@
 	import { commentTreeStore } from '$lib/client/stores/comments';
 	import CommentTree from '$lib/shared/helpers/comments';
 	import type { IComment } from '$lib/shared/types/comments';
-	import { Button, Spinner } from 'flowbite-svelte';
+	import { Button } from 'flowbite-svelte';
 	import { onDestroy, onMount } from 'svelte';
 	import Comment from './Comment.svelte';
 
@@ -29,6 +29,9 @@
 
 	const commentTreeUnsubscribe = commentTreeStore.subscribe((currentCommentTree) => {
 		topLevelComments = currentCommentTree.getReplies('root');
+		if (currentCommentTree.getCount() > 0) {
+			postCommentCount = currentCommentTree.getCount();
+		}
 	});
 
 	onMount(() => {
@@ -41,13 +44,11 @@
 	});
 </script>
 
-{#if commentsLoading}
-	<Spinner size="lg" />
-{:else if postCommentCount > 0 || $commentTreeStore.getCount() > 0}
+{#if $commentTreeStore.getCount() > 0}
 	<section class="ml-2">
 		{#each topLevelComments as comment (comment.id)}
 			<Comment currentDepth={1} {comment} />
-		{/each}		
+		{/each}
 
 		{#if !noMoreComments}
 			<Button on:click={() => handleLoadMoreCommentsClick(false)} color="blue" class="mt-2"

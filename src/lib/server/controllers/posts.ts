@@ -57,6 +57,11 @@ const GetPostsByAuthorSchema = {
 	urlSearchParams: postPaginationSchema,
 } satisfies TRequestSchema;
 
+const GetPostSelectors = {
+	...PUBLIC_POST_SELECTORS,
+	imageWidths: true,
+	imageHeights: true,
+};
 const GetPostSchema = {
 	urlSearchParams: z.object({
 		uploadedSuccessfully: z.string().optional(),
@@ -158,7 +163,6 @@ const PostUpdateSchema = {
 	}),
 	body: z.object({
 		description: descriptionSchema.optional(),
-		isNsfw: boolStrSchema.optional(),
 	}),
 } satisfies TRequestSchema;
 
@@ -291,8 +295,12 @@ export const handleCreatePost = async (
 					postPictures,
 					isNsfw,
 				);
-				const { fileObjectIds, fileBuffers: postImageFileBuffers } =
-					flattenPostImageBuffers(postImageBufferMaps);
+				const {
+					fileObjectIds,
+					fileBuffers: postImageFileBuffers,
+					imageHeights: postImageHeights,
+					imageWidths: postImageWidths,
+				} = flattenPostImageBuffers(postImageBufferMaps);
 				const postImageUrls = await uploadBatchToBucket(
 					AWS_POST_PICTURE_BUCKET_NAME,
 					'posts',
@@ -307,6 +315,8 @@ export const handleCreatePost = async (
 					tags,
 					artists,
 					postImageUrls,
+					postImageWidths,
+					postImageHeights,
 					event.locals.user.id,
 				);
 
@@ -340,8 +350,8 @@ export const handleGetPost = async (
 		try {
 			const post =
 				handlerType === 'api-route'
-					? await findPostById(postId, PUBLIC_POST_SELECTORS)
-					: await findPostByIdWithUpdatedViewCount(postId, PUBLIC_POST_SELECTORS);
+					? await findPostById(postId, GetPostSelectors)
+					: await findPostByIdWithUpdatedViewCount(postId, GetPostSelectors);
 			if (!post) {
 				const error = createErrorResponse(handlerType, 404, `Post with id ${postId} not found`);
 				if (handlerType === 'page-server-load') {
@@ -654,14 +664,6 @@ export const handleLikePost = async (event: RequestEvent) => {
 					);
 				}
 
-				if (post.likes - 1 < 0 && action === 'dislike') {
-					return createErrorResponse(
-						'api-route',
-						409,
-						`The post with the id: ${postId} has 0 likes, and cannot be disliked further`,
-					);
-				}
-
 				const likedPost = await likePostById(postId, action, event.locals.user.id);
 				if (!likedPost) {
 					return createErrorResponse(
@@ -678,7 +680,11 @@ export const handleLikePost = async (event: RequestEvent) => {
 					}`,
 				);
 			} catch (error) {
-				return createErrorResponse('api-route', 500, 'An error occured while liking the post');
+				return createErrorResponse(
+					'api-route',
+					500,
+					'An unexpected error occured while liking the post',
+				);
 			}
 		},
 		true,

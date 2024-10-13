@@ -53,6 +53,8 @@ model Post {
   likes        Int              @default(0)
   views        Int              @default(0)
   imageUrls    String[]
+  imageWidths  Int[]
+  imageHeights Int[]
   artists      Artist[]
   commentCount Int              @default(0)
   comments     Comment[]

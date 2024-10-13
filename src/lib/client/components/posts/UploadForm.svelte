@@ -113,6 +113,7 @@
 	$: {
 		const isValidForm =
 			!loadingPostPictures &&
+			description.length > 0 &&
 			isLabelAppropriate(description, 'description') &&
 			tags.length > 0 &&
 			artists.length > 0 &&

@@ -1,16 +1,9 @@
 <script lang="ts">
-	import CommentTextbox from '$lib/client/components/comments/CommentTextbox.svelte';
-	import CommentsContainer from '$lib/client/components/comments/CommentsContainer.svelte';
-	import ImageCollection from '$lib/client/components/images/ImageCollection.svelte';
-	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
-	import { formatNumberWithCommas, normalizeCount } from '$lib/client/helpers/posts';
+	import PostPresentation from '$lib/client/components/posts/container/PostPresentation.svelte';
+	import { normalizeCount } from '$lib/client/helpers/posts';
 	import { commentTreeStore } from '$lib/client/stores/comments';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
-	import {
-		IMAGE_FILTER_EXCLUSION_BASE_URLS,
-		ORIGINAL_IMAGE_SUFFIX,
-	} from '$lib/shared/constants/images';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import { Button, Modal } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
@@ -24,13 +17,6 @@
 
 	const tagNames = post.tags.map((tag) => tag.name);
 	const artistNames = post.artists.map((artist) => artist.name);
-
-	const originalSizedImageUrls = post.imageUrls.filter((imageUrl) => {
-		if (IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))) {
-			return true;
-		}
-		return imageUrl.includes(ORIGINAL_IMAGE_SUFFIX);
-	});
 
 	$: {
 		post = data.post;
@@ -98,78 +84,5 @@
 {/if}
 
 <main class="m-5 space-y-5">
-	<div class="space-y-2">
-		<p class="text-lg dark:text-white">
-			ID: <span class=" dark:text-gray-400">{post.id}</span>
-		</p>
-
-		<p class="text-lg dark:text-white">
-			Uploaded at: <span class=" dark:text-gray-400">{formatDate(post.createdAt)}</span>
-		</p>
-
-		<p class="text-lg dark:text-white">
-			Last updated at: <span class=" dark:text-gray-400">{formatDate(post.updatedAt)}</span>
-		</p>
-
-		<p class="text-lg dark:text-white">
-			Author Username: <span class=" dark:text-gray-400">
-				{#if post.author}
-					<a class="underline" href="/profile/{post.author.username}">{post.author.username}</a>
-				{:else}
-					{DELETED_ACCOUNT_HEADING}
-				{/if}
-			</span>
-		</p>
-
-		<p class="text-lg dark:text-white">
-			Author ID: <span class=" dark:text-gray-400">
-				{#if post.author}
-					<a class="underline" href="/profile/{post.author.username}">{post.author.id}</a>
-				{:else}
-					{DELETED_ACCOUNT_HEADING}
-				{/if}
-			</span>
-		</p>
-
-		<p class="text-lg dark:text-white">
-			Description: <span class=" dark:text-gray-400">{post.description}</span>
-		</p>
-
-		<p class="text-lg dark:text-white">
-			Is Nsfw?: <span class=" dark:text-gray-400">{post.isNsfw ? 'Yes' : 'No'}</span>
-		</p>
-
-		<p class="text-lg dark:text-white">
-			Likes: <span class=" dark:text-gray-400">{formatNumberWithCommas(post.likes)}</span>
-		</p>
-
-		<p class="text-lg dark:text-white">
-			Views: <span class=" dark:text-gray-400">{formatNumberWithCommas(post.views)}</span>
-		</p>
-	</div>
-
-	<div class="space-y-2">
-		<p class="text-lg dark:text-white">
-			Total images in post: <span class=" dark:text-gray-400">{originalSizedImageUrls.length}</span>
-		</p>
-		<ImageCollection imageUrls={originalSizedImageUrls} imagesAlt={post.description} />
-	</div>
-
-	<div class="space-y-1">
-		<p class="text-lg dark:text-white">Tags</p>
-		<LabelContainer labelType="tag" labelColor="red" labels={post.tags} />
-	</div>
-
-	<div class="space-y-1">
-		<p class="text-lg dark:text-white">Artists</p>
-		<LabelContainer labelType="artist" labelColor="green" labels={post.artists} />
-	</div>
-
-	<div class="space-y-2">
-		{#if $authenticatedUserStore}
-			<CommentTextbox postId={post.id} />
-		{/if}
-		<p class="text-lg dark:text-white">Comments: {totalPostCommentCount}</p>
-		<CommentsContainer postCommentCount={post.commentCount} postId={post.id} />
-	</div>
+	<PostPresentation {post} {totalPostCommentCount} />
 </main>

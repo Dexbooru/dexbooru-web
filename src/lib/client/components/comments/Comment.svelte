@@ -32,7 +32,7 @@
 		repliesLoading = false;
 
 		const { pageNumber: pageNumberResult, noMoreComments: noMoreCommentsResult } = paginationData;
-		loadMoreButtonText = pageNumberResult > 0 ? 'Load more replies' : 'Load replies';
+		loadMoreButtonText = pageNumberResult > 0 && !noMoreComments ? 'Load more replies' : 'Load replies';
 		pageNumber = pageNumberResult;
 		noMoreComments = noMoreCommentsResult;
 	};

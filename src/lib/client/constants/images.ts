@@ -1,0 +1,1 @@
+export const IMAGE_TO_SCREEN_RATIO_THRESHOLD = 0.8;

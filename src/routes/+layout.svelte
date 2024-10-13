@@ -6,6 +6,7 @@
 	import Footer from '$lib/client/components/layout/Footer.svelte';
 	import Navbar from '$lib/client/components/layout/Navbar.svelte';
 	import DeletePostConfirmationModal from '$lib/client/components/posts/card/DeletePostConfirmationModal.svelte';
+	import EditPostModal from '$lib/client/components/posts/card/EditPostModal.svelte';
 	import PostCardReportModal from '$lib/client/components/posts/card/PostCardReportModal.svelte';
 	import HiddenPostModal from '$lib/client/components/posts/container/HiddenPostModal.svelte';
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
@@ -18,7 +19,6 @@
 	import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { IUserNotifications } from '$lib/shared/types/notifcations';
-	import { redirect } from '@sveltejs/kit';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import { Button } from 'flowbite-svelte';
 	import { ArrowUpOutline } from 'flowbite-svelte-icons';
@@ -38,14 +38,19 @@
 		modalStore.set({ isOpen: false, focusedModalName: null });
 	});
 
-	onMount(async () => {
-		validateTokenIntervalId = setInterval(async () => {
+	const validateUserSession = async () => {
+		if (localStorage.getItem(SESSION_ID_KEY)) {
 			const response = await validateUserAuthToken();
-			if (!response.ok) {
+			if (response.status === 401) {
 				localStorage.removeItem(SESSION_ID_KEY);
-				redirect(302, '/');
+				window.location.href = '/profile/logout';
 			}
-		}, AUTH_CHECK_INTERVAL_SIZE);
+		}
+	};
+
+	onMount(async () => {
+		validateUserSession();
+		validateTokenIntervalId = setInterval(validateUserSession, AUTH_CHECK_INTERVAL_SIZE);
 
 		registerDocumentEventListeners();
 
@@ -55,6 +60,8 @@
 				const responseData: TApiResponse<IUserNotifications> = await notificationResponse.json();
 				const notificationData: IUserNotifications = responseData.data;
 				notificationStore.set(notificationData);
+			} else if (notificationResponse.status === 401) {
+				window.location.href = '/profile/logout';
 			}
 		}
 	});
@@ -92,5 +99,6 @@
 <GlobalSearchModal />
 <HiddenPostModal />
 <PostCardReportModal />
+<EditPostModal />
 <DeletePostConfirmationModal />
 <ImagePreviewModal />

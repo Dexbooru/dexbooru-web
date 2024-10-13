@@ -181,6 +181,7 @@
 			bind:value={input}
 			placeholder="Enter the code from your app"
 			required
+			autocomplete="off"
 		/>
 	{/if}
 </Label>

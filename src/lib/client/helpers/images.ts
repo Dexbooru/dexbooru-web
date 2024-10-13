@@ -1,4 +1,50 @@
 import { isFileImage } from '$lib/shared/helpers/images';
+import { IMAGE_TO_SCREEN_RATIO_THRESHOLD } from '../constants/images';
+
+type TImageDism = { imageWidth: number; imageHeight: number };
+
+export const computeDownScaledImageRatios = (dimsA: TImageDism[], dimsB: TImageDism[]) => {
+	const ratios: number[] = [];
+
+	for (let i = 0; i < dimsA.length; i++) {
+		const { imageWidth: imageWidthA, imageHeight: imageHeightA } = dimsA[i];
+		const { imageWidth: imageWidthB, imageHeight: imageHeightB } = dimsB[i];
+
+		const ratio = (imageWidthA * imageHeightA) / (imageWidthB * imageHeightB);
+		ratios.push(Math.floor(ratio * 100));
+	}
+
+	return ratios;
+};
+
+export const transformImageDimensions = (
+	imageWidth: number,
+	imageHeight: number,
+	screenWidth: number,
+	screenHeight: number,
+) => {
+	if (screenWidth === 0 || screenHeight === 0) return { imageWidth, imageHeight };
+
+	const screenArea = screenWidth * screenHeight;
+	const imageArea = imageWidth * imageHeight;
+	const imageToScreenRatio = imageArea / screenArea;
+
+	if (imageToScreenRatio >= IMAGE_TO_SCREEN_RATIO_THRESHOLD) {
+		const widthRatio = (screenWidth * IMAGE_TO_SCREEN_RATIO_THRESHOLD) / imageWidth;
+		const heightRatio = (screenHeight * IMAGE_TO_SCREEN_RATIO_THRESHOLD) / imageHeight;
+		const scalingFactor = Math.min(widthRatio, heightRatio);
+
+		return {
+			imageWidth: Math.floor(imageWidth * scalingFactor),
+			imageHeight: Math.floor(imageHeight * scalingFactor),
+		};
+	}
+
+	return {
+		imageWidth,
+		imageHeight,
+	};
+};
 
 export function urlIsImage(sourceUrl: string): Promise<boolean> {
 	return new Promise((resolve) => {

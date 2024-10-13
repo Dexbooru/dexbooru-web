@@ -7,6 +7,10 @@ export interface ILikePutBody {
 	action: TPostLikeAction;
 }
 
+export interface IUpdatePostBody {
+	description: string;
+}
+
 export type THiddenPagePostData = {
 	nsfwPosts: TPost[];
 	blacklistedPosts: TPost[];
@@ -26,6 +30,8 @@ export type TPost = Post & {
 	description: string;
 	createdAt: Date;
 	imageUrls: string[];
+	imageWidths: number[];
+	imageHeights: number[];
 	likes: number;
 	author: {
 		id: string;

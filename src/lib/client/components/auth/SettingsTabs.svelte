@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { TabItem, Tabs } from 'flowbite-svelte';
 	import { GridSolid, UserCircleSolid } from 'flowbite-svelte-icons';
@@ -14,7 +15,6 @@
 	import Enable2faForm from './Enable2faForm.svelte';
 	import PostPreferencesForm from './PostPreferencesForm.svelte';
 	import UserInterfacePreferenceForm from './UserInterfacePreferenceForm.svelte';
-	import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 
 	export let form: ActionData;
 
