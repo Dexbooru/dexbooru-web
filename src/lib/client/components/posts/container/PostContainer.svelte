@@ -3,6 +3,7 @@
 	import PostPageSidebar from '$lib/client/components/posts/container/PostPageSidebar.svelte';
 	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
 	import { originalPostsPageStore, postsPageStore } from '$lib/client/stores/posts';
+	import { userPreferenceStore } from '$lib/client/stores/users';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
 	import { onDestroy, onMount } from 'svelte';
 	import { get } from 'svelte/store';
@@ -67,7 +68,9 @@
 	<div id="post-container-body" class="space-y-4 mb-5">
 		<div id="post-container-title" class="flex justify-between flex-wrap">
 			<p class="text-4xl dark:text-white">{postContainerTitle}</p>
-			<Searchbar queryInputHandler={onPostSearch} placeholder="Search by keyword(s)" />
+			{#if !$userPreferenceStore.hidePostMetadataOnPreview}
+				<Searchbar queryInputHandler={onPostSearch} placeholder="Search by keyword(s)" />
+			{/if}
 		</div>
 		<PostGrid />
 		{#if $postsPageStore.length > 0}

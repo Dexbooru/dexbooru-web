@@ -29,6 +29,7 @@ const prismaClientSingleton = () => {
 			$allOperations: async ({ model, args, query, operation }) => {
 				const isSelectQuery = operation.toLocaleLowerCase().includes('find');
 				const isCachableModel = CACHABLE_MODELS.includes(model ?? '');
+
 				if (isSelectQuery && isCachableModel) {
 					const selectQueryKey = JSON.stringify(args);
 					const cachedSelectQueryResults = redis.isOpen ? await redis.get(selectQueryKey) : null;

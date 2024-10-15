@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { likePost } from '$lib/client/api/posts';
 	import {
+		COLLECTIONS_MODAL_NAME,
 		DELETE_POST_MODAL_NAME,
 		EDIT_POST_MODAL_NAME,
 		REPORT_MODAL_NAME,
@@ -34,6 +35,7 @@
 		username: string;
 		profilePictureUrl: string;
 	};
+	export let onPostViewPage: boolean = false;
 
 	let postLikeLoading = false;
 	let hasLikedPost = $postPaginationStore?.likedPosts.map((post) => post.id).includes(postId);
@@ -100,40 +102,58 @@
 	};
 </script>
 
-<div class="flex flex-col space-y-3">
+<div
+	class="flex {onPostViewPage ? 'flex-row' : 'flex-col'} {onPostViewPage
+		? 'space-x-3'
+		: 'space-y-3'}"
+>
 	<Button disabled={postLikeLoading} on:click={handleLikePost} color="green" class="flex space-x-3">
 		<HeartSolid color={hasLikedPost ? 'red' : 'inherit'} role="icon" style="bg-red" />
 		<span>{normalizeCount(likes)} - Like post</span>
 	</Button>
 
-	<Button class="space-x-2" href="/posts/{postId}" color="blue">
-		<span>View full post</span>
-		<ArrowRightToBracketSolid />
-	</Button>
-	<Button
-		on:click={() => handleModalOpen(REPORT_MODAL_NAME, { postId })}
-		class="space-x-2"
-		color="yellow"
-	>
-		<span>Report post</span>
-		<ExclamationCircleSolid />
-	</Button>
+	{#if $authenticatedUserStore}
+		<Button
+			on:click={() => modalStore.set({ isOpen: true, focusedModalName: COLLECTIONS_MODAL_NAME })}
+			>Add to collection</Button
+		>
+	{/if}
+
+	<div class="flex justify-center gap-2">
+		{#if !onPostViewPage}
+			<Button class="space-x-2" href="/posts/{postId}" color="blue">
+				<span>View post</span>
+				<ArrowRightToBracketSolid />
+			</Button>
+		{/if}
+		<Button
+			on:click={() => handleModalOpen(REPORT_MODAL_NAME, { postId })}
+			class="space-x-2"
+			color="yellow"
+		>
+			<span>Report post</span>
+			<ExclamationCircleSolid />
+		</Button>
+	</div>
+
 	{#if isPostAuthor}
-		<Button
-			color="green"
-			class="space-x-2"
-			on:click={() => handleModalOpen(EDIT_POST_MODAL_NAME, { post })}
-		>
-			<span>Edit post</span>
-			<PenSolid />
-		</Button>
-		<Button
-			class="space-x-2"
-			on:click={() => handleModalOpen(DELETE_POST_MODAL_NAME, { post })}
-			color="red"
-		>
-			<span>Delete post</span>
-			<TrashBinSolid />
-		</Button>
+		<div class="flex justify-center gap-2">
+			<Button
+				color="green"
+				class="space-x-2"
+				on:click={() => handleModalOpen(EDIT_POST_MODAL_NAME, { post })}
+			>
+				<span>Edit post</span>
+				<PenSolid />
+			</Button>
+			<Button
+				class="space-x-2"
+				on:click={() => handleModalOpen(DELETE_POST_MODAL_NAME, { post })}
+				color="red"
+			>
+				<span>Delete post</span>
+				<TrashBinSolid />
+			</Button>
+		</div>
 	{/if}
 </div>

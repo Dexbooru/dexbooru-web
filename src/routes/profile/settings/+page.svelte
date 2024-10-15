@@ -11,6 +11,6 @@
 </svelte:head>
 
 <main>
-	<Heading class="p-3 mt-2 text-center">Account Settings</Heading>
+	<Heading class="p-3 text-center">Account Settings</Heading>
 	<SettingsTabs {form} />
 </main>

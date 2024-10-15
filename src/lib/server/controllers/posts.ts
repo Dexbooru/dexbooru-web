@@ -3,6 +3,7 @@ import {
 	MAXIMUM_IMAGES_PER_POST,
 	MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB,
 } from '$lib/shared/constants/images';
+import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
 import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import { isLabelAppropriate, transformLabels } from '$lib/shared/helpers/labels';
 import type { TPost, TPostOrderByColumn } from '$lib/shared/types/posts';
@@ -10,7 +11,7 @@ import { redirect, type RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../constants/aws';
-import { MAXIMUM_POSTS_PER_PAGE, PUBLIC_POST_SELECTORS } from '../constants/posts';
+import { PUBLIC_POST_SELECTORS } from '../constants/posts';
 import { boolStrSchema, postPaginationSchema } from '../constants/reusableSchemas';
 import { SINGLE_POST_CACHE_TIME_SECONDS } from '../constants/sessions';
 import { findPostsByArtistName } from '../db/actions/artist';
@@ -21,6 +22,7 @@ import {
 	findPostByIdWithUpdatedViewCount,
 	findPostsByAuthorId,
 	findPostsByPage,
+	getTotalPostCount,
 	likePostById,
 	updatePost,
 } from '../db/actions/post';
@@ -399,6 +401,7 @@ export const handleGetPostsWithArtistName = async (
 			const user = event.locals.user;
 			const artistName = data.pathParams.name;
 			const { ascending, orderBy, pageNumber } = data.urlSearchParams;
+
 			try {
 				const posts = await findPostsByArtistName(
 					artistName,
@@ -581,6 +584,7 @@ export const handleGetPosts = async (
 				pageNumber,
 				ascending,
 				orderBy,
+				postCount: await getTotalPostCount(),
 			};
 
 			return createSuccessResponse(

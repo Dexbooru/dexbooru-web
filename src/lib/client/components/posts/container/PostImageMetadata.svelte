@@ -1,7 +1,10 @@
 <script lang="ts">
+	import { userPreferenceStore } from '$lib/client/stores/users';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
+		NSFW_PREVIEW_IMAGE_SUFFIX,
 		ORIGINAL_IMAGE_SUFFIX,
+		PREVIEW_IMAGE_SUFFIX,
 	} from '$lib/shared/constants/images';
 	import type { TPost } from '$lib/shared/types/posts';
 	import {
@@ -13,6 +16,7 @@
 		TableHeadCell,
 	} from 'flowbite-svelte';
 	import ImageCollection from '../../images/ImageCollection.svelte';
+	import PostCardActions from '../card/PostCardActions.svelte';
 
 	export let post: TPost;
 
@@ -59,6 +63,10 @@
 	Total images in post: <span class=" dark:text-gray-400">{originalSizedImageUrls.length}</span>
 </p>
 
+{#if $userPreferenceStore.hidePostMetadataOnPreview}
+	<PostCardActions onPostViewPage {post} postId={post.id} likes={post.likes} author={post.author} />
+{/if}
+
 {#if imagesMetadata.length > 0}
 	<p class="text-lg dark:text-white">Post images metadata:</p>
 	<Table hoverable={true}>
@@ -72,19 +80,21 @@
 		</TableHead>
 		<TableBody tableBodyClass="divide-y !w-1/2">
 			{#each imagesMetadata as { imageFileName, imageWidth, imageHeight, imageUrl }}
-				<TableBodyRow>
-					<TableBodyCell>{imageFileName}</TableBodyCell>
-					<TableBodyCell>{imageWidth}</TableBodyCell>
-					<TableBodyCell>{imageHeight}</TableBodyCell>
-					<TableBodyCell>
-						<a
-							target="_blank"
-							href={imageUrl}
-							class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-							>Download image</a
-						>
-					</TableBodyCell>
-				</TableBodyRow>
+				{#if imageFileName.includes(ORIGINAL_IMAGE_SUFFIX) || (!imageFileName.includes(NSFW_PREVIEW_IMAGE_SUFFIX) && imageFileName.includes(PREVIEW_IMAGE_SUFFIX))}
+					<TableBodyRow>
+						<TableBodyCell>{imageFileName}</TableBodyCell>
+						<TableBodyCell>{imageWidth}</TableBodyCell>
+						<TableBodyCell>{imageHeight}</TableBodyCell>
+						<TableBodyCell>
+							<a
+								target="_blank"
+								href={imageUrl}
+								class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+								>Download image</a
+							>
+						</TableBodyCell>
+					</TableBodyRow>
+				{/if}
 			{/each}
 		</TableBody>
 	</Table>

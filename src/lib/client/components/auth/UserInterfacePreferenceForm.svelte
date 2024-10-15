@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { userPreferenceStore } from '$lib/client/stores/users';
-	import { Alert, Button, Card, Label, Textarea } from 'flowbite-svelte';
+	import { Alert, Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 
 	export let error: string | null = null;
 	export let errorType: string | null = null;
 
 	let customSiteCss: string = '';
+	let hidePostMetadataOnPreview: boolean = false;
 
 	const userPreferenceUnsubscribe = userPreferenceStore.subscribe((data) => {
-        customSiteCss = data.customSideWideCss;
+		customSiteCss = data.customSideWideCss;
+		hidePostMetadataOnPreview = data.hidePostMetadataOnPreview;
 	});
 
 	onDestroy(() => {
@@ -30,6 +32,20 @@
 			/>
 			<p class="text-sm text-gray-500">
 				Your CSS will be applied after each page on Dexbooru is fully loaded
+			</p>
+		</Label>
+		<Label class="space-y-2 mb-3">
+			<span>Hide post metadata on your preview</span>
+			<Checkbox bind:checked={hidePostMetadataOnPreview} />
+			<input name="hidePostMetadataOnPreview" type="hidden" value={hidePostMetadataOnPreview} />
+			<p class="text-sm text-gray-500">
+				Post tags, artists, uploader and other visible information will not be shown. The images
+				will be shown still.
+			</p>
+			<p class="text-sm text-gray-500">
+				The post actions (ex: like, edit, report, etc) will still be available on the specific post
+				view page. <br />They will be visible on the cards in your uploaded posts always for ease of
+				accessibility.
 			</p>
 		</Label>
 

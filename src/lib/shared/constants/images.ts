@@ -14,6 +14,7 @@ export const PROFILE_PICTURE_HEIGHT = 128;
 
 export const FILE_IMAGE_REGEX = /^image\/(jpeg|jpg|webp|png|gif|bmp)$/;
 
+export const MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB = 3.5;
 export const MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB = 3.5;
 export const MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB = 1.75;
 

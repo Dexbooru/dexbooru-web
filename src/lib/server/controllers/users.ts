@@ -242,6 +242,7 @@ const UpdateUserPersonalPreferencesSchema = {
 const UpdateUserUserInterfacePreferencesSchema = {
 	form: z.object({
 		customSiteWideCss: z.string().optional(),
+		hidePostMetadataOnPreview: boolStrSchema.optional(),
 	}),
 } satisfies TRequestSchema;
 
@@ -251,11 +252,13 @@ export const handleUpdateUserInterfacePreferences = async (event: RequestEvent) 
 		'form-action',
 		UpdateUserUserInterfacePreferencesSchema,
 		async (data) => {
-			const { customSiteWideCss } = data.form;
+			const { customSiteWideCss, hidePostMetadataOnPreview } = data.form;
 
 			try {
 				await updateUserPreferences(event.locals.user.id, {
 					customSideWideCss: customSiteWideCss ?? '',
+					hidePostMetadataOnPreview: hidePostMetadataOnPreview ?? false,
+					updatedAt: new Date(),
 				});
 
 				return createSuccessResponse(

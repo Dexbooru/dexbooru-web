@@ -24,9 +24,9 @@
 		<p class="mt-2">{authorId ? authorUsername : DELETED_ACCOUNT_HEADING}</p>
 	</a>
 </div>
-<p class="text-base dark:text-white">Uploader Date</p>
+<p class="text-base dark:text-white">Upload Date</p>
 <div class="space-x-2 flex align-middle flex-wrap">
-	<p class="text-md mt-2 dark:text-white">
+	<p class="text-md dark:text-white">
 		<span class="leading-none text-sm dark:text-gray-400">{formatDate(createdAt)}</span>
 	</p>
 </div>

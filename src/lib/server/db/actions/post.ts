@@ -178,3 +178,7 @@ export async function createPost(
 
 	return newPost as TPost;
 }
+
+export const getTotalPostCount = async () => {
+	return await prisma.post.count();
+}

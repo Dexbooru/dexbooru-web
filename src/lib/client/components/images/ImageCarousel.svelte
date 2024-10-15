@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { TCarouselTransitionFunction } from '$lib/client/types/images';
-	import { POST_PICTURE_PREVIEW_HEIGHT, POST_PICTURE_PREVIEW_WIDTH } from '$lib/shared/constants/images';
 	import { Carousel } from 'flowbite-svelte';
 	import type { HTMLImgAttributes } from 'svelte/elements';
 
+	export let postId: string;
 	export let postHref: string | null = null;
 	export let imageUrls: string[];
 	export let imagesAlt: string | null = null;
@@ -12,8 +12,7 @@
 
 	const imagesData: HTMLImgAttributes[] = imageUrls.map((_, index) => {
 		return {
-			width: POST_PICTURE_PREVIEW_WIDTH,
-			height: POST_PICTURE_PREVIEW_HEIGHT,
+			'data-post-id': postId,
 			src: null,
 			alt: imagesAlt
 				? `${index + 1} - ${imagesAlt}`
@@ -40,7 +39,7 @@
 		transition={transitionFunction}
 	>
 		<a slot="slide" href={postHref} let:Slide let:index>
-			<Slide class="object-cover post-carousel-image" image={downloadSlideImage(index)} />
+			<Slide class=" object-contain post-carousel-image" image={downloadSlideImage(index)} />
 		</a>
 
 		{#if imagesData.length > 1}

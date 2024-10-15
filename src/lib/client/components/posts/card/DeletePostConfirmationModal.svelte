@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { deletePost } from '$lib/client/api/posts';
 	import { DELETE_POST_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
@@ -26,12 +28,22 @@
 		}
 	});
 
+	const individualPostPathRegex = new RegExp(
+		'^/posts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+	);
+
+	const pagePath = $page.url.pathname;
+
 	const handleDeletePost = async () => {
 		postDeletionLoading = true;
 		const response = await deletePost(postId);
 		postDeletionLoading = false;
 
 		if (response.ok) {
+			if (individualPostPathRegex.test(pagePath)) {
+				goto('/');
+				return;
+			}
 			postsPageStore.update((previousPosts) => previousPosts.filter((post) => post.id !== postId));
 			originalPostsPageStore.update((previousPosts) =>
 				previousPosts.filter((post) => post.id !== postId),

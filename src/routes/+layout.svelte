@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { validateUserAuthToken } from '$lib/client/api/auth';
 	import { getNotifications } from '$lib/client/api/notifications';
+	import CollectionsModal from '$lib/client/components/collections/CollectionsModal.svelte';
 	import ImagePreviewModal from '$lib/client/components/images/ImagePreviewModal.svelte';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
 	import Navbar from '$lib/client/components/layout/Navbar.svelte';
@@ -39,12 +41,19 @@
 	});
 
 	const validateUserSession = async () => {
+		if (!$authenticatedUserStore) {
+			localStorage.removeItem(SESSION_ID_KEY);
+			return;
+		}
+
 		if (localStorage.getItem(SESSION_ID_KEY)) {
 			const response = await validateUserAuthToken();
 			if (response.status === 401) {
 				localStorage.removeItem(SESSION_ID_KEY);
-				window.location.href = '/profile/logout';
+				goto('/profile/logout');
 			}
+		} else {
+			goto('/profile/logout');
 		}
 	};
 
@@ -61,7 +70,7 @@
 				const notificationData: IUserNotifications = responseData.data;
 				notificationStore.set(notificationData);
 			} else if (notificationResponse.status === 401) {
-				window.location.href = '/profile/logout';
+				goto('/profile/logout');
 			}
 		}
 	});
@@ -102,3 +111,4 @@
 <EditPostModal />
 <DeletePostConfirmationModal />
 <ImagePreviewModal />
+<CollectionsModal />

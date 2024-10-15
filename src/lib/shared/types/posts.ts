@@ -22,6 +22,7 @@ export interface IPostPaginationData {
 	pageNumber: number;
 	ascending: boolean;
 	orderBy: TPostOrderByColumn;
+	postCount: number;
 }
 
 export type TPost = Post & {

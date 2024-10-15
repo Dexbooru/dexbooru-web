@@ -98,7 +98,7 @@
 			<div>
 				<AuthInput
 					inputFieldType="otp-code"
-					labelTitle="OTP Code ({TOTP_CODE_LENGTH}-digit code)"
+					labelTitle="TOTP Code ({TOTP_CODE_LENGTH}-digit code)"
 					inputName="otpCode"
 					bind:input={otpCode}
 				/>

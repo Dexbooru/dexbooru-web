@@ -44,9 +44,11 @@ export const NULLABLE_USER: IUser = {
 };
 export const NULLABLE_USER_USER_PREFERENCES: UserPreference = {
 	userId: NONEXISTENT_USER_ID,
+	twoFactorAuthenticationEnabled: false,
 	autoBlurNsfw: true,
 	browseInSafeMode: false,
 	customSideWideCss: '',
+	hidePostMetadataOnPreview: false,
 	blacklistedArtists: [],
 	blacklistedTags: [],
 };

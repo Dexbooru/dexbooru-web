@@ -3,6 +3,7 @@
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/posts';
 	import { postPaginationStore } from '$lib/client/stores/posts';
+	import { userPreferenceStore } from '$lib/client/stores/users';
 	import {
 		Sidebar,
 		SidebarDropdownItem,
@@ -43,27 +44,29 @@
 						{/each}
 					{/each}
 				</SidebarDropdownWrapper>
-				<SidebarDropdownWrapper label="All Tags">
-					<svelte:fragment slot="icon">
-						<TagSolid
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+				{#if !$userPreferenceStore.hidePostMetadataOnPreview}
+					<SidebarDropdownWrapper label="All Tags">
+						<svelte:fragment slot="icon">
+							<TagSolid
+								class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+							/>
+						</svelte:fragment>
+						<LabelContainer labelType="tag" labelsAreLarge labels={uniqueTags} />
+					</SidebarDropdownWrapper>
+					<SidebarDropdownWrapper label="All Artists">
+						<svelte:fragment slot="icon">
+							<PalleteSolid
+								class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+							/>
+						</svelte:fragment>
+						<LabelContainer
+							labelType="artist"
+							labelsAreLarge
+							labelColor="green"
+							labels={uniqueArtists}
 						/>
-					</svelte:fragment>
-					<LabelContainer labelType="tag" labelsAreLarge labels={uniqueTags} />
-				</SidebarDropdownWrapper>
-				<SidebarDropdownWrapper label="All Artists">
-					<svelte:fragment slot="icon">
-						<PalleteSolid
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-						/>
-					</svelte:fragment>
-					<LabelContainer
-						labelType="artist"
-						labelsAreLarge
-						labelColor="green"
-						labels={uniqueArtists}
-					/>
-				</SidebarDropdownWrapper>
+					</SidebarDropdownWrapper>
+				{/if}
 			</SidebarGroup>
 
 			<HiddenPostAlert />

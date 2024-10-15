@@ -58,7 +58,7 @@
 	});
 </script>
 
-<Tabs style="underline">
+<Tabs defaultClass="flex flex-wrap space-x-2 rtl:space-x-revers !p-3" style="underline">
 	<TabItem on:click={() => handleTabClick('personal')} open={currentTab === 'personal'}>
 		<div slot="title" class="flex items-center gap-2">
 			<UserCircleSolid size="md" />

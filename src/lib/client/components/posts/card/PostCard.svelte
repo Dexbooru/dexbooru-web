@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import ImageCarousel from '$lib/client/components/images/ImageCarousel.svelte';
 	import PostCardBody from '$lib/client/components/posts/card/PostCardBody.svelte';
 	import { HIDDEN_POSTS_MODAL_NAME } from '$lib/client/constants/layout';
@@ -40,30 +41,49 @@
 		});
 	});
 
+	const pagePath = $page.url.pathname;
+
 	onDestroy(() => {
 		userPreferenceUnsubsribe();
 	});
 </script>
 
-<Card>
-	{#if isNsfw && $userPreferenceStore.autoBlurNsfw && $modalStore.focusedModalName !== HIDDEN_POSTS_MODAL_NAME}
-		<Toast
-			dismissable={false}
-			divClass="w-full max-w-xs p-4 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3 mt-2 mb-2"
-			contentClass="flex space-x-4 rtl:space-x-reverse divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-700"
-		>
-			<ExclamationCircleSolid class="w-5 h-5 text-primary-600 dark:text-primary-500" />
-			<div class="ps-4 text-sm font-normal">This post is marked as NSFW!</div>
-		</Toast>
-	{/if}
-
+{#if $userPreferenceStore.hidePostMetadataOnPreview}
 	<ImageCarousel
+		postId={post.id}
 		postHref="/posts/{postId}"
 		{imageUrls}
 		imagesAlt={description}
 		slideDuration={350}
 		transitionFunction={(x) => scale(x, { duration: 500, easing: quintOut })}
 	/>
-	<PostCardBody {post} {author} {createdAt} {tags} {artists} />
-	<PostCardActions {post} {author} {likes} {postId} />
-</Card>
+	{#if pagePath.includes('/posts/uploaded')}
+		<div class="mt-2 border p-2 rounded-lg">
+			<PostCardActions {post} {author} {likes} {postId} />
+		</div>
+	{/if}
+{:else}
+	<Card>
+		{#if isNsfw && $userPreferenceStore.autoBlurNsfw && $modalStore.focusedModalName !== HIDDEN_POSTS_MODAL_NAME}
+			<Toast
+				dismissable={false}
+				divClass="w-full max-w-xs p-4 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3 mt-2 mb-2"
+				contentClass="flex space-x-4 rtl:space-x-reverse divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-700"
+			>
+				<ExclamationCircleSolid class="w-5 h-5 text-primary-600 dark:text-primary-500" />
+				<div class="ps-4 text-sm font-normal">This post is marked as NSFW!</div>
+			</Toast>
+		{/if}
+
+		<ImageCarousel
+			postId={post.id}
+			postHref="/posts/{postId}"
+			{imageUrls}
+			imagesAlt={description}
+			slideDuration={350}
+			transitionFunction={(x) => scale(x, { duration: 500, easing: quintOut })}
+		/>
+		<PostCardBody {post} {author} {createdAt} {tags} {artists} />
+		<PostCardActions {post} {author} {likes} {postId} />
+	</Card>
+{/if}
