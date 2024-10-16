@@ -16,6 +16,7 @@
 		postsPageStore,
 	} from '$lib/client/stores/posts';
 	import { authenticatedUserStore } from '$lib/client/stores/users';
+	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button } from 'flowbite-svelte';
@@ -93,6 +94,13 @@
 			}
 
 			hasLikedPost = !hasLikedPost;
+
+			const likeSpan = document.getElementById('like-text');
+			const updatedAtText = document.getElementById('updated-at-text') as HTMLSpanElement;
+			if (likeSpan && updatedAtText) {
+				likeSpan.innerText = normalizeCount(likes);
+				updatedAtText.innerText = formatDate(new Date());
+			}
 		} else {
 			toast.push(
 				`There was an error while ${hasLikedPost ? 'disliking' : 'liking'}  the post!`,

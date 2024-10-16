@@ -17,7 +17,9 @@
 </p>
 
 <p class="text-lg dark:text-white">
-	Last updated at: <span class=" dark:text-gray-400">{formatDate(post.updatedAt)}</span>
+	Last updated at: <span id="updated-at-text" class=" dark:text-gray-400"
+		>{formatDate(post.updatedAt)}</span
+	>
 </p>
 
 <p class="text-lg dark:text-white">
@@ -41,7 +43,9 @@
 </p>
 
 <p class="text-lg dark:text-white whitespace-pre-wrap">
-	Description: <br /><span class=" dark:text-gray-400">{post.description}</span>
+	Description: <br /><span id="description-text" class=" dark:text-gray-400"
+		>{post.description}</span
+	>
 </p>
 
 <p class="text-lg dark:text-white">
@@ -54,7 +58,9 @@
 </p>
 
 <p class="text-lg dark:text-white">
-	Likes: <span class=" dark:text-gray-400">{formatNumberWithCommas(post.likes)}</span>
+	Likes: <span id="likes-text" class=" dark:text-gray-400"
+		>{formatNumberWithCommas(post.likes)}</span
+	>
 </p>
 
 <p class="text-lg dark:text-white">

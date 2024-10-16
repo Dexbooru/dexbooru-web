@@ -33,3 +33,5 @@ export const PUBLIC_POST_SELECTORS: TPostSelector = {
 		},
 	},
 };
+
+export const POST_CACHE_TIME_MS = 10_000;

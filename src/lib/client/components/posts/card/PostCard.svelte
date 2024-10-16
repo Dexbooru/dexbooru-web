@@ -58,7 +58,7 @@
 		transitionFunction={(x) => scale(x, { duration: 500, easing: quintOut })}
 	/>
 	{#if pagePath.includes('/posts/uploaded')}
-		<div class="mt-2 border p-2 rounded-lg">
+		<div class="p-3">
 			<PostCardActions {post} {author} {likes} {postId} />
 		</div>
 	{/if}

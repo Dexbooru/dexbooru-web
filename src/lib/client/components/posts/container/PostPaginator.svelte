@@ -47,7 +47,7 @@
 		{#if noPostsOnPage && !!!['uploaded', 'liked'].find((item) => $page.url.href.includes(item))}
 			<Button href={firstPageUrl.href} color="blue">Return to Home</Button>
 		{:else}
-			{#if ($postPaginationStore.pageNumber - 1 >= 0 || noPostsLeft) && $postPaginationStore.pageNumber !== 0}
+			{#if $postPaginationStore.pageNumber - 1 >= 0 && $postPaginationStore.pageNumber !== 0}
 				<PaginationItem
 					href={previousPageUrl.href}
 					large
@@ -58,12 +58,10 @@
 				</PaginationItem>
 			{/if}
 
-			{#if !noPostsLeft}
-				<PaginationItem href={nextPageUrl.href} large class="flex items-center next-page-link">
-					Next
-					<ArrowRightSolid class="ml-2 w-5 h-5" />
-				</PaginationItem>
-			{/if}
+			<PaginationItem href={nextPageUrl.href} large class="flex items-center next-page-link">
+				Next
+				<ArrowRightSolid class="ml-2 w-5 h-5" />
+			</PaginationItem>
 		{/if}
 	</div>
 {/if}

@@ -4,6 +4,7 @@
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { modalStore } from '$lib/client/stores/layout';
 	import { MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION } from '$lib/shared/constants/images';
+	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Label, Modal, Textarea } from 'flowbite-svelte';
@@ -28,7 +29,14 @@
 		if (response.ok) {
 			toast.push('Edited the post successfully', SUCCESS_TOAST_OPTIONS);
 			modalStore.set({ isOpen: false, focusedModalName: null });
-			post.description = description;
+
+			const descriptionSpan = document.getElementById('description-text') as HTMLSpanElement;
+			const updatedAtText = document.getElementById('updated-at-text') as HTMLSpanElement;
+			if (descriptionSpan && updatedAtText) {
+				post.description = description;
+				descriptionSpan.innerText = description;
+				updatedAtText.innerText = formatDate(new Date());
+			}
 		} else {
 			toast.push('An unexpected error occured while editing the post', FAILURE_TOAST_OPTIONS);
 		}

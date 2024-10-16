@@ -8,6 +8,18 @@ class CommentTree {
 		this.data.set('root', []);
 	}
 
+	static compareComments(commentA: IComment, commentB: IComment): number {
+		const commentACreatedAt = commentA.createdAt;
+		const commentBCreatedAt = commentB.createdAt;
+
+		if (commentACreatedAt.getTime() > commentBCreatedAt.getTime()) {
+			return -1;
+		} else if (commentACreatedAt.getTime() < commentBCreatedAt.getTime()) {
+			return 1;
+		}
+		return 0;
+	}
+
 	addComment(comment: IComment) {
 		const parentCommentIdKey = comment.parentCommentId !== null ? comment.parentCommentId : 'root';
 
@@ -21,9 +33,10 @@ class CommentTree {
 
 		const associatedComments = this.data.get(parentCommentIdKey) || [];
 		const filteredAssociatedComments = associatedComments.filter(
-			(associatedComment) => associatedComment.id !== comment.id
+			(associatedComment) => associatedComment.id !== comment.id,
 		);
 		filteredAssociatedComments.push(comment);
+		filteredAssociatedComments.sort(CommentTree.compareComments);
 
 		this.data.set(parentCommentIdKey, filteredAssociatedComments);
 	}

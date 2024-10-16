@@ -1,6 +1,36 @@
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { Prisma } from '@prisma/client';
 import prisma from '../prisma';
+import redis from '../redis';
+
+const computeIndividualPostCacheKey = (postId: string) => {
+	return `post-${postId}`;
+};
+
+const computePostTotalViewsKey = (postId: string) => {
+	return `post-totalviews-${postId}`;
+};
+
+export const determineCacheKey = (args: unknown, operation: string): string | null => {
+	let keyName: string | null = null;
+	const convertedArgs = args as Prisma.PostFindManyArgs &
+		Prisma.PostFindFirstArgs &
+		Prisma.PostUpdateArgs;
+
+	if (operation === 'findUnique' || operation === 'update') {
+		const postId = convertedArgs.where?.id ?? '';
+		if (!convertedArgs.data.views) {
+			keyName = computeIndividualPostCacheKey(postId as string);
+		}
+	} else if (operation === 'findMany') {
+		// const skipRows = convertedArgs.skip ?? 0;
+		// const takeRows = convertedArgs.take ?? 0;
+
+		console.log(operation, args);
+	}
+
+	return keyName;
+};
 
 export async function deletePostById(postId: string, authorId: string) {
 	await prisma.post.delete({
@@ -181,4 +211,10 @@ export async function createPost(
 
 export const getTotalPostCount = async () => {
 	return await prisma.post.count();
-}
+};
+
+export const incrementViews = async (postId: string) => {
+	await redis.incr(computePostTotalViewsKey(postId));
+};
+
+export const incrementOrDecrementLikes = async () => {};

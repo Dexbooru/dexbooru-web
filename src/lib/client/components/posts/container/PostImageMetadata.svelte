@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { userPreferenceStore } from '$lib/client/stores/users';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
 		NSFW_PREVIEW_IMAGE_SUFFIX,
@@ -63,9 +62,7 @@
 	Total images in post: <span class=" dark:text-gray-400">{originalSizedImageUrls.length}</span>
 </p>
 
-{#if $userPreferenceStore.hidePostMetadataOnPreview}
-	<PostCardActions onPostViewPage {post} postId={post.id} likes={post.likes} author={post.author} />
-{/if}
+<PostCardActions onPostViewPage {post} postId={post.id} likes={post.likes} author={post.author} />
 
 {#if imagesMetadata.length > 0}
 	<p class="text-lg dark:text-white">Post images metadata:</p>

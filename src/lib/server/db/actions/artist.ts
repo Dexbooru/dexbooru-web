@@ -1,7 +1,25 @@
 import { MAX_ARTISTS_PER_PAGE } from '$lib/server/constants/artists';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
-import type { Artist } from '@prisma/client';
+import type { Artist, Prisma } from '@prisma/client';
 import prisma from '../prisma';
+
+export const determineCacheKey = (args: unknown, operation: string): string | null => {
+	let keyName: string | null = null;
+	const convertedArgs = args as Prisma.ArtistFindUniqueArgs & Prisma.ArtistFindManyArgs;
+
+	if (operation === 'findUnique') {
+		const artistName = convertedArgs.where?.name ?? '';
+		const skipRows = convertedArgs.skip ?? 0;
+		const takeRows = convertedArgs.take ?? 0;
+		keyName = computeArtistPageCacheKey(artistName, takeRows, skipRows);
+	}
+
+	return keyName;
+};
+
+const computeArtistPageCacheKey = (artistName: string, take: number, skip: number) => {
+	return `post-tags-${artistName}-${take}-${skip}`;
+};
 
 export async function findPostsByArtistName(
 	artistName: string,
@@ -9,11 +27,11 @@ export async function findPostsByArtistName(
 	pageLimit: number,
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
-	selectors?: TPostSelector
+	selectors?: TPostSelector,
 ): Promise<TPost[]> {
 	const data = await prisma.artist.findUnique({
 		where: {
-			name: artistName
+			name: artistName,
 		},
 		select: {
 			posts: {
@@ -21,10 +39,10 @@ export async function findPostsByArtistName(
 				skip: pageNumber * pageLimit,
 				take: pageLimit,
 				orderBy: {
-					[orderBy]: ascending ? 'asc' : 'desc'
-				}
-			}
-		}
+					[orderBy]: ascending ? 'asc' : 'desc',
+				},
+			},
+		},
 	});
 
 	if (!data) return [];
@@ -34,22 +52,22 @@ export async function findPostsByArtistName(
 
 export async function getArtistsWithStartingLetter(
 	letter: string,
-	pageNumber: number
+	pageNumber: number,
 ): Promise<Artist[]> {
 	const artists = await prisma.artist.findMany({
 		where: {
 			OR: [
 				{
-					name: { startsWith: letter }
+					name: { startsWith: letter },
 				},
 				{
-					name: { startsWith: letter.toLocaleLowerCase() }
-				}
-			]
+					name: { startsWith: letter.toLocaleLowerCase() },
+				},
+			],
 		},
 		orderBy: { name: 'asc' },
 		skip: pageNumber * MAX_ARTISTS_PER_PAGE,
-		take: MAX_ARTISTS_PER_PAGE
+		take: MAX_ARTISTS_PER_PAGE,
 	});
 
 	return artists;
