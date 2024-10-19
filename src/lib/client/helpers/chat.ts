@@ -1,7 +1,7 @@
 import { DEXBOORU_CORE_API_CHAT_WS_URL } from '$lib/shared/constants/chat';
 import { get } from 'svelte/store';
+import { getAuthenticatedUser } from '../constants/context';
 import { chatStore } from '../stores/chat';
-import { authenticatedUserStore } from '../stores/users';
 import type { TChatMessage, TEventHubMessage } from '../types/core';
 
 const DEFAULT_PING_INTERVAL_MS = 25_000;
@@ -26,7 +26,7 @@ export class ChatManager {
 	}
 
 	sendMessage(roomId: string, content: string) {
-		const authenticatedUser = get(authenticatedUserStore);
+		const authenticatedUser = get(getAuthenticatedUser());
 		if (!authenticatedUser) return;
 
 		const { id: authorId } = authenticatedUser;

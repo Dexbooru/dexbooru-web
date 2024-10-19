@@ -1,18 +1,24 @@
 <script lang="ts">
-	import { notificationStore } from '$lib/client/stores/notifications';
+	import { getAuthenticatedUserNotifications } from '$lib/client/helpers/context';
 	import type { IFriendRequest } from '$lib/shared/types/friends';
 	import { Dropdown } from 'flowbite-svelte';
 	import { BullhornSolid } from 'flowbite-svelte-icons';
+	import { onDestroy } from 'svelte';
 	import FriendRequest from './FriendRequest.svelte';
 
 	export let notificationCount: number;
 
 	let friendRequests: IFriendRequest[] = [];
 
-	notificationStore.subscribe((notificationData) => {
+	const userNotifications = getAuthenticatedUserNotifications();
+	const userNotificationsUnsubscribe = userNotifications.subscribe((notificationData) => {
 		if (!notificationData) return;
 
 		friendRequests = notificationData.friendRequests;
+	});
+
+	onDestroy(() => {
+		userNotificationsUnsubscribe();
 	});
 </script>
 

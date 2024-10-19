@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createPostCommentsPaginator } from '$lib/client/api/comments';
-	import { commentTreeStore } from '$lib/client/stores/comments';
+	import { getCommentTree } from '$lib/client/helpers/context';
 	import CommentTree from '$lib/shared/helpers/comments';
 	import type { IComment } from '$lib/shared/types/comments';
 	import { Button } from 'flowbite-svelte';
@@ -15,7 +15,8 @@
 	let commentsLoading = false;
 	let loadMoreButtonText = 'Load comments';
 
-	const rootLevelCommentLoader = createPostCommentsPaginator(postId, null);
+	const commentTree = getCommentTree();
+	const rootLevelCommentLoader = createPostCommentsPaginator(postId, null, commentTree);
 
 	const handleLoadMoreCommentsClick = async (isInitialLoad: boolean = false) => {
 		commentsLoading = true;
@@ -27,7 +28,7 @@
 		noMoreComments = noMoreCommentsResult;
 	};
 
-	const commentTreeUnsubscribe = commentTreeStore.subscribe((currentCommentTree) => {
+	const commentTreeUnsubscribe = commentTree.subscribe((currentCommentTree) => {
 		topLevelComments = currentCommentTree.getReplies('root');
 		if (currentCommentTree.getCount() > 0) {
 			postCommentCount = currentCommentTree.getCount();
@@ -39,12 +40,12 @@
 	});
 
 	onDestroy(() => {
-		commentTreeStore.set(new CommentTree());
+		commentTree.set(new CommentTree());
 		commentTreeUnsubscribe();
 	});
 </script>
 
-{#if $commentTreeStore.getCount() > 0}
+{#if $commentTree.getCount() > 0}
 	<section class="ml-2">
 		{#each topLevelComments as comment (comment.id)}
 			<Comment currentDepth={1} {comment} />

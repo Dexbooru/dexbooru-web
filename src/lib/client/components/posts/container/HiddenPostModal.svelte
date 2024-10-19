@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { HIDDEN_POSTS_MODAL_NAME } from '$lib/client/constants/layout';
-	import { modalStore } from '$lib/client/stores/layout';
-	import { blacklistedPostPageStore, nsfwPostPageStore } from '$lib/client/stores/posts';
-	import { authenticatedUserStore, userPreferenceStore } from '$lib/client/stores/users';
+	import {
+		getActiveModal,
+		getAuthenticatedUser,
+		getAuthenticatedUserPreferences,
+		getBlacklistedPostPage,
+		getNsfwPostPage,
+	} from '$lib/client/helpers/context';
 	import { Button, Modal, TabItem, Tabs } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
@@ -11,8 +15,13 @@
 	let offendingTags: Set<string> = new Set<string>();
 	let offendingArtists: Set<string> = new Set<string>();
 
-	const hiddenPostPageUnsubscribe = blacklistedPostPageStore.subscribe((posts) => {
-		const { blacklistedTags, blacklistedArtists } = get(userPreferenceStore);
+	const user = getAuthenticatedUser();
+	const blacklistedPostPage = getBlacklistedPostPage();
+	const nsfwPostPage = getNsfwPostPage();
+	const activeModal = getActiveModal();
+
+	const hiddenPostPageUnsubscribe = blacklistedPostPage.subscribe((posts) => {
+		const { blacklistedTags, blacklistedArtists } = get(getAuthenticatedUserPreferences());
 		posts.forEach((post) => {
 			post.tags.forEach((tag) => {
 				if (blacklistedTags.includes(tag.name)) {
@@ -35,17 +44,17 @@
 	});
 </script>
 
-{#if $authenticatedUserStore && ($blacklistedPostPageStore.length > 0 || $nsfwPostPageStore.length > 0)}
+{#if $user && ($blacklistedPostPage.length > 0 || $nsfwPostPage.length > 0)}
 	<Modal
 		title="Hidden posts on this page based on your preferences"
-		open={$modalStore.isOpen && $modalStore.focusedModalName === HIDDEN_POSTS_MODAL_NAME}
+		open={$activeModal.isOpen && $activeModal.focusedModalName === HIDDEN_POSTS_MODAL_NAME}
 		outsideclose
 	>
 		<Tabs style="underline">
 			<TabItem
-				open={$blacklistedPostPageStore.length > 0}
-				disabled={$blacklistedPostPageStore.length === 0}
-				title="Blacklisted ({$blacklistedPostPageStore.length})"
+				open={$blacklistedPostPage.length > 0}
+				disabled={$blacklistedPostPage.length === 0}
+				title="Blacklisted ({$blacklistedPostPage.length})"
 			>
 				<p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
 					<span class="text-red-600">Offending tags: </span>{offendingTags.size > 0
@@ -58,16 +67,16 @@
 				<PostGrid useHiddenPosts />
 			</TabItem>
 			<TabItem
-				open={$nsfwPostPageStore.length > 0}
-				disabled={$nsfwPostPageStore.length === 0}
-				title="NSFW ({$nsfwPostPageStore.length})"
+				open={$nsfwPostPage.length > 0}
+				disabled={$nsfwPostPage.length === 0}
+				title="NSFW ({$nsfwPostPage.length})"
 			>
 				<PostGrid useNsfwPosts />
 			</TabItem>
 		</Tabs>
 
 		<svelte:fragment slot="footer">
-			<Button on:click={() => modalStore.set({ isOpen: false, focusedModalName: null })}
+			<Button on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 				>Close</Button
 			>
 		</svelte:fragment>

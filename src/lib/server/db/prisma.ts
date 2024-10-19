@@ -24,9 +24,15 @@ const CACHE_OPTIONS: Record<string, CacheOptions> = {
 };
 
 const prismaClientSingleton = () => {
-	const client = new PrismaClient().$extends({
+	if (redis === null) return new PrismaClient();
+
+	return new PrismaClient().$extends({
 		query: {
 			$allOperations: async ({ model, args, query, operation }) => {
+				if (redis === null) {
+					return await query(args);
+				}
+
 				const isSelectQuery = operation.toLocaleLowerCase().includes('find');
 				const isCachableModel = CACHABLE_MODELS.includes(model ?? '');
 
@@ -52,8 +58,6 @@ const prismaClientSingleton = () => {
 			},
 		},
 	});
-
-	return client;
 };
 
 type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;

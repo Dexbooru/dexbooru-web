@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { userPreferenceStore } from '$lib/client/stores/users';
+	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
 		NSFW_PREVIEW_IMAGE_SUFFIX,
@@ -20,38 +20,54 @@
 
 	export let post: TPost;
 
-	const originalSizedImageUrls = post.imageUrls.filter((imageUrl) => {
-		if (IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))) {
-			return true;
-		}
-		return imageUrl.includes(ORIGINAL_IMAGE_SUFFIX);
-	});
+	const userPreferences = getAuthenticatedUserPreferences();
 
-	const imagesMetadata = post.imageUrls
-		.map((imageUrl, index) => {
+	let originalSizedImageUrls: string[] = [];
+	let imagesMetadata: {
+		imageFileName: string;
+		imageUrl: string;
+		imageHeight: number;
+		imageWidth: number;
+	}[] = [];
+	let originalImageDimensions: {
+		imageWidth: number;
+		imageHeight: number;
+	}[] = [];
+
+	$: {
+		originalSizedImageUrls = post.imageUrls.filter((imageUrl) => {
 			if (
 				IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))
 			) {
-				return null;
+				return true;
 			}
+			return imageUrl.includes(ORIGINAL_IMAGE_SUFFIX);
+		});
+		imagesMetadata = post.imageUrls
+			.map((imageUrl, index) => {
+				if (
+					IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))
+				) {
+					return null;
+				}
 
-			const imageUrlParts = imageUrl.split('/');
-			const imageFileName = `${imageUrlParts[imageUrlParts.length - 1]}.webp`;
-			const imageWidth = post.imageWidths[index];
-			const imageHeight = post.imageHeights[index];
+				const imageUrlParts = imageUrl.split('/');
+				const imageFileName = `${imageUrlParts[imageUrlParts.length - 1]}.webp`;
+				const imageWidth = post.imageWidths[index];
+				const imageHeight = post.imageHeights[index];
 
-			return {
-				imageFileName,
-				imageUrl,
-				imageHeight,
-				imageWidth,
-			};
-		})
-		.filter((metadata) => metadata !== null);
-
-	const originalImageDimensions = imagesMetadata
-		.filter((metadata) => metadata.imageFileName.includes(ORIGINAL_IMAGE_SUFFIX))
-		.map((metadata) => ({ imageWidth: metadata.imageWidth, imageHeight: metadata.imageHeight }));
+				return {
+					imageFileName,
+					imageUrl,
+					imageHeight,
+					imageWidth,
+				};
+			})
+			.filter((metadata) => metadata !== null);
+		originalImageDimensions = imagesMetadata
+			.filter((metadata) => metadata.imageFileName.includes(ORIGINAL_IMAGE_SUFFIX))
+			.map((metadata) => ({ imageWidth: metadata.imageWidth, imageHeight: metadata.imageHeight }));
+	}
 </script>
 
 <ImageCollection
@@ -63,7 +79,7 @@
 	Total images in post: <span class=" dark:text-gray-400">{originalSizedImageUrls.length}</span>
 </p>
 
-{#if $userPreferenceStore.hidePostMetadataOnPreview}
+{#if $userPreferences.hidePostMetadataOnPreview}
 	<PostCardActions onPostViewPage {post} postId={post.id} likes={post.likes} author={post.author} />
 {/if}
 

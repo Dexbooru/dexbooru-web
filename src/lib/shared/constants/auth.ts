@@ -29,7 +29,6 @@ export const PASSWORD_REQUIREMENTS: TPasswordRequirements = {
 	'special-character': 'The password must contain at least one special charcter',
 };
 export const SPECIAL_CHARACTER_REGEX = /[\W_]/g;
-export const SALT_ROUNDS = 7;
 export const ACCOUNT_DELETION_CONFIRMATION_TEXT = 'delete my account';
 export const DELETED_ACCOUNT_HEADING = '[deleted-user]';
 export const NONEXISTENT_USER_ID = 'non-existent-id';
@@ -51,4 +50,6 @@ export const NULLABLE_USER_USER_PREFERENCES: UserPreference = {
 	hidePostMetadataOnPreview: false,
 	blacklistedArtists: [],
 	blacklistedTags: [],
+	createdAt: new Date(),
+	updatedAt: new Date(),
 };

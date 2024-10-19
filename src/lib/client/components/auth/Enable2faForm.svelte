@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { generateUserTotp } from '$lib/client/api/auth';
+	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { userPreferenceStore } from '$lib/client/stores/users';
 	import type { IGeneratedOtpData } from '$lib/client/types/auth';
 	import { TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
 	import type { TApiResponse } from '$lib/shared/types/api';
@@ -16,6 +16,8 @@
 	let totpLoading: boolean = false;
 	let totpUri: string = '';
 	let otpCode: string = '';
+
+	const userPreferences = getAuthenticatedUserPreferences();
 
 	const handleTotpGeneration = async () => {
 		if (currentPassword.length === 0 || totpUri.length > 0) return;
@@ -56,7 +58,7 @@
 			inputFieldType="password-confirm"
 			inputName="password"
 		/>
-		{#if $userPreferenceStore.twoFactorAuthenticationEnabled}
+		{#if $userPreferences.twoFactorAuthenticationEnabled}
 			<Button type="submit">Disable 2FA on account</Button>
 		{:else}
 			<Button

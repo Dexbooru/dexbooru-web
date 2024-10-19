@@ -1,11 +1,12 @@
-import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
 import { buildUrl } from '$lib/client/helpers/urls';
+import type CommentTree from '$lib/shared/helpers/comments';
+import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
 import type { TApiResponse } from '$lib/shared/types/api';
 import type { IComment, ICommentCreateBody } from '$lib/shared/types/comments';
 import { toast } from '@zerodevx/svelte-toast';
+import type { Writable } from 'svelte/store';
 import { FAILURE_TOAST_OPTIONS } from '../constants/toasts';
 import { getApiAuthHeaders } from '../helpers/auth';
-import { commentTreeStore } from '../stores/comments';
 
 export const getComments = async (
 	postId: string,
@@ -21,7 +22,11 @@ export const getComments = async (
 	return await fetch(finalUrl);
 };
 
-export const createPostCommentsPaginator = (postId: string, parentCommentId: string | null) => {
+export const createPostCommentsPaginator = (
+	postId: string,
+	parentCommentId: string | null,
+	commentTree: Writable<CommentTree>,
+) => {
 	let pageNumber = 0;
 	let noMoreComments = false;
 
@@ -36,7 +41,7 @@ export const createPostCommentsPaginator = (postId: string, parentCommentId: str
 			const responseData: TApiResponse<IComment[]> = await response.json();
 			const comments = convertDataStructureToIncludeDatetimes(responseData.data) as IComment[];
 
-			commentTreeStore.update((currentCommentTree) => {
+			commentTree.update((currentCommentTree) => {
 				comments.forEach((comment) => {
 					currentCommentTree.addComment(comment);
 				});

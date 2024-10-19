@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { validateUserAuthToken } from '$lib/client/api/auth';
-	import { getNotifications } from '$lib/client/api/notifications';
 	import CollectionsModal from '$lib/client/components/collections/CollectionsModal.svelte';
 	import ImagePreviewModal from '$lib/client/components/images/ImagePreviewModal.svelte';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
@@ -13,35 +12,66 @@
 	import HiddenPostModal from '$lib/client/components/posts/container/HiddenPostModal.svelte';
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
-	import { registerDocumentEventListeners } from '$lib/client/helpers/dom';
-	import { modalStore, scrollToTopButtonActiveStore } from '$lib/client/stores/layout';
-	import { notificationStore } from '$lib/client/stores/notifications';
-	import { authenticatedUserStore, userPreferenceStore } from '$lib/client/stores/users';
-	import { NULLABLE_USER } from '$lib/shared/constants/auth';
+	import {
+		updateActiveModal,
+		updateAuthenticatedUser,
+		updateAuthenticatedUserNotifications,
+		updateAuthenticatedUserPreferences,
+		updateBlacklistedPostPage,
+		updateCommentTree,
+		updateFooter,
+		updateHiddenPostsPage,
+		updateNsfwPostPage,
+		updateOriginalPostsPage,
+		updatePostPagination,
+		updatePostsPage,
+	} from '$lib/client/helpers/context';
+	import {
+		destroyDocumentEventListeners,
+		registerDocumentEventListeners,
+	} from '$lib/client/helpers/dom';
+	import { NULLABLE_USER, NULLABLE_USER_USER_PREFERENCES } from '$lib/shared/constants/auth';
 	import { SESSION_ID_KEY } from '$lib/shared/constants/session';
-	import type { TApiResponse } from '$lib/shared/types/api';
-	import type { IUserNotifications } from '$lib/shared/types/notifcations';
+	import CommentTree from '$lib/shared/helpers/comments';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
-	import { Button } from 'flowbite-svelte';
-	import { ArrowUpOutline } from 'flowbite-svelte-icons';
 	import { onDestroy, onMount } from 'svelte';
 	import '../app.postcss';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
 
+	updateAuthenticatedUserNotifications(
+		data.user.id === NULLABLE_USER.id ? null : data.userNotifications,
+	);
+	updateAuthenticatedUser(data.user.id === NULLABLE_USER.id ? null : data.user);
+	updateAuthenticatedUserPreferences(
+		data.user.id === NULLABLE_USER.id ? NULLABLE_USER_USER_PREFERENCES : data.userPreferences,
+	);
+	updatePostPagination(null);
+	updatePostsPage([]);
+	updateOriginalPostsPage([]);
+	updateBlacklistedPostPage([]);
+	updateNsfwPostPage([]);
+	updateHiddenPostsPage({
+		nsfwPosts: [],
+		blacklistedPosts: [],
+	});
+	updateCommentTree(new CommentTree());
+	updateActiveModal({
+		isOpen: false,
+		focusedModalName: null,
+	});
+	updateFooter({
+		height: 0,
+		bottom: 0,
+		element: null,
+	});
+
 	let validateTokenIntervalId: NodeJS.Timeout;
 	const AUTH_CHECK_INTERVAL_SIZE = 60 * 2.5 * 1000;
 
-	authenticatedUserStore.set(data.user.id !== NULLABLE_USER.id ? data.user : null);
-	userPreferenceStore.set(data.userPreferences);
-
-	const pageUnsubscribe = page.subscribe((_) => {
-		modalStore.set({ isOpen: false, focusedModalName: null });
-	});
-
 	const validateUserSession = async () => {
-		if (!$authenticatedUserStore) {
+		if (data.user.id === NULLABLE_USER.id) {
 			localStorage.removeItem(SESSION_ID_KEY);
 			return;
 		}
@@ -57,26 +87,18 @@
 		}
 	};
 
-	onMount(async () => {
+	onMount(() => {
 		validateUserSession();
 		validateTokenIntervalId = setInterval(validateUserSession, AUTH_CHECK_INTERVAL_SIZE);
 
-		registerDocumentEventListeners();
+		registerDocumentEventListeners(data.user, data.userPreferences);
 
-		if ($authenticatedUserStore) {
-			const notificationResponse = await getNotifications();
-			if (notificationResponse.ok) {
-				const responseData: TApiResponse<IUserNotifications> = await notificationResponse.json();
-				const notificationData: IUserNotifications = responseData.data;
-				notificationStore.set(notificationData);
-			} else if (notificationResponse.status === 401) {
-				goto('/profile/logout');
-			}
-		}
+		return () => {
+			destroyDocumentEventListeners(data.user, data.userPreferences);
+		};
 	});
 
 	onDestroy(() => {
-		pageUnsubscribe();
 		clearInterval(validateTokenIntervalId);
 	});
 </script>
@@ -90,17 +112,6 @@
 
 <Navbar />
 <div style="flex:1">
-	<div class="relative">
-		{#if $scrollToTopButtonActiveStore}
-			<Button
-				on:click={() => window.scroll({ top: 0, behavior: 'smooth' })}
-				pill={true}
-				size="xl"
-				class="!p-2 !absolute right-0 bottom-0"><ArrowUpOutline class="w-6 h-6" /></Button
-			>
-		{/if}
-	</div>
-
 	<slot />
 </div>
 <Footer />

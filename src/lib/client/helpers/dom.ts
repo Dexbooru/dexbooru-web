@@ -1,10 +1,10 @@
 import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
 import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
-import { get } from 'svelte/store';
+import type { IUser } from '$lib/shared/types/users';
+import type { UserPreference } from '@prisma/client';
 import { GLOBAL_SEARCH_MODAL_NAME } from '../constants/layout';
-import { footerStore, modalStore } from '../stores/layout';
-import { authenticatedUserStore, userPreferenceStore } from '../stores/users';
 import type { IDeviceStoreData } from '../types/device';
+import { getActiveModal, getFooter } from './context';
 
 const LAZY_LOADABLE_IMAGES = ['booru-avatar', 'post-carousel-image', 'whole-post-image'];
 const LAZY_LOADABLE_IMAGE_DEFAULT_MAP = {
@@ -27,34 +27,33 @@ export const getDeviceDetectionDataFromWindow = (): IDeviceStoreData => {
 	};
 };
 
-export const registerDocumentEventListeners = () => {
+export const registerDocumentEventListeners = (user: IUser, userPreferences: UserPreference) => {
 	if (document.readyState !== 'loading') {
-		onLoadDocument();
+		onLoadDocument(user, userPreferences);
 	} else {
-		document.addEventListener('DOMContentLoaded', onLoadDocument);
+		document.addEventListener('DOMContentLoaded', () => onLoadDocument(user, userPreferences));
 	}
 
 	document.addEventListener('resize', onResizeDocument);
 	document.addEventListener('keydown', onKeyDownDocument);
 };
 
-export const destroyDocumentEventListeners = () => {
+export const destroyDocumentEventListeners = (user: IUser, userPreferences: UserPreference) => {
 	document.removeEventListener('resize', onResizeDocument);
-	document.removeEventListener('DOMContentLoaded', onLoadDocument);
+	document.removeEventListener('DOMContentLoaded', () => onLoadDocument(user, userPreferences));
 	document.removeEventListener('keydown', onKeyDownDocument);
 };
 
-const onLoadDocument = () => {
-	applyCustomSiteWideCss();
-	updateFooterData();
+const onLoadDocument = (user: IUser, userPreferences: UserPreference) => {
+	applyCustomSiteWideCss(user, userPreferences);
+	//updateFooterData();
 	lazyLoadImages();
 };
 
-const applyCustomSiteWideCss = () => {
-	const user = get(authenticatedUserStore);
+const applyCustomSiteWideCss = (user: IUser, userPreferences: UserPreference) => {
 	if (!user) return;
 
-	const { customSideWideCss } = get(userPreferenceStore);
+	const { customSideWideCss } = userPreferences;
 	if (typeof customSideWideCss === 'string' && customSideWideCss.length > 0) {
 		const customSideWideStylesheet = document.createElement('style');
 		customSideWideStylesheet.innerText = customSideWideCss;
@@ -69,7 +68,9 @@ const onResizeDocument = () => {
 const onKeyDownDocument = (event: KeyboardEvent) => {
 	if (event.ctrlKey && event.key.toLowerCase() === 'k') {
 		event.preventDefault();
-		modalStore.set({ isOpen: true, focusedModalName: GLOBAL_SEARCH_MODAL_NAME });
+
+		const activeModal = getActiveModal();
+		activeModal.set({ isOpen: true, focusedModalName: GLOBAL_SEARCH_MODAL_NAME });
 	}
 };
 
@@ -124,7 +125,8 @@ const updateFooterData = () => {
 		const footerHeight = footerElement.clientHeight;
 		const screenHeight = document.body.scrollHeight;
 
-		footerStore.set({
+		const footer = getFooter();
+		footer.set({
 			height: footerHeight,
 			bottom: screenHeight - footerHeight,
 			element: footerElement,

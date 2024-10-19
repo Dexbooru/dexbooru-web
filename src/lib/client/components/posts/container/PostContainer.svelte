@@ -2,8 +2,11 @@
 	import PostGrid from '$lib/client/components/posts/container/PostGrid.svelte';
 	import PostPageSidebar from '$lib/client/components/posts/container/PostPageSidebar.svelte';
 	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
-	import { originalPostsPageStore, postsPageStore } from '$lib/client/stores/posts';
-	import { userPreferenceStore } from '$lib/client/stores/users';
+	import {
+		getAuthenticatedUserPreferences,
+		getOriginalPostsPage,
+		getPostsPage,
+	} from '$lib/client/helpers/context';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
 	import { onDestroy, onMount } from 'svelte';
 	import { get } from 'svelte/store';
@@ -12,11 +15,14 @@
 	export let postContainerTitle: string;
 
 	const CLEAR_INPUT_INTERVAL_MS: number = 1000;
+	const originalPostPage = getOriginalPostsPage();
+	const postsPage = getPostsPage();
+	const userPreferences = getAuthenticatedUserPreferences();
 
 	const onPostSearch = (query: string) => {
 		const cleanedQuery = query.toLocaleLowerCase().trim();
 
-		const filteredPosts = $originalPostsPageStore.filter((post) => {
+		const filteredPosts = $originalPostPage.filter((post) => {
 			const tagHasQuery = post.tags
 				.map((tag) => tag.name)
 				.find((tagName) => tagName.toLocaleLowerCase().includes(cleanedQuery));
@@ -29,13 +35,13 @@
 			return tagHasQuery || artistHasQuery || descriptionHasQuery || uploaderHasQuery;
 		});
 
-		postsPageStore.set(filteredPosts);
+		postsPage.set(filteredPosts);
 	};
 
 	let uniqueTags: string[] = [];
 	let uniqueArtists: string[] = [];
 
-	const postPageStoreUnsubscribe = postsPageStore.subscribe((updatedPosts) => {
+	const postPageStoreUnsubscribe = postsPage.subscribe((updatedPosts) => {
 		uniqueTags = getUniqueLabelsFromPosts(updatedPosts, 'tag');
 		uniqueArtists = getUniqueLabelsFromPosts(updatedPosts, 'artist');
 	});
@@ -47,7 +53,7 @@
 
 		const postSearchResetTimeoutId = setInterval(() => {
 			if (searchInput && !searchInput.value) {
-				postsPageStore.set(get(originalPostsPageStore));
+				postsPage.set(get(originalPostPage));
 			}
 		}, CLEAR_INPUT_INTERVAL_MS);
 
@@ -68,12 +74,12 @@
 	<div id="post-container-body" class="space-y-4 mb-5">
 		<div id="post-container-title" class="flex justify-between flex-wrap">
 			<p class="text-4xl dark:text-white">{postContainerTitle}</p>
-			{#if !$userPreferenceStore.hidePostMetadataOnPreview}
+			{#if !$userPreferences.hidePostMetadataOnPreview}
 				<Searchbar queryInputHandler={onPostSearch} placeholder="Search by keyword(s)" />
 			{/if}
 		</div>
 		<PostGrid />
-		{#if $postsPageStore.length > 0}
+		{#if $postsPage.length > 0}
 			<PostPaginator />
 		{/if}
 	</div>

@@ -2,8 +2,7 @@
 	import { createComment } from '$lib/client/api/comments';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { convertToMarkdown } from '$lib/client/helpers/comments';
-	import { commentTreeStore } from '$lib/client/stores/comments';
-	import { authenticatedUserStore } from '$lib/client/stores/users';
+	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
 	import { COMMENT_TEXT_AREA_ROWS, MAXIMUM_CONTENT_LENGTH } from '$lib/shared/constants/comments';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { IComment } from '$lib/shared/types/comments';
@@ -19,6 +18,9 @@
 	let commentContent = '';
 	let commentContentMarkdown = '';
 
+	const user = getAuthenticatedUser();
+	const commentTree = getCommentTree();
+
 	const handleOnInput = async (event: Event) => {
 		const target = event.target as HTMLTextAreaElement;
 		commentContentMarkdown = await convertToMarkdown(target.value);
@@ -33,7 +35,7 @@
 	};
 
 	const handleCommentCreate = async () => {
-		if (!$authenticatedUserStore) return;
+		if (!$user) return;
 		if (!commentContent) return;
 		if (commentContent.length > MAXIMUM_CONTENT_LENGTH) return;
 
@@ -50,12 +52,12 @@
 			const responseData: TApiResponse<IComment> = await response.json();
 			const newComment = responseData.data;
 
-			commentTreeStore.update((commentTree) => {
+			commentTree.update((commentTree) => {
 				commentTree.addComment({
 					...newComment,
 					createdAt: new Date(newComment.createdAt),
-					authorId: $authenticatedUserStore?.id,
-					author: $authenticatedUserStore,
+					authorId: $user?.id,
+					author: $user,
 				});
 				return commentTree;
 			});

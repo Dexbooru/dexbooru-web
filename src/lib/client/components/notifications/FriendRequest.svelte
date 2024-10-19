@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { handleFriendRequest } from '$lib/client/api/friends';
+	import { getAuthenticatedUserNotifications } from '$lib/client/helpers/context';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { chatStore } from '$lib/client/stores/chat';
-	import { notificationStore } from '$lib/client/stores/notifications';
 	import { getTimeDifferenceString } from '$lib/shared/helpers/dates';
 	import type { IFriendRequest, TFriendRequestAction } from '$lib/shared/types/friends';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -11,6 +11,8 @@
 	export let friendRequest: IFriendRequest;
 
 	let friendshipActionLoading = false;
+
+	const userNotifications = getAuthenticatedUserNotifications();
 
 	const handleFriendshipAction = async (action: TFriendRequestAction) => {
 		friendshipActionLoading = true;
@@ -26,7 +28,7 @@
 					: 'You rejected the friend request successfully!';
 			toast.push(toastMessage, SUCCESS_TOAST_OPTIONS);
 
-			notificationStore.update((currentNotificationData) => {
+			userNotifications.update((currentNotificationData) => {
 				if (!currentNotificationData) return null;
 
 				currentNotificationData.friendRequests = currentNotificationData.friendRequests.filter(

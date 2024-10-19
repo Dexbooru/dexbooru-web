@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { addFriend, deleteFriend } from '$lib/client/api/friends';
+	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { IUser, TUserStatistics } from '$lib/shared/types/users';
@@ -16,8 +16,10 @@
 	let addFriendLoading = false;
 	let deleteFriendLoading = false;
 
+	const user = getAuthenticatedUser();
+
 	const handleAddFriend = async () => {
-		if (!$authenticatedUserStore || $authenticatedUserStore.id === targetUser.id) return;
+		if (!$user || $user.id === targetUser.id) return;
 
 		addFriendLoading = true;
 		const response = await addFriend(targetUser.username);
@@ -35,7 +37,7 @@
 	};
 
 	const handleDeleteFriend = async () => {
-		if (!$authenticatedUserStore || $authenticatedUserStore.id === targetUser.id) return;
+		if (!$user || $user.id === targetUser.id) return;
 
 		deleteFriendLoading = true;
 		const response = await deleteFriend(targetUser.username);
@@ -54,7 +56,7 @@
 	<div class="flex justify-end">
 		<DotsHorizontalOutline class="hover:cursor-pointer" />
 		<Dropdown class="w-36">
-			{#if $authenticatedUserStore && $authenticatedUserStore.id === targetUser.id}
+			{#if $user && $user.id === targetUser.id}
 				<DropdownItem>Export data</DropdownItem>
 			{/if}
 			<DropdownItem>Report account</DropdownItem>
@@ -72,7 +74,7 @@
 			>Account creation date:
 			<strong>{formatDate(new Date(targetUser.createdAt))}</strong></span
 		>
-		{#if $authenticatedUserStore && $authenticatedUserStore.id === targetUser.id}
+		{#if $user && $user.id === targetUser.id}
 			<span class="text-sm text-gray-500 dark:text-gray-400"
 				>Account last updated at date:
 				<strong>{formatDate(new Date(targetUser.updatedAt))}</strong></span
@@ -106,8 +108,8 @@
 		>
 
 		<div class="flex mt-4 space-x-3 rtl:space-x-reverse lg:mt-6">
-			{#if $authenticatedUserStore}
-				{#if $authenticatedUserStore.id !== targetUser.id}
+			{#if $user}
+				{#if $user.id !== targetUser.id}
 					{#if friendStatus === 'not-friends'}
 						<Button disabled={addFriendLoading} on:click={handleAddFriend}>Add friend</Button>
 					{:else if friendStatus === 'request-pending'}

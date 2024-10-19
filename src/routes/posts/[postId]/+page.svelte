@@ -1,29 +1,37 @@
 <script lang="ts">
 	import PostPresentation from '$lib/client/components/posts/container/PostPresentation.svelte';
+	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
 	import { normalizeCount } from '$lib/client/helpers/posts';
-	import { commentTreeStore } from '$lib/client/stores/comments';
-	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate } from '$lib/shared/helpers/dates';
+	import type { TPost } from '$lib/shared/types/posts';
 	import { Button, Modal } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
-	let { post, uploadedSuccessfully } = data;
+	let post: TPost;
+	let uploadedSuccessfully: boolean;
 	let totalPostCommentCount: string = '0';
 	let uploadSuccessModalOpen = true;
 
-	const tagNames = post.tags.map((tag) => tag.name);
-	const artistNames = post.artists.map((artist) => artist.name);
+	const user = getAuthenticatedUser();
+	const commentTree = getCommentTree();
+
+	let tagNames: string[] = [];
+	let artistNames: string[] = [];
 
 	$: {
+		console.log('listened to update', data.post);
 		post = data.post;
 		uploadedSuccessfully = data.uploadedSuccessfully;
+
+		tagNames = data.post.tags.map((tag) => tag.name);
+		artistNames = data.post.artists.map((artist) => artist.name);
 	}
 
-	const commentTreeUnsubscribe = commentTreeStore.subscribe((tree) => {
+	const commentTreeUnsubscribe = commentTree.subscribe((tree) => {
 		totalPostCommentCount = normalizeCount(tree.getCount());
 	});
 
@@ -58,7 +66,7 @@
 	<meta property="article:published_time" content={formatDate(post.createdAt)} />
 </svelte:head>
 
-{#if uploadedSuccessfully && $authenticatedUserStore && $authenticatedUserStore.id === post.author.id}
+{#if uploadedSuccessfully && $user && $user.id === post.author.id}
 	<Modal
 		title="Your post was uploaded succesfully! 🚀🚀"
 		open={uploadSuccessModalOpen}

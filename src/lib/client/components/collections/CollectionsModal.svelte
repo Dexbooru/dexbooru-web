@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { COLLECTIONS_MODAL_NAME } from '$lib/client/constants/layout';
-	import { modalStore } from '$lib/client/stores/layout';
+	import { getActiveModal } from '$lib/client/helpers/context';
 	import { Button, Checkbox, Modal } from 'flowbite-svelte';
 	import { PlusSolid } from 'flowbite-svelte-icons';
 
@@ -14,6 +14,8 @@
 	];
 
 	let selectedCollections: number[] = [];
+
+	const activeModal = getActiveModal();
 
 	function toggleCollection(collectionId: number) {
 		if (selectedCollections.includes(collectionId)) {
@@ -35,8 +37,8 @@
 </script>
 
 <Modal
-	open={$modalStore.isOpen && $modalStore.focusedModalName === COLLECTIONS_MODAL_NAME}
-	on:close={() => modalStore.set({ isOpen: false, focusedModalName: null })}
+	open={$activeModal.isOpen && $activeModal.focusedModalName === COLLECTIONS_MODAL_NAME}
+	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	size="xl"
 	outsideclose
 >
@@ -73,7 +75,7 @@
 	<svelte:fragment slot="footer">
 		<Button
 			color="alternative"
-			on:click={() => modalStore.set({ isOpen: false, focusedModalName: null })}>Cancel</Button
+			on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}>Cancel</Button
 		>
 		<Button color="primary" on:click={handleSave}>Save</Button>
 	</svelte:fragment>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { userPreferenceStore } from '$lib/client/stores/users';
+	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import { Alert, Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 
@@ -9,7 +9,8 @@
 	let customSiteCss: string = '';
 	let hidePostMetadataOnPreview: boolean = false;
 
-	const userPreferenceUnsubscribe = userPreferenceStore.subscribe((data) => {
+	const userPreferences = getAuthenticatedUserPreferences();
+	const userPreferenceUnsubscribe = userPreferences.subscribe((data) => {
 		customSiteCss = data.customSideWideCss;
 		hidePostMetadataOnPreview = data.hidePostMetadataOnPreview;
 	});

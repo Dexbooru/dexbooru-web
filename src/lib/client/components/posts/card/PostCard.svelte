@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import ImageCarousel from '$lib/client/components/images/ImageCarousel.svelte';
 	import PostCardBody from '$lib/client/components/posts/card/PostCardBody.svelte';
 	import { HIDDEN_POSTS_MODAL_NAME } from '$lib/client/constants/layout';
-	import { modalStore } from '$lib/client/stores/layout';
-	import { userPreferenceStore } from '$lib/client/stores/users';
+	import { getActiveModal, getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
 		NSFW_PREVIEW_IMAGE_SUFFIX,
@@ -24,7 +22,10 @@
 	let imageUrls = post.imageUrls;
 	let likes = post.likes;
 
-	const userPreferenceUnsubsribe = userPreferenceStore.subscribe((data) => {
+	const userPreferences = getAuthenticatedUserPreferences();
+	const activeModal = getActiveModal();
+
+	const userPreferenceUnsubsribe = userPreferences.subscribe((data) => {
 		const blurImages = isNsfw && data.autoBlurNsfw;
 		imageUrls = imageUrls.filter((imageUrl) => {
 			if (
@@ -41,14 +42,12 @@
 		});
 	});
 
-	const pagePath = $page.url.pathname;
-
 	onDestroy(() => {
 		userPreferenceUnsubsribe();
 	});
 </script>
 
-{#if $userPreferenceStore.hidePostMetadataOnPreview}
+{#if $userPreferences.hidePostMetadataOnPreview}
 	<ImageCarousel
 		postId={post.id}
 		postHref="/posts/{postId}"
@@ -57,14 +56,9 @@
 		slideDuration={350}
 		transitionFunction={(x) => scale(x, { duration: 500, easing: quintOut })}
 	/>
-	{#if pagePath.includes('/posts/uploaded')}
-		<div class="mt-2 border p-2 rounded-lg">
-			<PostCardActions {post} {author} {likes} {postId} />
-		</div>
-	{/if}
 {:else}
-	<Card>
-		{#if isNsfw && $userPreferenceStore.autoBlurNsfw && $modalStore.focusedModalName !== HIDDEN_POSTS_MODAL_NAME}
+	<Card class="self-start">
+		{#if isNsfw && $userPreferences.autoBlurNsfw && $activeModal.focusedModalName !== HIDDEN_POSTS_MODAL_NAME}
 			<Toast
 				dismissable={false}
 				divClass="w-full max-w-xs p-4 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3 mt-2 mb-2"

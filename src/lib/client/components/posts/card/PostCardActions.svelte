@@ -8,14 +8,14 @@
 		REPORT_MODAL_NAME,
 	} from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { normalizeCount } from '$lib/client/helpers/posts';
-	import { modalStore } from '$lib/client/stores/layout';
 	import {
-		originalPostsPageStore,
-		postPaginationStore,
-		postsPageStore,
-	} from '$lib/client/stores/posts';
-	import { authenticatedUserStore } from '$lib/client/stores/users';
+		getActiveModal,
+		getAuthenticatedUser,
+		getOriginalPostsPage,
+		getPostPaginationData,
+		getPostsPage,
+	} from '$lib/client/helpers/context';
+	import { normalizeCount } from '$lib/client/helpers/posts';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button } from 'flowbite-svelte';
@@ -37,14 +37,20 @@
 	};
 	export let onPostViewPage: boolean = false;
 
+	const user = getAuthenticatedUser();
+	const postsPage = getPostsPage();
+	const originalPostPage = getOriginalPostsPage();
+	const postPagination = getPostPaginationData();
+	const activeModal = getActiveModal();
+
 	let postLikeLoading = false;
-	let hasLikedPost = $postPaginationStore?.likedPosts.map((post) => post.id).includes(postId);
+	let hasLikedPost = $postPagination?.likedPosts.map((post) => post.id).includes(postId);
 
 	const pagePathName = $page.url.pathname;
-	const isPostAuthor = $authenticatedUserStore && $authenticatedUserStore.id === author.id;
+	const isPostAuthor = $user && $user.id === author.id;
 
 	const handleModalOpen = (focusedModalName: string, data: unknown) => {
-		modalStore.set({
+		activeModal.set({
 			isOpen: true,
 			focusedModalName: focusedModalName,
 			modalData: data,
@@ -52,7 +58,7 @@
 	};
 
 	const handleLikePost = async () => {
-		if (!$authenticatedUserStore) {
+		if (!$user) {
 			toast.push(
 				'Please sign-in or register for an account to able to like posts',
 				FAILURE_TOAST_OPTIONS,
@@ -69,7 +75,7 @@
 				SUCCESS_TOAST_OPTIONS,
 			);
 			likes = hasLikedPost ? likes - 1 : likes + 1;
-			postPaginationStore.update((paginationData) => {
+			postPagination.update((paginationData) => {
 				if (!paginationData) return null;
 
 				if (hasLikedPost) {
@@ -84,10 +90,8 @@
 			});
 
 			if (pagePathName.includes('/posts/liked') && hasLikedPost) {
-				postsPageStore.update((previousPosts) =>
-					previousPosts.filter((post) => post.id !== postId),
-				);
-				originalPostsPageStore.update((previousPosts) => {
+				postsPage.update((previousPosts) => previousPosts.filter((post) => post.id !== postId));
+				originalPostPage.update((previousPosts) => {
 					return previousPosts.filter((post) => post.id !== postId);
 				});
 			}
@@ -112,9 +116,9 @@
 		<span>{normalizeCount(likes)} - Like post</span>
 	</Button>
 
-	{#if $authenticatedUserStore}
+	{#if $user}
 		<Button
-			on:click={() => modalStore.set({ isOpen: true, focusedModalName: COLLECTIONS_MODAL_NAME })}
+			on:click={() => activeModal.set({ isOpen: true, focusedModalName: COLLECTIONS_MODAL_NAME })}
 			>Add to collection</Button
 		>
 	{/if}

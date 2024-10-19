@@ -1,14 +1,14 @@
 import type { IPostPaginationData, TPost } from '$lib/shared/types/posts';
 import { get } from 'svelte/store';
 import {
-	blacklistedPostPageStore,
-	hiddenPostsPageStore,
-	nsfwPostPageStore,
-	originalPostsPageStore,
-	postPaginationStore,
-	postsPageStore,
-} from '../stores/posts';
-import { userPreferenceStore } from '../stores/users';
+	getAuthenticatedUserPreferences,
+	getBlacklistedPostPage,
+	getHiddenPostsPage,
+	getNsfwPostPage,
+	getOriginalPostsPage,
+	getPostsPage,
+} from '../helpers/context';
+import { getPostPaginationData } from './context';
 
 export function normalizeCount(count: number): string {
 	if (count >= 1000000) {
@@ -30,14 +30,14 @@ export function roundNumber(target: number, places: number = 0) {
 	return Number(target.toFixed(places));
 }
 
-export const updatePostStores = (postPaginationData: IPostPaginationData) => {
-	const userPreferences = get(userPreferenceStore);
+export const updatePostStores = (updatePostPaginationData: IPostPaginationData) => {
+	const userPreferences = get(getAuthenticatedUserPreferences());
 	const { blacklistedArtists, blacklistedTags, browseInSafeMode } = userPreferences;
 
 	const nsfwPosts: TPost[] = [];
 	const blacklistedPosts: TPost[] = [];
 	const displayPosts: TPost[] = [];
-	for (const post of postPaginationData.posts) {
+	for (const post of updatePostPaginationData.posts) {
 		const containsBlacklistedTag = post.tags.some((tag) => blacklistedTags.includes(tag.name));
 		const containsBlacklistedArtist = post.artists.some((artist) =>
 			blacklistedArtists.includes(artist.name),
@@ -63,12 +63,19 @@ export const updatePostStores = (postPaginationData: IPostPaginationData) => {
 		}
 	}
 
-	postPaginationStore.set(postPaginationData);
-	postsPageStore.set(displayPosts);
-	originalPostsPageStore.set(displayPosts);
-	blacklistedPostPageStore.set(blacklistedPosts);
-	nsfwPostPageStore.set(nsfwPosts);
-	hiddenPostsPageStore.set({
+	const postPaginationData = getPostPaginationData();
+	const postsPage = getPostsPage();
+	const originalPostsPage = getOriginalPostsPage();
+	const blacklistedPostsPage = getBlacklistedPostPage();
+	const nsfwPostsPage = getNsfwPostPage();
+	const hiddenPostsPage = getHiddenPostsPage();
+
+	postPaginationData.set(updatePostPaginationData);
+	postsPage.set(displayPosts);
+	originalPostsPage.set(displayPosts);
+	blacklistedPostsPage.set(blacklistedPosts);
+	nsfwPostsPage.set(nsfwPosts);
+	hiddenPostsPage.set({
 		nsfwPosts,
 		blacklistedPosts,
 	});

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { IMAGE_PREVIEW_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { getActiveModal } from '$lib/client/helpers/context';
 	import { filesToBase64Strings } from '$lib/client/helpers/images';
-	import { modalStore } from '$lib/client/stores/layout';
 	import {
 		MAXIMUM_IMAGES_PER_POST,
 		MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB,
@@ -14,6 +14,8 @@
 
 	export let images: { imageBase64: string; file: File }[] = [];
 	export let loadingPictures: boolean = false;
+
+	const activeModal = getActiveModal();
 
 	const resetFileUploadState = (
 		target: HTMLInputElement,
@@ -126,7 +128,7 @@
 				color="alternative"
 				style="width: 200px; height: 200px; background-image: url({imageBase64}); background-repeat: no-repeat; background-size: cover; background-position: center;"
 				on:click={() =>
-					modalStore.set({
+					activeModal.set({
 						isOpen: true,
 						focusedModalName: IMAGE_PREVIEW_MODAL_NAME,
 						modalData: { imageBase64, imageFile: file },

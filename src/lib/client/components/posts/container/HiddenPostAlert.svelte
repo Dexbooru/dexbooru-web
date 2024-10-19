@@ -1,19 +1,25 @@
 <script lang="ts">
 	import { HIDDEN_POSTS_MODAL_NAME } from '$lib/client/constants/layout';
-	import { modalStore } from '$lib/client/stores/layout';
 	import {
-		blacklistedPostPageStore,
-		hiddenPostsPageStore,
-		nsfwPostPageStore,
-	} from '$lib/client/stores/posts';
-	import { authenticatedUserStore } from '$lib/client/stores/users';
+		getActiveModal,
+		getAuthenticatedUser,
+		getBlacklistedPostPage,
+		getHiddenPostsPage,
+		getNsfwPostPage,
+	} from '$lib/client/helpers/context';
 	import { Alert } from 'flowbite-svelte';
 	import { InfoCircleSolid } from 'flowbite-svelte-icons';
 	import { onDestroy, onMount } from 'svelte';
 
 	let titleParts: string[] = [];
 
-	const hiddenPostPageUnsubscribe = hiddenPostsPageStore.subscribe((data) => {
+	const user = getAuthenticatedUser();
+	const hiddenPostsPage = getHiddenPostsPage();
+	const blacklistedPostsPage = getBlacklistedPostPage();
+	const nsfwPostsPage = getNsfwPostPage();
+	const activeModal = getActiveModal();
+
+	const hiddenPostPageUnsubscribe = hiddenPostsPage.subscribe((data) => {
 		titleParts = [];
 		const updatedTitleParts: string[] = [];
 		const { nsfwPosts, blacklistedPosts } = data;
@@ -33,7 +39,7 @@
 		const hiddenPostAlert = document.getElementById('hidden-posts-page-alert');
 		if (hiddenPostAlert) {
 			hiddenPostAlert.addEventListener('click', () => {
-				modalStore.set({ isOpen: true, focusedModalName: HIDDEN_POSTS_MODAL_NAME });
+				activeModal.set({ isOpen: true, focusedModalName: HIDDEN_POSTS_MODAL_NAME });
 			});
 		}
 	});
@@ -43,7 +49,7 @@
 	});
 </script>
 
-{#if $authenticatedUserStore && ($blacklistedPostPageStore.length > 0 || $nsfwPostPageStore.length > 0)}
+{#if $user && ($blacklistedPostsPage.length > 0 || $nsfwPostsPage.length > 0)}
 	<hr class="mt-2 mb-2" />
 	<Alert
 		id="hidden-posts-page-alert"

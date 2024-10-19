@@ -3,5 +3,5 @@ import type { IPostPaginationData } from '$lib/shared/types/posts';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	return await handleGetPosts(event, 'page-server-load', 'general') as IPostPaginationData;
+	return (await handleGetPosts(event, 'page-server-load', 'general')) as IPostPaginationData;
 };

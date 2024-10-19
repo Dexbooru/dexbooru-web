@@ -1,4 +1,4 @@
-import { SALT_ROUNDS } from '$lib/shared/constants/auth';
+import { SALT_ROUNDS } from '$lib/server/constants/auth';
 import bcrypt from 'bcryptjs';
 
 export const hashPassword = async (password: string): Promise<string> => {

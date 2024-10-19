@@ -2,8 +2,10 @@
 	import { page } from '$app/stores';
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/posts';
-	import { postPaginationStore } from '$lib/client/stores/posts';
-	import { userPreferenceStore } from '$lib/client/stores/users';
+	import {
+		getAuthenticatedUserPreferences,
+		getPostPaginationData,
+	} from '$lib/client/helpers/context';
 	import {
 		Sidebar,
 		SidebarDropdownItem,
@@ -21,10 +23,13 @@
 	export let uniqueTags: string[] = [];
 	export let uniqueArtists: string[] = [];
 
+	const userPreferences = getAuthenticatedUserPreferences();
+	const postPaginationData = getPostPaginationData();
+
 	const postsBaseUrl = $page.url.origin + $page.url.pathname;
 </script>
 
-{#if $postPaginationStore}
+{#if $postPaginationData}
 	<Sidebar>
 		<SidebarWrapper>
 			<SidebarGroup>
@@ -39,12 +44,12 @@
 							<SidebarDropdownItem
 								href={getHref(postsBaseUrl)}
 								{label}
-								active={isActive($postPaginationStore.orderBy, $postPaginationStore.ascending)}
+								active={isActive($postPaginationData.orderBy, $postPaginationData.ascending)}
 							/>
 						{/each}
 					{/each}
 				</SidebarDropdownWrapper>
-				{#if !$userPreferenceStore.hidePostMetadataOnPreview}
+				{#if !$userPreferences.hidePostMetadataOnPreview}
 					<SidebarDropdownWrapper label="All Tags">
 						<svelte:fragment slot="icon">
 							<TagSolid

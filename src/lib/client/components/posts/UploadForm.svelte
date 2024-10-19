@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getEstimatedPostRating } from '$lib/client/api/mlApi';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION } from '$lib/shared/constants/images';
 	import {
@@ -31,6 +32,12 @@
 		file: File;
 	}[] = [];
 	let loadingPostPictures = false;
+
+	$: {
+		getEstimatedPostRating(tags)
+			.then((response) => response.json())
+			.then((data) => console.log(data));
+	}
 
 	const addLabel = (labelType: 'tag' | 'artist') => {
 		const label = labelType === 'tag' ? tag : artist;

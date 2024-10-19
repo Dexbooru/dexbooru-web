@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { REPORT_MODAL_NAME } from '$lib/client/constants/layout';
-	import { modalStore } from '$lib/client/stores/layout';
+	import { getActiveModal } from '$lib/client/helpers/context';
 	import { REPORT_REASON_CATEGORIES } from '$lib/shared/constants/reports';
 	import type { ReportReasonCategory } from '$lib/shared/types/reports';
 	import { Button, Label, Modal, Select, Textarea } from 'flowbite-svelte';
@@ -10,7 +10,9 @@
 	let reportVerbalReason = '';
 	let selectedReportReasonCategory: ReportReasonCategory;
 
-	const modalStoreUnsubscribe = modalStore.subscribe((data) => {
+	const activeModal = getActiveModal();
+
+	const modalStoreUnsubscribe = activeModal.subscribe((data) => {
 		if (data.focusedModalName === REPORT_MODAL_NAME) {
 			const { postId: focusedPostId } = data.modalData as { postId: string };
 			postId = focusedPostId;
@@ -23,8 +25,8 @@
 </script>
 
 <Modal
-	open={$modalStore.isOpen && $modalStore.focusedModalName === REPORT_MODAL_NAME}
-	on:close={() => modalStore.set({ isOpen: false, focusedModalName: null })}
+	open={$activeModal.isOpen && $activeModal.focusedModalName === REPORT_MODAL_NAME}
+	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	size="xs"
 	outsideclose
 	class="w-full"

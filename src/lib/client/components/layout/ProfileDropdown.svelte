@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { notificationStore } from '$lib/client/stores/notifications';
-	import { authenticatedUserStore } from '$lib/client/stores/users';
+	import {
+		getAuthenticatedUser,
+		getAuthenticatedUserNotifications,
+	} from '$lib/client/helpers/context';
 	import { Avatar, Button, Dropdown, DropdownItem, Spinner } from 'flowbite-svelte';
 	import { AngleDownSolid } from 'flowbite-svelte-icons';
 	import { onDestroy } from 'svelte';
@@ -9,7 +11,10 @@
 
 	let notificationCount: number;
 
-	const notificationUnsubscribe = notificationStore.subscribe((currentNotificationData) => {
+	const user = getAuthenticatedUser();
+	const notifications = getAuthenticatedUserNotifications();
+
+	const notificationUnsubscribe = notifications.subscribe((currentNotificationData) => {
 		if (!currentNotificationData) return;
 
 		notificationCount = Object.values(currentNotificationData)
@@ -24,7 +29,7 @@
 	});
 </script>
 
-{#if $notificationStore}
+{#if $notifications}
 	<NotificationBell {notificationCount} />
 	<NotificationList {notificationCount} />
 {:else}
@@ -33,15 +38,15 @@
 
 <Button color="light" id="navbar-profile-picture" class="!p-1 flex space-x-4">
 	<Avatar
-		src={$authenticatedUserStore?.profilePictureUrl}
-		alt="profile picture of {$authenticatedUserStore?.username}"
+		src={$user?.profilePictureUrl}
+		alt="profile picture of {$user?.username}"
 		class="mr-2 booru-avatar hide-alt-text"
 	/>
-	{$authenticatedUserStore?.username}
+	{$user?.username}
 	<AngleDownSolid size="sm" class="!mr-2" />
 </Button>
 <Dropdown triggeredBy="#navbar-profile-picture">
-	<DropdownItem href="/profile/{$authenticatedUserStore?.username}">Your Profile</DropdownItem>
+	<DropdownItem href="/profile/{$user?.username}">Your Profile</DropdownItem>
 	<DropdownItem href="/posts/uploaded">Your Posts</DropdownItem>
 	<DropdownItem href="/posts/liked">Liked Posts</DropdownItem>
 	<DropdownItem href="/profile/settings">Settings</DropdownItem>

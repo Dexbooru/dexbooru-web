@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authenticatedUserStore } from '$lib/client/stores/users';
+	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import type { TPost } from '$lib/shared/types/posts';
 	import CommentTextbox from '../../comments/CommentTextbox.svelte';
 	import CommentsContainer from '../../comments/CommentsContainer.svelte';
@@ -8,6 +8,8 @@
 
 	export let post: TPost;
 	export let totalPostCommentCount: string = '0';
+
+	const user = getAuthenticatedUser();
 </script>
 
 <div class="space-y-5">
@@ -21,7 +23,7 @@
 </div>
 
 <div class="space-y-2">
-	{#if $authenticatedUserStore}
+	{#if $user}
 		<CommentTextbox postId={post.id} />
 	{/if}
 	<p class="text-lg dark:text-white">Comments: {totalPostCommentCount}</p>

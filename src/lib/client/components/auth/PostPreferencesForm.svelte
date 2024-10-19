@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { userPreferenceStore } from '$lib/client/stores/users';
+	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import { Alert, Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 
@@ -11,7 +11,9 @@
 	let blacklistedTags: string = '';
 	let blacklistedArtists: string = '';
 
-	const userPreferenceUnsubscribe = userPreferenceStore.subscribe((data) => {
+	const userPreferences = getAuthenticatedUserPreferences();
+
+	const userPreferenceUnsubscribe = userPreferences.subscribe((data) => {
 		autoBlurNsfw = data.autoBlurNsfw;
 		browseInSafeMode = data.browseInSafeMode;
 		blacklistedTags = data.blacklistedTags.join('\n');

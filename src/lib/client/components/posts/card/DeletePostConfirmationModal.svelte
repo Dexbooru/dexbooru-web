@@ -4,12 +4,12 @@
 	import { deletePost } from '$lib/client/api/posts';
 	import { DELETE_POST_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { modalStore } from '$lib/client/stores/layout';
 	import {
-		originalPostsPageStore,
-		postPaginationStore,
-		postsPageStore,
-	} from '$lib/client/stores/posts';
+		getActiveModal,
+		getOriginalPostsPage,
+		getPostPaginationData,
+		getPostsPage,
+	} from '$lib/client/helpers/context';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Modal } from 'flowbite-svelte';
@@ -20,7 +20,12 @@
 	let postId: string;
 	let postDeletionLoading = false;
 
-	const modalStoreUnsubscribe = modalStore.subscribe((data) => {
+	const postsPage = getPostsPage();
+	const originalPostPage = getOriginalPostsPage();
+	const postPagination = getPostPaginationData();
+	const activeModal = getActiveModal();
+
+	const modalStoreUnsubscribe = activeModal.subscribe((data) => {
 		if (data.focusedModalName === DELETE_POST_MODAL_NAME) {
 			const { post: focusedDeletionPost } = data.modalData as { post: TPost };
 			targetDeletionPost = focusedDeletionPost;
@@ -44,11 +49,11 @@
 				goto('/');
 				return;
 			}
-			postsPageStore.update((previousPosts) => previousPosts.filter((post) => post.id !== postId));
-			originalPostsPageStore.update((previousPosts) =>
+			postsPage.update((previousPosts) => previousPosts.filter((post) => post.id !== postId));
+			originalPostPage.update((previousPosts) =>
 				previousPosts.filter((post) => post.id !== postId),
 			);
-			postPaginationStore.update((paginationData) => {
+			postPagination.update((paginationData) => {
 				if (!paginationData) return null;
 
 				return {
@@ -57,7 +62,7 @@
 				};
 			});
 			toast.push('The post was deleted successfully!', SUCCESS_TOAST_OPTIONS);
-			modalStore.set({
+			activeModal.set({
 				isOpen: false,
 				focusedModalName: null,
 			});
@@ -72,10 +77,10 @@
 </script>
 
 <Modal
-	open={$modalStore.isOpen &&
-		$modalStore.focusedModalName === DELETE_POST_MODAL_NAME &&
+	open={$activeModal.isOpen &&
+		$activeModal.focusedModalName === DELETE_POST_MODAL_NAME &&
 		targetDeletionPost !== null}
-	on:close={() => modalStore.set({ isOpen: false, focusedModalName: null })}
+	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	size="xs"
 	outsideclose
 	class="w-full"
@@ -89,7 +94,7 @@
 			>Yes, I'm sure</Button
 		>
 		<Button
-			on:click={() => modalStore.set({ isOpen: false, focusedModalName: null })}
+			on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 			color="alternative">No, cancel</Button
 		>
 	</div>

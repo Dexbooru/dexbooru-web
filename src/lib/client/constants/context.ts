@@ -1,0 +1,13 @@
+export const USER_CONTEXT_KEY = 'authenticatedUser';
+export const USER_PREFERENCE_CONTEXT_KEY = 'authenticatedUserPreferences';
+export const USER_NOTIFICATIONS_CONTEXT_KEY = 'authenticatedUserNotifications';
+export const POST_PAGINATION_DATA_CONTEXT_KEY = 'postPaginationData';
+export const POST_PAGINATION_CONTEXT_KEY = 'postPaginationStore';
+export const POSTS_PAGE_CONTEXT_KEY = 'postsPageStore';
+export const ORIGINAL_POSTS_PAGE_CONTEXT_KEY = 'originalPostsPageStore';
+export const BLACKLISTED_POST_PAGE_CONTEXT_KEY = 'blacklistedPostPageStore';
+export const NSFW_POST_PAGE_CONTEXT_KEY = 'nsfwPostPageStore';
+export const HIDDEN_POSTS_PAGE_CONTEXT_KEY = 'hiddenPostsPageStore';
+export const COMMENT_TREE_CONTEXT_KEY = 'commentTree';
+export const ACTIVE_MODAL_CONTEXT_KEY = 'activeModal';
+export const FOOTER_CONTEXT_KEY = 'footer';

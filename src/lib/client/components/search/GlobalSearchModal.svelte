@@ -6,8 +6,8 @@
 		SEARCH_DEBOUNCE_TIMEOUT_MS,
 	} from '$lib/client/constants/search';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { getActiveModal } from '$lib/client/helpers/context';
 	import { debounce, memoize } from '$lib/client/helpers/util';
-	import { modalStore } from '$lib/client/stores/layout';
 	import { queryStore } from '$lib/client/stores/search';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { IAppSearchResult } from '$lib/shared/types/search';
@@ -20,7 +20,9 @@
 	let currentSearchResults: IAppSearchResult | null = null;
 	let searchResultsLoading = false;
 
-	const modalStoreUnsubscribe = modalStore.subscribe((data) => {
+	const activeModal = getActiveModal();
+
+	const modalStoreUnsubscribe = activeModal.subscribe((data) => {
 		if (data.focusedModalName === GLOBAL_SEARCH_MODAL_NAME) {
 			const globalSearchInput = document.querySelector(
 				`#${GLOBAL_SEARCH_INPUT_ELEMENT_ID}`,
@@ -67,11 +69,11 @@
 
 <Modal
 	title="Find tags, artists, users and posts"
-	open={$modalStore.isOpen && $modalStore.focusedModalName === GLOBAL_SEARCH_MODAL_NAME}
+	open={$activeModal.isOpen && $activeModal.focusedModalName === GLOBAL_SEARCH_MODAL_NAME}
 	outsideclose
 	class="w-screen"
 	placement="top-center"
-	on:close={() => modalStore.set({ isOpen: false, focusedModalName: null })}
+	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 >
 	<div class="flex relative">
 		<Searchbar

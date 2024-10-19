@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { getAuthenticatedUser } from '$lib/client/constants/context';
 	import { chatStore } from '$lib/client/stores/chat';
-	import { authenticatedUserStore } from '$lib/client/stores/users';
 	import type { TChatMessage } from '$lib/client/types/core';
 	import { onDestroy } from 'svelte';
 
@@ -11,6 +11,8 @@
 		const currentMessages = $chatStore.messages.get(roomId ?? '') ?? [];
 		messages = currentMessages;
 	}
+
+	const user = getAuthenticatedUser();
 
 	const chatStoreUnsubsribe = chatStore.subscribe((data) => {
 		if (!roomId) return;
@@ -32,7 +34,7 @@
 		<p class="text-center text-xl text-gray-300">Open a chat to start messaging</p>
 	{:else}
 		{#each messages as message (message.id)}
-			{#if message.senderId === $authenticatedUserStore?.id}
+			{#if message.senderId === $user?.id}
 				<div class="flex justify-end">
 					<div class="bg-blue-500 text-white p-4 rounded-lg shadow-md">
 						<p class="text-sm">{message.content}</p>

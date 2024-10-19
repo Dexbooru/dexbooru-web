@@ -133,7 +133,6 @@ class FakerMockGenerator {
 					this.enFaker.helpers.rangeToNumber({ min: 1, max: MAXIMUM_IMAGES_PER_POST })
 				)
 					.fill(-1)
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars
 					.map((_) => this.enFaker.image.urlLoremFlickr({ width: 400, height: 400 }))
 			};
 

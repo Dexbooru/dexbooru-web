@@ -2,8 +2,7 @@
 	import { createPostCommentsPaginator } from '$lib/client/api/comments';
 	import { MAXIMUM_COMMENT_REPLY_DEPTH_LOAD } from '$lib/client/constants/comments';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { commentTreeStore } from '$lib/client/stores/comments';
-	import { authenticatedUserStore } from '$lib/client/stores/users';
+	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate, getFormalDateTitle, ymdFormat } from '$lib/shared/helpers/dates';
 	import type { IComment } from '$lib/shared/types/comments';
@@ -24,7 +23,9 @@
 	let pageNumber = 0;
 	let noMoreComments = false;
 
-	const replyCommentLoader = createPostCommentsPaginator(comment.postId, comment.id);
+	const user = getAuthenticatedUser();
+	const commentTree = getCommentTree();
+	const replyCommentLoader = createPostCommentsPaginator(comment.postId, comment.id, commentTree);
 
 	const handleLoadRepliesClick = async (isInitialLoad: boolean = false) => {
 		repliesLoading = true;
@@ -32,13 +33,14 @@
 		repliesLoading = false;
 
 		const { pageNumber: pageNumberResult, noMoreComments: noMoreCommentsResult } = paginationData;
-		loadMoreButtonText = pageNumberResult > 0 && !noMoreComments ? 'Load more replies' : 'Load replies';
+		loadMoreButtonText =
+			pageNumberResult > 0 && !noMoreComments ? 'Load more replies' : 'Load replies';
 		pageNumber = pageNumberResult;
 		noMoreComments = noMoreCommentsResult;
 	};
 
 	const handleReplyButtonClick = () => {
-		if (!$authenticatedUserStore) {
+		if (!$user) {
 			toast.push('You must be signed in to reply to comments', FAILURE_TOAST_OPTIONS);
 			return;
 		}
@@ -46,7 +48,7 @@
 		replyBoxOpen = !replyBoxOpen;
 	};
 
-	const commentTreeUnsubscribe = commentTreeStore.subscribe((commentTree) => {
+	const commentTreeUnsubscribe = commentTree.subscribe((commentTree) => {
 		replies = commentTree.getReplies(comment.id);
 	});
 
