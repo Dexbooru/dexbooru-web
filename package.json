@@ -6,6 +6,7 @@
 		"dev": "dotenv -e .env -- vite dev",
 		"build": "prisma generate && vite build",
 		"preview": "dotenv -e .env -- vite preview",
+		"preinstall": "npx only-allow pnpm",
 		"postinstall": "prisma generate",
 		"dbseed:dev": "dotenv -e .env -- prisma db push --force-reset && prisma db seed",
 		"dbmigrate:dev": "dotenv -e .env -- prisma migrate dev",
@@ -90,5 +91,6 @@
 	},
 	"engines": {
 		"node": ">=18.0.0"
-	}
+	},
+	"packageManager": "pnpm@9.12.0"
 }
