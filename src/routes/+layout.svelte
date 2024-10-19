@@ -18,6 +18,8 @@
 		updateAuthenticatedUserNotifications,
 		updateAuthenticatedUserPreferences,
 		updateBlacklistedPostPage,
+		updateChangePasswordAuthRequirements,
+		updateChangeUsernameAuthRequirements,
 		updateCommentTree,
 		updateFooter,
 		updateHiddenPostsPage,
@@ -25,6 +27,7 @@
 		updateOriginalPostsPage,
 		updatePostPagination,
 		updatePostsPage,
+		updateRegisterFormAuthRequirements,
 	} from '$lib/client/helpers/context';
 	import {
 		destroyDocumentEventListeners,
@@ -66,6 +69,9 @@
 		bottom: 0,
 		element: null,
 	});
+	updateChangePasswordAuthRequirements({});
+	updateRegisterFormAuthRequirements({});
+	updateChangeUsernameAuthRequirements({});
 
 	let validateTokenIntervalId: NodeJS.Timeout;
 	const AUTH_CHECK_INTERVAL_SIZE = 60 * 2.5 * 1000;

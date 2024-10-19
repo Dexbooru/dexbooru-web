@@ -21,14 +21,17 @@ const CreateCollectionSchema = {
 			.max(MAXIMUM_DESCRIPTION_LENGTH, {
 				message: `The maximum collection description length is ${MAXIMUM_DESCRIPTION_LENGTH}`,
 			}),
-		thumbnail: z.instanceof(globalThis.File).refine(
-			(val) => {
-				return isFileImageSmall(val) && isFileImage(val);
-			},
-			{
-				message: `The provided collection thumbnail exceeded the maximum size of ${MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB} mb`,
-			},
-		),
+		thumbnail: z
+			.instanceof(globalThis.File)
+			.refine(
+				(val) => {
+					return isFileImageSmall(val) && isFileImage(val);
+				},
+				{
+					message: `The provided collection thumbnail exceeded the maximum size of ${MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB} mb`,
+				},
+			)
+			.optional(),
 	}),
 } satisfies TRequestSchema;
 
@@ -38,9 +41,9 @@ export const handleCreateCollection = async (event: RequestEvent) => {
 		'form-action',
 		CreateCollectionSchema,
 		async (data) => {
-			const { title, description, thumbnail } = data.form;
+			// const { title, description, thumbnail } = data.form;
 			try {
-				console.log(title, description, thumbnail);
+				console.log(data);
 			} catch {
 				return createErrorResponse(
 					'form-action',

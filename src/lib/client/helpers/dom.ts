@@ -46,7 +46,6 @@ export const destroyDocumentEventListeners = (user: IUser, userPreferences: User
 
 const onLoadDocument = (user: IUser, userPreferences: UserPreference) => {
 	applyCustomSiteWideCss(user, userPreferences);
-	//updateFooterData();
 	lazyLoadImages();
 };
 

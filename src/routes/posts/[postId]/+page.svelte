@@ -23,7 +23,6 @@
 	let artistNames: string[] = [];
 
 	$: {
-		console.log('listened to update', data.post);
 		post = data.post;
 		uploadedSuccessfully = data.uploadedSuccessfully;
 

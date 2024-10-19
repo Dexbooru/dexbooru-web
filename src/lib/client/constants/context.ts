@@ -11,3 +11,6 @@ export const HIDDEN_POSTS_PAGE_CONTEXT_KEY = 'hiddenPostsPageStore';
 export const COMMENT_TREE_CONTEXT_KEY = 'commentTree';
 export const ACTIVE_MODAL_CONTEXT_KEY = 'activeModal';
 export const FOOTER_CONTEXT_KEY = 'footer';
+export const REGISTER_FORM_AUTH_REQUIREMENTS_CONTEXT_KEY = 'registerFormAuthRequirements';
+export const CHANGE_PASSWORD_AUTH_REQUIREMENTS_CONTEXT_KEY = 'changePasswordAuthRequirements';
+export const CHANGE_USERNAME_AUTH_REQUIREMENTS_CONTEXT_KEY = 'changeUsernameAuthRequirements';

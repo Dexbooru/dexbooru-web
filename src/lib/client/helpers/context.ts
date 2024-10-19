@@ -8,6 +8,8 @@ import { writable, type Writable } from 'svelte/store';
 import {
 	ACTIVE_MODAL_CONTEXT_KEY,
 	BLACKLISTED_POST_PAGE_CONTEXT_KEY,
+	CHANGE_PASSWORD_AUTH_REQUIREMENTS_CONTEXT_KEY,
+	CHANGE_USERNAME_AUTH_REQUIREMENTS_CONTEXT_KEY,
 	COMMENT_TREE_CONTEXT_KEY,
 	FOOTER_CONTEXT_KEY,
 	HIDDEN_POSTS_PAGE_CONTEXT_KEY,
@@ -15,11 +17,27 @@ import {
 	ORIGINAL_POSTS_PAGE_CONTEXT_KEY,
 	POSTS_PAGE_CONTEXT_KEY,
 	POST_PAGINATION_CONTEXT_KEY,
+	REGISTER_FORM_AUTH_REQUIREMENTS_CONTEXT_KEY,
 	USER_CONTEXT_KEY,
 	USER_NOTIFICATIONS_CONTEXT_KEY,
 	USER_PREFERENCE_CONTEXT_KEY,
 } from '../constants/context';
-import type { IFooterStoreData, IModalStoreData } from '../types/stores';
+import type { IAuthFormRequirementData, IFooterStoreData, IModalStoreData } from '../types/stores';
+
+export const updateChangePasswordAuthRequirements = (requirements: IAuthFormRequirementData) => {
+	const updatedRequirements = writable(requirements);
+	setContext(CHANGE_PASSWORD_AUTH_REQUIREMENTS_CONTEXT_KEY, updatedRequirements);
+};
+
+export const updateChangeUsernameAuthRequirements = (requirements: IAuthFormRequirementData) => {
+	const updatedRequirements = writable(requirements);
+	setContext(CHANGE_USERNAME_AUTH_REQUIREMENTS_CONTEXT_KEY, updatedRequirements);
+};
+
+export const updateRegisterFormAuthRequirements = (requirements: IAuthFormRequirementData) => {
+	const updatedRequirements = writable(requirements);
+	setContext(REGISTER_FORM_AUTH_REQUIREMENTS_CONTEXT_KEY, updatedRequirements);
+};
 
 export const updateFooter = (footerData: IFooterStoreData) => {
 	const updatedFooter = writable(footerData);
@@ -79,6 +97,24 @@ export const updateAuthenticatedUserNotifications = (notifications: IUserNotific
 export const updateAuthenticatedUserPreferences = (userPreferences: UserPreference) => {
 	const updatedUserPreferences = writable(userPreferences);
 	setContext(USER_PREFERENCE_CONTEXT_KEY, updatedUserPreferences);
+};
+
+export const getChangePasswordAuthRequirements = (): Writable<IAuthFormRequirementData> => {
+	return getContext<Writable<IAuthFormRequirementData>>(
+		CHANGE_PASSWORD_AUTH_REQUIREMENTS_CONTEXT_KEY,
+	);
+};
+
+export const getChangeUsernameAuthRequirements = (): Writable<IAuthFormRequirementData> => {
+	return getContext<Writable<IAuthFormRequirementData>>(
+		CHANGE_USERNAME_AUTH_REQUIREMENTS_CONTEXT_KEY,
+	);
+};
+
+export const getRegisterFormAuthRequirements = (): Writable<IAuthFormRequirementData> => {
+	return getContext<Writable<IAuthFormRequirementData>>(
+		REGISTER_FORM_AUTH_REQUIREMENTS_CONTEXT_KEY,
+	);
 };
 
 export const getAuthenticatedUser = () => {

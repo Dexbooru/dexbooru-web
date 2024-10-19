@@ -14,7 +14,7 @@
 
 	export let postContainerTitle: string;
 
-	const CLEAR_INPUT_INTERVAL_MS: number = 1000;
+	const CLEAR_INPUT_INTERVAL_MS: number = 250;
 	const originalPostPage = getOriginalPostsPage();
 	const postsPage = getPostsPage();
 	const userPreferences = getAuthenticatedUserPreferences();
@@ -47,11 +47,10 @@
 	});
 
 	onMount(() => {
-		const searchInput = document.querySelector(
-			'input[placeholder="Search by keyword(s)"]',
-		) as HTMLInputElement;
+		const searchInput = document.querySelector('#post-page-searchbar') as HTMLInputElement;
 
 		const postSearchResetTimeoutId = setInterval(() => {
+			if (get(postsPage) === get(originalPostPage)) return;
 			if (searchInput && !searchInput.value) {
 				postsPage.set(get(originalPostPage));
 			}
@@ -72,10 +71,15 @@
 		<PostPageSidebar {uniqueTags} {uniqueArtists} />
 	</div>
 	<div id="post-container-body" class="space-y-4 mb-5">
-		<div id="post-container-title" class="flex justify-between flex-wrap">
+		<div id="post-container-title" class="block space-y-3">
 			<p class="text-4xl dark:text-white">{postContainerTitle}</p>
 			{#if !$userPreferences.hidePostMetadataOnPreview}
-				<Searchbar queryInputHandler={onPostSearch} placeholder="Search by keyword(s)" />
+				<Searchbar
+					inputElementId="post-page-searchbar"
+					width="25rem"
+					queryInputHandler={onPostSearch}
+					placeholder="Search by keyword(s) on this page"
+				/>
 			{/if}
 		</div>
 		<PostGrid />

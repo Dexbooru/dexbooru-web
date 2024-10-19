@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { registerFormAuthRequirementsStore } from '$lib/client/stores/forms';
+	import { getRegisterFormAuthRequirements } from '$lib/client/helpers/context';
 	import { Alert, Button, Card } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 	import type { ActionData } from '../../../../routes/register/$types';
@@ -8,6 +8,7 @@
 
 	export let form: ActionData;
 
+	const registerFormRequirements = getRegisterFormAuthRequirements();
 	const registerErrorReason: string | undefined = form?.reason;
 	let username: string = form?.username || '';
 	let email: string = form?.email || '';
@@ -15,20 +16,18 @@
 	let confirmedPassword: string = '';
 	let registerButtonDisabled = true;
 
-	const registerFormAuthRequirementsUnsubscribe = registerFormAuthRequirementsStore.subscribe(
-		(data) => {
-			const disabledCheck =
-				email.length > 0 &&
-				username.length > 0 &&
-				password.length > 0 &&
-				confirmedPassword.length > 0 &&
-				data.username?.unsatisfied.length === 0 &&
-				data.password?.unsatisfied.length === 0 &&
-				data.email?.unsatisfied.length === 0 &&
-				data.confirmedPassword === true;
-			registerButtonDisabled = !disabledCheck;
-		},
-	);
+	const registerFormAuthRequirementsUnsubscribe = registerFormRequirements.subscribe((data) => {
+		const disabledCheck =
+			email.length > 0 &&
+			username.length > 0 &&
+			password.length > 0 &&
+			confirmedPassword.length > 0 &&
+			data.username?.unsatisfied.length === 0 &&
+			data.password?.unsatisfied.length === 0 &&
+			data.email?.unsatisfied.length === 0 &&
+			data.confirmedPassword === true;
+		registerButtonDisabled = !disabledCheck;
+	});
 
 	onDestroy(() => {
 		registerFormAuthRequirementsUnsubscribe();
@@ -45,14 +44,14 @@
 			inputName="username"
 			labelTitle="Enter your username"
 			bind:input={username}
-			formStore={registerFormAuthRequirementsStore}
+			formStore={registerFormRequirements}
 		/>
 		<AuthInput
 			inputFieldType="email"
 			inputName="email"
 			labelTitle="Enter your email"
 			bind:input={email}
-			formStore={registerFormAuthRequirementsStore}
+			formStore={registerFormRequirements}
 		/>
 		<AuthInput
 			inputFieldType="password"
@@ -60,7 +59,7 @@
 			labelTitle="Enter your password"
 			labelStyling="margin-bottom: 20px;"
 			bind:input={password}
-			formStore={registerFormAuthRequirementsStore}
+			formStore={registerFormRequirements}
 		/>
 		<AuthInput
 			inputFieldType="password-confirm"
@@ -69,7 +68,7 @@
 			labelStyling="margin-top: 0px; margin-bottom: 20px;"
 			bind:input={confirmedPassword}
 			bind:comparisonInput={password}
-			formStore={registerFormAuthRequirementsStore}
+			formStore={registerFormRequirements}
 		/>
 
 		<ProfilePictureUpload />
