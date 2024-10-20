@@ -7,3 +7,5 @@ node_modules
 .github
 docker
 scripts
+dist
+*.md

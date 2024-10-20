@@ -17,10 +17,10 @@
 
 {#if (useHiddenPosts ? $blacklistedPostPage : useNsfwPosts ? $nsfwPostPage : $postPageStore).length > 0}
 	<div
-		class="grid sm:grid-cols-1 sm:place-items-center {(useHiddenPosts || useNsfwPosts) &&
+		class="grid grid-cols-1 {(useHiddenPosts || useNsfwPosts) &&
 			'place-items-left'} {!useHiddenPosts &&
 			!useNsfwPosts &&
-			'md:place-items-start md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'} gap-4 auto-rows-min"
+			'md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'} gap-4 auto-rows-min"
 	>
 		{#each useHiddenPosts ? $blacklistedPostPage : useNsfwPosts ? $nsfwPostPage : $postPageStore as post (post)}
 			<PostCard {post} />

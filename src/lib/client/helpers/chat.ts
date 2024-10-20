@@ -1,6 +1,6 @@
 import { DEXBOORU_CORE_API_CHAT_WS_URL } from '$lib/shared/constants/chat';
 import { get } from 'svelte/store';
-import { getAuthenticatedUser } from '../constants/context';
+import { getAuthenticatedUser } from '../helpers/context';
 import { chatStore } from '../stores/chat';
 import type { TChatMessage, TEventHubMessage } from '../types/core';
 
