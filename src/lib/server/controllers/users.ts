@@ -14,7 +14,7 @@ import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
 import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
 import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import type { TFriendStatus } from '$lib/shared/types/friends';
-import type { IUser } from '$lib/shared/types/users';
+import type { TUser } from '$lib/shared/types/users';
 import { redirect, type RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { deleteFromBucket, uploadToBucket } from '../aws/actions/s3';
@@ -314,8 +314,7 @@ export const handleUserOauth2AuthFlowValidate = async (event: RequestEvent) => {
 		event,
 		'api-route',
 		{} satisfies TRequestSchema,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		async (data) => {
+		async (_) => {
 			const user = event.locals.user;
 			let isValidUser = true;
 			let error: unknown;
@@ -330,7 +329,7 @@ export const handleUserOauth2AuthFlowValidate = async (event: RequestEvent) => {
 				findUserById(user.id),
 				findUserByEmail(user.email),
 			]);
-			let dbUser: IUser | null = user;
+			let dbUser: TUser | null = user;
 			for (const resultUser of users) {
 				if (resultUser === null || resultUser.id !== user.id) {
 					dbUser = null;

@@ -2,7 +2,7 @@ import { buildUrl } from '$lib/client/helpers/urls';
 import type CommentTree from '$lib/shared/helpers/comments';
 import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
 import type { TApiResponse } from '$lib/shared/types/api';
-import type { IComment, ICommentCreateBody } from '$lib/shared/types/comments';
+import type { TComment, TCommentCreateBody } from '$lib/shared/types/comments';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Writable } from 'svelte/store';
 import { FAILURE_TOAST_OPTIONS } from '../constants/toasts';
@@ -38,8 +38,8 @@ export const createPostCommentsPaginator = (
 		const response = await getComments(postId, parentCommentId, pageNumber);
 
 		if (response.ok) {
-			const responseData: TApiResponse<IComment[]> = await response.json();
-			const comments = convertDataStructureToIncludeDatetimes(responseData.data) as IComment[];
+			const responseData: TApiResponse<TComment[]> = await response.json();
+			const comments = convertDataStructureToIncludeDatetimes(responseData.data) as TComment[];
 
 			commentTree.update((currentCommentTree) => {
 				comments.forEach((comment) => {
@@ -66,7 +66,7 @@ export const createPostCommentsPaginator = (
 	};
 };
 
-export const createComment = async (postId: string, body: ICommentCreateBody) => {
+export const createComment = async (postId: string, body: TCommentCreateBody) => {
 	return await fetch(`/api/post/${postId}/comments`, {
 		method: 'POST',
 		body: JSON.stringify(body),

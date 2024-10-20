@@ -1,12 +1,12 @@
 import type {
-	IAppSearchResult,
+	TAppSearchResult,
 	TPostSearchResults,
-	TUserSearchResults
+	TUserSearchResults,
 } from '$lib/shared/types/search';
 import { Prisma, type Artist, type Tag } from '@prisma/client';
 import prisma from '../prisma';
 
-export async function searchForTags(query: string, limit: number): Promise<IAppSearchResult> {
+export async function searchForTags(query: string, limit: number): Promise<TAppSearchResult> {
 	const searchStatement = Prisma.sql`
       SELECT
           t."id", t."name"
@@ -24,7 +24,7 @@ export async function searchForTags(query: string, limit: number): Promise<IAppS
 	return { tags: results };
 }
 
-export async function searchForArtists(query: string, limit: number): Promise<IAppSearchResult> {
+export async function searchForArtists(query: string, limit: number): Promise<TAppSearchResult> {
 	const searchStatement = Prisma.sql`
       SELECT
           a."id", a."name"
@@ -42,7 +42,7 @@ export async function searchForArtists(query: string, limit: number): Promise<IA
 	return { artists: results };
 }
 
-export async function searchForPosts(query: string, limit: number): Promise<IAppSearchResult> {
+export async function searchForPosts(query: string, limit: number): Promise<TAppSearchResult> {
 	const searchStatement = Prisma.sql`
       SELECT
           p."id", 
@@ -70,7 +70,7 @@ export async function searchForPosts(query: string, limit: number): Promise<IApp
 	return { posts: results };
 }
 
-export async function searchForUsers(query: string, limit: number): Promise<IAppSearchResult> {
+export async function searchForUsers(query: string, limit: number): Promise<TAppSearchResult> {
 	const searchStatement = Prisma.sql`
      SELECT
         u."id", u."username", u."profilePictureUrl", u."createdAt" 
@@ -88,18 +88,18 @@ export async function searchForUsers(query: string, limit: number): Promise<IApp
 	return { users: results };
 }
 
-export async function searchAllSections(query: string, limit: number): Promise<IAppSearchResult> {
+export async function searchAllSections(query: string, limit: number): Promise<TAppSearchResult> {
 	const [usersResult, postsResult, tagsResult, artistsResult] = await Promise.all([
 		searchForUsers(query, limit),
 		searchForPosts(query, limit),
 		searchForTags(query, limit),
-		searchForArtists(query, limit)
+		searchForArtists(query, limit),
 	]);
 
 	return {
 		posts: postsResult.posts,
 		users: usersResult.users,
 		tags: tagsResult.tags,
-		artists: artistsResult.artists
+		artists: artistsResult.artists,
 	};
 }

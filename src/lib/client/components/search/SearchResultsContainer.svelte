@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { IAppSearchResult } from '$lib/shared/types/search';
+	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import { TabItem, Tabs } from 'flowbite-svelte';
 	import { slide } from 'svelte/transition';
 	import LabelTable from '../tables/LabelTable.svelte';
 	import PostTable from '../tables/PostTable.svelte';
 	import UserTable from '../tables/UserTable.svelte';
 
-	export let results: IAppSearchResult;
+	export let results: TAppSearchResult;
 	let { posts, artists, tags, users } = results;
 
 	$: {

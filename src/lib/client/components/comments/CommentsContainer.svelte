@@ -2,7 +2,7 @@
 	import { createPostCommentsPaginator } from '$lib/client/api/comments';
 	import { getCommentTree } from '$lib/client/helpers/context';
 	import CommentTree from '$lib/shared/helpers/comments';
-	import type { IComment } from '$lib/shared/types/comments';
+	import type { TComment } from '$lib/shared/types/comments';
 	import { Button } from 'flowbite-svelte';
 	import { onDestroy, onMount } from 'svelte';
 	import Comment from './Comment.svelte';
@@ -11,7 +11,7 @@
 	export let postCommentCount: number;
 
 	let noMoreComments = false;
-	let topLevelComments: IComment[] = [];
+	let topLevelComments: TComment[] = [];
 	let commentsLoading = false;
 	let loadMoreButtonText = 'Load comments';
 

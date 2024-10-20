@@ -1,20 +1,20 @@
 import type { Comment } from '@prisma/client';
 
-export interface ICommentCreateBody {
+export type TCommentCreateBody = {
 	parentCommentId: string | null;
 	content: string;
-}
+};
 
-export interface ICommentDeleteBody {
+export type TCommentDeleteBody = {
 	commentId: string;
-}
+};
 
-export interface ICommentEditBody {
+export type TCommentEditBody = {
 	commentId: string;
 	updatedContent: string;
-}
+};
 
-export type IComment = Comment & {
+export type TComment = Comment & {
 	author: {
 		id: string;
 		username: string;

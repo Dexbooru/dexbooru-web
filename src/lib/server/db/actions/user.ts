@@ -1,7 +1,7 @@
 import { roundNumber } from '$lib/client/helpers/posts';
 import type { TUserSelector } from '$lib/server/types/users';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
-import type { IUser } from '$lib/shared/types/users';
+import type { TUser } from '$lib/shared/types/users';
 import prisma from '../prisma';
 
 export async function getUserStatistics(userId: string) {
@@ -171,48 +171,48 @@ export async function findLikedPostsByAuthorId(
 	return data.likedPosts as TPost[];
 }
 
-export async function findUserById(id: string, selectors?: TUserSelector): Promise<IUser | null> {
+export async function findUserById(id: string, selectors?: TUserSelector): Promise<TUser | null> {
 	return (await prisma.user.findUnique({
 		where: {
 			id,
 		},
 		select: selectors,
-	})) as IUser;
+	})) as TUser;
 }
 
 export async function findUserByEmail(
 	email: string,
 	selectors?: TUserSelector,
-): Promise<IUser | null> {
+): Promise<TUser | null> {
 	return (await prisma.user.findFirst({
 		where: {
 			email,
 		},
 		select: selectors,
-	})) as IUser | null;
+	})) as TUser | null;
 }
 
 export async function findUserByName(
 	username: string,
 	selectors?: TUserSelector,
-): Promise<IUser | null> {
+): Promise<TUser | null> {
 	return (await prisma.user.findFirst({
 		where: {
 			username,
 		},
 		select: selectors,
-	})) as IUser | null;
+	})) as TUser | null;
 }
 
 export async function findUserByNameOrEmail(
 	email: string,
 	username: string,
-): Promise<IUser | null> {
+): Promise<TUser | null> {
 	return (await prisma.user.findFirst({
 		where: {
 			OR: [{ email }, { username }],
 		},
-	})) as IUser;
+	})) as TUser;
 }
 
 export async function editPasswordByUserId(userId: string, newPassword: string): Promise<boolean> {
@@ -277,7 +277,7 @@ export async function createUser(
 	email: string,
 	password: string,
 	profilePictureUrl: string,
-): Promise<IUser> {
+): Promise<TUser> {
 	const newUser = await prisma.user.create({
 		data: {
 			email,

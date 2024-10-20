@@ -1,4 +1,4 @@
-export interface IUploadFormFields {
+export type TUploadFormFields = {
 	description: string;
 	tags: string;
 	artists: string;

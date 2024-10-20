@@ -1,10 +1,10 @@
 import { handleGetUser } from '$lib/server/controllers/users';
 import type { TFriendStatus } from '$lib/shared/types/friends';
-import type { IUser, TUserStatistics } from '$lib/shared/types/users';
+import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 import type { PageServerLoad } from './$types';
 
 type UserResponse = {
-	targetUser: IUser;
+	targetUser: TUser;
 	friendStatus: TFriendStatus;
 	userStatistics: TUserStatistics;
 };

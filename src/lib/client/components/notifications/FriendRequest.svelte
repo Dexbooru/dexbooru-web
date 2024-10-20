@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { handleFriendRequest } from '$lib/client/api/friends';
-	import { getAuthenticatedUserNotifications } from '$lib/client/helpers/context';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { getAuthenticatedUserNotifications } from '$lib/client/helpers/context';
 	import { chatStore } from '$lib/client/stores/chat';
 	import { getTimeDifferenceString } from '$lib/shared/helpers/dates';
-	import type { IFriendRequest, TFriendRequestAction } from '$lib/shared/types/friends';
+	import type { TFriendRequest, TFriendRequestAction } from '$lib/shared/types/friends';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button, DropdownItem } from 'flowbite-svelte';
 
-	export let friendRequest: IFriendRequest;
+	export let friendRequest: TFriendRequest;
 
 	let friendshipActionLoading = false;
 

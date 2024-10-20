@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { formatDate } from '$lib/shared/helpers/dates';
-	import type { IAppSearchResult } from '$lib/shared/types/search';
+	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import {
 		Avatar,
 		Table,
@@ -8,10 +8,10 @@
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell
+		TableHeadCell,
 	} from 'flowbite-svelte';
 
-	export let posts: IAppSearchResult['posts'];
+	export let posts: TAppSearchResult['posts'];
 </script>
 
 <Table hoverable>

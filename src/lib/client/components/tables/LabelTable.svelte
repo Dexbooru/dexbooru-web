@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { IAppSearchResult } from '$lib/shared/types/search';
+	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import {
 		Table,
 		TableBody,
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell
+		TableHeadCell,
 	} from 'flowbite-svelte';
 
-	export let labels: IAppSearchResult['tags'] | IAppSearchResult['artists'];
+	export let labels: TAppSearchResult['tags'] | TAppSearchResult['artists'];
 	export let labelType: 'tag' | 'artist';
 </script>
 

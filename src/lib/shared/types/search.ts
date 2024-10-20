@@ -2,18 +2,18 @@ import type { Artist, Tag } from '@prisma/client';
 
 export type TSearchSection = 'posts' | 'tags' | 'artists' | 'users' | 'all';
 
-export interface IAppSearchParams {
+export type TAppSearchParams = {
 	query: string;
 	searchSection?: TSearchSection;
 	limit?: number;
-}
+};
 
-export interface IAppSearchResult {
+export type TAppSearchResult = {
 	posts?: TPostSearchResults;
 	users?: TUserSearchResults;
 	tags?: Tag[];
 	artists?: Artist[];
-}
+};
 
 export type TPostSearchResults = {
 	id: string;

@@ -10,14 +10,14 @@
 	import { debounce, memoize } from '$lib/client/helpers/util';
 	import { queryStore } from '$lib/client/stores/search';
 	import type { TApiResponse } from '$lib/shared/types/api';
-	import type { IAppSearchResult } from '$lib/shared/types/search';
+	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Modal, Spinner } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 	import Searchbar from '../reusable/Searchbar.svelte';
 	import SearchResultsContainer from './SearchResultsContainer.svelte';
 
-	let currentSearchResults: IAppSearchResult | null = null;
+	let currentSearchResults: TAppSearchResult | null = null;
 	let searchResultsLoading = false;
 
 	const activeModal = getActiveModal();
@@ -38,7 +38,7 @@
 	const fetchQueryResults = memoize(async (query: string) => {
 		const response = await getGlobalSearchResults(query);
 		if (response.ok) {
-			const responseData: TApiResponse<IAppSearchResult> = await response.json();
+			const responseData: TApiResponse<TAppSearchResult> = await response.json();
 			return responseData.data;
 		} else {
 			toast.push(

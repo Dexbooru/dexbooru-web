@@ -1,7 +1,7 @@
 import type { FriendRequest, Prisma } from '@prisma/client';
 import type { DefaultArgs } from '@prisma/client/runtime/library';
 
-export type IFriendRequest = FriendRequest & {
+export type TFriendRequest = FriendRequest & {
 	senderUser: {
 		id: string;
 		profilePictureUrl: string;
@@ -25,14 +25,14 @@ export type TFriendStatus =
 	| 'is-self'
 	| 'irrelevant';
 
-export interface IFriendRequestSendBody {
+export type TFriendRequestSendBody = {
 	receiverUsername: string;
-}
+};
 
-export interface IFriendRequestHandleBody {
+export type TFriendRequestHandleBody = {
 	action: TFriendRequestAction;
-}
+};
 
-export interface IFriendRemoveBody {
+export type TFriendRemoveBody = {
 	receiverUserId: string;
-}
+};

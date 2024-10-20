@@ -1,3 +1,3 @@
-export interface IGeneratedOtpData {
+export interface TGeneratedOtpData {
 	totpUri: string;
 }

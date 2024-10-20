@@ -1,5 +1,5 @@
 import { JWT_PRIVATE_KEY } from '$env/static/private';
-import type { IUser } from '$lib/shared/types/users';
+import type { TUser } from '$lib/shared/types/users';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import {
 	SESSION_JWT_EXPIRES_IN_STANDARD_AGE,
@@ -8,11 +8,11 @@ import {
 import { PUBLIC_USER_SELECTORS } from '../constants/users';
 import type { TSetHeadersFunction } from '../types/sessions';
 
-const generateUserClaims = (userRecord: Partial<IUser>): Partial<IUser> => {
-	const userClaims: Partial<IUser> = {};
+const generateUserClaims = (userRecord: Partial<TUser>): Partial<TUser> => {
+	const userClaims: Partial<TUser> = {};
 
 	Object.keys(PUBLIC_USER_SELECTORS).forEach((key) => {
-		const claimKey = key as keyof IUser;
+		const claimKey = key as keyof TUser;
 		if (userRecord[claimKey]) {
 			userClaims[claimKey] = userRecord[claimKey] as (string & Date) | undefined;
 		}
@@ -21,7 +21,7 @@ const generateUserClaims = (userRecord: Partial<IUser>): Partial<IUser> => {
 	return userClaims;
 };
 
-export function generateUpdatedUserTokenFromClaims(userClaims: IUser & JwtPayload): string {
+export function generateUpdatedUserTokenFromClaims(userClaims: TUser & JwtPayload): string {
 	const encodedToken = jwt.sign(userClaims as object, JWT_PRIVATE_KEY, {
 		algorithm: 'HS256',
 	});
@@ -29,7 +29,7 @@ export function generateUpdatedUserTokenFromClaims(userClaims: IUser & JwtPayloa
 }
 
 export function generateEncodedUserTokenFromRecord(
-	userRecord: Partial<IUser>,
+	userRecord: Partial<TUser>,
 	rememberMe: boolean,
 	overrideExpiry?: string,
 ): string {
@@ -45,12 +45,12 @@ export function generateEncodedUserTokenFromRecord(
 	return encodedToken;
 }
 
-export function getUserClaimsFromEncodedJWTToken(encodedJwtToken: string): IUser | null {
+export function getUserClaimsFromEncodedJWTToken(encodedJwtToken: string): TUser | null {
 	try {
 		const decodedUserClaims = jwt.verify(encodedJwtToken, JWT_PRIVATE_KEY);
 		return (
 			typeof decodedUserClaims === 'string' ? JSON.parse(decodedUserClaims) : decodedUserClaims
-		) as IUser;
+		) as TUser;
 	} catch (error) {
 		return null;
 	}

@@ -1,43 +1,43 @@
-export interface IRegisterFormFields {
+export type TRegisterFormFields = {
 	username: string;
 	email: string;
 	password: string;
 	profilePicture: File;
 	confirmedPassword: string;
-}
+};
 
-export interface ILoginFormFields {
+export type TLoginFormFields = {
 	username: string;
 	password: string;
 	rememberMe?: string;
-}
+};
 
-export interface IAuthFieldRequirements {
+export type TAuthFieldRequirements = {
 	satisfied: string[];
 	unsatisfied: string[];
-}
+};
 
-export interface IChangePasswordFormFields {
+export type TChangePasswordFormFields = {
 	oldPassword: string;
 	newPassword: string;
 	confirmedNewPassword: string;
-}
+};
 
-export interface IChangeProfilePictureFormFields {
+export type TChangeProfilePictureFormFields = {
 	newProfilePicture: File;
-}
+};
 
-export interface IChangeUsernameFormFields {
+export type IChangeUsernameFormFields = {
 	newUsername: string;
-}
+};
 
-export interface IDeleteAccountFields {
+export type IDeleteAccountFields = {
 	deletionConfirmationText: string;
-}
+};
 
-export interface IAccountRecoveryFormFields {
+export type IAccountRecoveryFormFields = {
 	email: string;
-}
+};
 
 export type TPASSWORD_REQUIREMENT_ABV =
 	| 'length'

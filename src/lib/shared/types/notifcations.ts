@@ -1,5 +1,5 @@
-import type { IFriendRequest } from './friends';
+import type { TFriendRequest } from './friends';
 
-export interface IUserNotifications {
-	friendRequests: IFriendRequest[];
-}
+export type TUserNotifications = {
+	friendRequests: TFriendRequest[];
+};

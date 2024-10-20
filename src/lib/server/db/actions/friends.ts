@@ -1,6 +1,6 @@
 import type {
-	IFriendRequest,
 	TChatFriend,
+	TFriendRequest,
 	TFriendRequestSelector,
 } from '$lib/shared/types/friends';
 import type { FriendRequest } from '@prisma/client';
@@ -9,7 +9,7 @@ import prisma from '../prisma';
 export async function findFriendRequests(
 	receiverUserId: string,
 	selectors?: TFriendRequestSelector,
-): Promise<IFriendRequest[]> {
+): Promise<TFriendRequest[]> {
 	const friendRequestsReceived = await prisma.friendRequest.findMany({
 		where: {
 			receiverUserId,
@@ -20,7 +20,7 @@ export async function findFriendRequests(
 		},
 	});
 
-	return friendRequestsReceived as IFriendRequest[];
+	return friendRequestsReceived as TFriendRequest[];
 }
 
 export async function createFriendRequest(

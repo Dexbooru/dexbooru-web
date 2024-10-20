@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { addFriend, deleteFriend } from '$lib/client/api/friends';
-	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { IUser, TUserStatistics } from '$lib/shared/types/users';
@@ -9,7 +9,7 @@
 	import { Avatar, Button, Card, Dropdown, DropdownItem } from 'flowbite-svelte';
 	import { DotsHorizontalOutline } from 'flowbite-svelte-icons';
 
-	export let targetUser: IUser;
+	export let targetUser: TUser;
 	export let friendStatus: TFriendStatus;
 	export let userStatistics: TUserStatistics;
 

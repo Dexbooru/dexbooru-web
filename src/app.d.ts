@@ -1,12 +1,12 @@
-import type { IUser } from '$lib/shared/types/users';
+import type { TUser } from '$lib/shared/types/users';
 
 declare global {
 	namespace App {
 		interface Locals {
-			user: IUser;
+			user: TUser;
 		}
 		interface PageData {
-			user: IUser;
+			user: TUser;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-import type { IPostPaginationData, TPost } from '$lib/shared/types/posts';
+import type { TPost, TPostPaginationData } from '$lib/shared/types/posts';
 import { get } from 'svelte/store';
 import {
 	getAuthenticatedUserPreferences,
@@ -30,7 +30,7 @@ export function roundNumber(target: number, places: number = 0) {
 	return Number(target.toFixed(places));
 }
 
-export const updatePostStores = (updatePostPaginationData: IPostPaginationData) => {
+export const updatePostStores = (updatePostPaginationData: TPostPaginationData) => {
 	const userPreferences = get(getAuthenticatedUserPreferences());
 	const { blacklistedArtists, blacklistedTags, browseInSafeMode } = userPreferences;
 

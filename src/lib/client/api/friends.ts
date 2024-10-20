@@ -1,5 +1,5 @@
 import { buildUrl } from '$lib/client/helpers/urls';
-import type { IFriendRequestHandleBody } from '$lib/shared/types/friends';
+import type { TFriendRequestHandleBody } from '$lib/shared/types/friends';
 import { getApiAuthHeaders } from '../helpers/auth';
 
 export const addFriend = async (username: string): Promise<Response> => {
@@ -11,7 +11,7 @@ export const addFriend = async (username: string): Promise<Response> => {
 
 export const handleFriendRequest = async (
 	username: string,
-	body: IFriendRequestHandleBody,
+	body: TFriendRequestHandleBody,
 ): Promise<Response> => {
 	const url = buildUrl(`/api/user/${username}/friend-requests`, { action: body.action });
 	return await fetch(url, {

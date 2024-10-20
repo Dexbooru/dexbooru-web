@@ -1,6 +1,6 @@
 import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
 import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
-import type { IUser } from '$lib/shared/types/users';
+import type { TUser } from '$lib/shared/types/users';
 import type { UserPreference } from '@prisma/client';
 import { GLOBAL_SEARCH_MODAL_NAME } from '../constants/layout';
 import type { IDeviceStoreData } from '../types/device';
@@ -27,7 +27,7 @@ export const getDeviceDetectionDataFromWindow = (): IDeviceStoreData => {
 	};
 };
 
-export const registerDocumentEventListeners = (user: IUser, userPreferences: UserPreference) => {
+export const registerDocumentEventListeners = (user: TUser, userPreferences: UserPreference) => {
 	if (document.readyState !== 'loading') {
 		onLoadDocument(user, userPreferences);
 	} else {
@@ -38,18 +38,18 @@ export const registerDocumentEventListeners = (user: IUser, userPreferences: Use
 	document.addEventListener('keydown', onKeyDownDocument);
 };
 
-export const destroyDocumentEventListeners = (user: IUser, userPreferences: UserPreference) => {
+export const destroyDocumentEventListeners = (user: TUser, userPreferences: UserPreference) => {
 	document.removeEventListener('resize', onResizeDocument);
 	document.removeEventListener('DOMContentLoaded', () => onLoadDocument(user, userPreferences));
 	document.removeEventListener('keydown', onKeyDownDocument);
 };
 
-const onLoadDocument = (user: IUser, userPreferences: UserPreference) => {
+const onLoadDocument = (user: TUser, userPreferences: UserPreference) => {
 	applyCustomSiteWideCss(user, userPreferences);
 	lazyLoadImages();
 };
 
-const applyCustomSiteWideCss = (user: IUser, userPreferences: UserPreference) => {
+const applyCustomSiteWideCss = (user: TUser, userPreferences: UserPreference) => {
 	if (!user) return;
 
 	const { customSideWideCss } = userPreferences;

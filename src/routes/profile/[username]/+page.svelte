@@ -1,12 +1,12 @@
 <script lang="ts">
 	import UserProfileCard from '$lib/client/components/auth/UserProfileCard.svelte';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
-	import type { IUser, TUserStatistics } from '$lib/shared/types/users';
+	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
-	let targetUser: IUser;
+	let targetUser: TUser;
 	let friendStatus: TFriendStatus;
 	let userStatistics: TUserStatistics;
 

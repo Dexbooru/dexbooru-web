@@ -3,27 +3,27 @@ import type { DefaultArgs } from '@prisma/client/runtime/library';
 
 export type TPostLikeAction = 'like' | 'dislike';
 
-export interface ILikePutBody {
+export type TLikePutBody = {
 	action: TPostLikeAction;
-}
+};
 
-export interface IUpdatePostBody {
+export type TUpdatePostBody = {
 	description: string;
-}
+};
 
 export type THiddenPagePostData = {
 	nsfwPosts: TPost[];
 	blacklistedPosts: TPost[];
 };
 
-export interface IPostPaginationData {
+export type TPostPaginationData = {
 	posts: TPost[];
 	likedPosts: TPost[];
 	pageNumber: number;
 	ascending: boolean;
 	orderBy: TPostOrderByColumn;
 	postCount: number;
-}
+};
 
 export type TPost = Post & {
 	id: string;

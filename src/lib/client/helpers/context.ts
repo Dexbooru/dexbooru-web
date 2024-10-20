@@ -1,7 +1,7 @@
 import type CommentTree from '$lib/shared/helpers/comments';
-import type { IUserNotifications } from '$lib/shared/types/notifcations';
-import type { IPostPaginationData, THiddenPagePostData, TPost } from '$lib/shared/types/posts';
-import type { IUser } from '$lib/shared/types/users';
+import type { TUserNotifications } from '$lib/shared/types/notifcations';
+import type { THiddenPagePostData, TPost, TPostPaginationData } from '$lib/shared/types/posts';
+import type { TUser } from '$lib/shared/types/users';
 import type { UserPreference } from '@prisma/client';
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
@@ -22,24 +22,24 @@ import {
 	USER_NOTIFICATIONS_CONTEXT_KEY,
 	USER_PREFERENCE_CONTEXT_KEY,
 } from '../constants/context';
-import type { IAuthFormRequirementData, IFooterStoreData, IModalStoreData } from '../types/stores';
+import type { TAuthFormRequirementData, TFooterStoreData, TModalStoreData } from '../types/stores';
 
-export const updateChangePasswordAuthRequirements = (requirements: IAuthFormRequirementData) => {
+export const updateChangePasswordAuthRequirements = (requirements: TAuthFormRequirementData) => {
 	const updatedRequirements = writable(requirements);
 	setContext(CHANGE_PASSWORD_AUTH_REQUIREMENTS_CONTEXT_KEY, updatedRequirements);
 };
 
-export const updateChangeUsernameAuthRequirements = (requirements: IAuthFormRequirementData) => {
+export const updateChangeUsernameAuthRequirements = (requirements: TAuthFormRequirementData) => {
 	const updatedRequirements = writable(requirements);
 	setContext(CHANGE_USERNAME_AUTH_REQUIREMENTS_CONTEXT_KEY, updatedRequirements);
 };
 
-export const updateRegisterFormAuthRequirements = (requirements: IAuthFormRequirementData) => {
+export const updateRegisterFormAuthRequirements = (requirements: TAuthFormRequirementData) => {
 	const updatedRequirements = writable(requirements);
 	setContext(REGISTER_FORM_AUTH_REQUIREMENTS_CONTEXT_KEY, updatedRequirements);
 };
 
-export const updateFooter = (footerData: IFooterStoreData) => {
+export const updateFooter = (footerData: TFooterStoreData) => {
 	const updatedFooter = writable(footerData);
 	setContext(FOOTER_CONTEXT_KEY, updatedFooter);
 };
@@ -49,12 +49,12 @@ export const updateCommentTree = (commentTree: CommentTree) => {
 	setContext(COMMENT_TREE_CONTEXT_KEY, updatedCommentTree);
 };
 
-export const updateActiveModal = (activeModal: IModalStoreData) => {
+export const updateActiveModal = (activeModal: TModalStoreData) => {
 	const updatedActiveModal = writable(activeModal);
 	setContext(ACTIVE_MODAL_CONTEXT_KEY, updatedActiveModal);
 };
 
-export const updatePostPagination = (paginationData: IPostPaginationData | null) => {
+export const updatePostPagination = (paginationData: TPostPaginationData | null) => {
 	const updatedPaginationData = writable(paginationData);
 	setContext(POST_PAGINATION_CONTEXT_KEY, updatedPaginationData);
 };
@@ -84,12 +84,12 @@ export const updateHiddenPostsPage = (hiddenPagePosts: THiddenPagePostData) => {
 	setContext(HIDDEN_POSTS_PAGE_CONTEXT_KEY, updatedHiddenPosts);
 };
 
-export const updateAuthenticatedUser = (user: IUser | null) => {
+export const updateAuthenticatedUser = (user: TUser | null) => {
 	const updatedUser = writable(user);
 	setContext(USER_CONTEXT_KEY, updatedUser);
 };
 
-export const updateAuthenticatedUserNotifications = (notifications: IUserNotifications | null) => {
+export const updateAuthenticatedUserNotifications = (notifications: TUserNotifications | null) => {
 	const updatedNotifications = writable(notifications);
 	setContext(USER_NOTIFICATIONS_CONTEXT_KEY, updatedNotifications);
 };
@@ -99,26 +99,26 @@ export const updateAuthenticatedUserPreferences = (userPreferences: UserPreferen
 	setContext(USER_PREFERENCE_CONTEXT_KEY, updatedUserPreferences);
 };
 
-export const getChangePasswordAuthRequirements = (): Writable<IAuthFormRequirementData> => {
-	return getContext<Writable<IAuthFormRequirementData>>(
+export const getChangePasswordAuthRequirements = (): Writable<TAuthFormRequirementData> => {
+	return getContext<Writable<TAuthFormRequirementData>>(
 		CHANGE_PASSWORD_AUTH_REQUIREMENTS_CONTEXT_KEY,
 	);
 };
 
-export const getChangeUsernameAuthRequirements = (): Writable<IAuthFormRequirementData> => {
-	return getContext<Writable<IAuthFormRequirementData>>(
+export const getChangeUsernameAuthRequirements = (): Writable<TAuthFormRequirementData> => {
+	return getContext<Writable<TAuthFormRequirementData>>(
 		CHANGE_USERNAME_AUTH_REQUIREMENTS_CONTEXT_KEY,
 	);
 };
 
-export const getRegisterFormAuthRequirements = (): Writable<IAuthFormRequirementData> => {
-	return getContext<Writable<IAuthFormRequirementData>>(
+export const getRegisterFormAuthRequirements = (): Writable<TAuthFormRequirementData> => {
+	return getContext<Writable<TAuthFormRequirementData>>(
 		REGISTER_FORM_AUTH_REQUIREMENTS_CONTEXT_KEY,
 	);
 };
 
 export const getAuthenticatedUser = () => {
-	return getContext<Writable<IUser | null>>(USER_CONTEXT_KEY);
+	return getContext<Writable<TUser | null>>(USER_CONTEXT_KEY);
 };
 
 export const getAuthenticatedUserPreferences = () => {
@@ -126,11 +126,11 @@ export const getAuthenticatedUserPreferences = () => {
 };
 
 export const getAuthenticatedUserNotifications = () => {
-	return getContext<Writable<IUserNotifications | null>>(USER_NOTIFICATIONS_CONTEXT_KEY);
+	return getContext<Writable<TUserNotifications | null>>(USER_NOTIFICATIONS_CONTEXT_KEY);
 };
 
 export const getPostPaginationData = () => {
-	return getContext<Writable<IPostPaginationData | null>>(POST_PAGINATION_CONTEXT_KEY);
+	return getContext<Writable<TPostPaginationData | null>>(POST_PAGINATION_CONTEXT_KEY);
 };
 
 export const getPostsPage = () => {
@@ -154,7 +154,7 @@ export const getHiddenPostsPage = () => {
 };
 
 export const getActiveModal = () => {
-	return getContext<Writable<IModalStoreData>>(ACTIVE_MODAL_CONTEXT_KEY);
+	return getContext<Writable<TModalStoreData>>(ACTIVE_MODAL_CONTEXT_KEY);
 };
 
 export const getCommentTree = () => {
@@ -162,5 +162,5 @@ export const getCommentTree = () => {
 };
 
 export const getFooter = () => {
-	return getContext<Writable<IFooterStoreData>>(FOOTER_CONTEXT_KEY);
+	return getContext<Writable<TFooterStoreData>>(FOOTER_CONTEXT_KEY);
 };

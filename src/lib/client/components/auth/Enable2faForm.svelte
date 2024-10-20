@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { generateUserTotp } from '$lib/client/api/auth';
-	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import type { IGeneratedOtpData } from '$lib/client/types/auth';
+	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
+	import type { TGeneratedOtpData } from '$lib/client/types/auth';
 	import { TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -27,7 +27,7 @@
 
 		const response = await generateUserTotp(currentPassword);
 		if (response.ok) {
-			const responseData: TApiResponse<IGeneratedOtpData> = await response.json();
+			const responseData: TApiResponse<TGeneratedOtpData> = await response.json();
 			totpUri = responseData.data.totpUri;
 		} else {
 			if (response.status === 401) {

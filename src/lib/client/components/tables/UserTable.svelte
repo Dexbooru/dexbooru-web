@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { formatDate } from '$lib/shared/helpers/dates';
-	import type { IAppSearchResult } from '$lib/shared/types/search';
+	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import {
 		Avatar,
 		Table,
@@ -8,10 +8,10 @@
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell
+		TableHeadCell,
 	} from 'flowbite-svelte';
 
-	export let users: IAppSearchResult['users'];
+	export let users: TAppSearchResult['users'];
 </script>
 
 <Table hoverable>
@@ -27,7 +27,7 @@
 		{#each users || [] as user}
 			<TableBodyRow>
 				<TableBodyCell>{user.id}</TableBodyCell>
-                <TableBodyCell class="text-center">
+				<TableBodyCell class="text-center">
 					<Avatar
 						class="ml-auto mr-auto booru-avatar"
 						src={user.profilePictureUrl}
@@ -43,7 +43,8 @@
 				<TableBodyCell>
 					<a
 						href="/profile/{user.username}"
-						class="font-medium text-primary-600 hover:underline dark:text-primary-500">View profile</a
+						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+						>View profile</a
 					>
 				</TableBodyCell>
 			</TableBodyRow>

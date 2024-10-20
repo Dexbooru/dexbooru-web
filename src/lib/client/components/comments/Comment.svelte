@@ -5,7 +5,7 @@
 	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate, getFormalDateTitle, ymdFormat } from '$lib/shared/helpers/dates';
-	import type { IComment } from '$lib/shared/types/comments';
+	import type { TComment } from '$lib/shared/types/comments';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button } from 'flowbite-svelte';
 	import { MessagesSolid } from 'flowbite-svelte-icons';
@@ -13,12 +13,12 @@
 	import { slide } from 'svelte/transition';
 	import CommentTextbox from './CommentTextbox.svelte';
 
-	export let comment: IComment;
+	export let comment: TComment;
 	export let currentDepth: number = 1;
 
 	let repliesLoading = false;
 	let replyBoxOpen = false;
-	let replies: IComment[] = [];
+	let replies: TComment[] = [];
 	let loadMoreButtonText = 'Load replies';
 	let pageNumber = 0;
 	let noMoreComments = false;

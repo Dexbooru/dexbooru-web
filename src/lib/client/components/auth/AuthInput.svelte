@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { IAuthFormRequirementData } from '$lib/client/types/stores';
+	import type { TAuthFormRequirementData } from '$lib/client/types/stores';
 	import {
 		MAXIMUM_EMAIL_LENGTH,
 		MAXIMUM_PASSWORD_LENGTH,
@@ -19,7 +19,7 @@
 	export let labelStyling: string = '';
 	export let inputFieldType: 'username' | 'email' | 'password' | 'password-confirm' | 'otp-code';
 	export let showRequirements: boolean = true;
-	export let formStore: Writable<IAuthFormRequirementData> | null = null;
+	export let formStore: Writable<TAuthFormRequirementData> | null = null;
 
 	let satisfiedRequirements: string[] = [];
 	let unsatisfiedRequirements: string[] = [];
