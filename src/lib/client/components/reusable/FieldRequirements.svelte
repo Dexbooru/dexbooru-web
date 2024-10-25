@@ -8,11 +8,21 @@
 	import { Li, List, P, Popover } from 'flowbite-svelte';
 	import { CheckCircleSolid, CloseCircleSolid, QuestionCircleSolid } from 'flowbite-svelte-icons';
 
-	export let requirementsPlacement: Placement = 'bottom-start';
-	export let requirementsType: 'email' | 'username' | 'password';
-	export let popoverButtonId: string;
-	export let satisifedRequirements: string[] = [];
-	export let unsatisfiedRequirements: string[] = [];
+	interface Props {
+		requirementsPlacement?: Placement;
+		requirementsType: 'email' | 'username' | 'password';
+		popoverButtonId: string;
+		satisifedRequirements?: string[];
+		unsatisfiedRequirements?: string[];
+	}
+
+	let {
+		requirementsPlacement = 'bottom-start',
+		requirementsType,
+		popoverButtonId,
+		satisifedRequirements = [],
+		unsatisfiedRequirements = []
+	}: Props = $props();
 </script>
 
 <button type="button" id={popoverButtonId}>

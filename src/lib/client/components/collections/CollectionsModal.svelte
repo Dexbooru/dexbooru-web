@@ -13,7 +13,7 @@
 		// Add more collections as needed
 	];
 
-	let selectedCollections: number[] = [];
+	let selectedCollections: number[] = $state([]);
 
 	const activeModal = getActiveModal();
 
@@ -72,11 +72,13 @@
 		{/each}
 	</div>
 
-	<svelte:fragment slot="footer">
-		<Button
-			color="alternative"
-			on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}>Cancel</Button
-		>
-		<Button color="primary" on:click={handleSave}>Save</Button>
-	</svelte:fragment>
+	{#snippet footer()}
+	
+			<Button
+				color="alternative"
+				on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}>Cancel</Button
+			>
+			<Button color="primary" on:click={handleSave}>Save</Button>
+		
+	{/snippet}
 </Modal>

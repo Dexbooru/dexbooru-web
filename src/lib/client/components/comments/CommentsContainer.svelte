@@ -7,13 +7,17 @@
 	import { onDestroy, onMount } from 'svelte';
 	import Comment from './Comment.svelte';
 
-	export let postId: string;
-	export let postCommentCount: number;
+	interface Props {
+		postId: string;
+		postCommentCount: number;
+	}
 
-	let noMoreComments = false;
-	let topLevelComments: TComment[] = [];
+	let { postId, postCommentCount = $bindable() }: Props = $props();
+
+	let noMoreComments = $state(false);
+	let topLevelComments: TComment[] = $state([]);
 	let commentsLoading = false;
-	let loadMoreButtonText = 'Load comments';
+	let loadMoreButtonText = $state('Load comments');
 
 	const commentTree = getCommentTree();
 	const rootLevelCommentLoader = createPostCommentsPaginator(postId, null, commentTree);

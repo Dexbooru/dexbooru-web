@@ -4,6 +4,7 @@
 	import { getActiveModal } from '$lib/client/helpers/context';
 	import { filesToBase64Strings } from '$lib/client/helpers/images';
 	import {
+		FILE_IMAGE_ACCEPT,
 		MAXIMUM_IMAGES_PER_POST,
 		MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB,
 	} from '$lib/shared/constants/images';
@@ -12,8 +13,12 @@
 	import { Button, Fileupload, Label, P, Spinner } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 
-	export let images: { imageBase64: string; file: File }[] = [];
-	export let loadingPictures: boolean = false;
+	interface Props {
+		images?: { imageBase64: string; file: File }[];
+		loadingPictures?: boolean;
+	}
+
+	let { images = $bindable([]), loadingPictures = $bindable(false) }: Props = $props();
 
 	const activeModal = getActiveModal();
 
@@ -63,7 +68,7 @@
 			return;
 		}
 
-		if (files.find((file) => !isFileImageSmall(file))) {
+		if (files.find((file) => !isFileImageSmall(file, 'post'))) {
 			toast.push(
 				`At least one of the image files exceeded the maximum upload size of ${MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB} MB`,
 				FAILURE_TOAST_OPTIONS,
@@ -103,16 +108,16 @@
 	});
 </script>
 
-<Label class="space-y-2">
+<Label class="space-y-2 cursor-text">
 	<span
 		>Upload up to {MAXIMUM_IMAGES_PER_POST} images, each of which should not exceed {MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB}
-		MB</span
+		MB:</span
 	>
 	<Fileupload
 		id="postPicturesInput"
 		required
 		name="postPictures"
-		accept="image/*"
+		accept={FILE_IMAGE_ACCEPT}
 		multiple
 		on:change={onFileChange}
 	/>

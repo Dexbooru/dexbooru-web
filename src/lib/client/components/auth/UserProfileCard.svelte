@@ -4,17 +4,21 @@
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
-	import type { IUser, TUserStatistics } from '$lib/shared/types/users';
+	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button, Card, Dropdown, DropdownItem } from 'flowbite-svelte';
 	import { DotsHorizontalOutline } from 'flowbite-svelte-icons';
 
-	export let targetUser: TUser;
-	export let friendStatus: TFriendStatus;
-	export let userStatistics: TUserStatistics;
+	interface Props {
+		targetUser: TUser;
+		friendStatus: TFriendStatus;
+		userStatistics: TUserStatistics;
+	}
 
-	let addFriendLoading = false;
-	let deleteFriendLoading = false;
+	let { targetUser, friendStatus = $bindable(), userStatistics }: Props = $props();
+
+	let addFriendLoading = $state(false);
+	let deleteFriendLoading = $state(false);
 
 	const user = getAuthenticatedUser();
 
@@ -64,45 +68,45 @@
 	</div>
 	<div class="flex flex-col items-center pb-4">
 		<Avatar size="lg" class="booru-avatar" src={targetUser.profilePictureUrl} />
-		<h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{targetUser.username}</h5>
+		<h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white cursor-text">{targetUser.username}</h5>
 
-		<span class="text-sm text-gray-500 dark:text-gray-400"
+		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
 			>Account id:
 			<strong>{targetUser.id}</strong></span
 		>
-		<span class="text-sm text-gray-500 dark:text-gray-400"
+		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
 			>Account creation date:
 			<strong>{formatDate(new Date(targetUser.createdAt))}</strong></span
 		>
 		{#if $user && $user.id === targetUser.id}
-			<span class="text-sm text-gray-500 dark:text-gray-400"
+			<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
 				>Account last updated at date:
 				<strong>{formatDate(new Date(targetUser.updatedAt))}</strong></span
 			>
-			<span class="text-sm text-gray-500 dark:text-gray-400"
+			<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
 				>Account email:
 				<strong>{targetUser.email.toLocaleLowerCase()}</strong></span
 			>
 		{/if}
 		<hr class="border-0 h-px bg-gray-300 dark:bg-gray-600 my-6" />
 
-		<span class="text-sm text-gray-500 dark:text-gray-400"
+		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
 			>Total posts:
 			<strong>{userStatistics.totalPosts}</strong></span
 		>
-		<span class="text-sm text-gray-500 dark:text-gray-400"
+		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
 			>Total views on all posts:
 			<strong>{userStatistics.totalViews}</strong></span
 		>
-		<span class="text-sm text-gray-500 dark:text-gray-400"
+		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
 			>Average views on all posts:
 			<strong>{userStatistics.averageViews}</strong></span
 		>
-		<span class="text-sm text-gray-500 dark:text-gray-400"
+		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
 			>Total likes on all posts:
 			<strong>{userStatistics.totalLikes}</strong></span
 		>
-		<span class="text-sm text-gray-500 dark:text-gray-400"
+		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
 			>Average likes on all posts:
 			<strong>{userStatistics.averageViews}</strong></span
 		>

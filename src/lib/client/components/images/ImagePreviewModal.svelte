@@ -4,9 +4,9 @@
 	import { Modal } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 
-	let imageBase64: string;
-	let imageFile: File;
-	let imageAlt = '';
+	let imageBase64: string = $state();
+	let imageFile: File = $state();
+	let imageAlt = $state('');
 
 	const activeModal = getActiveModal();
 

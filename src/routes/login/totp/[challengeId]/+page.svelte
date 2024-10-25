@@ -2,16 +2,15 @@
 	import TotpForm from '$lib/client/components/auth/TotpForm.svelte';
 	import type { ActionData, PageData } from './$types';
 
-	export let form: ActionData;
-	export let data: PageData;
-
-	let username: string;
-	let rememberMe: boolean;
-
-	$: {
-		username = data.challengeData.username;
-		rememberMe = data.challengeData.rememberMe;
+	interface Props {
+		form: ActionData;
+		data: PageData;
 	}
+
+	let { form, data }: Props = $props();
+
+	let username: string = $derived(data.challengeData.username);
+	let rememberMe: boolean = $derived(data.challengeData.rememberMe);
 </script>
 
 <svelte:head>

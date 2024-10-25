@@ -6,8 +6,12 @@
 	import PostImageMetadata from './PostImageMetadata.svelte';
 	import PostMetadata from './PostMetadata.svelte';
 
-	export let post: TPost;
-	export let totalPostCommentCount: string = '0';
+	interface Props {
+		post: TPost;
+		totalPostCommentCount?: string;
+	}
+
+	let { post, totalPostCommentCount = '0' }: Props = $props();
 
 	const user = getAuthenticatedUser();
 </script>

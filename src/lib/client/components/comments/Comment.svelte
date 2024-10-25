@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Comment from './Comment.svelte';
 	import { createPostCommentsPaginator } from '$lib/client/api/comments';
 	import { MAXIMUM_COMMENT_REPLY_DEPTH_LOAD } from '$lib/client/constants/comments';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
@@ -13,15 +14,19 @@
 	import { slide } from 'svelte/transition';
 	import CommentTextbox from './CommentTextbox.svelte';
 
-	export let comment: TComment;
-	export let currentDepth: number = 1;
+	interface Props {
+		comment: TComment;
+		currentDepth?: number;
+	}
+
+	let { comment, currentDepth = 1 }: Props = $props();
 
 	let repliesLoading = false;
-	let replyBoxOpen = false;
-	let replies: TComment[] = [];
-	let loadMoreButtonText = 'Load replies';
+	let replyBoxOpen = $state(false);
+	let replies: TComment[] = $state([]);
+	let loadMoreButtonText = $state('Load replies');
 	let pageNumber = 0;
-	let noMoreComments = false;
+	let noMoreComments = $state(false);
 
 	const user = getAuthenticatedUser();
 	const commentTree = getCommentTree();
@@ -121,6 +126,6 @@
 
 <div class="ml-2 border-l-2">
 	{#each replies as reply (reply.id)}
-		<svelte:self currentDepth={currentDepth + 1} comment={reply} />
+		<Comment currentDepth={currentDepth + 1} comment={reply} />
 	{/each}
 </div>

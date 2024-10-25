@@ -20,8 +20,12 @@
 	} from 'flowbite-svelte-icons';
 	import HiddenPostAlert from './HiddenPostAlert.svelte';
 
-	export let uniqueTags: string[] = [];
-	export let uniqueArtists: string[] = [];
+	interface Props {
+		uniqueTags?: string[];
+		uniqueArtists?: string[];
+	}
+
+	let { uniqueTags = [], uniqueArtists = [] }: Props = $props();
 
 	const userPreferences = getAuthenticatedUserPreferences();
 	const postPaginationData = getPostPaginationData();
@@ -34,11 +38,13 @@
 		<SidebarWrapper>
 			<SidebarGroup>
 				<SidebarDropdownWrapper isOpen label="Order by">
-					<svelte:fragment slot="icon">
-						<OrderedListSolid
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-						/>
-					</svelte:fragment>
+					{#snippet icon()}
+									
+							<OrderedListSolid
+								class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+							/>
+						
+									{/snippet}
 					{#each Object.values(ORDER_BY_TRANSLATION_MAP) as orderOptions}
 						{#each orderOptions as { label, isActive, getHref }}
 							<SidebarDropdownItem
@@ -51,19 +57,23 @@
 				</SidebarDropdownWrapper>
 				{#if !$userPreferences.hidePostMetadataOnPreview}
 					<SidebarDropdownWrapper label="All Tags">
-						<svelte:fragment slot="icon">
-							<TagSolid
-								class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-							/>
-						</svelte:fragment>
+						{#snippet icon()}
+											
+								<TagSolid
+									class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+								/>
+							
+											{/snippet}
 						<LabelContainer labelType="tag" labelsAreLarge labels={uniqueTags} />
 					</SidebarDropdownWrapper>
 					<SidebarDropdownWrapper label="All Artists">
-						<svelte:fragment slot="icon">
-							<PalleteSolid
-								class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-							/>
-						</svelte:fragment>
+						{#snippet icon()}
+											
+								<PalleteSolid
+									class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+								/>
+							
+											{/snippet}
 						<LabelContainer
 							labelType="artist"
 							labelsAreLarge

@@ -5,17 +5,17 @@
 	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/login/totp/[challengeId]/$types';
 
-	export let form: ActionData;
-	export let username: string;
-	export let rememberMe: boolean;
+	interface Props {
+		form: ActionData;
+		username: string;
+		rememberMe: boolean;
+	}
+
+	let { form, username, rememberMe }: Props = $props();
 
 	let otpErrorReason = form?.reason ?? null;
-	let otpCode: string = '';
-	let otpFormButtonDisabled = true;
-
-	$: {
-		otpFormButtonDisabled = otpCode.length !== TOTP_CODE_LENGTH;
-	}
+	let otpCode: string = $state('');
+	let otpFormButtonDisabled = $derived(otpCode.length !== TOTP_CODE_LENGTH);
 
 	onMount(() => {
 		const totpTimeoutIntervalId = setTimeout(() => {

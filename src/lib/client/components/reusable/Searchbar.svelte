@@ -2,14 +2,25 @@
 	import { Input } from 'flowbite-svelte';
 	import { SearchOutline } from 'flowbite-svelte-icons';
 
-	export let inputElementId: string | null = null;
-	export let width: string = '300px';
-	export let isGlobal: boolean = false;
-	export let placeholder: string;
-	export let queryInputHandler: (query: string) => void;
-	export let queryChangeHandler: ((query: string) => void) | null = null;
+	interface Props {
+		inputElementId?: string | null;
+		width?: string;
+		isGlobal?: boolean;
+		placeholder: string;
+		queryInputHandler: (query: string) => void;
+		queryChangeHandler?: ((query: string) => void) | null;
+	}
 
-	const optionalProps: Record<string, string> = {};
+	let {
+		inputElementId = null,
+		width = '300px',
+		isGlobal = false,
+		placeholder,
+		queryInputHandler,
+		queryChangeHandler = null
+	}: Props = $props();
+
+	const optionalProps: Record<string, string> = $state({});
 	if (inputElementId) {
 		optionalProps.id = inputElementId;
 	}

@@ -6,7 +6,7 @@ import type { LayoutServerLoad } from "../$types";
 
 export const load: LayoutServerLoad = async ({ locals, cookies }) => {
     if (!locals.user) {
-        throw redirect(302, '/');
+        redirect(302, '/');
     }
 
     const friends = await findFriendsForUser(locals.user.id);

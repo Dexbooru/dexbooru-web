@@ -3,10 +3,14 @@
 	import { Alert, Button, Card } from 'flowbite-svelte';
 	import ProfilePictureUpload from '../files/ProfilePictureUpload.svelte';
 
-	export let error: string | null = null;
-	export let errorType: string | null = null;
+	interface Props {
+		error?: string | null;
+		errorType?: string | null;
+	}
 
-	let profilePictureFile: File | null = null;
+	let { error = null, errorType = null }: Props = $props();
+
+	let profilePictureFile: File | null = $state(null);
 </script>
 
 <Card>
@@ -24,7 +28,7 @@
 			disabled={profilePictureFile === null ||
 				(profilePictureFile !== null &&
 					!isFileImage(profilePictureFile) &&
-					!isFileImageSmall(profilePictureFile, false))}
+					!isFileImageSmall(profilePictureFile, 'profilePicture'))}
 			type="submit">Change Profile Picture</Button
 		>
 

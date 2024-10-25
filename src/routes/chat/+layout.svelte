@@ -7,7 +7,12 @@
 	import { get } from 'svelte/store';
 	import type { LayoutData } from './$types';
 
-	export let data: LayoutData;
+	interface Props {
+		data: LayoutData;
+		children?: import('svelte').Snippet;
+	}
+
+	let { data, children }: Props = $props();
 
 	const { friends, chatRooms } = data;
 	chatStore.set({
@@ -46,7 +51,7 @@
 
 <div id="chat-container" class="flex">
 	<DirectMessageSidebar />
-	<slot />
+	{@render children?.()}
 </div>
 
 <style>

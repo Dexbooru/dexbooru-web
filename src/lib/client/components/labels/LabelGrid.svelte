@@ -9,14 +9,18 @@
 	import { Button, Spinner } from 'flowbite-svelte';
 	import { PalleteSolid, TagSolid } from 'flowbite-svelte-icons';
 
-	export let labelType: 'tag' | 'artist';
+	interface Props {
+		labelType: 'tag' | 'artist';
+	}
 
-	let loadingLabels = false;
-	let finishedLabelPagination = false;
-	let hasLoadedLabelsOnce = false;
-	let labels: string[] = [];
+	let { labelType }: Props = $props();
+
+	let loadingLabels = $state(false);
+	let finishedLabelPagination = $state(false);
+	let hasLoadedLabelsOnce = $state(false);
+	let labels: string[] = $state([]);
 	let pageNumber = 0;
-	let selectedLabel = '';
+	let selectedLabel = $state('');
 
 	const getLabelsOnCurrentPage = async (event: Event, pressedLoadingMore: boolean) => {
 		const target = event.target as HTMLButtonElement;

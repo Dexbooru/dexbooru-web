@@ -20,8 +20,8 @@ model User {
   createdPosts             Post[]                    @relation(name: "created posts")
   likedPosts               Post[]                    @relation(name: "liked posts")
   createdComments          Comment[]
-  friends                  User[]                    @relation("user friends")
-  symmetricFriends         User[]                    @relation("user friends")
+  friends                  User[]                    @relation(name: "user friends")
+  symmetricFriends         User[]                    @relation(name: "user friends")
   sentFriendRequests       FriendRequest[]           @relation(name: "friend requests sent")
   receivedFriendRequests   FriendRequest[]           @relation(name: "friend requests received")
   passwordRecoveryAttempts PasswordRecoveryAttempt[]
@@ -51,7 +51,7 @@ model Post {
   id           String           @id @default(uuid())
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @default(now())
-  description  String           @db.Text
+  description  String           @db.VarChar(500)
   isNsfw       Boolean          @default(false)
   likes        Int              @default(0)
   views        Int              @default(0)
@@ -73,15 +73,16 @@ model Post {
 }
 
 model PostCollection {
-  id          String   @id @default(uuid())
-  title       String   @db.VarChar(150)
-  description String   @db.VarChar(250)
-  imageUrls   String[]
-  posts       Post[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
-  author      User?    @relation(name: "post collection author", fields: [authorId], references: [id])
-  authorId    String?
+  id                String   @id @default(uuid())
+  title             String   @db.VarChar(150)
+  description       String   @db.VarChar(250)
+  isNsfw            Boolean  @default(false)
+  thumbnailImageUrls String[] @default([])
+  posts             Post[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+  author            User?    @relation(name: "post collection author", fields: [authorId], references: [id])
+  authorId          String?
 
   @@index([id])
   @@index([authorId])

@@ -4,25 +4,35 @@
 	import LabelContainer from '../../labels/LabelContainer.svelte';
 	import PostAuthorDetails from './PostCardAuthorDetails.svelte';
 
-	export let post: TPost;
-	export let tags: { name: string }[];
-	export let artists: { name: string }[];
-	export let author: { id: string; username: string; profilePictureUrl: string } | null;
-	export let createdAt: Date;
+	interface Props {
+		post: TPost;
+		tags: { name: string }[];
+		artists: { name: string }[];
+		author: { id: string; username: string; profilePictureUrl: string } | null;
+		createdAt: Date;
+	}
+
+	let {
+		post,
+		tags,
+		artists,
+		author,
+		createdAt
+	}: Props = $props();
 </script>
 
 <div class="block space-y-2 ml-2 mt-2 mb-5">
-	<p class="text-base dark:text-white">Tags</p>
+	<p class="text-base dark:text-white cursor-text">Tags</p>
 	<LabelContainer labelColor="red" labelType="tag" labels={tags} />
 
-	<p class="text-base dark:text-white">Artists</p>
+	<p class="text-base dark:text-white cursor-text">Artists</p>
 	<LabelContainer labelColor="green" labelType="artist" labels={artists} />
 
-	<p class="text-base dark:text-white">Views</p>
-	<h2>{normalizeCount(post.views)}</h2>
+	<p class="text-base dark:text-white cursor-text">Views</p>
+	<h2 class="cursor-text">{normalizeCount(post.views)}</h2>
 
-	<p class="text-base dark:text-white">Comment count</p>
-	<h2>{normalizeCount(post.commentCount)}</h2>
+	<p class="text-base dark:text-white cursor-text">Comment count</p>
+	<h2 class="cursor-text">{normalizeCount(post.commentCount)}</h2>
 
 	<PostAuthorDetails {author} {createdAt} />
 </div>

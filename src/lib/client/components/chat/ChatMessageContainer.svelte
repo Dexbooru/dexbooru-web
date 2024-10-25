@@ -1,16 +1,22 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { chatStore } from '$lib/client/stores/chat';
 	import type { TChatMessage } from '$lib/client/types/core';
 	import { onDestroy } from 'svelte';
 
-	export let roomId: string | null = null;
+	interface Props {
+		roomId?: string | null;
+	}
 
-	let messages: TChatMessage[] = [];
-	$: {
+	let { roomId = null }: Props = $props();
+
+	let messages: TChatMessage[] = $state([]);
+	run(() => {
 		const currentMessages = $chatStore.messages.get(roomId ?? '') ?? [];
 		messages = currentMessages;
-	}
+	});
 
 	const user = getAuthenticatedUser();
 

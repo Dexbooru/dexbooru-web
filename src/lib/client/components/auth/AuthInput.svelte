@@ -12,19 +12,32 @@
 	import type { Writable } from 'svelte/store';
 	import FieldRequirements from '../reusable/FieldRequirements.svelte';
 
-	export let input: string;
-	export let inputName: string;
-	export let comparisonInput: string | null = null;
-	export let labelTitle: string;
-	export let labelStyling: string = '';
-	export let inputFieldType: 'username' | 'email' | 'password' | 'password-confirm' | 'otp-code';
-	export let showRequirements: boolean = true;
-	export let formStore: Writable<TAuthFormRequirementData> | null = null;
+	interface Props {
+		input: string;
+		inputName: string;
+		comparisonInput?: string | null;
+		labelTitle: string;
+		labelStyling?: string;
+		inputFieldType: 'username' | 'email' | 'password' | 'password-confirm' | 'otp-code';
+		showRequirements?: boolean;
+		formStore?: Writable<TAuthFormRequirementData> | null;
+	}
 
-	let satisfiedRequirements: string[] = [];
-	let unsatisfiedRequirements: string[] = [];
-	let showPassword = false;
-	let showConfirmedPassword = false;
+	let {
+		input = $bindable(),
+		inputName,
+		comparisonInput = $bindable(),
+		labelTitle,
+		labelStyling = '',
+		inputFieldType,
+		showRequirements = true,
+		formStore = null,
+	}: Props = $props();
+
+	let satisfiedRequirements: string[] = $state([]);
+	let unsatisfiedRequirements: string[] = $state([]);
+	let showPassword = $state(false);
+	let showConfirmedPassword = $state(false);
 
 	const onUsernameChange = () => {
 		const { satisfied, unsatisfied } = getUsernameRequirements(input);

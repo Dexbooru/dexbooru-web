@@ -7,10 +7,10 @@
 	import { ArrowLeftSolid, ArrowRightSolid } from 'flowbite-svelte-icons';
 	import { onDestroy } from 'svelte';
 
-	let previousPageUrl: URL;
-	let nextPageUrl: URL;
-	let noPostsLeft: boolean = false;
-	let noPostsOnPage: boolean = false;
+	let previousPageUrl: URL = $state();
+	let nextPageUrl: URL = $state();
+	let noPostsLeft: boolean = $state(false);
+	let noPostsOnPage: boolean = $state(false);
 
 	const postPaginationData = getPostPaginationData();
 

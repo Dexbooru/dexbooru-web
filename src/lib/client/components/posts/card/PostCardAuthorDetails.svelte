@@ -3,12 +3,16 @@
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import { Avatar } from 'flowbite-svelte';
 
-	export let author: { id: string; username: string; profilePictureUrl: string } | null;
-	export let createdAt: Date;
+	interface Props {
+		author: { id: string; username: string; profilePictureUrl: string } | null;
+		createdAt: Date;
+	}
+
+	let { author, createdAt }: Props = $props();
 	const {
 		id: authorId = null,
 		profilePictureUrl: authorProfilePictureUrl,
-		username: authorUsername
+		username: authorUsername,
 	} = author || {};
 </script>
 
@@ -24,9 +28,9 @@
 		<p class="mt-2">{authorId ? authorUsername : DELETED_ACCOUNT_HEADING}</p>
 	</a>
 </div>
-<p class="text-base dark:text-white">Upload Date</p>
+<p class="text-base dark:text-white cursor-text">Upload Date</p>
 <div class="space-x-2 flex align-middle flex-wrap">
-	<p class="text-md dark:text-white">
+	<p class="text-md dark:text-white cursor-text">
 		<span class="leading-none text-sm dark:text-gray-400">{formatDate(createdAt)}</span>
 	</p>
 </div>

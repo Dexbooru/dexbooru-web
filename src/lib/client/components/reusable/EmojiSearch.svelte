@@ -3,12 +3,16 @@
 	import { FaceGrinSolid } from 'flowbite-svelte-icons';
 	import VirtualizedList from './VirtualizedList.svelte';
 
-	export let handleEmoji: (targetEmoji: string) => void;
+	interface Props {
+		handleEmoji: (targetEmoji: string) => void;
+	}
 
-	let dropdownOpen = false;
-	let loadingEmojis = false;
+	let { handleEmoji }: Props = $props();
+
+	let dropdownOpen = $state(false);
+	let loadingEmojis = $state(false);
 	let emojiEntries: [string, string][] = [];
-	let filteredEmojiEntries = emojiEntries;
+	let filteredEmojiEntries = $state(emojiEntries);
 
 	const handleEmojiButtonClick = async () => {
 		dropdownOpen = true;

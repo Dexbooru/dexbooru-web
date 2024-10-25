@@ -7,8 +7,12 @@
 	} from '$lib/client/helpers/context';
 	import PostPaginator from './PostPaginator.svelte';
 
-	export let useHiddenPosts: boolean = false;
-	export let useNsfwPosts: boolean = false;
+	interface Props {
+		useHiddenPosts?: boolean;
+		useNsfwPosts?: boolean;
+	}
+
+	let { useHiddenPosts = false, useNsfwPosts = false }: Props = $props();
 
 	const postPageStore = getPostsPage();
 	const nsfwPostPage = getNsfwPostPage();

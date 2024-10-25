@@ -3,13 +3,17 @@
 	import { Alert, Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 
-	export let error: string | null = null;
-	export let errorType: string | null = null;
+	interface Props {
+		error?: string | null;
+		errorType?: string | null;
+	}
 
-	let autoBlurNsfw: boolean = false;
-	let browseInSafeMode: boolean = false;
-	let blacklistedTags: string = '';
-	let blacklistedArtists: string = '';
+	let { error = null, errorType = null }: Props = $props();
+
+	let autoBlurNsfw: boolean = $state(false);
+	let browseInSafeMode: boolean = $state(false);
+	let blacklistedTags: string = $state('');
+	let blacklistedArtists: string = $state('');
 
 	const userPreferences = getAuthenticatedUserPreferences();
 

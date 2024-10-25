@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { getEstimatedPostRating } from '$lib/client/api/mlApi';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION } from '$lib/shared/constants/images';
 	import {
 		MAXIMUM_ARTIST_LENGTH,
-		MAXIMUM_ARTISTS_PER_POST,
 		MAXIMUM_TAG_LENGTH,
-		MAXIMUM_TAGS_PER_POST,
 		SEPERATOR_CHARACTER_UI,
 	} from '$lib/shared/constants/labels';
-	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
+	import {
+		MAXIMUM_ARTISTS_PER_POST,
+		MAXIMUM_POST_DESCRIPTION_LENGTH,
+		MAXIMUM_TAGS_PER_POST,
+	} from '$lib/shared/constants/posts';
 	import { isLabelAppropriate, transformLabel } from '$lib/shared/helpers/labels';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Checkbox, Heading, Input, Label, Li, List, Textarea } from 'flowbite-svelte';
@@ -17,27 +18,40 @@
 	import type { ActionData } from '../../../../routes/posts/upload/$types';
 	import PostPictureUpload from '../files/PostPictureUpload.svelte';
 	import LabelContainer from '../labels/LabelContainer.svelte';
+	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 
-	export let form: ActionData;
+	interface Props {
+		form: ActionData;
+	}
 
-	let isNsfw: boolean = false;
-	let tags: string[] = form?.tags || [];
-	let artists: string[] = form?.artists || [];
-	let tag: string = '';
-	let artist: string = '';
-	let description: string = form?.description || '';
-	let uploadButtonDisabled = true;
+	let { form }: Props = $props();
+
+	let isNsfw: boolean = $state(false);
+	let tags: string[] = $state(form?.tags || []);
+	let artists: string[] = $state(form?.artists || []);
+	let tag: string = $state('');
+	let artist: string = $state('');
+	let description: string = $state(form?.description || '');
 	let postImages: {
 		imageBase64: string;
 		file: File;
-	}[] = [];
-	let loadingPostPictures = false;
-
-	$: {
-		getEstimatedPostRating(tags)
-			.then((response) => response.json())
-			.then((data) => console.log(data));
-	}
+	}[] = $state([]);
+	let loadingPostPictures = $state(false);
+	let uploadButtonDisabled = $derived.by(() => {
+		const isValidForm =
+			!loadingPostPictures &&
+			description.length > 0 &&
+			isLabelAppropriate(description, 'postDescription') &&
+			tags.length > 0 &&
+			artists.length > 0 &&
+			postImages.length > 0 &&
+			!tags.some((tag) => !isLabelAppropriate(tag, 'tag')) &&
+			!artists.some((artist) => !isLabelAppropriate(artist, 'artist')) &&
+			!postImages.some(
+				(postImage) => !isFileImage(postImage.file) || !isFileImageSmall(postImage.file, 'post'),
+			);
+		return !isValidForm;
+	});
 
 	const addLabel = (labelType: 'tag' | 'artist') => {
 		const label = labelType === 'tag' ? tag : artist;
@@ -111,31 +125,21 @@
 		}
 	};
 
+	$effect(() => {
+		getEstimatedPostRating(tags)
+			.then((response) => response.json())
+			.then((data) => console.log(data));
+	});
+
 	onMount(() => {
 		if (form?.reason) {
 			toast.push(form.reason, FAILURE_TOAST_OPTIONS);
 		}
 	});
-
-	$: {
-		const isValidForm =
-			!loadingPostPictures &&
-			description.length > 0 &&
-			isLabelAppropriate(description, 'description') &&
-			tags.length > 0 &&
-			artists.length > 0 &&
-			postImages.length > 0 &&
-			!tags.some((tag) => !isLabelAppropriate(tag, 'tag')) &&
-			!artists.some((artist) => !isLabelAppropriate(artist, 'artist')) &&
-			!postImages.some(
-				(postImage) => !isFileImage(postImage.file) || !isFileImageSmall(postImage.file),
-			);
-		uploadButtonDisabled = !isValidForm;
-	}
 </script>
 
 <main class="flex flex-col justify-center items-center m-5">
-	<Heading class="mb-5 px-2.5 text-center">Upload a post!</Heading>
+	<Heading class="mb-5 px-2.5 text-center cursor-text">Upload a post!</Heading>
 	<form
 		id="upload-form"
 		method="POST"
@@ -143,29 +147,29 @@
 		enctype="multipart/form-data"
 	>
 		<section class="space-y-2">
-			<Label class="mb-1" for="description-textarea">
-				Please enter a description for your post (max {MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION} characters)
+			<Label class="mb-1 cursor-text" for="description-textarea">
+				Please enter a description for your post (max {MAXIMUM_POST_DESCRIPTION_LENGTH} characters):
 			</Label>
 			<Textarea
 				id="description-textarea"
-				maxlength={MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION}
+				maxlength={MAXIMUM_POST_DESCRIPTION_LENGTH}
 				rows="5"
 				bind:value={description}
 				name="description"
 				placeholder="Enter a description"
 				required
 			/>
-			<p class="leading-none dark:text-gray-400 text-right mt-2">
-				{description.length}/{MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION}
+			<p class="leading-none dark:text-gray-400 text-right mt-2 cursor-text">
+				{description.length}/{MAXIMUM_POST_DESCRIPTION_LENGTH}
 			</p>
 
-			<List class="dark:text-gray-400" list="disc">
+			<List class="dark:text-gray-400 cursor-text" list="disc">
 				{#each SEPERATOR_CHARACTER_UI as message}
 					<Li>{message}</Li>
 				{/each}
 			</List>
 
-			<Label for="tag-input"
+			<Label class="cursor-text" for="tag-input"
 				>Please specify one or more tags (max of {MAXIMUM_TAGS_PER_POST}):</Label
 			>
 			<div class="flex gap-2 mt-2">
@@ -197,7 +201,7 @@
 			</div>
 			<Input type="hidden" name="tags" value={tags.join(',')} />
 
-			<Label for="artist-input"
+			<Label class="cursor-text" for="artist-input"
 				>Please specify one or more artists (max of {MAXIMUM_ARTISTS_PER_POST}):</Label
 			>
 			<div class="flex gap-2 mt-2">
@@ -231,7 +235,7 @@
 
 			<PostPictureUpload bind:loadingPictures={loadingPostPictures} bind:images={postImages} />
 
-			<Checkbox bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
+			<Checkbox class="cursor-text" bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
 			<Input type="hidden" name="isNsfw" value={isNsfw} />
 		</section>
 

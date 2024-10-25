@@ -3,11 +3,15 @@
 	import { MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB } from '$lib/shared/constants/images';
 	import { Avatar, Fileupload, ImagePlaceholder, Label } from 'flowbite-svelte';
 
-	export let isChangingProfilePicture: boolean = false;
-	export let profilePictureFile: File | null = null;
+	interface Props {
+		isChangingProfilePicture?: boolean;
+		profilePictureFile?: File | null;
+	}
 
-	let profilePictureBase64String: string | null = null;
-	let parsingProfilePicture = false;
+	let { isChangingProfilePicture = false, profilePictureFile = $bindable(null) }: Props = $props();
+
+	let profilePictureBase64String: string | null = $state(null);
+	let parsingProfilePicture = $state(false);
 
 	const onProfilePictureChange = async (event: Event) => {
 		profilePictureFile = null;

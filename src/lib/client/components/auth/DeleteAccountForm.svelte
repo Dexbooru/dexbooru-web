@@ -4,11 +4,15 @@
 	import { slide } from 'svelte/transition';
 	import AuthInput from './AuthInput.svelte';
 
-	export let error: string | null = null;
-	export let errorType: string | null = null;
+	interface Props {
+		error?: string | null;
+		errorType?: string | null;
+	}
 
-	let confirmedPassword: string = '';
-	let confirmationText: string = '';
+	let { error = null, errorType = null }: Props = $props();
+
+	let confirmedPassword: string = $state('');
+	let confirmationText: string = $state('');
 </script>
 
 <Card>

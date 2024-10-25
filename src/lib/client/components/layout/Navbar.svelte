@@ -6,16 +6,12 @@
 	import GlobalSearchbar from '../search/GlobalSearchbar.svelte';
 	import ProfileDropdown from './ProfileDropdown.svelte';
 
-	let activeUrl: string;
-
-	$: {
-		activeUrl = getPathFromUrl($page.url.href, true);
-	}
+	let activeUrl: string = $derived(getPathFromUrl($page.url.href, true));
 
 	const user = getAuthenticatedUser();
 </script>
 
-<Navbar id="app-navbar" class="sticky top-0 z-50">
+<Navbar id="app-navbar" class="sticky top-0 z-50 bg-white dark:bg-gray-900 rounded-none">
 	<div class="flex space-x-4">
 		<NavBrand href="/">
 			<img src="/favicon.png" class="mr-3 h-6 sm:h-9 rounded-md" alt="Dexbooru Logo" />
@@ -37,7 +33,7 @@
 		<NavHamburger />
 	</div>
 	<NavUl class="order-1" {activeUrl}>
-		<NavLi href="/">Home</NavLi>
+		<NavLi href="/posts">Posts</NavLi>
 		<NavLi href="/tags">Tags</NavLi>
 		<NavLi href="/artists">Artists</NavLi>
 		<NavLi href="/collections">Collections</NavLi>

@@ -6,9 +6,13 @@
 	import { onDestroy } from 'svelte';
 	import FriendRequest from './FriendRequest.svelte';
 
-	export let notificationCount: number;
+	interface Props {
+		notificationCount: number;
+	}
 
-	let friendRequests: TFriendRequest[] = [];
+	let { notificationCount }: Props = $props();
+
+	let friendRequests: TFriendRequest[] = $state([]);
 
 	const userNotifications = getAuthenticatedUserNotifications();
 	const userNotificationsUnsubscribe = userNotifications.subscribe((notificationData) => {
@@ -26,7 +30,9 @@
 	triggeredBy="#notification-bell"
 	class="w-full max-w-sm rounded divide-y divide-gray-100 shadow dark:bg-gray-800 dark:divide-gray-700"
 >
-	<div slot="header" class="text-center py-2 font-bold">Notifications ({notificationCount})</div>
+	{#snippet header()}
+		<div  class="text-center py-2 font-bold">Notifications ({notificationCount})</div>
+	{/snippet}
 	{#if notificationCount > 0}
 		{#each friendRequests as friendRequest (friendRequest)}
 			<FriendRequest {friendRequest} />

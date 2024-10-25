@@ -4,14 +4,18 @@
 	import { onDestroy } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 
-	export let error: string | null = null;
-	export let errorType: string | null = null;
+	interface Props {
+		error?: string | null;
+		errorType?: string | null;
+	}
+
+	let { error = null, errorType = null }: Props = $props();
 
 	const changePasswordRequirements = getChangePasswordAuthRequirements();
-	let oldPassword: string = '';
-	let newPassword: string = '';
-	let confirmedNewPassword: string = '';
-	let changePasswordButtonDiabled = true;
+	let oldPassword: string = $state('');
+	let newPassword: string = $state('');
+	let confirmedNewPassword: string = $state('');
+	let changePasswordButtonDiabled = $state(true);
 
 	const changePasswordFormAuthRequirementsUnsubscribe = changePasswordRequirements.subscribe(
 		(data) => {

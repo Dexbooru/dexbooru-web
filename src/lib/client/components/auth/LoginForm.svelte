@@ -1,22 +1,28 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { Alert, Button, Card, Checkbox, Input, Label } from 'flowbite-svelte';
 	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
 	import type { ActionData } from '../../../../routes/login/$types';
 
-	export let form: ActionData;
+	interface Props {
+		form: ActionData;
+	}
 
-	let showPassword = false;
+	let { form }: Props = $props();
+
+	let showPassword = $state(false);
 
 	const loginErrorReason: string | undefined = form?.reason;
-	let username: string = form?.username || '';
-	let password: string = '';
-	let rememberMe: boolean = false;
+	let username: string = $state(form?.username || '');
+	let password: string = $state('');
+	let rememberMe: boolean = $state(false);
 
-	let loginFormButtonDisabled = true;
+	let loginFormButtonDisabled = $state(true);
 
-	$: {
+	run(() => {
 		loginFormButtonDisabled = !(username.length > 0 && password.length > 0);
-	}
+	});
 </script>
 
 <Card class="w-full max-w-md mt-20">

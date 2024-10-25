@@ -10,13 +10,17 @@
 	import { Button, TabItem, Tabs, Textarea } from 'flowbite-svelte';
 	import EmojiSearch from '../reusable/EmojiSearch.svelte';
 
-	export let onCommentCreate: (() => void) | null = null;
-	export let postId: string;
-	export let parentCommentId: string | null = null;
+	interface Props {
+		onCommentCreate?: (() => void) | null;
+		postId: string;
+		parentCommentId?: string | null;
+	}
 
-	let commentCreating = false;
-	let commentContent = '';
-	let commentContentMarkdown = '';
+	let { onCommentCreate = null, postId, parentCommentId = null }: Props = $props();
+
+	let commentCreating = $state(false);
+	let commentContent = $state('');
+	let commentContentMarkdown = $state('');
 
 	const user = getAuthenticatedUser();
 	const commentTree = getCommentTree();
@@ -73,7 +77,9 @@
 
 <Tabs style="underline">
 	<TabItem open>
-		<span slot="title">Your comment</span>
+		{#snippet title()}
+				<span >Your comment</span>
+			{/snippet}
 		<div class="flex flex-col space-y-2">
 			<div class="flex">
 				<EmojiSearch {handleEmoji} />
@@ -98,7 +104,9 @@
 		>
 	</TabItem>
 	<TabItem>
-		<span slot="title">Preview your markdown comment</span>
+		{#snippet title()}
+				<span >Preview your markdown comment</span>
+			{/snippet}
 		<div class="z-10 flex flex-col p-4 dark:bg-gray-700 dark:border-gray-600 text-left">
 			{#if commentContentMarkdown.length > 0}
 				<p class="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">

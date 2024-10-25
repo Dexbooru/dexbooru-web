@@ -8,9 +8,13 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button, DropdownItem } from 'flowbite-svelte';
 
-	export let friendRequest: TFriendRequest;
+	interface Props {
+		friendRequest: TFriendRequest;
+	}
 
-	let friendshipActionLoading = false;
+	let { friendRequest }: Props = $props();
+
+	let friendshipActionLoading = $state(false);
 
 	const userNotifications = getAuthenticatedUserNotifications();
 

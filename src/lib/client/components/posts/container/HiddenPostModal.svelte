@@ -12,8 +12,8 @@
 	import { get } from 'svelte/store';
 	import PostGrid from './PostGrid.svelte';
 
-	let offendingTags: Set<string> = new Set<string>();
-	let offendingArtists: Set<string> = new Set<string>();
+	let offendingTags: Set<string> = $state(new Set<string>());
+	let offendingArtists: Set<string> = $state(new Set<string>());
 
 	const user = getAuthenticatedUser();
 	const blacklistedPostPage = getBlacklistedPostPage();
@@ -75,10 +75,12 @@
 			</TabItem>
 		</Tabs>
 
-		<svelte:fragment slot="footer">
-			<Button on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
-				>Close</Button
-			>
-		</svelte:fragment>
+		{#snippet footer()}
+			
+				<Button on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+					>Close</Button
+				>
+			
+			{/snippet}
 	</Modal>
 {/if}

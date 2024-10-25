@@ -5,13 +5,16 @@
 	import { getPostPaginationData } from '$lib/client/helpers/context';
 	import { onDestroy } from 'svelte';
 
-	export let postsSection: string;
+	interface Props {
+		postsSection: string;
+	}
 
-	let currentPageTitle: string;
-	let currentPageDescription: string;
+	let { postsSection }: Props = $props();
+
+	let currentPageTitle: string = $state('');
+	let currentPageDescription: string = $state('');
 
 	const postPaginationData = getPostPaginationData();
-
 	const postPaginationUnsubscribe = postPaginationData.subscribe((paginationData) => {
 		if (paginationData) {
 			currentPageTitle = `${postsSection} - Page ${paginationData.pageNumber + 1}`;

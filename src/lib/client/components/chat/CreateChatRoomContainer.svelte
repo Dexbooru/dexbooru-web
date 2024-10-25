@@ -7,7 +7,11 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button, Listgroup, ListgroupItem, Popover } from 'flowbite-svelte';
 
-	export let friends: TChatFriend[] = [];
+	interface Props {
+		friends?: TChatFriend[];
+	}
+
+	let { friends = $bindable([]) }: Props = $props();
 
 	const onChatRoomCreateClick = async (event: MouseEvent, recieverUserId: string) => {
 		const target = event.target as HTMLButtonElement;

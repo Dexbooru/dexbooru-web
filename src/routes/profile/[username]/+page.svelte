@@ -4,17 +4,15 @@
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
-
-	let targetUser: TUser;
-	let friendStatus: TFriendStatus;
-	let userStatistics: TUserStatistics;
-
-	$: {
-		targetUser = data.targetUser;
-		friendStatus = data.friendStatus;
-		userStatistics = data.userStatistics;
+	interface Props {
+		data: PageData;
 	}
+
+	let { data }: Props = $props();
+
+	let targetUser: TUser = $derived(data.targetUser);
+	let friendStatus: TFriendStatus = $derived(data.friendStatus);
+	let userStatistics: TUserStatistics = $derived(data.userStatistics);
 </script>
 
 <svelte:head>

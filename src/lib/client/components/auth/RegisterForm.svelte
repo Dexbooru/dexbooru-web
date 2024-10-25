@@ -6,15 +6,19 @@
 	import ProfilePictureUpload from '../files/ProfilePictureUpload.svelte';
 	import AuthInput from './AuthInput.svelte';
 
-	export let form: ActionData;
+	interface Props {
+		form: ActionData;
+	}
+
+	let { form }: Props = $props();
 
 	const registerFormRequirements = getRegisterFormAuthRequirements();
 	const registerErrorReason: string | undefined = form?.reason;
-	let username: string = form?.username || '';
-	let email: string = form?.email || '';
-	let password: string = '';
-	let confirmedPassword: string = '';
-	let registerButtonDisabled = true;
+	let username: string = $state(form?.username || '');
+	let email: string = $state(form?.email || '');
+	let password: string = $state('');
+	let confirmedPassword: string = $state('');
+	let registerButtonDisabled = $state(true);
 
 	const registerFormAuthRequirementsUnsubscribe = registerFormRequirements.subscribe((data) => {
 		const disabledCheck =

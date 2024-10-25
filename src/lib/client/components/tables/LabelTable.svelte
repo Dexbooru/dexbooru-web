@@ -9,8 +9,12 @@
 		TableHeadCell,
 	} from 'flowbite-svelte';
 
-	export let labels: TAppSearchResult['tags'] | TAppSearchResult['artists'];
-	export let labelType: 'tag' | 'artist';
+	interface Props {
+		labels: TAppSearchResult['tags'] | TAppSearchResult['artists'];
+		labelType: 'tag' | 'artist';
+	}
+
+	let { labels, labelType }: Props = $props();
 </script>
 
 <Table hoverable>

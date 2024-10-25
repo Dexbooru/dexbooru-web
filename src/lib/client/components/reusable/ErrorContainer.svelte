@@ -5,7 +5,11 @@
 	import type { TErrorPageType } from '$lib/client/types/page';
 	import { Button } from 'flowbite-svelte';
 
-	export let errorPageType: TErrorPageType;
+	interface Props {
+		errorPageType: TErrorPageType;
+	}
+
+	let { errorPageType }: Props = $props();
 
 	const errorMessage = $page.error?.message;
 	const pageResponseStatus = $page.status;

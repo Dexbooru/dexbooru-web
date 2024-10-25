@@ -1,8 +1,6 @@
 export const MAXIMUM_TAG_LENGTH = 75;
 export const MAXIMUM_ARTIST_LENGTH = 75;
-export const MAXIMUM_TAGS_PER_POST = 20;
-export const MAXIMUM_ARTISTS_PER_POST = 5;
-export const MAXIMUM_DESCRIPTION_LENGTH = 500;
+
 export const SEPERATOR_CHARACTER_MAP: Record<string, string> = {
 	'-': '',
 	' ': '_',

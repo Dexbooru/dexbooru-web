@@ -16,10 +16,14 @@
 	import { scale } from 'svelte/transition';
 	import PostCardActions from './PostCardActions.svelte';
 
-	export let post: TPost;
+	interface Props {
+		post: TPost;
+	}
+
+	let { post }: Props = $props();
 
 	const { id: postId, description, author, tags, artists, createdAt, isNsfw } = post;
-	let imageUrls = post.imageUrls;
+	let imageUrls = $state(post.imageUrls);
 	let likes = post.likes;
 
 	const userPreferences = getAuthenticatedUserPreferences();

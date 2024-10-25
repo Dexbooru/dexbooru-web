@@ -9,26 +9,21 @@
 	import { onDestroy } from 'svelte';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
 
-	let post: TPost;
-	let uploadedSuccessfully: boolean;
-	let totalPostCommentCount: string = '0';
-	let uploadSuccessModalOpen = true;
+	let { data }: Props = $props();
+
+	let post: TPost = $derived(data.post);
+	let uploadedSuccessfully = $derived(data.uploadedSuccessfully);
+	let totalPostCommentCount: string = $state('0');
+	let uploadSuccessModalOpen = $state(true);
+	let tagNames = $derived(data.post.tags.map((tag) => tag.name));
+	let artistNames = $derived(data.post.artists.map((artist) => artist.name));
 
 	const user = getAuthenticatedUser();
 	const commentTree = getCommentTree();
-
-	let tagNames: string[] = [];
-	let artistNames: string[] = [];
-
-	$: {
-		post = data.post;
-		uploadedSuccessfully = data.uploadedSuccessfully;
-
-		tagNames = data.post.tags.map((tag) => tag.name);
-		artistNames = data.post.artists.map((artist) => artist.name);
-	}
 
 	const commentTreeUnsubscribe = commentTree.subscribe((tree) => {
 		totalPostCommentCount = normalizeCount(tree.getCount());
@@ -84,9 +79,9 @@
 			You can delete the post if you want, via the card preview on the uploaded posts page.
 		</p>
 
-		<svelte:fragment slot="footer">
+		{#snippet footer()}
 			<Button on:click={uploadSuccessModalClose}>Return to post</Button>
-		</svelte:fragment>
+		{/snippet}
 	</Modal>
 {/if}
 

@@ -4,12 +4,16 @@
 	import { onDestroy } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 
-	export let error: string | null = null;
-	export let errorType: string | null = null;
+	interface Props {
+		error?: string | null;
+		errorType?: string | null;
+	}
+
+	let { error = null, errorType = null }: Props = $props();
 
 	const changeUsernameRequirements = getChangeUsernameAuthRequirements();
-	let newUsername: string = '';
-	let changeUsernameButtonDisabled = true;
+	let newUsername: string = $state('');
+	let changeUsernameButtonDisabled = $state(true);
 
 	const changeUsernameFormAuthRequirementsUnsubscribe = changeUsernameRequirements.subscribe(
 		(data) => {

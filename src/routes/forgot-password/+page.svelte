@@ -2,7 +2,11 @@
 	import ForgotPasswordForm from '$lib/client/components/auth/ForgotPasswordForm.svelte';
 	import type { ActionData } from './$types';
 
-	export let form: ActionData;
+	interface Props {
+		form: ActionData;
+	}
+
+	let { form }: Props = $props();
 
 	const errorReason = form ? form.reason : null;
 </script>

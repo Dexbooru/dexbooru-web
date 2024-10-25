@@ -3,7 +3,11 @@ import {
 	MAXIMUM_IMAGES_PER_POST,
 	MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB,
 } from '$lib/shared/constants/images';
-import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
+import {
+	MAXIMUM_ARTISTS_PER_POST,
+	MAXIMUM_POSTS_PER_PAGE,
+	MAXIMUM_TAGS_PER_POST,
+} from '$lib/shared/constants/posts';
 import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import { isLabelAppropriate, transformLabels } from '$lib/shared/helpers/labels';
 import type { TPost, TPostOrderByColumn } from '$lib/shared/types/posts';
@@ -13,7 +17,6 @@ import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { PUBLIC_POST_SELECTORS } from '../constants/posts';
 import { boolStrSchema, postPaginationSchema } from '../constants/reusableSchemas';
-import { SINGLE_POST_CACHE_TIME_SECONDS } from '../constants/sessions';
 import { findPostsByArtistName } from '../db/actions/artist';
 import {
 	createPost,
@@ -34,11 +37,7 @@ import {
 	isRedirectObject,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
-import {
-	flattenPostImageBuffers,
-	runPostImageTransformationPipelineInBatch,
-} from '../helpers/images';
-import { cacheResponse } from '../helpers/sessions';
+import { flattenImageBuffers, runPostImageTransformationPipelineInBatch } from '../helpers/images';
 import type {
 	TControllerHandlerVariant,
 	TPostFetchCategory,
@@ -48,7 +47,7 @@ import type {
 const descriptionSchema = z
 	.string()
 	.min(1, 'The description must be at least a single character long')
-	.refine((val) => isLabelAppropriate(val, 'description'), {
+	.refine((val) => isLabelAppropriate(val, 'postDescription'), {
 		message: 'The provided description was not appropriate',
 	});
 
@@ -119,7 +118,7 @@ const CreatePostSchema = {
 			.refine(
 				(val) => {
 					if (val.length > MAXIMUM_IMAGES_PER_POST) return false;
-					return !val.some((file) => !isFileImage(file) || !isFileImageSmall(file));
+					return !val.some((file) => !isFileImage(file) || !isFileImageSmall(file, 'post'));
 				},
 				{
 					message: `At least one of the uploaded post picture was not an image format, exceeded the maximum size of ${MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB} or the total number of images exceeded the maximum allowed size per post of ${MAXIMUM_IMAGES_PER_POST}`,
@@ -134,6 +133,7 @@ const CreatePostSchema = {
 			})
 			.refine(
 				(val) => {
+					if (val.length > MAXIMUM_TAGS_PER_POST) return false;
 					return !val.some((tag) => !isLabelAppropriate(tag, 'tag'));
 				},
 				{
@@ -149,6 +149,7 @@ const CreatePostSchema = {
 			})
 			.refine(
 				(val) => {
+					if (val.length > MAXIMUM_ARTISTS_PER_POST) return false;
 					return !val.some((artist) => !isLabelAppropriate(artist, 'artist'));
 				},
 				{
@@ -302,7 +303,7 @@ export const handleCreatePost = async (
 					fileBuffers: postImageFileBuffers,
 					imageHeights: postImageHeights,
 					imageWidths: postImageWidths,
-				} = flattenPostImageBuffers(postImageBufferMaps);
+				} = flattenImageBuffers(postImageBufferMaps);
 				const postImageUrls = await uploadBatchToBucket(
 					AWS_POST_PICTURE_BUCKET_NAME,
 					'posts',
@@ -323,7 +324,7 @@ export const handleCreatePost = async (
 				);
 
 				if (handlerType === 'form-action') {
-					throw redirect(302, `/posts/${newPost.id}?uploadedSuccessfully=true`);
+					redirect(302, `/posts/${newPost.id}?uploadedSuccessfully=true`);
 				}
 
 				return createSuccessResponse(handlerType, 'Post created successfully', { newPost }, 201);
@@ -360,10 +361,6 @@ export const handleGetPost = async (
 					throw error;
 				}
 				return error;
-			}
-
-			if (handlerType === 'page-server-load') {
-				cacheResponse(event.setHeaders, SINGLE_POST_CACHE_TIME_SECONDS);
 			}
 
 			const uploadedSuccessfully = data.urlSearchParams.uploadedSuccessfully;
@@ -510,7 +507,7 @@ export const handleGetPosts = async (
 		const user = event.locals.user;
 
 		if (user.id === NULLABLE_USER.id && ['uploaded', 'liked'].includes(category)) {
-			throw redirect(302, '/');
+			redirect(302, '/');
 		}
 
 		if (user.id === NULLABLE_USER.id && category === 'liked') {
@@ -596,7 +593,7 @@ export const handleGetPosts = async (
 			const errorResponse = createErrorResponse(
 				handlerType,
 				500,
-				'An error occurred while fetching the posts',
+				'An unexpected error occurred while fetching the posts',
 			);
 			if (handlerType === 'page-server-load') {
 				throw errorResponse;

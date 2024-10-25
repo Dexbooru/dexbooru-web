@@ -9,13 +9,16 @@
 	import { Alert, Button, Card } from 'flowbite-svelte';
 	import AuthInput from './AuthInput.svelte';
 
-	export let error: string | null | undefined;
-	export let errorType: string;
+	interface Props {
+		error: string | null | undefined;
+		errorType: string;
+	}
+	const { error, errorType }: Props = $props();
 
-	let currentPassword: string = '';
-	let totpLoading: boolean = false;
-	let totpUri: string = '';
-	let otpCode: string = '';
+	let currentPassword: string = $state('');
+	let totpLoading: boolean = $state(false);
+	let totpUri: string = $state('');
+	let otpCode: string = $state('');
 
 	const userPreferences = getAuthenticatedUserPreferences();
 
@@ -48,7 +51,7 @@
 	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
 		2FA
 		<br />
-		<h2 class="text-sm">(2-factor authentication)</h2>
+		<span class="text-sm">(2-factor authentication)</span>
 	</h3>
 	<form method="POST" action="?/twoFactorAuthentication" class="flex flex-col space-y-4">
 		<AuthInput

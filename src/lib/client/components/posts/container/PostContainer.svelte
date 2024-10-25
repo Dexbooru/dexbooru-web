@@ -1,22 +1,31 @@
 <script lang="ts">
+	import CollectionCreateDrawer from '$lib/client/collections/CollectionCreateDrawer.svelte';
 	import PostGrid from '$lib/client/components/posts/container/PostGrid.svelte';
 	import PostPageSidebar from '$lib/client/components/posts/container/PostPageSidebar.svelte';
 	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
 	import {
+		getAuthenticatedUser,
 		getAuthenticatedUserPreferences,
 		getOriginalPostsPage,
 		getPostsPage,
 	} from '$lib/client/helpers/context';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
+	import { Button } from 'flowbite-svelte';
+	import { PlusSolid } from 'flowbite-svelte-icons';
 	import { onDestroy, onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import Searchbar from '../../reusable/Searchbar.svelte';
 
-	export let postContainerTitle: string;
+	interface Props {
+		postContainerTitle: string;
+	}
+
+	let { postContainerTitle }: Props = $props();
 
 	const CLEAR_INPUT_INTERVAL_MS: number = 250;
 	const originalPostPage = getOriginalPostsPage();
 	const postsPage = getPostsPage();
+	const user = getAuthenticatedUser();
 	const userPreferences = getAuthenticatedUserPreferences();
 
 	const onPostSearch = (query: string) => {
@@ -38,8 +47,9 @@
 		postsPage.set(filteredPosts);
 	};
 
-	let uniqueTags: string[] = [];
-	let uniqueArtists: string[] = [];
+	let uniqueTags: string[] = $state([]);
+	let uniqueArtists: string[] = $state([]);
+	let collectionCreateDrawerHidden: boolean = $state(true);
 
 	const postPageStoreUnsubscribe = postsPage.subscribe((updatedPosts) => {
 		uniqueTags = getUniqueLabelsFromPosts(updatedPosts, 'tag');
@@ -72,15 +82,23 @@
 	</div>
 	<div id="post-container-body" class="space-y-4 mb-5">
 		<div id="post-container-title" class="block space-y-3">
-			<p class="text-4xl dark:text-white">{postContainerTitle}</p>
-			{#if !$userPreferences.hidePostMetadataOnPreview}
-				<Searchbar
-					inputElementId="post-page-searchbar"
-					width="25rem"
-					queryInputHandler={onPostSearch}
-					placeholder="Search by keyword(s) on this page"
-				/>
-			{/if}
+			<h1 class="text-4xl dark:text-white cursor-text">{postContainerTitle}</h1>
+			<div class="flex">
+				{#if !$userPreferences.hidePostMetadataOnPreview}
+					<Searchbar
+						inputElementId="post-page-searchbar"
+						width="25rem"
+						queryInputHandler={onPostSearch}
+						placeholder="Search by keyword(s) on this page"
+					/>
+				{/if}
+				{#if $user}
+					<Button on:click={() => (collectionCreateDrawerHidden = false)}>
+						Create collection
+						<PlusSolid class="ml-3" />
+					</Button>
+				{/if}
+			</div>
 		</div>
 		<PostGrid />
 		{#if $postsPage.length > 0}
@@ -88,6 +106,7 @@
 		{/if}
 	</div>
 </main>
+<CollectionCreateDrawer bind:isHidden={collectionCreateDrawerHidden} />
 
 <style>
 	#post-container {

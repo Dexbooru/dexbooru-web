@@ -11,7 +11,7 @@
 	import { InfoCircleSolid } from 'flowbite-svelte-icons';
 	import { onDestroy, onMount } from 'svelte';
 
-	let titleParts: string[] = [];
+	let titleParts: string[] = $state([]);
 
 	const user = getAuthenticatedUser();
 	const hiddenPostsPage = getHiddenPostsPage();
@@ -56,7 +56,9 @@
 		defaultClass="p-2 space-x-2 hover:cursor-pointer bg-gray-50 hover:bg-gray-200 hover:dark:bg-gray-700 text-sm text-wrap"
 		color="red"
 	>
-		<InfoCircleSolid slot="icon" class="w-5 h-5" />
+		{#snippet icon()}
+				<InfoCircleSolid  class="w-5 h-5" />
+			{/snippet}
 		{`Click to display ${titleParts.join(' and ')} post(s)`}
 	</Alert>
 {/if}

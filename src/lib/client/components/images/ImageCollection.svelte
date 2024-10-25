@@ -7,18 +7,22 @@
 	import { Alert, Button } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 
-	export let imageUrls: string[];
-	export let imageDimensions: { imageWidth: number; imageHeight: number }[];
-	export let imagesAlt: string;
+	interface Props {
+		imageUrls: string[];
+		imageDimensions: { imageWidth: number; imageHeight: number }[];
+		imagesAlt: string;
+	}
+
+	let { imageUrls, imageDimensions, imagesAlt }: Props = $props();
 
 	let screenWidth: number = 0;
 	let screenHeight: number = 0;
-	let imagesScaledDown = false;
-	let transformedImageDimensions: { imageWidth: number; imageHeight: number }[] = imageDimensions;
-	let resizeRatios: string[] = [];
-	let resizedImages: boolean = false;
-	let showResizeAlert: boolean = false;
-	let showOriginalImageSizes: boolean = false;
+	let imagesScaledDown = $state(false);
+	let transformedImageDimensions: { imageWidth: number; imageHeight: number }[] = $state(imageDimensions);
+	let resizeRatios: string[] = $state([]);
+	let resizedImages: boolean = $state(false);
+	let showResizeAlert: boolean = $state(false);
+	let showOriginalImageSizes: boolean = $state(false);
 
 	const recomputeImageDimensions = () => {
 		transformedImageDimensions = imageDimensions;

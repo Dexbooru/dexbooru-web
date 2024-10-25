@@ -1,4 +1,6 @@
 import {
+	COLLECTION_THUMBNAIL_HEIGHT,
+	COLLECTION_THUMBNAIL_WIDTH,
 	NSFW_PREVIEW_IMAGE_SUFFIX,
 	ORIGINAL_IMAGE_SUFFIX,
 	POST_PICTURE_PREVIEW_HEIGHT,
@@ -6,17 +8,20 @@ import {
 	PREVIEW_IMAGE_SUFFIX,
 	PROFILE_PICTURE_HEIGHT,
 	PROFILE_PICTURE_WIDTH,
-	WEBP_OPTIONS,
 } from '$lib/shared/constants/images';
-import type { Sharp } from 'sharp';
+import type { ResizeOptions, Sharp } from 'sharp';
 import sharp from 'sharp';
+import { WEBP_OPTIONS } from '../constants/images';
 import type { TImageData, TImageMetadata } from '../types/images';
 
-export async function fileToSharp(file: File): Promise<Sharp> {
-	const fileArrayBuffer = await file.arrayBuffer();
-	const fileBuffer = Buffer.from(fileArrayBuffer);
-	return sharp(fileBuffer);
-}
+const getImageResizeOptions = (width: number, height: number) => {
+	return {
+		width,
+		height,
+		fit: 'cover',
+		background: { r: 0, g: 0, b: 0, alpha: 0 },
+	} as ResizeOptions;
+};
 
 const getImageMeta = async (image: Sharp): Promise<TImageMetadata> => {
 	const metadata = await image.metadata();
@@ -30,18 +35,18 @@ function applyBlurFilter(image: Sharp, sigma: number = 40) {
 	return image.blur(sigma);
 }
 
-function applyPreviewResizer(image: Sharp) {
-	return image.resize({
-		width: POST_PICTURE_PREVIEW_WIDTH,
-		height: POST_PICTURE_PREVIEW_HEIGHT,
-		fit: 'contain',
-		background: { r: 0, g: 0, b: 0, alpha: 0 },
-	});
+export async function fileToSharp(file: File): Promise<Sharp> {
+	const fileArrayBuffer = await file.arrayBuffer();
+	const fileBuffer = Buffer.from(fileArrayBuffer);
+	return sharp(fileBuffer);
 }
 
 export async function runProfileImageTransformationPipeline(file: File): Promise<Buffer> {
 	const image = await fileToSharp(file);
-	return image.webp(WEBP_OPTIONS).resize(PROFILE_PICTURE_WIDTH, PROFILE_PICTURE_HEIGHT).toBuffer();
+	return image
+		.webp(WEBP_OPTIONS)
+		.resize(getImageResizeOptions(PROFILE_PICTURE_WIDTH, PROFILE_PICTURE_HEIGHT))
+		.toBuffer();
 }
 
 async function runPostImageTransformationPipeline(
@@ -55,12 +60,14 @@ async function runPostImageTransformationPipeline(
 
 	const image = await fileToSharp(file);
 
-	const orignalImage = image.webp();
-	const originalImageBuffer = await orignalImage.toBuffer();
+	const originalImage = image.webp(WEBP_OPTIONS);
+	const originalImageBuffer = await originalImage.toBuffer();
 	imageData.buffers.original = originalImageBuffer;
-	imageData.metadata.original = await getImageMeta(orignalImage);
+	imageData.metadata.original = await getImageMeta(originalImage);
 
-	const previewImage = applyPreviewResizer(orignalImage);
+	const previewImage = originalImage.resize(
+		getImageResizeOptions(POST_PICTURE_PREVIEW_WIDTH, POST_PICTURE_PREVIEW_HEIGHT),
+	);
 	const previewImageBuffer = await previewImage.toBuffer();
 	imageData.buffers.preview = previewImageBuffer;
 	imageData.metadata.preview = {
@@ -81,7 +88,32 @@ async function runPostImageTransformationPipeline(
 	return imageData;
 }
 
-export function flattenPostImageBuffers(bufferMaps: TImageData[]) {
+export async function applyCollectionImageTransformationPipeline(file: File, isNsfw: boolean) {
+	const imageData = {
+		buffers: {},
+		metadata: {},
+	} as TImageData;
+
+	const image = await fileToSharp(file);
+
+	const orignalImage = image
+		.webp(WEBP_OPTIONS)
+		.resize(getImageResizeOptions(COLLECTION_THUMBNAIL_WIDTH, COLLECTION_THUMBNAIL_HEIGHT));
+	const originalImageBuffer = await orignalImage.toBuffer();
+	imageData.buffers.original = originalImageBuffer;
+	imageData.metadata.original = await getImageMeta(orignalImage);
+
+	if (isNsfw) {
+		const nsfwImage = applyBlurFilter(orignalImage);
+		const nsfwImageBuffer = await nsfwImage.toBuffer();
+		imageData.buffers.nsfwPreview = nsfwImageBuffer;
+		imageData.metadata.nsfwPreview = await getImageMeta(nsfwImage);
+	}
+
+	return imageData;
+}
+
+export function flattenImageBuffers(bufferMaps: TImageData[]) {
 	const fileBuffers: Buffer[] = [];
 	const fileObjectIds: string[] = [];
 	const imageWidths: number[] = [];

@@ -9,7 +9,7 @@
 	import NotificationBell from '../notifications/NotificationBell.svelte';
 	import NotificationList from '../notifications/NotificationList.svelte';
 
-	let notificationCount: number;
+	let notificationCount: number = $state();
 
 	const user = getAuthenticatedUser();
 	const notifications = getAuthenticatedUserNotifications();
@@ -50,5 +50,7 @@
 	<DropdownItem href="/posts/uploaded">Your Posts</DropdownItem>
 	<DropdownItem href="/posts/liked">Liked Posts</DropdownItem>
 	<DropdownItem href="/profile/settings">Settings</DropdownItem>
-	<DropdownItem href="/profile/logout" slot="footer">Sign out</DropdownItem>
+	{#snippet footer()}
+		<DropdownItem href="/profile/logout" >Sign out</DropdownItem>
+	{/snippet}
 </Dropdown>

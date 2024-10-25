@@ -11,7 +11,11 @@
 		TableHeadCell,
 	} from 'flowbite-svelte';
 
-	export let posts: TAppSearchResult['posts'];
+	interface Props {
+		posts: TAppSearchResult['posts'];
+	}
+
+	let { posts }: Props = $props();
 </script>
 
 <Table hoverable>

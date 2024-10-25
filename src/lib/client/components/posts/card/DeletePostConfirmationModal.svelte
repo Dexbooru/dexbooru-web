@@ -16,9 +16,9 @@
 	import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
 	import { onDestroy } from 'svelte';
 
-	let targetDeletionPost: TPost | null = null;
+	let targetDeletionPost: TPost | null = $state(null);
 	let postId: string;
-	let postDeletionLoading = false;
+	let postDeletionLoading = $state(false);
 
 	const postsPage = getPostsPage();
 	const originalPostPage = getOriginalPostsPage();

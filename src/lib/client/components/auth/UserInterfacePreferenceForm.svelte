@@ -3,11 +3,15 @@
 	import { Alert, Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 
-	export let error: string | null = null;
-	export let errorType: string | null = null;
+	interface Props {
+		error?: string | null;
+		errorType?: string | null;
+	}
 
-	let customSiteCss: string = '';
-	let hidePostMetadataOnPreview: boolean = false;
+	let { error = null, errorType = null }: Props = $props();
+
+	let customSiteCss: string = $state('');
+	let hidePostMetadataOnPreview: boolean = $state(false);
 
 	const userPreferences = getAuthenticatedUserPreferences();
 	const userPreferenceUnsubscribe = userPreferences.subscribe((data) => {

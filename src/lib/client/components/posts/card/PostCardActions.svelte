@@ -27,15 +27,25 @@
 		TrashBinSolid,
 	} from 'flowbite-svelte-icons';
 
-	export let post: TPost;
-	export let postId: string;
-	export let likes: number;
-	export let author: {
+	interface Props {
+		post: TPost;
+		postId: string;
+		likes: number;
+		author: {
 		id: string;
 		username: string;
 		profilePictureUrl: string;
 	};
-	export let onPostViewPage: boolean = false;
+		onPostViewPage?: boolean;
+	}
+
+	let {
+		post,
+		postId,
+		likes = $bindable(),
+		author,
+		onPostViewPage = false
+	}: Props = $props();
 
 	const user = getAuthenticatedUser();
 	const postsPage = getPostsPage();
@@ -43,8 +53,8 @@
 	const postPagination = getPostPaginationData();
 	const activeModal = getActiveModal();
 
-	let postLikeLoading = false;
-	let hasLikedPost = $postPagination?.likedPosts.map((post) => post.id).includes(postId);
+	let postLikeLoading = $state(false);
+	let hasLikedPost = $state($postPagination?.likedPosts.map((post) => post.id).includes(postId));
 
 	const pagePathName = $page.url.pathname;
 	const isPostAuthor = $user && $user.id === author.id;

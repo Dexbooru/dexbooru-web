@@ -1,8 +1,9 @@
 import type CommentTree from '$lib/shared/helpers/comments';
+import type { TCollectionPaginationData } from '$lib/shared/types/collections';
 import type { TUserNotifications } from '$lib/shared/types/notifcations';
 import type { THiddenPagePostData, TPost, TPostPaginationData } from '$lib/shared/types/posts';
 import type { TUser } from '$lib/shared/types/users';
-import type { UserPreference } from '@prisma/client';
+import type { PostCollection, UserPreference } from '@prisma/client';
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
 import {
@@ -10,10 +11,13 @@ import {
 	BLACKLISTED_POST_PAGE_CONTEXT_KEY,
 	CHANGE_PASSWORD_AUTH_REQUIREMENTS_CONTEXT_KEY,
 	CHANGE_USERNAME_AUTH_REQUIREMENTS_CONTEXT_KEY,
+	COLLECTION_PAGE_CONTEXT_KEY,
+	COLLECTION_PAGINATION_DATA_CONTEXT_KEY,
 	COMMENT_TREE_CONTEXT_KEY,
 	FOOTER_CONTEXT_KEY,
 	HIDDEN_POSTS_PAGE_CONTEXT_KEY,
 	NSFW_POST_PAGE_CONTEXT_KEY,
+	ORIGINAL_COLLECTION_PAGE_CONTEXT_KEY,
 	ORIGINAL_POSTS_PAGE_CONTEXT_KEY,
 	POSTS_PAGE_CONTEXT_KEY,
 	POST_PAGINATION_CONTEXT_KEY,
@@ -23,6 +27,21 @@ import {
 	USER_PREFERENCE_CONTEXT_KEY,
 } from '../constants/context';
 import type { TAuthFormRequirementData, TFooterStoreData, TModalStoreData } from '../types/stores';
+
+export const updateCollectionPagination = (paginationData: TCollectionPaginationData | null) => {
+	const updatedCollectionData = writable(paginationData);
+	setContext(COLLECTION_PAGINATION_DATA_CONTEXT_KEY, updatedCollectionData);
+};
+
+export const updateOriginalCollectionPage = (collections: PostCollection[]) => {
+	const updatedCollections = writable(collections);
+	setContext(ORIGINAL_COLLECTION_PAGE_CONTEXT_KEY, updatedCollections);
+};
+
+export const updateCollectionPage = (collections: PostCollection[]) => {
+	const updatedCollections = writable(collections);
+	setContext(COLLECTION_PAGE_CONTEXT_KEY, updatedCollections);
+};
 
 export const updateChangePasswordAuthRequirements = (requirements: TAuthFormRequirementData) => {
 	const updatedRequirements = writable(requirements);
@@ -97,6 +116,20 @@ export const updateAuthenticatedUserNotifications = (notifications: TUserNotific
 export const updateAuthenticatedUserPreferences = (userPreferences: UserPreference) => {
 	const updatedUserPreferences = writable(userPreferences);
 	setContext(USER_PREFERENCE_CONTEXT_KEY, updatedUserPreferences);
+};
+
+export const getOriginalCollectionPage = () => {
+	return getContext<Writable<PostCollection[]>>(ORIGINAL_COLLECTION_PAGE_CONTEXT_KEY);
+};
+
+export const getCollectionPage = () => {
+	return getContext<Writable<PostCollection[]>>(COLLECTION_PAGE_CONTEXT_KEY);
+};
+
+export const getCollectionPaginationData = () => {
+	return getContext<Writable<TCollectionPaginationData | null>>(
+		COLLECTION_PAGINATION_DATA_CONTEXT_KEY,
+	);
 };
 
 export const getChangePasswordAuthRequirements = (): Writable<TAuthFormRequirementData> => {

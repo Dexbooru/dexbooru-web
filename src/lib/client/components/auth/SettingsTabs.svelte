@@ -16,13 +16,17 @@
 	import PostPreferencesForm from './PostPreferencesForm.svelte';
 	import UserInterfacePreferenceForm from './UserInterfacePreferenceForm.svelte';
 
-	export let form: ActionData;
+	interface Props {
+		form: ActionData;
+	}
+
+	let { form }: Props = $props();
 
 	const errorReason = form ? form.reason : null;
 	const errorType = form ? form.type : null;
 
 	const validTabNames = ['personal', 'preferences', 'security'] as const;
-	let currentTab: string = 'personal';
+	let currentTab: string = $state('personal');
 
 	const message = form ? form.message : null;
 
@@ -60,10 +64,12 @@
 
 <Tabs defaultClass="flex flex-wrap space-x-2 rtl:space-x-revers !p-3" style="underline">
 	<TabItem on:click={() => handleTabClick('personal')} open={currentTab === 'personal'}>
-		<div slot="title" class="flex items-center gap-2">
-			<UserCircleSolid size="md" />
-			Personal
-		</div>
+		{#snippet title()}
+				<div  class="flex items-center gap-2">
+				<UserCircleSolid size="md" />
+				Personal
+			</div>
+			{/snippet}
 		<section class="flex flex-wrap gap-4 items-start">
 			<ChangeUsernameForm error={errorReason} {errorType} />
 			<ChangePasswordForm error={errorReason} {errorType} />
@@ -76,7 +82,8 @@
 		title="Preferences"
 		open={currentTab === 'preferences'}
 	>
-		<div slot="title" class="flex items-center gap-2">
+		<!-- @migration-task: migrate this slot by hand, `title` would shadow a prop on the parent component -->
+	<div slot="title" class="flex items-center gap-2">
 			<GridSolid size="md" />
 			Preferences
 		</div>

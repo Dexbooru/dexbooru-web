@@ -17,8 +17,8 @@
 	import Searchbar from '../reusable/Searchbar.svelte';
 	import SearchResultsContainer from './SearchResultsContainer.svelte';
 
-	let currentSearchResults: TAppSearchResult | null = null;
-	let searchResultsLoading = false;
+	let currentSearchResults: TAppSearchResult | null = $state(null);
+	let searchResultsLoading = $state(false);
 
 	const activeModal = getActiveModal();
 

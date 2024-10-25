@@ -51,6 +51,6 @@ export const actions: Actions = {
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.user.id === NULLABLE_USER.id) {
-		throw redirect(302, '/');
+		redirect(302, '/');
 	}
 };

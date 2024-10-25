@@ -3,11 +3,14 @@
 	import { updatePostStores } from '$lib/client/helpers/posts';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
-
-	$: {
-		updatePostStores(data);
+	interface Props {
+		data: PageData;
 	}
+
+	let { data }: Props = $props();
+	$effect(() => {
+		updatePostStores(data);
+	});
 </script>
 
 <PostWrapper postsSection="Liked Posts" />

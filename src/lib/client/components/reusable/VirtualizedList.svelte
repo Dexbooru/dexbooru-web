@@ -2,24 +2,36 @@
 	// @ts-nocheck
 	import VirtualList from 'svelte-tiny-virtual-list';
 
-	export let data: unknown[];
-	export let listHeight: number;
-	export let listItemFn: ((item: unknown) => unknown) | null = null;
-	export let listItemClass: string = '';
-	export let handleListItemClick: ((event: Event) => void) | null = null;
+	interface Props {
+		data: unknown[];
+		listHeight: number;
+		listItemFn?: ((item: unknown) => unknown) | null;
+		listItemClass?: string;
+		handleListItemClick?: ((event: Event) => void) | null;
+	}
+
+	let {
+		data,
+		listHeight,
+		listItemFn = null,
+		listItemClass = '',
+		handleListItemClick = null
+	}: Props = $props();
 </script>
 
 <VirtualList itemCount={data.length} itemSize={30} height={listHeight}>
-	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<li
-		on:click={handleListItemClick}
-		slot="item"
-		let:index
-		let:style
-		{style}
-		class={listItemClass}
-	>
-		{listItemFn ? listItemFn(data[index]) : data[index]}
-	</li>
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	{#snippet item({ index, style })}
+		<li
+			onclick={handleListItemClick}
+			
+			
+			
+			{style}
+			class={listItemClass}
+		>
+			{listItemFn ? listItemFn(data[index]) : data[index]}
+		</li>
+	{/snippet}
 </VirtualList>

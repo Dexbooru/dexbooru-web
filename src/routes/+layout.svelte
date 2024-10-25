@@ -20,6 +20,8 @@
 		updateBlacklistedPostPage,
 		updateChangePasswordAuthRequirements,
 		updateChangeUsernameAuthRequirements,
+		updateCollectionPage,
+		updateCollectionPagination,
 		updateCommentTree,
 		updateFooter,
 		updateHiddenPostsPage,
@@ -41,7 +43,12 @@
 	import '../app.postcss';
 	import type { LayoutData } from './$types';
 
-	export let data: LayoutData;
+	interface Props {
+		data: LayoutData;
+		children?: import('svelte').Snippet;
+	}
+
+	let { data, children }: Props = $props();
 
 	updateAuthenticatedUserNotifications(
 		data.user.id === NULLABLE_USER.id ? null : data.userNotifications,
@@ -72,6 +79,9 @@
 	updateChangePasswordAuthRequirements({});
 	updateRegisterFormAuthRequirements({});
 	updateChangeUsernameAuthRequirements({});
+	updateCollectionPage([]);
+	updateOriginalPostsPage([]);
+	updateCollectionPagination(null);
 
 	let validateTokenIntervalId: NodeJS.Timeout;
 	const AUTH_CHECK_INTERVAL_SIZE = 60 * 2.5 * 1000;
@@ -117,8 +127,8 @@
 </svelte:head>
 
 <Navbar />
-<div style="flex:1">
-	<slot />
+<div class="flex-grow">
+	{@render children?.()}
 </div>
 <Footer />
 <SvelteToast options={TOAST_DEFAULT_OPTIONS} />

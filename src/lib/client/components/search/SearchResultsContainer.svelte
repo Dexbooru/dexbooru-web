@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import { TabItem, Tabs } from 'flowbite-svelte';
 	import { slide } from 'svelte/transition';
@@ -6,15 +8,19 @@
 	import PostTable from '../tables/PostTable.svelte';
 	import UserTable from '../tables/UserTable.svelte';
 
-	export let results: TAppSearchResult;
-	let { posts, artists, tags, users } = results;
+	interface Props {
+		results: TAppSearchResult;
+	}
 
-	$: {
+	let { results }: Props = $props();
+	let { posts, artists, tags, users } = $state(results);
+
+	run(() => {
 		posts = results.posts;
 		artists = results.artists;
 		tags = results.tags;
 		users = results.users;
-	}
+	});
 </script>
 
 <div in:slide out:slide>

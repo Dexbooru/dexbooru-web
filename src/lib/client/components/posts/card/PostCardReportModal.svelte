@@ -6,9 +6,9 @@
 	import { Button, Label, Modal, Select, Textarea } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 
-	let postId: string;
-	let reportVerbalReason = '';
-	let selectedReportReasonCategory: ReportReasonCategory;
+	let postId: string = $state();
+	let reportVerbalReason = $state('');
+	let selectedReportReasonCategory: ReportReasonCategory = $state();
 
 	const activeModal = getActiveModal();
 

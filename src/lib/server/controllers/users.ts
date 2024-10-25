@@ -21,7 +21,6 @@ import { deleteFromBucket, uploadToBucket } from '../aws/actions/s3';
 import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { SESSION_ID_COOKIE_OPTIONS } from '../constants/cookies';
 import { boolStrSchema } from '../constants/reusableSchemas';
-import { SINGLE_USER_CACHE_TIME_SECONDS } from '../constants/sessions';
 import { checkIfUserIsFriended } from '../db/actions/friends';
 import {
 	createUserPreferences,
@@ -64,10 +63,14 @@ import {
 } from '../helpers/totp';
 import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
-const usernamePasswordSchema = z.object({
+const usernamePasswordFormSchema = z.object({
 	username: z.string().trim().min(1, 'The username cannot be empty'),
 	password: z.string().min(1, 'The password cannot be empty'),
 	rememberMe: boolStrSchema,
+});
+const usernamePasswordEndpointSchmea = z.object({
+	username: z.string().trim().min(1, 'The username cannot be empty'),
+	password: z.string().min(1, 'The password cannot be empty'),
 });
 
 const usernameRequirementSchema = z
@@ -162,12 +165,12 @@ const UserOtpGenerateSchema = {
 	}),
 } satisfies TRequestSchema;
 
-const UserOauth2SchemaEndpointSchema = {
-	body: usernamePasswordSchema,
+const UserAuthEndpointSchema = {
+	body: usernamePasswordEndpointSchmea,
 } satisfies TRequestSchema;
 
-const UserOauth2SchemaFormSchema = {
-	form: usernamePasswordSchema,
+const UserAuthFormSchema = {
+	form: usernamePasswordFormSchema,
 } satisfies TRequestSchema;
 
 const UserCreateSchema = {
@@ -182,7 +185,7 @@ const UserCreateSchema = {
 			.refine((val) => {
 				if (typeof val === 'string') return true;
 
-				return isFileImage(val) && isFileImageSmall(val, false);
+				return isFileImage(val) && isFileImageSmall(val, 'profilePicture');
 			}, profilePictureRefinementError),
 	}),
 } satisfies TRequestSchema;
@@ -199,7 +202,7 @@ const UserChangeProfilePictureSchema = {
 		newProfilePicture: z.instanceof(globalThis.File).refine((val) => {
 			if (val.size === 0) return false;
 
-			return isFileImage(val) && isFileImageSmall(val, false);
+			return isFileImage(val) && isFileImageSmall(val, 'profilePicture');
 		}, profilePictureRefinementError),
 	}),
 } satisfies TRequestSchema;
@@ -309,7 +312,7 @@ export const handleUpdatePostPreferences = async (event: RequestEvent) => {
 	);
 };
 
-export const handleUserOauth2AuthFlowValidate = async (event: RequestEvent) => {
+export const handleUserAuthFlowValidate = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
 		event,
 		'api-route',
@@ -366,10 +369,11 @@ export const handleGetUser = async (
 			username: true,
 			profilePictureUrl: true,
 			createdAt: true,
-			...(user.id !== NULLABLE_USER.id && {
-				updatedAt: true,
-				email: true,
-			}),
+			...(user.id !== NULLABLE_USER.id &&
+				targetUsername === user.username && {
+					updatedAt: true,
+					email: true,
+				}),
 		});
 		if (!targetUser) {
 			const errorResponse = createErrorResponse(
@@ -395,10 +399,6 @@ export const handleGetUser = async (
 		}
 
 		const userStatistics = await getUserStatistics(targetUser.id);
-
-		if (targetUser.id !== user.id && handlerType === 'page-server-load') {
-			cacheResponse(event.setHeaders, SINGLE_USER_CACHE_TIME_SECONDS);
-		}
 
 		return createSuccessResponse(
 			handlerType,
@@ -624,7 +624,7 @@ export const handleDeleteUser = async (event: RequestEvent) => {
 				await deleteUserById(event.locals.user.id);
 				event.cookies.delete(SESSION_ID_KEY, { path: '/' });
 
-				throw redirect(302, '/');
+				redirect(302, '/');
 			} catch (error) {
 				if (isRedirectObject(error)) throw error;
 				return createErrorResponse(
@@ -682,7 +682,7 @@ export const handleCreateUser = async (event: RequestEvent) => {
 
 			await createUserPreferences(newUser.id);
 
-			throw redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
+			redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
 		} catch (error) {
 			if (isRedirectObject(error)) throw error;
 			return createErrorResponse(
@@ -706,17 +706,17 @@ export const handleProcessUserTotp = async (event: RequestEvent) => {
 			try {
 				const totpChallenge = await getTotpChallenge(challengeId);
 				if (!totpChallenge) {
-					throw redirect(302, '/login');
+					redirect(302, '/login');
 				}
 
 				const ipAddress = event.getClientAddress();
 				if (ipAddress !== totpChallenge.ipAddress) {
-					throw redirect(302, '/login');
+					redirect(302, '/login');
 				}
 
 				const user = await findUserByName(username);
 				if (!user) {
-					throw redirect(302, '/login');
+					redirect(302, '/login');
 				}
 
 				const isTotpCodeValid = isValidOtpCode(user.username, otpCode);
@@ -731,7 +731,7 @@ export const handleProcessUserTotp = async (event: RequestEvent) => {
 
 				deleteTotpChallenge(challengeId);
 
-				throw redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
+				redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
 			} catch (error) {
 				if (isRedirectObject(error)) throw error;
 
@@ -755,12 +755,12 @@ export const handleGetUserTotp = async (event: RequestEvent) => {
 			try {
 				const challengeData = await getTotpChallenge(challengeId);
 				if (!challengeData) {
-					throw redirect(302, '/login');
+					redirect(302, '/login');
 				}
 
 				const ipAddress = event.getClientAddress();
 				if (ipAddress !== challengeData.ipAddress) {
-					throw redirect(302, '/login');
+					redirect(302, '/login');
 				}
 
 				return createSuccessResponse(
@@ -781,62 +781,53 @@ export const handleGetUserTotp = async (event: RequestEvent) => {
 };
 
 export const handleUserOauth2AuthFlowForm = async (event: RequestEvent) => {
-	return await validateAndHandleRequest(
-		event,
-		'form-action',
-		UserOauth2SchemaFormSchema,
-		async (data) => {
-			const { username, password, rememberMe } = data.form;
-			const errorData = {
-				username,
-				reason: 'A user with that name does not exist or the provided password was incorrect!',
-			};
+	return await validateAndHandleRequest(event, 'form-action', UserAuthFormSchema, async (data) => {
+		const { username, password, rememberMe } = data.form;
+		const errorData = {
+			username,
+			reason: 'A user with that name does not exist or the provided password was incorrect!',
+		};
 
-			try {
-				const user = await findUserByName(username);
-				if (!user) {
-					return createErrorResponse('form-action', 401, 'The authentication failed', errorData);
-				}
-
-				const passwordMatchConfirmed = await doPasswordsMatch(password, user.password);
-				if (!passwordMatchConfirmed) {
-					return createErrorResponse('form-action', 401, 'The authentication failed', errorData);
-				}
-
-				const preferences = await getUserPreferences(user.id);
-				if (preferences && preferences.twoFactorAuthenticationEnabled) {
-					const ipAddress = event.getClientAddress();
-					const newTotpChallengeId = await createTotpChallenge(
-						user.username,
-						ipAddress,
-						rememberMe,
-					);
-					throw redirect(302, `/login/totp/${newTotpChallengeId}`);
-				}
-
-				const encodedAuthToken = generateEncodedUserTokenFromRecord(user, rememberMe);
-				event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(rememberMe));
-
-				throw redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
-			} catch (error) {
-				if (isRedirectObject(error)) throw error;
-				return createErrorResponse(
-					'form-action',
-					500,
-					'An unexpected error occured while trying to authenticate',
-				);
+		try {
+			const user = await findUserByName(username);
+			if (!user) {
+				return createErrorResponse('form-action', 401, 'The authentication failed', errorData);
 			}
-		},
-	);
+
+			const passwordMatchConfirmed = await doPasswordsMatch(password, user.password);
+			if (!passwordMatchConfirmed) {
+				return createErrorResponse('form-action', 401, 'The authentication failed', errorData);
+			}
+
+			const preferences = await getUserPreferences(user.id);
+			if (preferences && preferences.twoFactorAuthenticationEnabled) {
+				const ipAddress = event.getClientAddress();
+				const newTotpChallengeId = await createTotpChallenge(user.username, ipAddress, rememberMe);
+				redirect(302, `/login/totp/${newTotpChallengeId}`);
+			}
+
+			const encodedAuthToken = generateEncodedUserTokenFromRecord(user, rememberMe);
+			event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(rememberMe));
+
+			redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
+		} catch (error) {
+			if (isRedirectObject(error)) throw error;
+			return createErrorResponse(
+				'form-action',
+				500,
+				'An unexpected error occured while trying to authenticate',
+			);
+		}
+	});
 };
 
-export const handleUserOauth2AuthFlowEndpoint = async (event: RequestEvent) => {
+export const handleUserAuthFlowEndpoint = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
 		event,
 		'api-route',
-		UserOauth2SchemaEndpointSchema,
+		UserAuthEndpointSchema,
 		async (data) => {
-			const { username, password, rememberMe } = data.body;
+			const { username, password } = data.body;
 
 			try {
 				const user = await findUserByName(username);
@@ -853,7 +844,7 @@ export const handleUserOauth2AuthFlowEndpoint = async (event: RequestEvent) => {
 					);
 				}
 
-				const encodedAuthToken = generateEncodedUserTokenFromRecord(user, rememberMe, '1d');
+				const encodedAuthToken = generateEncodedUserTokenFromRecord(user, false, '1d');
 
 				return createSuccessResponse(
 					'api-route',

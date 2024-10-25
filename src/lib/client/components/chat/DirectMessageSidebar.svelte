@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { page } from '$app/stores';
 	import { SIDEBAR_WIDTH_STORAGE_KEY } from '$lib/client/constants/chat';
 	import { chatStore } from '$lib/client/stores/chat';
@@ -10,13 +12,13 @@
 	import { onDestroy, onMount } from 'svelte';
 	import CreateChatRoomContainer from './CreateChatRoomContainer.svelte';
 
-	let filteredFriends: TChatFriend[] = [];
-	let processedRooms: (Partial<TChatRoom> & Partial<TChatFriend> & { chatRoomId: string })[] = [];
+	let filteredFriends: TChatFriend[] = $state([]);
+	let processedRooms: (Partial<TChatRoom> & Partial<TChatFriend> & { chatRoomId: string })[] = $state([]);
 
-	let currentRoomId: string = '';
-	$: {
+	let currentRoomId: string = $state('');
+	run(() => {
 		currentRoomId = $page.params.roomId;
-	}
+	});
 
 	const persistSidebarWidth = (sidebarElement: HTMLElement | null) => {
 		if (sidebarElement) {

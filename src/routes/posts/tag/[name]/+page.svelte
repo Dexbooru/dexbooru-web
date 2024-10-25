@@ -4,12 +4,16 @@
 	import { updatePostStores } from '$lib/client/helpers/posts';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	const tagName = $page.params.name;
 
-	$: {
+	$effect(() => {
 		updatePostStores(data);
-	}
+	});
 </script>
 
 <PostWrapper postsSection="Posts with the tag: {tagName}" />

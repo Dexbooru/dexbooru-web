@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { Button, Card, Input, Label } from 'flowbite-svelte';
 
-	export let error: string | null = null;
+	interface Props {
+		error?: string | null;
+	}
 
-	let email: string = '';
+	let { error = null }: Props = $props();
+
+	let email: string = $state('');
 </script>
 
 <Card class="w-full max-w-md mt-20">

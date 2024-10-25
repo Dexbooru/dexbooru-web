@@ -5,10 +5,14 @@
 	import { PapperPlaneSolid } from 'flowbite-svelte-icons';
 	import { get } from 'svelte/store';
 
-	export let roomId: string;
-	export let friend: TChatFriend;
+	interface Props {
+		roomId: string;
+		friend: TChatFriend;
+	}
 
-	let content: string = '';
+	let { roomId, friend }: Props = $props();
+
+	let content: string = $state('');
 
 	const sendMessageViaSocket = (overridenContent: string | null = null) => {
 		const { manager } = get(chatStore);

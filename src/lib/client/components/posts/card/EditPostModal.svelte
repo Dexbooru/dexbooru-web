@@ -3,14 +3,14 @@
 	import { EDIT_POST_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getActiveModal } from '$lib/client/helpers/context';
-	import { MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION } from '$lib/shared/constants/images';
+	import { MAXIMUM_POST_DESCRIPTION_LENGTH } from '$lib/shared/constants/posts';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Label, Modal, Textarea } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 
 	let post: TPost;
-	let description: string = '';
+	let description: string = $state('');
 	let editingPost: boolean = false;
 
 	const activeModal = getActiveModal();
@@ -50,11 +50,11 @@
 	class="w-full"
 >
 	<Label class="mb-1" for="description-textarea">
-		Please enter a description for your post <br /> (max {MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION} characters)
+		Please enter a description for your post <br /> (max {MAXIMUM_POST_DESCRIPTION_LENGTH} characters)
 	</Label>
 	<Textarea
 		id="description-textarea"
-		maxlength={MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION}
+		maxlength={MAXIMUM_POST_DESCRIPTION_LENGTH}
 		rows="5"
 		bind:value={description}
 		name="description"
@@ -62,7 +62,7 @@
 		required
 	/>
 	<p class="leading-none dark:text-gray-400 text-right mt-2">
-		{description.length}/{MAXIMUM_CHARACTERS_PER_POST_DESCRIPTION}
+		{description.length}/{MAXIMUM_POST_DESCRIPTION_LENGTH}
 	</p>
 
 	<Button

@@ -18,32 +18,23 @@
 	import ImageCollection from '../../images/ImageCollection.svelte';
 	import PostCardActions from '../card/PostCardActions.svelte';
 
-	export let post: TPost;
+	interface Props {
+		post: TPost;
+	}
 
-	const userPreferences = getAuthenticatedUserPreferences();
-
-	let originalSizedImageUrls: string[] = [];
-	let imagesMetadata: {
-		imageFileName: string;
-		imageUrl: string;
-		imageHeight: number;
-		imageWidth: number;
-	}[] = [];
-	let originalImageDimensions: {
-		imageWidth: number;
-		imageHeight: number;
-	}[] = [];
-
-	$: {
-		originalSizedImageUrls = post.imageUrls.filter((imageUrl) => {
+	let { post }: Props = $props();
+	let originalSizedImageUrls = $derived(
+		post.imageUrls.filter((imageUrl) => {
 			if (
 				IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))
 			) {
 				return true;
 			}
 			return imageUrl.includes(ORIGINAL_IMAGE_SUFFIX);
-		});
-		imagesMetadata = post.imageUrls
+		}),
+	);
+	let imagesMetadata = $derived(
+		post.imageUrls
 			.map((imageUrl, index) => {
 				if (
 					IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))
@@ -63,11 +54,15 @@
 					imageWidth,
 				};
 			})
-			.filter((metadata) => metadata !== null);
-		originalImageDimensions = imagesMetadata
+			.filter((metadata) => metadata !== null),
+	);
+	let originalImageDimensions = $derived(
+		imagesMetadata
 			.filter((metadata) => metadata.imageFileName.includes(ORIGINAL_IMAGE_SUFFIX))
-			.map((metadata) => ({ imageWidth: metadata.imageWidth, imageHeight: metadata.imageHeight }));
-	}
+			.map((metadata) => ({ imageWidth: metadata.imageWidth, imageHeight: metadata.imageHeight })),
+	);
+
+	const userPreferences = getAuthenticatedUserPreferences();
 </script>
 
 <ImageCollection

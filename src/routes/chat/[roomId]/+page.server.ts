@@ -3,7 +3,7 @@ import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals, params, parent }) => {
     if (!locals.user) {
-        throw redirect(302, '/');
+        redirect(302, '/');
     }   
 
     const chatLayoutData = await parent();
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals, params, parent }) => {
 
     const room = chatRooms.find(chatRoom => chatRoom.id === roomId);
     if (!room)  {
-        throw redirect(302, '/chat');
+        redirect(302, '/chat');
     }
 
     const friendId = room.participants[0] === locals.user.id ? room.participants[1] : room.participants[0];
@@ -20,7 +20,7 @@ export const load: PageServerLoad = async ({ locals, params, parent }) => {
     const isParticipant = room.participants.includes(locals.user.id);
 
     if (!friend || !isParticipant) {
-        throw redirect(302, '/chat');
+        redirect(302, '/chat');
     }
 
     return {
