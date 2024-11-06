@@ -1,19 +1,20 @@
 <script lang="ts">
-	import CollectionCreateDrawer from '$lib/client/collections/CollectionCreateDrawer.svelte';
+	import CollectionCreateDrawer from '$lib/client/components/collections/CollectionCreateDrawer.svelte';
 	import PostGrid from '$lib/client/components/posts/container/PostGrid.svelte';
 	import PostPageSidebar from '$lib/client/components/posts/container/PostPageSidebar.svelte';
 	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
+	import { CLEAR_INPUT_INTERVAL_MS } from '$lib/client/constants/search';
 	import {
 		getAuthenticatedUser,
-		getAuthenticatedUserPreferences,
 		getOriginalPostsPage,
+		getPostPaginationData,
 		getPostsPage,
 	} from '$lib/client/helpers/context';
+	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
-	import { Button } from 'flowbite-svelte';
-	import { PlusSolid } from 'flowbite-svelte-icons';
 	import { onDestroy, onMount } from 'svelte';
 	import { get } from 'svelte/store';
+	import { fade } from 'svelte/transition';
 	import Searchbar from '../../reusable/Searchbar.svelte';
 
 	interface Props {
@@ -21,12 +22,14 @@
 	}
 
 	let { postContainerTitle }: Props = $props();
+	let uniqueTags: string[] = $state([]);
+	let uniqueArtists: string[] = $state([]);
+	let collectionCreateDrawerHidden: boolean = $state(true);
 
-	const CLEAR_INPUT_INTERVAL_MS: number = 250;
+	const postPaginationData = getPostPaginationData();
 	const originalPostPage = getOriginalPostsPage();
 	const postsPage = getPostsPage();
 	const user = getAuthenticatedUser();
-	const userPreferences = getAuthenticatedUserPreferences();
 
 	const onPostSearch = (query: string) => {
 		const cleanedQuery = query.toLocaleLowerCase().trim();
@@ -47,9 +50,12 @@
 		postsPage.set(filteredPosts);
 	};
 
-	let uniqueTags: string[] = $state([]);
-	let uniqueArtists: string[] = $state([]);
-	let collectionCreateDrawerHidden: boolean = $state(true);
+	const postPaginationDataUnsubscribe = postPaginationData.subscribe((data) => {
+		if (data) {
+			applyLazyLoadingOnImageClass('post-carousel-image');
+			applyLazyLoadingOnImageClass('booru-avatar-post-card');
+		}
+	});
 
 	const postPageStoreUnsubscribe = postsPage.subscribe((updatedPosts) => {
 		uniqueTags = getUniqueLabelsFromPosts(updatedPosts, 'tag');
@@ -57,6 +63,9 @@
 	});
 
 	onMount(() => {
+		applyLazyLoadingOnImageClass('post-carousel-image');
+		applyLazyLoadingOnImageClass('booru-avatar-post-card');
+
 		const searchInput = document.querySelector('#post-page-searchbar') as HTMLInputElement;
 
 		const postSearchResetTimeoutId = setInterval(() => {
@@ -73,32 +82,23 @@
 
 	onDestroy(() => {
 		postPageStoreUnsubscribe();
+		postPaginationDataUnsubscribe();
 	});
 </script>
 
-<main id="post-container" class="mt-5">
+<main in:fade id="post-container" class="mt-5">
 	<div id="post-container-sidebar">
 		<PostPageSidebar {uniqueTags} {uniqueArtists} />
 	</div>
 	<div id="post-container-body" class="space-y-4 mb-5">
 		<div id="post-container-title" class="block space-y-3">
 			<h1 class="text-4xl dark:text-white cursor-text">{postContainerTitle}</h1>
-			<div class="flex">
-				{#if !$userPreferences.hidePostMetadataOnPreview}
-					<Searchbar
-						inputElementId="post-page-searchbar"
-						width="25rem"
-						queryInputHandler={onPostSearch}
-						placeholder="Search by keyword(s) on this page"
-					/>
-				{/if}
-				{#if $user}
-					<Button on:click={() => (collectionCreateDrawerHidden = false)}>
-						Create collection
-						<PlusSolid class="ml-3" />
-					</Button>
-				{/if}
-			</div>
+			<Searchbar
+				inputElementId="post-page-searchbar"
+				width="25rem"
+				queryInputHandler={onPostSearch}
+				placeholder="Search by keyword(s) on this page"
+			/>
 		</div>
 		<PostGrid />
 		{#if $postsPage.length > 0}

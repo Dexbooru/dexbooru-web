@@ -32,20 +32,14 @@
 		postId: string;
 		likes: number;
 		author: {
-		id: string;
-		username: string;
-		profilePictureUrl: string;
-	};
+			id: string;
+			username: string;
+			profilePictureUrl: string;
+		};
 		onPostViewPage?: boolean;
 	}
 
-	let {
-		post,
-		postId,
-		likes = $bindable(),
-		author,
-		onPostViewPage = false
-	}: Props = $props();
+	let { post, postId, likes = $bindable(), author, onPostViewPage = false }: Props = $props();
 
 	const user = getAuthenticatedUser();
 	const postsPage = getPostsPage();
@@ -128,8 +122,12 @@
 
 	{#if $user}
 		<Button
-			on:click={() => activeModal.set({ isOpen: true, focusedModalName: COLLECTIONS_MODAL_NAME })}
-			>Add to collection</Button
+			on:click={() =>
+				activeModal.set({
+					isOpen: true,
+					focusedModalName: COLLECTIONS_MODAL_NAME,
+					modalData: { postId },
+				})}>Add to collection</Button
 		>
 	{/if}
 

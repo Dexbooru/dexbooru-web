@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { Alert, Button, Card, Checkbox, Input, Label } from 'flowbite-svelte';
 	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
 	import type { ActionData } from '../../../../routes/login/$types';
@@ -14,14 +12,12 @@
 	let showPassword = $state(false);
 
 	const loginErrorReason: string | undefined = form?.reason;
+
 	let username: string = $state(form?.username || '');
 	let password: string = $state('');
 	let rememberMe: boolean = $state(false);
-
-	let loginFormButtonDisabled = $state(true);
-
-	run(() => {
-		loginFormButtonDisabled = !(username.length > 0 && password.length > 0);
+	let loginFormButtonDisabled = $derived.by(() => {
+		return !(username.length > 0 && password.length > 0);
 	});
 </script>
 

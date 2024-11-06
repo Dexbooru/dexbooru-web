@@ -16,7 +16,7 @@ import { z } from 'zod';
 import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { PUBLIC_POST_SELECTORS } from '../constants/posts';
-import { boolStrSchema, postPaginationSchema } from '../constants/reusableSchemas';
+import { boolStrSchema, pageNumberSchema } from '../constants/reusableSchemas';
 import { findPostsByArtistName } from '../db/actions/artist';
 import {
 	createPost,
@@ -43,6 +43,22 @@ import type {
 	TPostFetchCategory,
 	TRequestSchema,
 } from '../types/controllers';
+
+const postPaginationSchema = z.object({
+	category: z
+		.union([z.literal('general'), z.literal('liked'), z.literal('uploaded')])
+		.default('general'),
+	ascending: boolStrSchema,
+	orderBy: z
+		.union([
+			z.literal('views'),
+			z.literal('likes'),
+			z.literal('createdAt'),
+			z.literal('commentCount'),
+		])
+		.default('createdAt'),
+	pageNumber: pageNumberSchema,
+});
 
 const descriptionSchema = z
 	.string()
@@ -200,7 +216,7 @@ export const handleUpdatePost = async (
 				if (event.locals.user.id !== currentPost.authorId) {
 					return createErrorResponse(
 						handlerType,
-						401,
+						403,
 						`The currently authenticated user id does not match the post's author id: ${currentPost.authorId}`,
 					);
 				}
@@ -625,7 +641,7 @@ export const handleDeletePost = async (event: RequestEvent) => {
 				if (event.locals.user.id !== post.author.id) {
 					return createErrorResponse(
 						'api-route',
-						401,
+						403,
 						'You are not authorized to delete this post, as you are not the author',
 					);
 				}

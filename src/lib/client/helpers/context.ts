@@ -1,9 +1,13 @@
 import type CommentTree from '$lib/shared/helpers/comments';
-import type { TCollectionPaginationData } from '$lib/shared/types/collections';
+import type {
+	TCollectionHiddenPageData,
+	TCollectionPaginationData,
+	TPostCollection,
+} from '$lib/shared/types/collections';
 import type { TUserNotifications } from '$lib/shared/types/notifcations';
 import type { THiddenPagePostData, TPost, TPostPaginationData } from '$lib/shared/types/posts';
 import type { TUser } from '$lib/shared/types/users';
-import type { PostCollection, UserPreference } from '@prisma/client';
+import type { UserPreference } from '@prisma/client';
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
 import {
@@ -11,16 +15,18 @@ import {
 	BLACKLISTED_POST_PAGE_CONTEXT_KEY,
 	CHANGE_PASSWORD_AUTH_REQUIREMENTS_CONTEXT_KEY,
 	CHANGE_USERNAME_AUTH_REQUIREMENTS_CONTEXT_KEY,
-	COLLECTION_PAGE_CONTEXT_KEY,
+	COLLECTIONS_PAGE_CONTEXT_KEY,
 	COLLECTION_PAGINATION_DATA_CONTEXT_KEY,
 	COMMENT_TREE_CONTEXT_KEY,
 	FOOTER_CONTEXT_KEY,
+	HIDDEN_COLLECTIONS_PAGE_CONTEXT_KEY,
 	HIDDEN_POSTS_PAGE_CONTEXT_KEY,
+	NSFW_COLLECTIONS_PAGE_CONTEXT_KEY,
 	NSFW_POST_PAGE_CONTEXT_KEY,
-	ORIGINAL_COLLECTION_PAGE_CONTEXT_KEY,
+	ORIGINAL_COLLECTIONS_PAGE_CONTEXT_KEY,
 	ORIGINAL_POSTS_PAGE_CONTEXT_KEY,
 	POSTS_PAGE_CONTEXT_KEY,
-	POST_PAGINATION_CONTEXT_KEY,
+	POST_PAGINATION_DATA_CONTEXT_KEY,
 	REGISTER_FORM_AUTH_REQUIREMENTS_CONTEXT_KEY,
 	USER_CONTEXT_KEY,
 	USER_NOTIFICATIONS_CONTEXT_KEY,
@@ -28,19 +34,29 @@ import {
 } from '../constants/context';
 import type { TAuthFormRequirementData, TFooterStoreData, TModalStoreData } from '../types/stores';
 
+export const updateHiddenCollectionsPage = (collectionData: TCollectionHiddenPageData) => {
+	const updatedCollections = writable(collectionData);
+	setContext(HIDDEN_COLLECTIONS_PAGE_CONTEXT_KEY, updatedCollections);
+};
+
+export const updateNsfwCollectionsPage = (collections: TPostCollection[]) => {
+	const updatedCollections = writable(collections);
+	setContext(NSFW_COLLECTIONS_PAGE_CONTEXT_KEY, updatedCollections);
+};
+
 export const updateCollectionPagination = (paginationData: TCollectionPaginationData | null) => {
 	const updatedCollectionData = writable(paginationData);
 	setContext(COLLECTION_PAGINATION_DATA_CONTEXT_KEY, updatedCollectionData);
 };
 
-export const updateOriginalCollectionPage = (collections: PostCollection[]) => {
+export const updateOriginalCollectionPage = (collections: TPostCollection[]) => {
 	const updatedCollections = writable(collections);
-	setContext(ORIGINAL_COLLECTION_PAGE_CONTEXT_KEY, updatedCollections);
+	setContext(ORIGINAL_COLLECTIONS_PAGE_CONTEXT_KEY, updatedCollections);
 };
 
-export const updateCollectionPage = (collections: PostCollection[]) => {
+export const updateCollectionPage = (collections: TPostCollection[]) => {
 	const updatedCollections = writable(collections);
-	setContext(COLLECTION_PAGE_CONTEXT_KEY, updatedCollections);
+	setContext(COLLECTIONS_PAGE_CONTEXT_KEY, updatedCollections);
 };
 
 export const updateChangePasswordAuthRequirements = (requirements: TAuthFormRequirementData) => {
@@ -75,7 +91,7 @@ export const updateActiveModal = (activeModal: TModalStoreData) => {
 
 export const updatePostPagination = (paginationData: TPostPaginationData | null) => {
 	const updatedPaginationData = writable(paginationData);
-	setContext(POST_PAGINATION_CONTEXT_KEY, updatedPaginationData);
+	setContext(POST_PAGINATION_DATA_CONTEXT_KEY, updatedPaginationData);
 };
 
 export const updatePostsPage = (posts: TPost[]) => {
@@ -118,12 +134,20 @@ export const updateAuthenticatedUserPreferences = (userPreferences: UserPreferen
 	setContext(USER_PREFERENCE_CONTEXT_KEY, updatedUserPreferences);
 };
 
+export const getHiddenCollectionsPage = () => {
+	return getContext<Writable<TCollectionHiddenPageData>>(HIDDEN_COLLECTIONS_PAGE_CONTEXT_KEY);
+};
+
+export const getNsfwCollectionPage = () => {
+	return getContext<Writable<TPostCollection[]>>(NSFW_COLLECTIONS_PAGE_CONTEXT_KEY);
+};
+
 export const getOriginalCollectionPage = () => {
-	return getContext<Writable<PostCollection[]>>(ORIGINAL_COLLECTION_PAGE_CONTEXT_KEY);
+	return getContext<Writable<TPostCollection[]>>(ORIGINAL_COLLECTIONS_PAGE_CONTEXT_KEY);
 };
 
 export const getCollectionPage = () => {
-	return getContext<Writable<PostCollection[]>>(COLLECTION_PAGE_CONTEXT_KEY);
+	return getContext<Writable<TPostCollection[]>>(COLLECTIONS_PAGE_CONTEXT_KEY);
 };
 
 export const getCollectionPaginationData = () => {
@@ -163,7 +187,7 @@ export const getAuthenticatedUserNotifications = () => {
 };
 
 export const getPostPaginationData = () => {
-	return getContext<Writable<TPostPaginationData | null>>(POST_PAGINATION_CONTEXT_KEY);
+	return getContext<Writable<TPostPaginationData | null>>(POST_PAGINATION_DATA_CONTEXT_KEY);
 };
 
 export const getPostsPage = () => {

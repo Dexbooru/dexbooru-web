@@ -246,6 +246,7 @@ const UpdateUserUserInterfacePreferencesSchema = {
 	form: z.object({
 		customSiteWideCss: z.string().optional(),
 		hidePostMetadataOnPreview: boolStrSchema.optional(),
+		hideCollectionMetadataOnPreview: boolStrSchema.optional(),
 	}),
 } satisfies TRequestSchema;
 
@@ -255,12 +256,14 @@ export const handleUpdateUserInterfacePreferences = async (event: RequestEvent) 
 		'form-action',
 		UpdateUserUserInterfacePreferencesSchema,
 		async (data) => {
-			const { customSiteWideCss, hidePostMetadataOnPreview } = data.form;
+			const { customSiteWideCss, hidePostMetadataOnPreview, hideCollectionMetadataOnPreview } =
+				data.form;
 
 			try {
 				await updateUserPreferences(event.locals.user.id, {
 					customSideWideCss: customSiteWideCss ?? '',
 					hidePostMetadataOnPreview: hidePostMetadataOnPreview ?? false,
+					hideCollectionMetadataOnPreview: hideCollectionMetadataOnPreview ?? false,
 					updatedAt: new Date(),
 				});
 
@@ -268,7 +271,7 @@ export const handleUpdateUserInterfacePreferences = async (event: RequestEvent) 
 					'form-action',
 					'Successfully updated the user interface preferences of the user',
 				);
-			} catch {
+			} catch (error) {
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -423,9 +426,8 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 			try {
 				deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, event.locals.user.profilePictureUrl);
 
-				const newProfilePictureFileBuffer = await runProfileImageTransformationPipeline(
-					newProfilePicture,
-				);
+				const newProfilePictureFileBuffer =
+					await runProfileImageTransformationPipeline(newProfilePicture);
 				const updatedProfilePictureObjectUrl = await uploadToBucket(
 					AWS_PROFILE_PICTURE_BUCKET_NAME,
 					'profile_pictures',
@@ -662,9 +664,8 @@ export const handleCreateUser = async (event: RequestEvent) => {
 
 			let finalProfilePictureUrl = DEFAULT_PROFILE_PICTURE_URL;
 			if (profilePicture instanceof globalThis.File && profilePicture.size > 0) {
-				const finalProfilePictureBuffer = await runProfileImageTransformationPipeline(
-					profilePicture,
-				);
+				const finalProfilePictureBuffer =
+					await runProfileImageTransformationPipeline(profilePicture);
 				const profilePictureObjectUrl = await uploadToBucket(
 					AWS_PROFILE_PICTURE_BUCKET_NAME,
 					'profile_pictures',

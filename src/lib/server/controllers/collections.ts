@@ -1,6 +1,8 @@
+import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import {
 	MAXIMUM_COLLECTION_DESCRIPTION_LENGTH,
 	MAXIMUM_COLLECTION_TITLE_LENGTH,
+	MAXIMUM_POSTS_PER_COLLECTION,
 } from '$lib/shared/constants/collections';
 import { MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB } from '$lib/shared/constants/images';
 import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
@@ -13,11 +15,14 @@ import { AWS_COLLECTION_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { PUBLIC_POST_COLLECTION_SELECTORS } from '../constants/collections';
 import { boolStrSchema, pageNumberSchema } from '../constants/reusableSchemas';
 import {
+	addPostToCollection,
 	createCollection,
 	deleteCollection,
 	findCollectionById,
 	findCollections,
 	findCollectionsByAuthorId,
+	findCollectionsFromIds,
+	removePostFromCollection,
 	updateCollection,
 } from '../db/actions/collection';
 import { findUserByName } from '../db/actions/user';
@@ -37,6 +42,12 @@ const createCollectionFormErrorData = (errorData: Record<string, unknown>, messa
 	};
 };
 
+const collectionPaginationSchema = z.object({
+	pageNumber: pageNumberSchema,
+	ascending: boolStrSchema,
+	orderBy: z.union([z.literal('createdAt'), z.literal('updatedAt')]).default('createdAt'),
+});
+
 const collectionTitleSchema = z
 	.string()
 	.min(1, 'The title cannot be empty')
@@ -52,10 +63,14 @@ const collectionDescriptionSchema = z
 	})
 	.refine((val) => isLabelAppropriate(val, 'collectionDescription'));
 
-const GetCollectionsSchema = {
-	urlSearchParams: z.object({
-		pageNumber: pageNumberSchema,
+const GetCollectionSchema = {
+	pathParams: z.object({
+		collectionId: z.string().uuid(),
 	}),
+} satisfies TRequestSchema;
+
+const GetCollectionsSchema = {
+	urlSearchParams: collectionPaginationSchema,
 } satisfies TRequestSchema;
 
 const CreateCollectionSchema = {
@@ -98,10 +113,214 @@ const GetUserCollectionsSchema = {
 	pathParams: z.object({
 		username: z.string().min(1, 'The username cannot be empty'),
 	}),
-	urlSearchParams: z.object({
-		pageNumber: pageNumberSchema,
+	urlSearchParams: collectionPaginationSchema,
+} satisfies TRequestSchema;
+
+const GetAuthenticatedUserCollectionsSchema = {
+	urlSearchParams: collectionPaginationSchema,
+} satisfies TRequestSchema;
+
+const UpdateCollectionsPostsSchema = {
+	body: z.object({
+		postId: z.string().uuid(),
+		collectionActions: z.record(z.string().uuid(), z.enum(['add', 'delete'])),
 	}),
 } satisfies TRequestSchema;
+
+export const handleUpdateCollectionsPosts = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'api-route',
+		UpdateCollectionsPostsSchema,
+		async (data) => {
+			const user = event.locals.user;
+			const { postId, collectionActions } = data.body;
+			const collectionIds = Object.keys(collectionActions);
+
+			try {
+				const matchingCollections = await findCollectionsFromIds(collectionIds, {
+					authorId: true,
+					posts: {
+						select: { id: true },
+					},
+				});
+				if (matchingCollections.length !== collectionIds.length) {
+					return createErrorResponse(
+						'api-route',
+						404,
+						'At least one of the provided collection ids does not match to an existing collection',
+					);
+				}
+
+				const userOwnedCollections = matchingCollections.filter(
+					(collection) => collection.authorId === user.id,
+				);
+				if (userOwnedCollections.length !== collectionIds.length) {
+					return createErrorResponse(
+						'api-route',
+						403,
+						'At least one of the provided collection ids author does not match the authenticated user',
+					);
+				}
+
+				const updateReport = new Map<string, string>();
+				for (const [collectionId, action] of Object.entries(collectionActions)) {
+					const matchingCollection = matchingCollections.find(
+						(collection) => collection.id === collectionId,
+					);
+					const postCount = matchingCollection?.posts.length ?? 0;
+					const postAlreadyExistsInCollection = matchingCollection?.posts.some(
+						(post) => post.id === postId,
+					);
+
+					switch (action) {
+						case 'add':
+							if (postAlreadyExistsInCollection) {
+								updateReport.set(
+									collectionId,
+									`No action taken: Post ${postId} already exists in collection ${collectionId}`,
+								);
+							} else if (postCount === MAXIMUM_POSTS_PER_COLLECTION) {
+								updateReport.set(
+									collectionId,
+									`Failed to add post ${postId} to collection ${collectionId}: Maximum post limit of ${MAXIMUM_POSTS_PER_COLLECTION} reached`,
+								);
+							} else {
+								const updatedCollection = await addPostToCollection(collectionId, postId);
+								if (updatedCollection) {
+									updateReport.set(
+										collectionId,
+										`Successfully added post ${postId} to collection ${collectionId}`,
+									);
+								} else {
+									updateReport.set(
+										collectionId,
+										`Failed to add post ${postId} to collection ${collectionId}: An unexpected error occured at the database level`,
+									);
+								}
+							}
+							break;
+
+						case 'delete':
+							if (postCount === 0) {
+								updateReport.set(
+									collectionId,
+									`Failed to remove post ${postId} from collection ${collectionId}: No posts to remove`,
+								);
+							} else {
+								const updatedCollection = await removePostFromCollection(collectionId, postId);
+								if (updatedCollection) {
+									updateReport.set(
+										collectionId,
+										`Successfully removed post ${postId} from collection ${collectionId}`,
+									);
+								} else {
+									updateReport.set(
+										collectionId,
+										`Failed to remove post ${postId} from collection ${collectionId}: An unexpected error occured at the database level`,
+									);
+								}
+							}
+							break;
+
+						default:
+							updateReport.set(
+								collectionId,
+								`Invalid action "${action}" for collection ${collectionId}. No changes were made`,
+							);
+							break;
+					}
+				}
+
+				const responseData = Object.fromEntries(updateReport.entries());
+				return createSuccessResponse(
+					'api-route',
+					'Successfully updated the collections posts',
+					responseData,
+				);
+			} catch (error) {
+				return createErrorResponse(
+					'api-route',
+					500,
+					'An unexpected error occured while trying to the collections posts',
+				);
+			}
+		},
+		true,
+	);
+};
+
+export const handleGetCollection = async (
+	event: RequestEvent,
+	handlerType: TControllerHandlerVariant,
+) => {
+	return await validateAndHandleRequest(event, handlerType, GetCollectionSchema, async (data) => {
+		const { collectionId } = data.pathParams;
+		try {
+			const collection = await findCollectionById(collectionId, PUBLIC_POST_COLLECTION_SELECTORS);
+			if (!collection) {
+				return createErrorResponse(
+					'api-route',
+					404,
+					`A collection with the id: ${collectionId} does not exist`,
+				);
+			}
+
+			return createSuccessResponse(handlerType, 'Successfully fetched the collection', collection);
+		} catch {
+			return createErrorResponse(
+				handlerType,
+				500,
+				'An unexpected error occured while fetching the collection',
+			);
+		}
+	});
+};
+
+export const handleGetAuthenticatedUserCollections = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'page-server-load',
+		GetAuthenticatedUserCollectionsSchema,
+		async (data) => {
+			const user = event.locals.user;
+			const { pageNumber, orderBy, ascending } = data.urlSearchParams;
+
+			try {
+				if (user.id === NULLABLE_USER.id) {
+					throw redirect(302, '/');
+				}
+
+				const userCollections = await findCollectionsByAuthorId(
+					user.id,
+					pageNumber,
+					ascending,
+					orderBy,
+					PUBLIC_POST_COLLECTION_SELECTORS,
+				);
+				const responseData: TCollectionPaginationData = {
+					collections: userCollections,
+					pageNumber,
+					ascending,
+					orderBy,
+				};
+
+				return createSuccessResponse(
+					'page-server-load',
+					'Successfully fetched user collections',
+					responseData,
+				);
+			} catch (error) {
+				if (isRedirectObject(error)) throw error;
+				return createErrorResponse(
+					'page-server-load',
+					500,
+					'An unexpected error occured while fetching the user collections',
+				);
+			}
+		},
+	);
+};
 
 export const handleGetUserCollections = async (
 	event: RequestEvent,
@@ -113,7 +332,7 @@ export const handleGetUserCollections = async (
 		GetUserCollectionsSchema,
 		async (data) => {
 			const username = data.pathParams.username;
-			const pageNumber = data.urlSearchParams.pageNumber;
+			const { pageNumber, orderBy, ascending } = data.urlSearchParams;
 
 			try {
 				const user = await findUserByName(username);
@@ -126,13 +345,17 @@ export const handleGetUserCollections = async (
 				}
 
 				const userCollections = await findCollectionsByAuthorId(
-					event.locals.user.id,
+					user.id,
 					pageNumber,
+					ascending,
+					orderBy,
 					PUBLIC_POST_COLLECTION_SELECTORS,
 				);
 				const responseData: TCollectionPaginationData = {
 					collections: userCollections,
 					pageNumber,
+					ascending,
+					orderBy,
 				};
 
 				return createSuccessResponse(
@@ -156,13 +379,20 @@ export const handleGetCollections = async (
 	handlerType: TControllerHandlerVariant,
 ) => {
 	return await validateAndHandleRequest(event, handlerType, GetCollectionsSchema, async (data) => {
-		const pageNumber = data.urlSearchParams.pageNumber;
+		const { pageNumber, orderBy, ascending } = data.urlSearchParams;
 
 		try {
-			const collections = await findCollections(pageNumber, PUBLIC_POST_COLLECTION_SELECTORS);
+			const collections = await findCollections(
+				pageNumber,
+				ascending,
+				orderBy,
+				PUBLIC_POST_COLLECTION_SELECTORS,
+			);
 			const responseData: TCollectionPaginationData = {
 				collections,
 				pageNumber,
+				orderBy,
+				ascending,
 			};
 			return createSuccessResponse(
 				handlerType,
@@ -203,7 +433,7 @@ export const handleDeleteCollection = async (event: RequestEvent) => {
 				if (collection.authorId !== event.locals.user.id) {
 					return createErrorResponse(
 						'api-route',
-						401,
+						403,
 						`The user with the id: ${event.locals.user.id} is not the author of this collection`,
 					);
 				}
@@ -251,7 +481,7 @@ export const handleUpdateCollection = async (event: RequestEvent) => {
 				if (collection.authorId !== event.locals.user.id) {
 					return createErrorResponse(
 						'api-route',
-						401,
+						403,
 						`The user with the id: ${event.locals.user.id} is not the author of this collection`,
 					);
 				}
@@ -315,10 +545,6 @@ export const handleCreateCollection = async (
 					authorId: event.locals.user.id,
 				});
 
-				if (handlerType === 'form-action') {
-					redirect(302, `/collections/${newCollection.id}?createdSuccessfully=true`);
-				}
-
 				return createSuccessResponse(
 					handlerType,
 					'Collection created successfully',
@@ -327,7 +553,6 @@ export const handleCreateCollection = async (
 				);
 			} catch (error) {
 				if (isRedirectObject(error)) throw error;
-				console.log(error);
 				const message = 'An unexpected error occurred while creating the post';
 				return createErrorResponse(
 					handlerType,

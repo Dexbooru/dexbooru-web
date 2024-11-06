@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import PostWrapper from '$lib/client/components/posts/container/PostWrapper.svelte';
+	import PostsWrapper from '$lib/client/components/posts/container/PostsWrapper.svelte';
 	import { updatePostStores } from '$lib/client/helpers/posts';
 	import type { PageData } from './$types';
 
@@ -16,4 +16,10 @@
 	});
 </script>
 
-<PostWrapper postsSection="Posts with the tag: {tagName}" />
+<PostsWrapper
+	orderBy={data.orderBy}
+	pageNumber={data.pageNumber}
+	ascending={data.ascending}
+	posts={data.posts}
+	postsSection="Posts with the tag: {tagName}"
+/>

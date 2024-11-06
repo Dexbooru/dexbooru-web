@@ -7,8 +7,8 @@
 	import { ArrowLeftSolid, ArrowRightSolid } from 'flowbite-svelte-icons';
 	import { onDestroy } from 'svelte';
 
-	let previousPageUrl: URL = $state();
-	let nextPageUrl: URL = $state();
+	let previousPageUrl: URL = $state(new URL('http://mock.com'));
+	let nextPageUrl: URL = $state(new URL('http://mock.com'));
 	let noPostsLeft: boolean = $state(false);
 	let noPostsOnPage: boolean = $state(false);
 
@@ -47,7 +47,7 @@
 {#if $postPaginationData}
 	<div id="pagination-container" class="flex space-x-3 justify-center {noPostsLeft && 'mt-5'}">
 		{#if noPostsOnPage && !!!['uploaded', 'liked'].find((item) => $page.url.href.includes(item))}
-			<Button href={firstPageUrl.href} color="blue">Return to Home</Button>
+			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}
 			{#if ($postPaginationData.pageNumber - 1 >= 0 || noPostsLeft) && $postPaginationData.pageNumber !== 0}
 				<PaginationItem

@@ -32,17 +32,18 @@ model User {
 }
 
 model UserPreference {
-  twoFactorAuthenticationEnabled Boolean  @default(false)
-  browseInSafeMode               Boolean  @default(false)
-  autoBlurNsfw                   Boolean  @default(true)
-  blacklistedTags                String[] @default([]) @db.Text
-  blacklistedArtists             String[] @default([]) @db.Text
-  customSideWideCss              String   @default("") @db.Text
-  hidePostMetadataOnPreview      Boolean  @default(false)
-  user                           User?    @relation(name: "user profile preferences", fields: [userId], references: [id], onDelete: Cascade)
-  userId                         String   @unique
-  createdAt                      DateTime @default(now())
-  updatedAt                      DateTime @default(now())
+  twoFactorAuthenticationEnabled  Boolean  @default(false)
+  browseInSafeMode                Boolean  @default(false)
+  autoBlurNsfw                    Boolean  @default(true)
+  blacklistedTags                 String[] @default([]) @db.Text
+  blacklistedArtists              String[] @default([]) @db.Text
+  customSideWideCss               String   @default("") @db.Text
+  hidePostMetadataOnPreview       Boolean  @default(false)
+  hideCollectionMetadataOnPreview Boolean  @default(false)
+  user                            User?    @relation(name: "user profile preferences", fields: [userId], references: [id], onDelete: Cascade)
+  userId                          String   @unique
+  createdAt                       DateTime @default(now())
+  updatedAt                       DateTime @default(now())
 
   @@id([userId])
 }
@@ -73,16 +74,16 @@ model Post {
 }
 
 model PostCollection {
-  id                String   @id @default(uuid())
-  title             String   @db.VarChar(150)
-  description       String   @db.VarChar(250)
-  isNsfw            Boolean  @default(false)
+  id                 String   @id @default(uuid())
+  title              String   @db.VarChar(150)
+  description        String   @db.VarChar(250)
+  isNsfw             Boolean  @default(false)
   thumbnailImageUrls String[] @default([])
-  posts             Post[]
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @default(now())
-  author            User?    @relation(name: "post collection author", fields: [authorId], references: [id])
-  authorId          String?
+  posts              Post[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now())
+  author             User?    @relation(name: "post collection author", fields: [authorId], references: [id])
+  authorId           String?
 
   @@index([id])
   @@index([authorId])

@@ -2,12 +2,14 @@
 	import { addFriend, deleteFriend } from '$lib/client/api/friends';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
+	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button, Card, Dropdown, DropdownItem } from 'flowbite-svelte';
 	import { DotsHorizontalOutline } from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		targetUser: TUser;
@@ -54,6 +56,10 @@
 			toast.push('An error occured while trying to unfriend this user!', FAILURE_TOAST_OPTIONS);
 		}
 	};
+
+	onMount(() => {
+		applyLazyLoadingOnImageClass('booru-avatar-profile-card');
+	});
 </script>
 
 <Card style="min-width: 300px; max-width: 550px;">
@@ -67,8 +73,10 @@
 		</Dropdown>
 	</div>
 	<div class="flex flex-col items-center pb-4">
-		<Avatar size="lg" class="booru-avatar" src={targetUser.profilePictureUrl} />
-		<h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white cursor-text">{targetUser.username}</h5>
+		<Avatar size="lg" class="booru-avatar-profile-card" src={targetUser.profilePictureUrl} />
+		<h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white cursor-text">
+			{targetUser.username}
+		</h5>
 
 		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
 			>Account id:
@@ -111,7 +119,7 @@
 			<strong>{userStatistics.averageViews}</strong></span
 		>
 
-		<div class="flex mt-4 space-x-3 rtl:space-x-reverse lg:mt-6">
+		<div class="flex flex-col mt-4 space-y-3">
 			{#if $user}
 				{#if $user.id !== targetUser.id}
 					{#if friendStatus === 'not-friends'}
@@ -128,9 +136,13 @@
 					<Button href="/posts/uploaded/{targetUser.username}" color="blue"
 						>View uploaded posts</Button
 					>
+					<Button href="/collections/user/{targetUser.username}" color="blue"
+						>View created collections</Button
+					>
 				{:else}
 					<Button href="/posts/liked" color="red">View liked posts</Button>
 					<Button href="/posts/uploaded" color="blue">View uploaded posts</Button>
+					<Button href="/collections/created" color="blue">View created collections</Button>
 				{/if}
 			{/if}
 		</div>

@@ -5,8 +5,8 @@ export const ORIGINAL_IMAGE_SUFFIX = '_original';
 export const PREVIEW_IMAGE_SUFFIX = '_preview';
 export const NSFW_PREVIEW_IMAGE_SUFFIX = '_nsfw_preview';
 
-export const COLLECTION_THUMBNAIL_WIDTH = 600;
-export const COLLECTION_THUMBNAIL_HEIGHT = 500;
+export const COLLECTION_THUMBNAIL_WIDTH = 700;
+export const COLLECTION_THUMBNAIL_HEIGHT = 700;
 export const POST_PICTURE_PREVIEW_WIDTH = 350;
 export const POST_PICTURE_PREVIEW_HEIGHT = 350;
 export const PROFILE_PICTURE_WIDTH = 128;

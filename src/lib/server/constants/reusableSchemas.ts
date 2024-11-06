@@ -20,19 +20,3 @@ export const pageNumberSchema = z
 	.default('0')
 	.transform((val) => parseInt(val, 10))
 	.refine((val) => !isNaN(val), { message: 'Invalid pageNumber, must be a number' });
-
-export const postPaginationSchema = z.object({
-	category: z
-		.union([z.literal('general'), z.literal('liked'), z.literal('uploaded')])
-		.default('general'),
-	ascending: boolStrSchema,
-	orderBy: z
-		.union([
-			z.literal('views'),
-			z.literal('likes'),
-			z.literal('createdAt'),
-			z.literal('commentCount'),
-		])
-		.default('createdAt'),
-	pageNumber: pageNumberSchema,
-});

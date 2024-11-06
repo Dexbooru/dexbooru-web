@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { TabItem, Tabs } from 'flowbite-svelte';
-	import { GridSolid, UserCircleSolid } from 'flowbite-svelte-icons';
+	import { GridSolid, LockSolid, UserCircleSolid } from 'flowbite-svelte-icons';
 	import { onDestroy, onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/profile/settings/$types';
 	import ChangePasswordForm from './ChangePasswordForm.svelte';
@@ -28,12 +28,6 @@
 	const validTabNames = ['personal', 'preferences', 'security'] as const;
 	let currentTab: string = $state('personal');
 
-	const message = form ? form.message : null;
-
-	if (message) {
-		toast.push(message, SUCCESS_TOAST_OPTIONS);
-	}
-
 	const handleTabClick = (tabName: string) => {
 		if (currentTab === tabName) return;
 
@@ -55,6 +49,15 @@
 		if (typeof newAuthToken === 'string' && newAuthToken.length > 0) {
 			localStorage.setItem(SESSION_ID_KEY, newAuthToken);
 		}
+
+		const message = form ? (form.message as string) : null;
+		if (message !== null) {
+			if (message.includes('error')) {
+				toast.push(message, FAILURE_TOAST_OPTIONS);
+			} else {
+				toast.push(message, SUCCESS_TOAST_OPTIONS);
+			}
+		}
 	});
 
 	onDestroy(() => {
@@ -65,11 +68,11 @@
 <Tabs defaultClass="flex flex-wrap space-x-2 rtl:space-x-revers !p-3" style="underline">
 	<TabItem on:click={() => handleTabClick('personal')} open={currentTab === 'personal'}>
 		{#snippet title()}
-				<div  class="flex items-center gap-2">
+			<div class="flex items-center gap-2">
 				<UserCircleSolid size="md" />
 				Personal
 			</div>
-			{/snippet}
+		{/snippet}
 		<section class="flex flex-wrap gap-4 items-start">
 			<ChangeUsernameForm error={errorReason} {errorType} />
 			<ChangePasswordForm error={errorReason} {errorType} />
@@ -77,26 +80,27 @@
 			<DeleteAccountForm error={errorReason} {errorType} />
 		</section>
 	</TabItem>
-	<TabItem
-		on:click={() => handleTabClick('preferences')}
-		title="Preferences"
-		open={currentTab === 'preferences'}
-	>
-		<!-- @migration-task: migrate this slot by hand, `title` would shadow a prop on the parent component -->
-	<div slot="title" class="flex items-center gap-2">
-			<GridSolid size="md" />
-			Preferences
-		</div>
+	<TabItem on:click={() => handleTabClick('preferences')} open={currentTab === 'preferences'}>
+		{#snippet title()}
+			<div slot="title" class="flex items-center gap-2">
+				<GridSolid size="md" />
+				Preferences
+			</div>
+		{/snippet}
+
 		<section class="flex flex-wrap gap-4 items-start">
 			<PostPreferencesForm error={errorReason} {errorType} />
 			<UserInterfacePreferenceForm error={errorReason} {errorType} />
 		</section>
 	</TabItem>
-	<TabItem
-		open={currentTab === 'security'}
-		on:click={() => handleTabClick('security')}
-		title="Security"
-	>
+	<TabItem open={currentTab === 'security'} on:click={() => handleTabClick('security')}>
+		{#snippet title()}
+			<div slot="title" class="flex items-center gap-2">
+				<LockSolid size="md" />
+				Security
+			</div>
+		{/snippet}
+
 		<section class="flex flex-wrap gap-4 items-start">
 			<Enable2faForm error={errorReason} {errorType} />
 		</section>

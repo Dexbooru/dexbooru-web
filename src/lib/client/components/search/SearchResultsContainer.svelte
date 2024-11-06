@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import { TabItem, Tabs } from 'flowbite-svelte';
 	import { slide } from 'svelte/transition';
@@ -15,7 +13,7 @@
 	let { results }: Props = $props();
 	let { posts, artists, tags, users } = $state(results);
 
-	run(() => {
+	$effect(() => {
 		posts = results.posts;
 		artists = results.artists;
 		tags = results.tags;

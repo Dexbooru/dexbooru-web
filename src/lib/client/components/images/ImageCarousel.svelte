@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { TCarouselTransitionFunction } from '$lib/client/types/images';
 	import { Carousel } from 'flowbite-svelte';
+	import { type Component } from 'svelte';
 	import type { HTMLImgAttributes } from 'svelte/elements';
 
 	interface Props {
@@ -12,13 +13,23 @@
 		transitionFunction?: TCarouselTransitionFunction | null;
 	}
 
+	type SlideProps = {
+		Slide: Component;
+		index: number;
+	};
+
+	type SlideControlProps = {
+		Controls: Component;
+		Indicators: Component;
+	};
+
 	let {
 		postId,
 		postHref = null,
 		imageUrls,
 		imagesAlt = null,
 		slideDuration = 750,
-		transitionFunction = null
+		transitionFunction = null,
 	}: Props = $props();
 
 	const imagesData: HTMLImgAttributes[] = imageUrls.map((_, index) => {
@@ -42,24 +53,21 @@
 </script>
 
 {#if imageUrls.length > 0}
-	<Carousel
-		
-		
-		images={imagesData}
-		{slideDuration}
-		transition={transitionFunction}
-	>
-		{#snippet slide({ Slide, index })}
-				<a  href={postHref}  >
-				<Slide class=" object-contain post-carousel-image" image={downloadSlideImage(index)} />
+	<Carousel images={imagesData} {slideDuration} transition={transitionFunction}>
+		{#snippet slide({ Slide, index }: SlideProps)}
+			<a href={postHref}>
+				<Slide
+					class=" object-cover object-top post-carousel-image"
+					image={downloadSlideImage(index)}
+				/>
 			</a>
-			{/snippet}
+		{/snippet}
 
-		{#snippet children({ Controls, Indicators })}
-				{#if imagesData.length > 1}
+		{#snippet children({ Controls, Indicators }: SlideControlProps)}
+			{#if imagesData.length > 1}
 				<Controls />
 				<Indicators />
 			{/if}
-					{/snippet}
-		</Carousel>
+		{/snippet}
+	</Carousel>
 {/if}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import {
@@ -10,12 +11,17 @@
 		TableHead,
 		TableHeadCell,
 	} from 'flowbite-svelte';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		posts: TAppSearchResult['posts'];
 	}
 
 	let { posts }: Props = $props();
+
+	onMount(() => {
+		applyLazyLoadingOnImageClass('booru-avatar-search-table-posts');
+	});
 </script>
 
 <Table hoverable>
@@ -38,7 +44,7 @@
 				<TableBodyCell>{formatDate(new Date(post.createdAt))}</TableBodyCell>
 				<TableBodyCell class="text-center">
 					<Avatar
-						class="ml-auto mr-auto booru-avatar"
+						class="ml-auto mr-auto booru-avatar-search-table-posts"
 						src={post.uploaderProfilePictureUrl}
 						alt="profile picture of {post.uploaderName}"
 					/>

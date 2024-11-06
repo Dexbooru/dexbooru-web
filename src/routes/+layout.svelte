@@ -2,7 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { validateUserAuthToken } from '$lib/client/api/auth';
-	import CollectionsModal from '$lib/client/components/collections/CollectionsModal.svelte';
+	import DeleteCollectionConfirmationModal from '$lib/client/components/collections/card/DeleteCollectionConfirmationModal.svelte';
+	import EditCollectionModal from '$lib/client/components/collections/card/EditCollectionModal.svelte';
+	import CollectionsPostUpdateModal from '$lib/client/components/collections/CollectionPostUpdateModal.svelte';
 	import ImagePreviewModal from '$lib/client/components/images/ImagePreviewModal.svelte';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
 	import Navbar from '$lib/client/components/layout/Navbar.svelte';
@@ -13,6 +15,7 @@
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
 	import {
+		getActiveModal,
 		updateActiveModal,
 		updateAuthenticatedUser,
 		updateAuthenticatedUserNotifications,
@@ -24,8 +27,11 @@
 		updateCollectionPagination,
 		updateCommentTree,
 		updateFooter,
+		updateHiddenCollectionsPage,
 		updateHiddenPostsPage,
+		updateNsfwCollectionsPage,
 		updateNsfwPostPage,
+		updateOriginalCollectionPage,
 		updateOriginalPostsPage,
 		updatePostPagination,
 		updatePostsPage,
@@ -80,8 +86,12 @@
 	updateRegisterFormAuthRequirements({});
 	updateChangeUsernameAuthRequirements({});
 	updateCollectionPage([]);
-	updateOriginalPostsPage([]);
+	updateOriginalCollectionPage([]);
+	updateNsfwCollectionsPage([]);
 	updateCollectionPagination(null);
+	updateHiddenCollectionsPage({
+		nsfwCollections: [],
+	});
 
 	let validateTokenIntervalId: NodeJS.Timeout;
 	const AUTH_CHECK_INTERVAL_SIZE = 60 * 2.5 * 1000;
@@ -107,10 +117,10 @@
 		validateUserSession();
 		validateTokenIntervalId = setInterval(validateUserSession, AUTH_CHECK_INTERVAL_SIZE);
 
-		registerDocumentEventListeners(data.user, data.userPreferences);
+		registerDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
 
 		return () => {
-			destroyDocumentEventListeners(data.user, data.userPreferences);
+			destroyDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
 		};
 	});
 
@@ -138,4 +148,6 @@
 <EditPostModal />
 <DeletePostConfirmationModal />
 <ImagePreviewModal />
-<CollectionsModal />
+<CollectionsPostUpdateModal />
+<EditCollectionModal />
+<DeleteCollectionConfirmationModal />

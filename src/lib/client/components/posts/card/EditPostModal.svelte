@@ -49,11 +49,11 @@
 	outsideclose
 	class="w-full"
 >
-	<Label class="mb-1" for="description-textarea">
+	<Label class="mb-1" for="post-description-textarea">
 		Please enter a description for your post <br /> (max {MAXIMUM_POST_DESCRIPTION_LENGTH} characters)
 	</Label>
 	<Textarea
-		id="description-textarea"
+		id="post-description-textarea"
 		maxlength={MAXIMUM_POST_DESCRIPTION_LENGTH}
 		rows="5"
 		bind:value={description}

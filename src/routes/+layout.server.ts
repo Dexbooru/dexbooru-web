@@ -7,7 +7,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	const userPreferences =
 		locals.user.id === NULLABLE_USER.id
 			? NULLABLE_USER_USER_PREFERENCES
-			: (await getUserPreferences(locals.user.id)) ?? NULLABLE_USER_USER_PREFERENCES;
+			: ((await getUserPreferences(locals.user.id)) ?? NULLABLE_USER_USER_PREFERENCES);
 	const userNotifications =
 		locals.user.id === NULLABLE_USER.id ? null : await getUserNotificationsFromId(locals.user.id);
 

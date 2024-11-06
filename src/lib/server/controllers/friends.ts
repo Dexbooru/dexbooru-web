@@ -93,7 +93,7 @@ export const handleFriendRequest = async (event: RequestEvent) => {
 				}
 
 				const deletedFriendRequest = await deleteFriendRequest(event.locals.user.id, senderUser.id);
-				if (deletedFriendRequest) {
+				if (!deletedFriendRequest) {
 					return createErrorResponse(
 						'api-route',
 						409,

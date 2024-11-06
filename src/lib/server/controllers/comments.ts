@@ -99,7 +99,7 @@ export const handleDeletePostComments = async (event: RequestEvent) => {
 				if (comment.authorId !== event.locals.user.id) {
 					return createErrorResponse(
 						'api-route',
-						401,
+						403,
 						`The authenticated user with id: ${event.locals.user.id} does not match the comment's author id`,
 					);
 				}
@@ -152,7 +152,7 @@ export const handleEditPostComments = async (event: RequestEvent) => {
 				if (comment.authorId !== event.locals.user.id) {
 					return createErrorResponse(
 						'api-route',
-						401,
+						403,
 						`The authenticated user with id: ${event.locals.user.id} does not match the comment's author id`,
 					);
 				}

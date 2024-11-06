@@ -48,6 +48,7 @@ export const NULLABLE_USER_USER_PREFERENCES: UserPreference = {
 	browseInSafeMode: false,
 	customSideWideCss: '',
 	hidePostMetadataOnPreview: false,
+	hideCollectionMetadataOnPreview: false,
 	blacklistedArtists: [],
 	blacklistedTags: [],
 	createdAt: new Date(),

@@ -3,13 +3,14 @@
 		getAuthenticatedUser,
 		getAuthenticatedUserNotifications,
 	} from '$lib/client/helpers/context';
+	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { Avatar, Button, Dropdown, DropdownItem, Spinner } from 'flowbite-svelte';
 	import { AngleDownSolid } from 'flowbite-svelte-icons';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import NotificationBell from '../notifications/NotificationBell.svelte';
 	import NotificationList from '../notifications/NotificationList.svelte';
 
-	let notificationCount: number = $state();
+	let notificationCount: number = $state(0);
 
 	const user = getAuthenticatedUser();
 	const notifications = getAuthenticatedUserNotifications();
@@ -22,6 +23,10 @@
 				return notificationSection.length;
 			})
 			.reduce((prev, cur) => prev + cur, 0);
+	});
+
+	onMount(() => {
+		applyLazyLoadingOnImageClass('booru-avatar-navbar');
 	});
 
 	onDestroy(() => {
@@ -40,7 +45,7 @@
 	<Avatar
 		src={$user?.profilePictureUrl}
 		alt="profile picture of {$user?.username}"
-		class="mr-2 booru-avatar hide-alt-text"
+		class="mr-2 booru-avatar-navbar hide-alt-text"
 	/>
 	{$user?.username}
 	<AngleDownSolid size="sm" class="!mr-2" />
@@ -48,9 +53,10 @@
 <Dropdown triggeredBy="#navbar-profile-picture">
 	<DropdownItem href="/profile/{$user?.username}">Your Profile</DropdownItem>
 	<DropdownItem href="/posts/uploaded">Your Posts</DropdownItem>
+	<DropdownItem href="/collections/created">Your Collections</DropdownItem>
 	<DropdownItem href="/posts/liked">Liked Posts</DropdownItem>
 	<DropdownItem href="/profile/settings">Settings</DropdownItem>
 	{#snippet footer()}
-		<DropdownItem href="/profile/logout" >Sign out</DropdownItem>
+		<DropdownItem href="/profile/logout">Sign out</DropdownItem>
 	{/snippet}
 </Dropdown>

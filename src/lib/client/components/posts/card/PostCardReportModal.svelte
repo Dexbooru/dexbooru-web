@@ -2,13 +2,13 @@
 	import { REPORT_MODAL_NAME } from '$lib/client/constants/layout';
 	import { getActiveModal } from '$lib/client/helpers/context';
 	import { REPORT_REASON_CATEGORIES } from '$lib/shared/constants/reports';
-	import type { ReportReasonCategory } from '$lib/shared/types/reports';
+	import { ReportReasonCategory } from '$lib/shared/types/reports';
 	import { Button, Label, Modal, Select, Textarea } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 
-	let postId: string = $state();
+	let postId: string = $state('');
 	let reportVerbalReason = $state('');
-	let selectedReportReasonCategory: ReportReasonCategory = $state();
+	let selectedReportReasonCategory: ReportReasonCategory | '' = $state('');
 
 	const activeModal = getActiveModal();
 
@@ -30,12 +30,8 @@
 	size="xs"
 	outsideclose
 	class="w-full"
+	title="Report this post anonymously!"
 >
-	<h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
-		Report this post anonymously!
-		{postId}
-	</h3>
-
 	<Label class="space-y-2">
 		<span>Report category</span>
 		<Select

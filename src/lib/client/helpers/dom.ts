@@ -1,17 +1,11 @@
-import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
-import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 import type { TUser } from '$lib/shared/types/users';
 import type { UserPreference } from '@prisma/client';
+import type { Writable } from 'svelte/store';
+import { LAZY_LOADABLE_IMAGES, LAZY_LOADABLE_IMAGE_DEFAULT_MAP } from '../constants/dom';
 import { GLOBAL_SEARCH_MODAL_NAME } from '../constants/layout';
 import type { IDeviceStoreData } from '../types/device';
-import { getActiveModal, getFooter } from './context';
-
-const LAZY_LOADABLE_IMAGES = ['booru-avatar', 'post-carousel-image', 'whole-post-image'];
-const LAZY_LOADABLE_IMAGE_DEFAULT_MAP = {
-	'booru-avatar': DefaultProfilePicture,
-	'post-carousel-image': DefaultPostPicture,
-	'whole-post-image': DefaultPostPicture,
-};
+import type { TModalStoreData } from '../types/stores';
+import { getFooter } from './context';
 
 export const getDeviceDetectionDataFromWindow = (): IDeviceStoreData => {
 	const windowWidth = window.innerWidth;
@@ -27,7 +21,11 @@ export const getDeviceDetectionDataFromWindow = (): IDeviceStoreData => {
 	};
 };
 
-export const registerDocumentEventListeners = (user: TUser, userPreferences: UserPreference) => {
+export const registerDocumentEventListeners = (
+	user: TUser,
+	userPreferences: UserPreference,
+	activeModal: Writable<TModalStoreData>,
+) => {
 	if (document.readyState !== 'loading') {
 		onLoadDocument(user, userPreferences);
 	} else {
@@ -35,18 +33,21 @@ export const registerDocumentEventListeners = (user: TUser, userPreferences: Use
 	}
 
 	document.addEventListener('resize', onResizeDocument);
-	document.addEventListener('keydown', onKeyDownDocument);
+	document.addEventListener('keydown', (event) => onKeyDownDocument(event, activeModal));
 };
 
-export const destroyDocumentEventListeners = (user: TUser, userPreferences: UserPreference) => {
+export const destroyDocumentEventListeners = (
+	user: TUser,
+	userPreferences: UserPreference,
+	activeModal: Writable<TModalStoreData>,
+) => {
 	document.removeEventListener('resize', onResizeDocument);
 	document.removeEventListener('DOMContentLoaded', () => onLoadDocument(user, userPreferences));
-	document.removeEventListener('keydown', onKeyDownDocument);
+	document.removeEventListener('keydown', (event) => onKeyDownDocument(event, activeModal));
 };
 
 const onLoadDocument = (user: TUser, userPreferences: UserPreference) => {
 	applyCustomSiteWideCss(user, userPreferences);
-	lazyLoadImages();
 };
 
 const applyCustomSiteWideCss = (user: TUser, userPreferences: UserPreference) => {
@@ -64,57 +65,55 @@ const onResizeDocument = () => {
 	updateFooterData();
 };
 
-const onKeyDownDocument = (event: KeyboardEvent) => {
+const onKeyDownDocument = (event: KeyboardEvent, activeModal: Writable<TModalStoreData>) => {
 	if (event.ctrlKey && event.key.toLowerCase() === 'k') {
 		event.preventDefault();
 
-		const activeModal = getActiveModal();
-		activeModal.set({ isOpen: true, focusedModalName: GLOBAL_SEARCH_MODAL_NAME });
+		activeModal.update((data) => {
+			return {
+				isOpen: !data.isOpen,
+				focusedModalName: data.isOpen ? null : GLOBAL_SEARCH_MODAL_NAME,
+			};
+		});
 	}
 };
 
-const lazyLoadImages = () => {
-	const images = document.querySelectorAll('img');
-	images.forEach((image) => {
-		lazyLoadImage(image);
-	});
-
-	const observer = new MutationObserver((mutations) => {
-		mutations.forEach((mutation) => {
-			mutation.addedNodes.forEach((node) => {
-				if (node.nodeName.toLowerCase() === 'img') {
-					lazyLoadImage(node as HTMLImageElement);
-				}
-			});
-		});
-	});
-
-	observer.observe(document.body, { childList: true, subtree: true });
+export const applyLazyLoadingOnImageClass = (
+	className: keyof typeof LAZY_LOADABLE_IMAGE_DEFAULT_MAP,
+) => {
+	const matchingImageElements = Array.from(
+		document.getElementsByClassName(className),
+	) as HTMLImageElement[];
+	matchingImageElements.forEach((matchingImageElement) => lazyLoadImage(matchingImageElement));
 };
 
-const lazyLoadImage = (image: HTMLImageElement) => {
+export const lazyLoadImage = (image: HTMLImageElement) => {
 	const imageClassList = Array.from(image.classList);
 	const matchingLazyLoadableClassName = LAZY_LOADABLE_IMAGES.find((className) =>
 		imageClassList.includes(className),
 	);
 	if (!matchingLazyLoadableClassName) return;
 
-	image.setAttribute('loading', 'lazy');
+	if (image.onabort && image.onerror && image.onload) return;
 
+	image.setAttribute('loading', 'lazy');
 	image.style.transition = 'filter 0.5s ease, opacity 0.5s ease';
 	image.style.filter = 'blur(5px)';
 	image.style.opacity = '0';
 
-	image.onload = () => {
-		image.style.filter = 'blur(0px)';
-		image.style.opacity = '1';
-	};
-	image.onerror = () => {
+	const assignFallbackImage = () => {
 		image.src =
 			LAZY_LOADABLE_IMAGE_DEFAULT_MAP[
 				matchingLazyLoadableClassName as keyof typeof LAZY_LOADABLE_IMAGE_DEFAULT_MAP
 			] ?? '';
 	};
+
+	image.onload = () => {
+		image.style.filter = 'blur(0px)';
+		image.style.opacity = '1';
+	};
+	image.onabort = assignFallbackImage;
+	image.onerror = assignFallbackImage;
 };
 
 const updateFooterData = () => {

@@ -1,24 +1,17 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
-	import CollectionsGrid from '$lib/client/collections/CollectionsGrid.svelte';
-	import { updateCollectionPagination } from '$lib/client/helpers/context';
-	import type { ActionData, PageData } from './$types';
+	import CollectionsWrapper from '$lib/client/components/collections/container/CollectionsWrapper.svelte';
+	import { updateCollectionStores } from '$lib/client/helpers/collections';
+	import type { PageData } from './$types';
 
 	interface Props {
-		form: ActionData;
 		data: PageData;
 	}
 
-	let { form, data }: Props = $props();
+	let { data }: Props = $props();
 
-	run(() => {
-		updateCollectionPagination(data);
+	$effect(() => {
+		updateCollectionStores(data);
 	});
 </script>
 
-<svelte:head>
-	<title>Collections</title>
-</svelte:head>
-
-<CollectionsGrid />
+<CollectionsWrapper pageNumber={data.pageNumber} collections={data.collections} />

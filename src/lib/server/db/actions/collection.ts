@@ -1,4 +1,6 @@
+import { PUBLIC_POST_COLLECTION_SELECTORS } from '$lib/server/constants/collections';
 import { MAXIMUM_COLLECTIONS_PER_PAGE } from '$lib/shared/constants/collections';
+import type { TCollectionOrderByColumn, TPostCollection } from '$lib/shared/types/collections';
 import type { Prisma } from '@prisma/client';
 import type { DefaultArgs } from '@prisma/client/runtime/library';
 import prisma from '../prisma';
@@ -6,6 +8,7 @@ import prisma from '../prisma';
 export async function createCollection(data: Prisma.PostCollectionUncheckedCreateInput) {
 	const newCollection = await prisma.postCollection.create({
 		data,
+		select: PUBLIC_POST_COLLECTION_SELECTORS,
 	});
 
 	return newCollection;
@@ -26,30 +29,51 @@ export async function findCollectionById(
 export async function findCollectionsByAuthorId(
 	authorId: string,
 	pageNumber: number,
+	ascending: boolean,
+	orderBy: TCollectionOrderByColumn,
 	selectors?: Prisma.PostCollectionSelect<DefaultArgs>,
 ) {
-	return await prisma.postCollection.findMany({
+	return (await prisma.postCollection.findMany({
 		where: {
 			authorId,
 		},
 		skip: pageNumber * MAXIMUM_COLLECTIONS_PER_PAGE,
 		take: MAXIMUM_COLLECTIONS_PER_PAGE,
 		select: selectors,
-	});
+		orderBy: {
+			[orderBy]: ascending ? 'asc' : 'desc',
+		},
+	})) as TPostCollection[];
+}
+
+export async function findCollectionsFromIds(
+	collectionIds: string[],
+	selectors?: Prisma.PostCollectionSelect<DefaultArgs>,
+) {
+	return (await prisma.postCollection.findMany({
+		where: {
+			id: {
+				in: collectionIds,
+			},
+		},
+		select: selectors,
+	})) as TPostCollection[];
 }
 
 export async function findCollections(
 	pageNumber: number,
+	ascending: boolean,
+	orderBy: TCollectionOrderByColumn,
 	selectors?: Prisma.PostCollectionSelect<DefaultArgs>,
 ) {
-	return await prisma.postCollection.findMany({
+	return (await prisma.postCollection.findMany({
 		skip: pageNumber * MAXIMUM_COLLECTIONS_PER_PAGE,
 		take: MAXIMUM_COLLECTIONS_PER_PAGE,
 		select: selectors,
 		orderBy: {
-			createdAt: 'desc',
+			[orderBy]: ascending ? 'asc' : 'desc',
 		},
-	});
+	})) as TPostCollection[];
 }
 
 export async function updateCollection(id: string, title: string, description: string) {

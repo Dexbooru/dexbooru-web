@@ -1,5 +1,6 @@
-import type { TPost, TPostPaginationData } from '$lib/shared/types/posts';
+import type { TPost, TPostOrderByColumn, TPostPaginationData } from '$lib/shared/types/posts';
 import { get } from 'svelte/store';
+import { ORDER_BY_TRANSLATION_MAP } from '../constants/posts';
 import {
 	getAuthenticatedUserPreferences,
 	getBlacklistedPostPage,
@@ -29,6 +30,27 @@ export function formatNumberWithCommas(target: number): string {
 export function roundNumber(target: number, places: number = 0) {
 	return Number(target.toFixed(places));
 }
+
+export const generatePostWrapperMetaTags = (
+	postsSection: string,
+	pageNumber: number,
+	ascending: boolean,
+	orderBy: TPostOrderByColumn,
+	posts: TPost[],
+) => {
+	const title = `${postsSection} - Page ${pageNumber + 1}`;
+	let description = '';
+
+	const orderTranslationOptions = ORDER_BY_TRANSLATION_MAP[orderBy];
+	const matchingOrderTranslationOption = orderTranslationOptions.find((translationOption) =>
+		translationOption.isActive(orderBy, ascending),
+	);
+	if (matchingOrderTranslationOption) {
+		description = `${posts.length} post(s) sorted by the ${matchingOrderTranslationOption.label} criterion`;
+	}
+
+	return { title, description };
+};
 
 export const updatePostStores = (updatePostPaginationData: TPostPaginationData) => {
 	const userPreferences = get(getAuthenticatedUserPreferences());

@@ -21,7 +21,7 @@
 	<a class="inline-flex align-middle space-x-2" href={authorId && `/profile/${authorUsername}`}>
 		<Avatar
 			size="md"
-			class="booru-avatar hide-alt-text"
+			class="hide-alt-text booru-avatar-post-card"
 			src={authorProfilePictureUrl}
 			alt={authorId ? `profile picture of ${authorUsername}` : 'default user account'}
 		/>

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { enhance } from '$app/forms';
+	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { filesToBase64Strings } from '$lib/client/helpers/images';
 	import {
 		MAXIMUM_COLLECTION_DESCRIPTION_LENGTH,
 		MAXIMUM_COLLECTION_TITLE_LENGTH,
@@ -25,15 +25,23 @@
 		Textarea,
 	} from 'flowbite-svelte';
 	import { CalendarEditSolid } from 'flowbite-svelte-icons';
-	import { FAILURE_TOAST_OPTIONS } from '../constants/toasts';
-	import { filesToBase64Strings } from '../helpers/images';
 
 	let title: string = $state('');
 	let description: string = $state('');
 	let thumbnailFile: File | null = $state(null);
 	let thumbnailBase64: string = $state('');
 	let thumbnailLoading: boolean = $state(false);
-	let createCollectionButtonDisabled = $state(true);
+	let createCollectionButtonDisabled = $derived.by(() => {
+		return !(
+			isLabelAppropriate(title, 'collectionTitle') &&
+			isLabelAppropriate(description, 'collectionDescription') &&
+			(thumbnailFile === null ||
+				(thumbnailFile !== null &&
+					thumbnailBase64.length > 0 &&
+					isFileImage(thumbnailFile) &&
+					isFileImageSmall(thumbnailFile, 'collection')))
+		);
+	});
 	let isNsfw: boolean = $state(false);
 
 	const resetFileUploadState = () => {
@@ -86,22 +94,11 @@
 		thumbnailBase64 = results[0].imageBase64;
 		thumbnailFile = results[0].file;
 	};
-
-	run(() => {
-		createCollectionButtonDisabled = !(
-			isLabelAppropriate(title, 'collectionTitle') &&
-			isLabelAppropriate(description, 'collectionDescription') &&
-			(thumbnailFile === null ||
-				(thumbnailFile !== null &&
-					isFileImage(thumbnailFile) &&
-					isFileImageSmall(thumbnailFile, 'collection')))
-		);
-	});
 </script>
 
 <form use:enhance method="POST" enctype="multipart/form-data" class="mb-6">
 	<div class="mb-6">
-		<Label for="title" class="block mb-2"
+		<Label for="title" class="block mb-2 cursor-text"
 			>Title (max of {MAXIMUM_COLLECTION_TITLE_LENGTH} characters):</Label
 		>
 		<Input
@@ -113,7 +110,7 @@
 		/>
 	</div>
 	<div class="mb-6">
-		<Label for="description" class="mb-2"
+		<Label for="description" class="mb-2 cursor-text"
 			>Description (max of {MAXIMUM_COLLECTION_DESCRIPTION_LENGTH} characters):</Label
 		>
 		<Textarea
@@ -126,12 +123,12 @@
 	</div>
 
 	<div class="mb-6">
-		<Checkbox bind:checked={isNsfw}>Is NSFW?</Checkbox>
+		<Checkbox class="cursor-text" bind:checked={isNsfw}>Is NSFW?</Checkbox>
 		<Input type="hidden" value={isNsfw} name="isNsfw" />
 	</div>
 
 	<div class="mb-6">
-		<Label for="collectionThumbnail" class="mb-2"
+		<Label for="collectionThumbnail" class="mb-2 cursor-text"
 			>Collection Thumbnnail (maximum image size is {MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB} MB)</Label
 		>
 		<Fileupload on:change={onFileChange} accept={FILE_IMAGE_ACCEPT} name="collectionThumbnail" />

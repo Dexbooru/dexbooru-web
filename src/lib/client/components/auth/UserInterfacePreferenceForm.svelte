@@ -12,11 +12,13 @@
 
 	let customSiteCss: string = $state('');
 	let hidePostMetadataOnPreview: boolean = $state(false);
+	let hideCollectionMetadataOnPreview: boolean = $state(false);
 
 	const userPreferences = getAuthenticatedUserPreferences();
 	const userPreferenceUnsubscribe = userPreferences.subscribe((data) => {
 		customSiteCss = data.customSideWideCss;
 		hidePostMetadataOnPreview = data.hidePostMetadataOnPreview;
+		hideCollectionMetadataOnPreview = data.hideCollectionMetadataOnPreview;
 	});
 
 	onDestroy(() => {
@@ -51,6 +53,24 @@
 				The post actions (ex: like, edit, report, etc) will still be available on the specific post
 				view page. <br />They will be visible on the cards in your uploaded posts always for ease of
 				accessibility.
+			</p>
+		</Label>
+		<Label class="space-y-2 mb-3">
+			<span>Hide collection metadata on your preview</span>
+			<Checkbox bind:checked={hideCollectionMetadataOnPreview} />
+			<input
+				name="hideCollectionMetadataOnPreview"
+				type="hidden"
+				value={hideCollectionMetadataOnPreview}
+			/>
+			<p class="text-sm text-gray-500">
+				Collection titles, descriptios, uploaders and other visible information will not be shown.
+				The images will be shown still.
+			</p>
+			<p class="text-sm text-gray-500">
+				The collection actions (ex: edit, delete, etc) will still be available on the specific
+				collection view page. <br />They will be visible on the cards in your created collections
+				always for ease of accessibility.
 			</p>
 		</Label>
 
