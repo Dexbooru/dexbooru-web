@@ -108,6 +108,9 @@
 			required
 			placeholder="Enter a title"
 		/>
+		<p class="leading-none dark:text-gray-400 text-right mt-2 cursor-text">
+			{title.length}/{MAXIMUM_COLLECTION_TITLE_LENGTH}
+		</p>
 	</div>
 	<div class="mb-6">
 		<Label for="description" class="mb-2 cursor-text"
@@ -120,6 +123,9 @@
 			name="description"
 			bind:value={description}
 		/>
+		<p class="leading-none dark:text-gray-400 text-right mt-2 cursor-text">
+			{description.length}/{MAXIMUM_COLLECTION_TITLE_LENGTH}
+		</p>
 	</div>
 
 	<div class="mb-6">
