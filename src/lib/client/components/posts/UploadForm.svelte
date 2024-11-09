@@ -11,6 +11,7 @@
 		MAXIMUM_POST_DESCRIPTION_LENGTH,
 		MAXIMUM_TAGS_PER_POST,
 	} from '$lib/shared/constants/posts';
+	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate, transformLabel } from '$lib/shared/helpers/labels';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Checkbox, Heading, Input, Label, Li, List, Textarea } from 'flowbite-svelte';
@@ -18,7 +19,6 @@
 	import type { ActionData } from '../../../../routes/posts/upload/$types';
 	import PostPictureUpload from '../files/PostPictureUpload.svelte';
 	import LabelContainer from '../labels/LabelContainer.svelte';
-	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 
 	interface Props {
 		form: ActionData;
@@ -172,7 +172,7 @@
 			<Label class="cursor-text" for="tag-input"
 				>Please specify one or more tags (max of {MAXIMUM_TAGS_PER_POST}):</Label
 			>
-			<div class="flex gap-2 mt-2">
+			<div class="flex gap-2 mt-2 justify-around">
 				<Input
 					id="tag-input"
 					on:keypress={(event) => handleLabelKeypress(event, 'tag')}
@@ -183,8 +183,11 @@
 					placeholder="Enter a tag name"
 					class="flex-grow"
 				/>
+				<p class="leading-none dark:text-gray-400 text-right mt-2 cursor-text">
+					{tag.length}/{MAXIMUM_TAG_LENGTH}
+				</p>
 				<Button
-					disabled={tags.length === MAXIMUM_TAGS_PER_POST}
+					disabled={tags.length === MAXIMUM_TAGS_PER_POST || tag.length === 0}
 					type="button"
 					on:click={() => addLabel('tag')}>Add</Button
 				>
@@ -215,8 +218,11 @@
 					placeholder="Enter an artist name"
 					class="flex-grow"
 				/>
+				<p class="leading-none dark:text-gray-400 text-right mt-2 cursor-text">
+					{artist.length}/{MAXIMUM_ARTIST_LENGTH}
+				</p>
 				<Button
-					disabled={artists.length === MAXIMUM_ARTISTS_PER_POST}
+					disabled={artists.length === MAXIMUM_ARTISTS_PER_POST || artist.length === 0}
 					type="button"
 					on:click={() => addLabel('artist')}>Add</Button
 				>

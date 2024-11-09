@@ -1,5 +1,6 @@
 import type {
 	TAppSearchResult,
+	TPostCollectionSearchResults,
 	TPostSearchResults,
 	TUserSearchResults,
 } from '$lib/shared/types/search';
@@ -40,6 +41,38 @@ export async function searchForArtists(query: string, limit: number): Promise<TA
 
 	const results = (await prisma.$queryRaw(searchStatement)) as Artist[];
 	return { artists: results };
+}
+
+export async function searchForCollections(
+	query: string,
+	limit: number,
+): Promise<TAppSearchResult> {
+	const searchStatement = Prisma.sql`
+     SELECT
+        c."id", 
+        c."title", 
+        c."description",
+        c."createdAt",
+        u."username" AS "uploaderName", 
+        u."profilePictureUrl" AS "uploaderProfilePictureUrl"
+     FROM 
+        "PostCollection" c
+     INNER JOIN 
+        "User" u
+     ON
+        c."authorId" = u."id"
+     WHERE
+        c."searchable" @@ phraseto_tsquery('english', ${Prisma.raw(`'${query}'`)}) OR
+        LOWER(c."id") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
+        LOWER(c."title") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
+        LOWER(u."username") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
+        LOWER(u."id") ILIKE ${Prisma.raw(`'%${query}%'`)}
+     LIMIT 
+        ${Prisma.raw(limit.toString())}
+    `;
+
+	const results = (await prisma.$queryRaw(searchStatement)) as TPostCollectionSearchResults;
+	return { collections: results };
 }
 
 export async function searchForPosts(query: string, limit: number): Promise<TAppSearchResult> {
@@ -89,17 +122,20 @@ export async function searchForUsers(query: string, limit: number): Promise<TApp
 }
 
 export async function searchAllSections(query: string, limit: number): Promise<TAppSearchResult> {
-	const [usersResult, postsResult, tagsResult, artistsResult] = await Promise.all([
-		searchForUsers(query, limit),
-		searchForPosts(query, limit),
-		searchForTags(query, limit),
-		searchForArtists(query, limit),
-	]);
+	const [usersResult, postsResult, collectionsResult, tagsResult, artistsResult] =
+		await Promise.all([
+			searchForUsers(query, limit),
+			searchForPosts(query, limit),
+			searchForCollections(query, limit),
+			searchForTags(query, limit),
+			searchForArtists(query, limit),
+		]);
 
 	return {
 		posts: postsResult.posts,
 		users: usersResult.users,
 		tags: tagsResult.tags,
 		artists: artistsResult.artists,
+		collections: collectionsResult.collections,
 	};
 }

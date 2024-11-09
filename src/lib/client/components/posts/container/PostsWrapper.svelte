@@ -21,19 +21,20 @@
 	}
 
 	let { postsSection, pageNumber, posts, ascending, orderBy }: Props = $props();
+	let pageTitle = $state('');
+	let pageDescription = $state('');
 
 	const postPaginationData = getPostPaginationData();
 	const postsPage = getPostsPage();
 	const originalPostsPage = getOriginalPostsPage();
 	const nsfwPostsPage = getNsfwPostPage();
 	const blacklistedPostsPage = getBlacklistedPostPage();
-	const { title: pageTitle, description: pageDescription } = generatePostWrapperMetaTags(
-		postsSection,
-		pageNumber,
-		ascending,
-		orderBy,
-		posts,
-	);
+
+	$effect(() => {
+		const data = generatePostWrapperMetaTags(postsSection, pageNumber, ascending, orderBy, posts);
+		pageTitle = data.title;
+		pageDescription = data.description;
+	});
 
 	onDestroy(() => {
 		postPaginationData.set(null);

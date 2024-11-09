@@ -9,6 +9,7 @@
 		getCollectionPage,
 		getCollectionPaginationData,
 		getOriginalCollectionPage,
+		getUserCollections,
 	} from '$lib/client/helpers/context';
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -20,6 +21,7 @@
 	let collectionId: string;
 	let collectionDeletionLoading = $state(false);
 
+	const userCollections = getUserCollections();
 	const collectionsPage = getCollectionPage();
 	const originalCollectionsPage = getOriginalCollectionPage();
 	const collectionPagination = getCollectionPaginationData();
@@ -41,6 +43,9 @@
 
 	const pagePath = $page.url.pathname;
 
+	const updateCollections = (previousCollections: TPostCollection[]) =>
+		previousCollections.filter((collection) => collection.id !== collectionId);
+
 	const handleDeleteCollection = async () => {
 		collectionDeletionLoading = true;
 		const response = await deleteCollection(collectionId);
@@ -48,15 +53,12 @@
 
 		if (response.ok) {
 			if (individualCollectionPathRegex.test(pagePath)) {
-				goto('/');
+				goto('/collections');
 				return;
 			}
-			collectionsPage.update((previousCollections) =>
-				previousCollections.filter((collection) => collection.id !== collectionId),
-			);
-			originalCollectionsPage.update((previousCollections) =>
-				previousCollections.filter((post) => post.id !== collectionId),
-			);
+			collectionsPage.update(updateCollections);
+			originalCollectionsPage.update(updateCollections);
+			userCollections.update(updateCollections);
 			collectionPagination.update((paginationData) => {
 				if (!paginationData) return null;
 

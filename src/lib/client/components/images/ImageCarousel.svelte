@@ -1,12 +1,17 @@
 <script lang="ts">
 	import type { TCarouselTransitionFunction } from '$lib/client/types/images';
+	import {
+		COLLECTION_THUMBNAIL_WIDTH,
+		POST_PICTURE_PREVIEW_HEIGHT,
+		POST_PICTURE_PREVIEW_WIDTH,
+	} from '$lib/shared/constants/images';
 	import { Carousel } from 'flowbite-svelte';
 	import { type Component } from 'svelte';
 	import type { HTMLImgAttributes } from 'svelte/elements';
 
 	interface Props {
-		postId: string;
-		postHref?: string | null;
+		resourceType: 'collections' | 'posts';
+		resourceHref?: string | null;
 		imageUrls: string[];
 		imagesAlt?: string | null;
 		slideDuration?: number;
@@ -24,8 +29,8 @@
 	};
 
 	let {
-		postId,
-		postHref = null,
+		resourceType,
+		resourceHref = null,
 		imageUrls,
 		imagesAlt = null,
 		slideDuration = 750,
@@ -34,8 +39,9 @@
 
 	const imagesData: HTMLImgAttributes[] = imageUrls.map((_, index) => {
 		return {
-			'data-post-id': postId,
 			src: null,
+			width: resourceType === 'posts' ? POST_PICTURE_PREVIEW_WIDTH : COLLECTION_THUMBNAIL_WIDTH,
+			height: resourceType === 'posts' ? POST_PICTURE_PREVIEW_HEIGHT : COLLECTION_THUMBNAIL_WIDTH,
 			alt: imagesAlt
 				? `${index + 1} - ${imagesAlt}`
 				: `image content id of ${crypto.randomUUID()} in carousel slide ${index + 1}`,
@@ -55,9 +61,11 @@
 {#if imageUrls.length > 0}
 	<Carousel images={imagesData} {slideDuration} transition={transitionFunction}>
 		{#snippet slide({ Slide, index }: SlideProps)}
-			<a href={postHref}>
+			<a href={resourceHref}>
 				<Slide
-					class=" object-cover object-top post-carousel-image"
+					class=" object-cover object-top {resourceType === 'collections'
+						? 'collection-carousel-image'
+						: 'post-carousel-image'}"
 					image={downloadSlideImage(index)}
 				/>
 			</a>

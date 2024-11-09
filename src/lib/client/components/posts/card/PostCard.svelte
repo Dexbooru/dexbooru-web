@@ -18,9 +18,10 @@
 
 	interface Props {
 		post: TPost;
+		onCollectionViewPage?: boolean;
 	}
 
-	let { post }: Props = $props();
+	let { post, onCollectionViewPage = false }: Props = $props();
 
 	const { id: postId, description, author, tags, artists, createdAt, isNsfw } = post;
 	let imageUrls = $state(post.imageUrls);
@@ -51,10 +52,10 @@
 	});
 </script>
 
-{#if $userPreferences.hidePostMetadataOnPreview}
+{#if $userPreferences.hidePostMetadataOnPreview && !onCollectionViewPage}
 	<ImageCarousel
-		postId={post.id}
-		postHref="/posts/{postId}"
+		resourceType="posts"
+		resourceHref="/posts/{postId}"
 		{imageUrls}
 		imagesAlt={description}
 		slideDuration={350}
@@ -74,8 +75,8 @@
 		{/if}
 
 		<ImageCarousel
-			postId={post.id}
-			postHref="/posts/{postId}"
+			resourceType="posts"
+			resourceHref="/posts/{postId}"
 			{imageUrls}
 			imagesAlt={description}
 			slideDuration={350}

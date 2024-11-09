@@ -13,7 +13,17 @@ export type TAppSearchResult = {
 	users?: TUserSearchResults;
 	tags?: Tag[];
 	artists?: Artist[];
+	collections?: TPostCollectionSearchResults;
 };
+
+export type TPostCollectionSearchResults = {
+	id: string;
+	title: string;
+	description: string;
+	createdAt: Date;
+	uploaderName: string;
+	uploaderProfilePictureUrl: string;
+}[];
 
 export type TPostSearchResults = {
 	id: string;

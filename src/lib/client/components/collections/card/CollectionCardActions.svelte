@@ -10,8 +10,9 @@
 
 	type Props = {
 		collection: TPostCollection;
+		onCollectionViewPage?: boolean;
 	};
-	let { collection }: Props = $props();
+	let { collection, onCollectionViewPage = false }: Props = $props();
 
 	const authenticatedUser = getAuthenticatedUser();
 	const activeModal = getActiveModal();
@@ -21,11 +22,13 @@
 	};
 </script>
 
-<div class="flex flex-col space-y-3 mt-4">
-	<Button class="space-x-2" href="/collections/{collection.id}" color="blue">
-		<span>View collection</span>
-		<ArrowRightToBracketSolid />
-	</Button>
+<div class="flex {onCollectionViewPage ? 'flex-row space-x-3' : 'flex-col space-y-3'} mt-4">
+	{#if !onCollectionViewPage}
+		<Button class="space-x-2" href="/collections/{collection.id}" color="blue">
+			<span>View collection</span>
+			<ArrowRightToBracketSolid />
+		</Button>
+	{/if}
 
 	{#if $authenticatedUser && $authenticatedUser.id === collection.authorId}
 		<Button

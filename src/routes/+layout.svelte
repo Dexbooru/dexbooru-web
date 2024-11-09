@@ -36,6 +36,7 @@
 		updatePostPagination,
 		updatePostsPage,
 		updateRegisterFormAuthRequirements,
+		updateUserCollections,
 	} from '$lib/client/helpers/context';
 	import {
 		destroyDocumentEventListeners,
@@ -92,6 +93,7 @@
 	updateHiddenCollectionsPage({
 		nsfwCollections: [],
 	});
+	updateUserCollections([]);
 
 	let validateTokenIntervalId: NodeJS.Timeout;
 	const AUTH_CHECK_INTERVAL_SIZE = 60 * 2.5 * 1000;

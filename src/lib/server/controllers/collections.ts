@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { AWS_COLLECTION_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { PUBLIC_POST_COLLECTION_SELECTORS } from '../constants/collections';
+import { PUBLIC_POST_SELECTORS } from '../constants/posts';
 import { boolStrSchema, pageNumberSchema } from '../constants/reusableSchemas';
 import {
 	addPostToCollection,
@@ -139,6 +140,7 @@ export const handleUpdateCollectionsPosts = async (event: RequestEvent) => {
 
 			try {
 				const matchingCollections = await findCollectionsFromIds(collectionIds, {
+					id: true,
 					authorId: true,
 					posts: {
 						select: { id: true },
@@ -257,7 +259,12 @@ export const handleGetCollection = async (
 	return await validateAndHandleRequest(event, handlerType, GetCollectionSchema, async (data) => {
 		const { collectionId } = data.pathParams;
 		try {
-			const collection = await findCollectionById(collectionId, PUBLIC_POST_COLLECTION_SELECTORS);
+			const collection = await findCollectionById(collectionId, {
+				...PUBLIC_POST_COLLECTION_SELECTORS,
+				posts: {
+					select: PUBLIC_POST_SELECTORS,
+				},
+			});
 			if (!collection) {
 				return createErrorResponse(
 					'api-route',

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { getOriginalCollectionPage } from '$lib/client/helpers/context';
+	import { getOriginalCollectionPage, getUserCollections } from '$lib/client/helpers/context';
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { CloseButton, Drawer } from 'flowbite-svelte';
@@ -17,6 +17,7 @@
 	let { isHidden = $bindable() }: Props = $props();
 
 	const originalCollectionPage = getOriginalCollectionPage();
+	const userCollections = getUserCollections();
 
 	const pageUnsubscribe = page.subscribe((data) => {
 		const pathname = data.url.pathname;
@@ -33,6 +34,7 @@
 						return collections;
 					return [...collections, newCollection];
 				});
+				userCollections.update((collections) => [newCollection, ...collections]);
 			}
 			isHidden = true;
 			toast.push('The collection was created successfully!', SUCCESS_TOAST_OPTIONS);

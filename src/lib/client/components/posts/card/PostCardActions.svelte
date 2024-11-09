@@ -126,7 +126,7 @@
 				activeModal.set({
 					isOpen: true,
 					focusedModalName: COLLECTIONS_MODAL_NAME,
-					modalData: { postId },
+					modalData: { post },
 				})}>Add to collection</Button
 		>
 	{/if}

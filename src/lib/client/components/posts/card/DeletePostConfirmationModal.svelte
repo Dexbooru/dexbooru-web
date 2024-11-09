@@ -46,7 +46,7 @@
 
 		if (response.ok) {
 			if (individualPostPathRegex.test(pagePath)) {
-				goto('/');
+				goto('/posts');
 				return;
 			}
 			postsPage.update((previousPosts) => previousPosts.filter((post) => post.id !== postId));

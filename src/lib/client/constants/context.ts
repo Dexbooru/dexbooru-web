@@ -18,3 +18,4 @@ export const HIDDEN_COLLECTIONS_PAGE_CONTEXT_KEY = 'hiddenCollectionsPage';
 export const ORIGINAL_COLLECTIONS_PAGE_CONTEXT_KEY = 'originalCollectionsPage';
 export const NSFW_COLLECTIONS_PAGE_CONTEXT_KEY = 'nsfwCollectionPage';
 export const COLLECTION_PAGINATION_DATA_CONTEXT_KEY = 'collectionPaginationData';
+export const USER_COLLECTIONS_CONTEXT_KEY = 'userCollections';

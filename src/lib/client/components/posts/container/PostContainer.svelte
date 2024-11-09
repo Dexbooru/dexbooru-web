@@ -5,7 +5,6 @@
 	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
 	import { CLEAR_INPUT_INTERVAL_MS } from '$lib/client/constants/search';
 	import {
-		getAuthenticatedUser,
 		getOriginalPostsPage,
 		getPostPaginationData,
 		getPostsPage,
@@ -29,7 +28,6 @@
 	const postPaginationData = getPostPaginationData();
 	const originalPostPage = getOriginalPostsPage();
 	const postsPage = getPostsPage();
-	const user = getAuthenticatedUser();
 
 	const onPostSearch = (query: string) => {
 		const cleanedQuery = query.toLocaleLowerCase().trim();

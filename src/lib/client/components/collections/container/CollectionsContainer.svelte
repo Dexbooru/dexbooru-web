@@ -16,11 +16,13 @@
 	import Searchbar from '../../reusable/Searchbar.svelte';
 	import CollectionCreateDrawer from '../CollectionCreateDrawer.svelte';
 	import CollectionPageSidebar from './CollectionPageSidebar.svelte';
+	import CollectionPaginator from './CollectionPaginator.svelte';
 	import CollectionsGrid from './CollectionsGrid.svelte';
 
 	type Props = {
 		collectionContainerTitle: string;
 	};
+
 	let { collectionContainerTitle }: Props = $props();
 	let collectionCreateDrawerHidden: boolean = $state(true);
 	let uniqueAuthors: { id: string; username: string; profilePictureUrl: string }[] = $state([]);
@@ -50,7 +52,7 @@
 
 	const collectionPaginationDataUnsubscribe = collectionPaginationData.subscribe((data) => {
 		if (data) {
-			applyLazyLoadingOnImageClass('collection-preview-image');
+			applyLazyLoadingOnImageClass('collection-carousel-image');
 			applyLazyLoadingOnImageClass('booru-avatar-collection-card');
 		}
 	});
@@ -68,7 +70,7 @@
 	});
 
 	onMount(() => {
-		applyLazyLoadingOnImageClass('collection-preview-image');
+		applyLazyLoadingOnImageClass('collection-carousel-image');
 		applyLazyLoadingOnImageClass('booru-avatar-collection-card');
 
 		const searchInput = document.querySelector('#collection-page-searchbar') as HTMLInputElement;
@@ -115,7 +117,7 @@
 		</div>
 		<CollectionsGrid />
 		{#if $collectionPage.length > 0}
-			<!-- <PostPaginator /> -->
+			<CollectionPaginator />
 		{/if}
 	</div>
 </main>

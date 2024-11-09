@@ -6,6 +6,7 @@
 		getActiveModal,
 		getCollectionPage,
 		getOriginalCollectionPage,
+		getUserCollections,
 	} from '$lib/client/helpers/context';
 	import {
 		MAXIMUM_COLLECTION_DESCRIPTION_LENGTH,
@@ -24,6 +25,7 @@
 	const activeModal = getActiveModal();
 	const collectionPage = getCollectionPage();
 	const originalCollectionPage = getOriginalCollectionPage();
+	const userCollections = getUserCollections();
 
 	const modalStoreUnsubscribe = activeModal.subscribe((data) => {
 		if (data.focusedModalName === EDIT_COLLECTION_MODAL_NAME) {
@@ -59,6 +61,16 @@
 
 			collection.title = title;
 			collection.description = description;
+			const collectionTitle = document.getElementById('collection-title');
+			if (collectionTitle) {
+				collectionTitle.innerText = title;
+			}
+			const collectionDescription = document.getElementById('collection-description');
+			if (collectionDescription) {
+				collectionDescription.innerText = description;
+			}
+
+			userCollections.update(updateCollectionPage);
 			collectionPage.update(updateCollectionPage);
 			originalCollectionPage.update(updateCollectionPage);
 			activeModal.set({ isOpen: false, focusedModalName: null });

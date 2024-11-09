@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { MAXIMUM_ARTIST_LENGTH, MAXIMUM_TAG_LENGTH } from '$lib/shared/constants/labels';
 	import { Badge } from 'flowbite-svelte';
 	import type { ComponentProps } from 'svelte';
 
 	interface Props {
 		labels?: string[] | { name: string }[];
 		labelType: 'tag' | 'artist';
+		onPostsViewPage?: boolean;
 		labelsAreLarge?: boolean;
 		labelColor?: ComponentProps<Badge>['color'];
 		labelIsLink?: boolean;
@@ -12,7 +14,13 @@
 		handleLabelClose?: ((event: CustomEvent<any>) => void) | null;
 	}
 
+	const renderLabel = (label: string) => {
+		if (onPostsViewPage) return label;
+		return label.length >= 0.75 * maximumLabelLength ? label.slice(0, 20) + '...' : label;
+	};
+
 	let {
+		onPostsViewPage = false,
 		labels = [],
 		labelType,
 		labelsAreLarge = false,
@@ -25,6 +33,7 @@
 	let processedLabels: string[] = $derived(
 		labels.map((label) => (typeof label === 'object' ? label.name : label)),
 	);
+	const maximumLabelLength = labelType === 'tag' ? MAXIMUM_TAG_LENGTH : MAXIMUM_ARTIST_LENGTH;
 </script>
 
 <div class="flex flex-wrap">
@@ -37,7 +46,7 @@
 			class="ml-1 mr-1 mb-1"
 			rounded
 			color={labelColor}
-			>{label}
+			>{renderLabel(label)}
 		</Badge>
 	{/each}
 </div>

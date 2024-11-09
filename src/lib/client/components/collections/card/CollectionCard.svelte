@@ -1,17 +1,15 @@
 <script lang="ts">
 	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
+	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import {
 		COLLECTION_DESCRIPTION_PREVIEW_LENGTH,
 		COLLECTION_TITLE_PREVIEW_LENGTH,
 	} from '$lib/shared/constants/collections';
-	import {
-		COLLECTION_THUMBNAIL_HEIGHT,
-		COLLECTION_THUMBNAIL_WIDTH,
-	} from '$lib/shared/constants/images';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import { Avatar, Card } from 'flowbite-svelte';
+	import ImageCarousel from '../../images/ImageCarousel.svelte';
 	import CollectionCardActions from './CollectionCardActions.svelte';
 
 	interface Props {
@@ -31,41 +29,42 @@
 	});
 
 	const userPreferences = getAuthenticatedUserPreferences();
-	const nsfwThumbnail = collection.thumbnailImageUrls.find((imageUrl) => imageUrl.includes('nsfw'));
-	const originalThumbnail = collection.thumbnailImageUrls.find((imageUrl) =>
-		imageUrl.includes('original'),
-	);
+	const nsfwThumbnail =
+		collection.thumbnailImageUrls.find((imageUrl) => imageUrl.includes('nsfw')) ?? '';
+	const originalThumbnail =
+		collection.thumbnailImageUrls.find(
+			(imageUrl) => imageUrl.includes('preview') && !imageUrl.includes('nsfw'),
+		) ?? '';
 </script>
 
 {#if $userPreferences.hideCollectionMetadataOnPreview}
-	<a href="/collections/{collection.id}">
-		<img
-			loading="lazy"
-			width={COLLECTION_THUMBNAIL_WIDTH}
-			height={COLLECTION_THUMBNAIL_HEIGHT}
-			class="block p-3 collection-preview-image"
-			src={collection.isNsfw && $userPreferences.autoBlurNsfw ? nsfwThumbnail : originalThumbnail}
-			alt={collection.description}
-		/>
-	</a>
+	<ImageCarousel
+		imagesAlt={collection.description}
+		imageUrls={[
+			collection.isNsfw && $userPreferences.autoBlurNsfw ? nsfwThumbnail : originalThumbnail,
+		]}
+		resourceType="collections"
+		resourceHref="/collections/{collection.id}"
+	/>
 {:else}
 	<Card>
-		<a href="/collections/{collection.id}">
-			<img
-				loading="lazy"
-				width={COLLECTION_THUMBNAIL_WIDTH}
-				height={COLLECTION_THUMBNAIL_HEIGHT}
-				class="block mb-3 object-cover collection-preview-image"
-				src={collection.isNsfw && $userPreferences.autoBlurNsfw ? nsfwThumbnail : originalThumbnail}
-				alt={collection.description}
-			/>
-		</a>
+		<ImageCarousel
+			imagesAlt={collection.description}
+			imageUrls={[
+				collection.isNsfw && $userPreferences.autoBlurNsfw ? nsfwThumbnail : originalThumbnail,
+			]}
+			resourceType="collections"
+			resourceHref="/collections/{collection.id}"
+		/>
 		{#if !$userPreferences.hideCollectionMetadataOnPreview}
-			<h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+			<h5 class="mt-2 mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
 				{title}
 			</h5>
 			<p class="mb-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">
 				{description}
+			</p>
+			<p class="mb-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">
+				{formatNumberWithCommas(collection.posts.length)} post(s)
 			</p>
 			<div class="space-x-2 flex align-middle flex-wrap mb-2">
 				<a

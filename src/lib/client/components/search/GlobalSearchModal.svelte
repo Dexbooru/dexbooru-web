@@ -68,7 +68,7 @@
 </script>
 
 <Modal
-	title="Find tags, artists, users and posts"
+	title="Find global resources"
 	open={$activeModal.isOpen && $activeModal.focusedModalName === GLOBAL_SEARCH_MODAL_NAME}
 	outsideclose
 	class="w-screen"

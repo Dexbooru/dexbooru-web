@@ -51,8 +51,7 @@
 			</p>
 			<p class="text-sm text-gray-500">
 				The post actions (ex: like, edit, report, etc) will still be available on the specific post
-				view page. <br />They will be visible on the cards in your uploaded posts always for ease of
-				accessibility.
+				view page.
 			</p>
 		</Label>
 		<Label class="space-y-2 mb-3">
@@ -69,8 +68,7 @@
 			</p>
 			<p class="text-sm text-gray-500">
 				The collection actions (ex: edit, delete, etc) will still be available on the specific
-				collection view page. <br />They will be visible on the cards in your created collections
-				always for ease of accessibility.
+				collection view page.
 			</p>
 		</Label>
 

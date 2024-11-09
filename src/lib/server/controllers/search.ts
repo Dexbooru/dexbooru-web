@@ -6,6 +6,7 @@ import { z } from 'zod';
 import {
 	searchAllSections,
 	searchForArtists,
+	searchForCollections,
 	searchForPosts,
 	searchForTags,
 	searchForUsers,
@@ -32,6 +33,7 @@ const GetSearchResultsSchema = {
 				z.literal('tags'),
 				z.literal('artists'),
 				z.literal('users'),
+				z.literal('collections'),
 				z.literal('all'),
 			])
 			.default('all'),
@@ -65,6 +67,9 @@ export const handleGetSearchResults = async (event: RequestEvent) => {
 						break;
 					case 'posts':
 						finalSearchResults = await searchForPosts(normalizedQuery, limit);
+						break;
+					case 'collections':
+						finalSearchResults = await searchForCollections(normalizedQuery, limit);
 						break;
 				}
 

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Internal Server Error</title>
+        <style>
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                margin: 0;
+                font-family: Arial, sans-serif;
+                color: #333;
+                background-color: #f4f4f4;
+            }
+
+            .error-container {
+                background-color: #e0e0e0;
+                padding: 2em;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                max-width: 400px;
+                text-align: center;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 0.5em;
+            }
+
+            p {
+                margin: 0.3em 0;
+                font-size: 1.1em;
+            }
+
+            .status {
+                font-weight: bold;
+                color: #d9534f;
+            }
+
+            .error-message {
+                background-color: #f8f9fa;
+                padding: 1em;
+                border-radius: 5px;
+                color: #900;
+                font-family: monospace;
+                font-size: 1em;
+                margin-top: 0.5em;
+                white-space: pre-wrap;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                body {
+                    color: #fff;
+                    background-color: #333;
+                }
+
+                .error-container {
+                    background-color: #444;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+                }
+
+                .error-message {
+                    background-color: #222;
+                    color: #ffcccc;
+                }
+
+                .status {
+                    color: #f88;
+                }
+            }
+        </style>
+	</head>
+	<body>
+		<div class="error-container">
+			<h1>An unexpected error occurred while loading this page</h1>
+			<p class="status">Status: %sveltekit.status%</p>
+			<p>Message:</p>
+			<div class="error-message">%sveltekit.error.message%</div>
+		</div>
+	</body>
+</html>

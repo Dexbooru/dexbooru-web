@@ -70,19 +70,13 @@ async function runPostImageTransformationPipeline(
 	);
 	const previewImageBuffer = await previewImage.toBuffer();
 	imageData.buffers.preview = previewImageBuffer;
-	imageData.metadata.preview = {
-		width: POST_PICTURE_PREVIEW_WIDTH,
-		height: POST_PICTURE_PREVIEW_HEIGHT,
-	};
+	imageData.metadata.preview = await getImageMeta(previewImage);
 
 	if (isNsfw) {
 		const nsfwPreviewBlurImage = applyBlurFilter(previewImage);
 		const nsfwPreviewBlurImageBuffer = await nsfwPreviewBlurImage.toBuffer();
 		imageData.buffers.nsfwPreview = nsfwPreviewBlurImageBuffer;
-		imageData.metadata.nsfwPreview = {
-			width: POST_PICTURE_PREVIEW_WIDTH,
-			height: POST_PICTURE_PREVIEW_HEIGHT,
-		};
+		imageData.metadata.nsfwPreview = await getImageMeta(nsfwPreviewBlurImage);
 	}
 
 	return imageData;
@@ -96,15 +90,20 @@ export async function applyCollectionImageTransformationPipeline(file: File, isN
 
 	const image = await fileToSharp(file);
 
-	const orignalImage = image
-		.webp(WEBP_OPTIONS)
-		.resize(getImageResizeOptions(COLLECTION_THUMBNAIL_WIDTH, COLLECTION_THUMBNAIL_HEIGHT));
-	const originalImageBuffer = await orignalImage.toBuffer();
+	const originalImage = image.webp(WEBP_OPTIONS);
+	const originalImageBuffer = await originalImage.toBuffer();
 	imageData.buffers.original = originalImageBuffer;
-	imageData.metadata.original = await getImageMeta(orignalImage);
+	imageData.metadata.original = await getImageMeta(originalImage);
+
+	const resizeImage = originalImage.resize(
+		getImageResizeOptions(COLLECTION_THUMBNAIL_WIDTH, COLLECTION_THUMBNAIL_HEIGHT),
+	);
+	const resizeImageBuffer = await resizeImage.toBuffer();
+	imageData.buffers.preview = resizeImageBuffer;
+	imageData.metadata.preview = await getImageMeta(resizeImage);
 
 	if (isNsfw) {
-		const nsfwImage = applyBlurFilter(orignalImage);
+		const nsfwImage = applyBlurFilter(resizeImage);
 		const nsfwImageBuffer = await nsfwImage.toBuffer();
 		imageData.buffers.nsfwPreview = nsfwImageBuffer;
 		imageData.metadata.nsfwPreview = await getImageMeta(nsfwImage);

@@ -28,11 +28,17 @@ import {
 	POSTS_PAGE_CONTEXT_KEY,
 	POST_PAGINATION_DATA_CONTEXT_KEY,
 	REGISTER_FORM_AUTH_REQUIREMENTS_CONTEXT_KEY,
+	USER_COLLECTIONS_CONTEXT_KEY,
 	USER_CONTEXT_KEY,
 	USER_NOTIFICATIONS_CONTEXT_KEY,
 	USER_PREFERENCE_CONTEXT_KEY,
 } from '../constants/context';
 import type { TAuthFormRequirementData, TFooterStoreData, TModalStoreData } from '../types/stores';
+
+export const updateUserCollections = (collections: TPostCollection[]) => {
+	const updatedCollections = writable(collections);
+	setContext(USER_COLLECTIONS_CONTEXT_KEY, updatedCollections);
+};
 
 export const updateHiddenCollectionsPage = (collectionData: TCollectionHiddenPageData) => {
 	const updatedCollections = writable(collectionData);
@@ -132,6 +138,10 @@ export const updateAuthenticatedUserNotifications = (notifications: TUserNotific
 export const updateAuthenticatedUserPreferences = (userPreferences: UserPreference) => {
 	const updatedUserPreferences = writable(userPreferences);
 	setContext(USER_PREFERENCE_CONTEXT_KEY, updatedUserPreferences);
+};
+
+export const getUserCollections = () => {
+	return getContext<Writable<TPostCollection[]>>(USER_COLLECTIONS_CONTEXT_KEY);
 };
 
 export const getHiddenCollectionsPage = () => {

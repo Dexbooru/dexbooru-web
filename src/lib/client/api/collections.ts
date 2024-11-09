@@ -19,16 +19,8 @@ export const editCollection = async (collectionId: string, body: TUpdateCollecti
 
 export const updatePostCollections = async (
 	postId: string,
-	originalSelectedCollections: Map<string, 'add' | 'delete'>,
-	selectedCollections: Map<string, 'add' | 'delete'>,
+	updatedCollectionMap: Map<string, 'add' | 'delete'>,
 ) => {
-	const updatedCollectionMap = new Map<string, 'add' | 'delete'>();
-	for (const [collectionId, action] of selectedCollections.entries()) {
-		const originalAction = originalSelectedCollections.get(collectionId);
-		if (action !== originalAction) {
-			updatedCollectionMap.set(collectionId, action);
-		}
-	}
 	const body = {
 		postId,
 		collectionActions: Object.fromEntries(updatedCollectionMap.entries()),

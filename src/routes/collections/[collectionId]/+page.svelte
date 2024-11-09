@@ -1,4 +1,5 @@
 <script lang="ts">
+	import CollectionPresentation from '$lib/client/components/collections/CollectionPresentation.svelte';
 	import type { PageData } from './$types';
 
 	type Props = {
@@ -8,4 +9,6 @@
 	let { data }: Props = $props();
 </script>
 
-<h1 class="text-white">{JSON.stringify(data.collection.posts)}</h1>
+<main class="m-5 space-y-5">
+	<CollectionPresentation collection={data.collection} />
+</main>
