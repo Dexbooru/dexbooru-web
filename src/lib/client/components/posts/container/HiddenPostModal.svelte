@@ -9,19 +9,19 @@
 	} from '$lib/client/helpers/context';
 	import { Button, Modal, TabItem, Tabs } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
-	import { get } from 'svelte/store';
 	import PostGrid from './PostGrid.svelte';
 
 	let offendingTags: Set<string> = $state(new Set<string>());
 	let offendingArtists: Set<string> = $state(new Set<string>());
 
 	const user = getAuthenticatedUser();
+	const userPreferences = getAuthenticatedUserPreferences();
 	const blacklistedPostPage = getBlacklistedPostPage();
 	const nsfwPostPage = getNsfwPostPage();
 	const activeModal = getActiveModal();
 
 	const hiddenPostPageUnsubscribe = blacklistedPostPage.subscribe((posts) => {
-		const { blacklistedTags, blacklistedArtists } = get(getAuthenticatedUserPreferences());
+		const { blacklistedTags, blacklistedArtists } = $userPreferences;
 		posts.forEach((post) => {
 			post.tags.forEach((tag) => {
 				if (blacklistedTags.includes(tag.name)) {
@@ -76,11 +76,9 @@
 		</Tabs>
 
 		{#snippet footer()}
-			
-				<Button on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
-					>Close</Button
-				>
-			
-			{/snippet}
+			<Button on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+				>Close</Button
+			>
+		{/snippet}
 	</Modal>
 {/if}

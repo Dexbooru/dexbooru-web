@@ -1,8 +1,16 @@
 <script lang="ts">
 	import HomeChibiWallpaper from '$lib/client/assets/home_chibi_wallpaper.webp';
 	import { clearToken, storeToken } from '$lib/client/helpers/auth';
-	import { Button } from 'flowbite-svelte';
+	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { onMount } from 'svelte';
+	import type { PageData } from './$types';
+
+	type Props = {
+		data: PageData;
+	};
+
+	let { data }: Props = $props();
+	let { collectionCount, userCount, tagCount, artistCount, postCount } = data;
 
 	onMount(() => {
 		clearToken();
@@ -23,9 +31,12 @@
 		src={HomeChibiWallpaper}
 		alt="chibi wallpaper on home"
 	/>
-	<div class="flex m-5 space-x-2 justify-normal">
-		<Button href="/posts">Check out some posts</Button>
-		<Button href="/tags">Check out some tags</Button>
-		<Button href="/artists">Check out some artists</Button>
-	</div>
+	<p class="text-lg md:text-xl text-gray-700 dark:text-gray-300 mt-6">
+		Welcome to Dexbooru, an imageboard where you can share and discover anime/manga images.
+		<br /> Serving <span>{formatNumberWithCommas(postCount)} posts</span>,
+		<span>{formatNumberWithCommas(tagCount)} tags</span>,
+		<span>{formatNumberWithCommas(artistCount)} artists</span>,
+		<span>{formatNumberWithCommas(collectionCount)} collections</span>, and
+		<span>{formatNumberWithCommas(userCount)} users</span>.
+	</p>
 </main>
