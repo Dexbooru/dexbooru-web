@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getCommentTree } from '$lib/client/helpers/context';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate } from '$lib/shared/helpers/dates';
@@ -10,6 +11,8 @@
 	}
 
 	let { post }: Props = $props();
+
+	const commentTree = getCommentTree();
 </script>
 
 <p class="text-lg dark:text-white cursor-text">
@@ -53,7 +56,8 @@
 </p>
 
 <p class="text-lg dark:text-white cursor-text">
-	Comment count: <span class=" dark:text-gray-400">{formatNumberWithCommas(post.commentCount)}</span
+	Comment count: <span class=" dark:text-gray-400"
+		>{formatNumberWithCommas(Math.max(post.commentCount, $commentTree.getCount()))}</span
 	>
 </p>
 

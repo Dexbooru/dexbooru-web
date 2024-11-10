@@ -15,7 +15,7 @@ import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
 import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import type { TFriendStatus } from '$lib/shared/types/friends';
 import type { TUser } from '$lib/shared/types/users';
-import { redirect, type RequestEvent } from '@sveltejs/kit';
+import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { deleteFromBucket, uploadToBucket } from '../aws/actions/s3';
 import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '../constants/aws';
@@ -43,7 +43,6 @@ import {
 import {
 	createErrorResponse,
 	createSuccessResponse,
-	isRedirectObject,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import { buildCookieOptions } from '../helpers/cookies';
@@ -628,7 +627,7 @@ export const handleDeleteUser = async (event: RequestEvent) => {
 
 				redirect(302, '/');
 			} catch (error) {
-				if (isRedirectObject(error)) throw error;
+				if (isRedirect(error)) throw error;
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -685,7 +684,7 @@ export const handleCreateUser = async (event: RequestEvent) => {
 
 			redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
 		} catch (error) {
-			if (isRedirectObject(error)) throw error;
+			if (isRedirect(error)) throw error;
 			return createErrorResponse(
 				'form-action',
 				500,
@@ -734,8 +733,7 @@ export const handleProcessUserTotp = async (event: RequestEvent) => {
 
 				redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
 			} catch (error) {
-				if (isRedirectObject(error)) throw error;
-
+				if (isRedirect(error)) throw error;
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -770,7 +768,7 @@ export const handleGetUserTotp = async (event: RequestEvent) => {
 					{ challengeData },
 				);
 			} catch (error) {
-				if (isRedirectObject(error)) throw error;
+				if (isRedirect(error)) throw error;
 				throw createErrorResponse(
 					'page-server-load',
 					500,
@@ -812,7 +810,7 @@ export const handleUserOauth2AuthFlowForm = async (event: RequestEvent) => {
 
 			redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
 		} catch (error) {
-			if (isRedirectObject(error)) throw error;
+			if (isRedirect(error)) throw error;
 			return createErrorResponse(
 				'form-action',
 				500,

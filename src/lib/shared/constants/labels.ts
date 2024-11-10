@@ -15,3 +15,5 @@ export const SEPERATOR_CHARACTER_UI = [
 
 export const BLACKLISTED_LABELS = ['loli', 'lolicon', 'shota', 'shotcon', 'nigga', 'nigger'];
 export const LABEL_REGEX = /^[a-z0-9!@#$%^&*()_+={}\\[\]:;"'<>,.?\\/\\|`~]*$/;
+
+export const MAXIMUM_LABELS_ON_POST_CARD = 15;

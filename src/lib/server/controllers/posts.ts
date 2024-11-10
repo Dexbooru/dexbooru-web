@@ -16,7 +16,7 @@ import type {
 	TPostSimilarityBody,
 	TPostSimilarityResponse,
 } from '$lib/shared/types/posts';
-import { redirect, type RequestEvent } from '@sveltejs/kit';
+import { isHttpError, isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../constants/aws';
@@ -39,7 +39,6 @@ import { findLikedPostsByAuthorId, findLikedPostsFromSubset } from '../db/action
 import {
 	createErrorResponse,
 	createSuccessResponse,
-	isRedirectObject,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import { flattenImageBuffers, runPostImageTransformationPipelineInBatch } from '../helpers/images';
@@ -60,6 +59,7 @@ const postPaginationSchema = z.object({
 			z.literal('views'),
 			z.literal('likes'),
 			z.literal('createdAt'),
+			z.literal('updatedAt'),
 			z.literal('commentCount'),
 		])
 		.default('createdAt'),
@@ -424,7 +424,7 @@ export const handleCreatePost = async (
 
 				return createSuccessResponse(handlerType, 'Post created successfully', { newPost }, 201);
 			} catch (error) {
-				if (isRedirectObject(error)) throw error;
+				if (isRedirect(error)) throw error;
 				const message = 'An unexpected error occurred while creating the post';
 				return createErrorResponse(
 					handlerType,
@@ -469,6 +469,7 @@ export const handleGetPost = async (
 				finalData,
 			);
 		} catch (error) {
+			if (isHttpError(error)) throw error;
 			const errorResponse = createErrorResponse(
 				handlerType,
 				500,

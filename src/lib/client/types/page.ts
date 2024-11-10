@@ -1,2 +1,1 @@
-
-export type TErrorPageType = 'posts' | 'general';
+export type TErrorPageType = 'posts' | 'general' | 'collections' | 'internalServerError';

@@ -56,6 +56,9 @@
 	});
 
 	const postPageStoreUnsubscribe = postsPage.subscribe((updatedPosts) => {
+		applyLazyLoadingOnImageClass('post-carousel-image');
+		applyLazyLoadingOnImageClass('booru-avatar-post-card');
+
 		uniqueTags = getUniqueLabelsFromPosts(updatedPosts, 'tag');
 		uniqueArtists = getUniqueLabelsFromPosts(updatedPosts, 'artist');
 	});

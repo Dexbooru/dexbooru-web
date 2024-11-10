@@ -3,6 +3,7 @@
 	import { MAXIMUM_COMMENT_REPLY_DEPTH_LOAD } from '$lib/client/constants/comments';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
+	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate, getFormalDateTitle, ymdFormat } from '$lib/shared/helpers/dates';
 	import type { TComment } from '$lib/shared/types/comments';
@@ -54,6 +55,7 @@
 	};
 
 	const commentTreeUnsubscribe = commentTree.subscribe((commentTree) => {
+		applyLazyLoadingOnImageClass('booru-avatar-comment');
 		replies = commentTree.getReplies(comment.id);
 	});
 
@@ -69,14 +71,14 @@
 	});
 </script>
 
-<article class="p-6 mt-2 mb-2 text-base bg-gray-100 rounded-lg dark:bg-gray-900">
+<article class="p-2 mt-2 mb-2 text-base rounded-lg">
 	<div class="flex justify-between items-center mb-2">
 		<div class="flex items-center">
 			<p
 				class="inline-flex space-x-2 items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold"
 			>
 				<Avatar
-					class="booru-avatar"
+					class="booru-avatar-comment"
 					src={comment.author?.profilePictureUrl ?? undefined}
 					alt={comment.authorId
 						? `profile picture of ${comment.author.username}`
@@ -124,7 +126,7 @@
 	{/if}
 </article>
 
-<div class="ml-2 border-l-2">
+<div class="ml-5 border-l-2">
 	{#each replies as reply (reply.id)}
 		<Comment currentDepth={currentDepth + 1} comment={reply} />
 	{/each}

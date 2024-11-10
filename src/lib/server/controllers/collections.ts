@@ -8,7 +8,7 @@ import { MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB } from '$lib/shared/constants/imag
 import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import { isLabelAppropriate } from '$lib/shared/helpers/labels';
 import type { TCollectionPaginationData } from '$lib/shared/types/collections';
-import { redirect, type RequestEvent } from '@sveltejs/kit';
+import { isHttpError, isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { AWS_COLLECTION_PICTURE_BUCKET_NAME } from '../constants/aws';
@@ -30,7 +30,6 @@ import { findUserByName } from '../db/actions/user';
 import {
 	createErrorResponse,
 	createSuccessResponse,
-	isRedirectObject,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import { applyCollectionImageTransformationPipeline, flattenImageBuffers } from '../helpers/images';
@@ -267,14 +266,15 @@ export const handleGetCollection = async (
 			});
 			if (!collection) {
 				return createErrorResponse(
-					'api-route',
+					handlerType,
 					404,
 					`A collection with the id: ${collectionId} does not exist`,
 				);
 			}
 
 			return createSuccessResponse(handlerType, 'Successfully fetched the collection', collection);
-		} catch {
+		} catch (error) {
+			if (isHttpError(error)) throw error;
 			return createErrorResponse(
 				handlerType,
 				500,
@@ -295,7 +295,7 @@ export const handleGetAuthenticatedUserCollections = async (event: RequestEvent)
 
 			try {
 				if (user.id === NULLABLE_USER.id) {
-					throw redirect(302, '/');
+					redirect(302, '/');
 				}
 
 				const userCollections = await findCollectionsByAuthorId(
@@ -318,7 +318,7 @@ export const handleGetAuthenticatedUserCollections = async (event: RequestEvent)
 					responseData,
 				);
 			} catch (error) {
-				if (isRedirectObject(error)) throw error;
+				if (isRedirect(error)) throw error;
 				return createErrorResponse(
 					'page-server-load',
 					500,
@@ -559,7 +559,7 @@ export const handleCreateCollection = async (
 					201,
 				);
 			} catch (error) {
-				if (isRedirectObject(error)) throw error;
+				if (isRedirect(error)) throw error;
 				const message = 'An unexpected error occurred while creating the post';
 				return createErrorResponse(
 					handlerType,

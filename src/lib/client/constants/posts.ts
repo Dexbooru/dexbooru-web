@@ -40,6 +40,36 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 			},
 		},
 	],
+	updatedAt: [
+		{
+			label: 'Last updated at',
+			isActive(orderBy, ascending) {
+				return orderBy === 'updatedAt' && !ascending;
+			},
+			getHref(postsPageBaseUrl) {
+				const url = new URL(postsPageBaseUrl);
+				url.searchParams.append('pageNumber', '0');
+				url.searchParams.append('orderBy', 'updatedAt');
+				url.searchParams.append('ascending', 'false');
+
+				return url.href;
+			},
+		},
+		{
+			label: 'First updated at',
+			isActive(orderBy, ascending) {
+				return orderBy === 'updatedAt' && ascending;
+			},
+			getHref(postsPageBaseUrl) {
+				const url = new URL(postsPageBaseUrl);
+				url.searchParams.append('pageNumber', '0');
+				url.searchParams.append('orderBy', 'updatedAt');
+				url.searchParams.append('ascending', 'true');
+
+				return url.href;
+			},
+		},
+	],
 	likes: [
 		{
 			label: 'Most liked',

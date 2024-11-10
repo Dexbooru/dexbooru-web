@@ -48,7 +48,7 @@
 				<TableBodyCell>{formatDate(new Date(collection.createdAt))}</TableBodyCell>
 				<TableBodyCell class="text-center">
 					<Avatar
-						class="ml-auto mr-auto booru-avatar-search-table-posts"
+						class="ml-auto mr-auto booru-avatar-search-table-collections"
 						src={collection.uploaderProfilePictureUrl}
 						alt="profile picture of {collection.uploaderName}"
 					/>

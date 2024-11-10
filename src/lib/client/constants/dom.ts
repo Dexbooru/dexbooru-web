@@ -4,6 +4,7 @@ import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.we
 
 export const LAZY_LOADABLE_IMAGES = [
 	'booru-avatar',
+	'booru-avatar-comment',
 	'booru-avatar-collection-card',
 	'booru-avatar-navbar',
 	'booru-avatar-search-table-posts',
@@ -14,8 +15,10 @@ export const LAZY_LOADABLE_IMAGES = [
 	'post-carousel-image',
 	'collection-carousel-image',
 	'whole-post-image',
+	'whole-collection-image',
 ];
 export const LAZY_LOADABLE_IMAGE_DEFAULT_MAP = {
+	'booru-avatar-comment': DefaultProfilePicture,
 	'booru-avatar-collection-card': DefaultProfilePicture,
 	'booru-avatar-search-table-posts': DefaultProfilePicture,
 	'booru-avatar-search-table-collections': DefaultProfilePicture,
@@ -27,4 +30,5 @@ export const LAZY_LOADABLE_IMAGE_DEFAULT_MAP = {
 	'post-carousel-image': DefaultPostPicture,
 	'collection-carousel-image': DefaultPostCollectionPicture,
 	'whole-post-image': DefaultPostPicture,
+	'whole-collection-image': DefaultPostCollectionPicture,
 };

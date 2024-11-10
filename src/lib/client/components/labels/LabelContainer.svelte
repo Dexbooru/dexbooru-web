@@ -14,11 +14,6 @@
 		handleLabelClose?: ((event: CustomEvent<any>) => void) | null;
 	}
 
-	const renderLabel = (label: string) => {
-		if (onPostsViewPage) return label;
-		return label.length >= 0.75 * maximumLabelLength ? label.slice(0, 20) + '...' : label;
-	};
-
 	let {
 		onPostsViewPage = false,
 		labels = [],
@@ -33,6 +28,12 @@
 	let processedLabels: string[] = $derived(
 		labels.map((label) => (typeof label === 'object' ? label.name : label)),
 	);
+
+	const renderLabel = (label: string) => {
+		if (onPostsViewPage) return label;
+		return label.length >= 0.75 * maximumLabelLength ? label.slice(0, 20) + '...' : label;
+	};
+
 	const maximumLabelLength = labelType === 'tag' ? MAXIMUM_TAG_LENGTH : MAXIMUM_ARTIST_LENGTH;
 </script>
 

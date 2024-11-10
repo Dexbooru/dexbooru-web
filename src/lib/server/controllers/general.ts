@@ -1,6 +1,7 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import prisma from '../db/prisma';
 import { createSuccessResponse, validateAndHandleRequest } from '../helpers/controllers';
+import { cacheResponse } from '../helpers/sessions';
 import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
 export const handleFetchResourceGenerics = async (
@@ -26,6 +27,8 @@ export const handleFetchResourceGenerics = async (
 				artistCount,
 				userCount,
 			};
+
+			cacheResponse(event.setHeaders, 60);
 
 			return createSuccessResponse(
 				handlerType,

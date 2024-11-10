@@ -94,6 +94,14 @@ export const lazyLoadImage = (image: HTMLImageElement) => {
 	);
 	if (!matchingLazyLoadableClassName) return;
 
+	if (!image.complete) {
+		image.src =
+			LAZY_LOADABLE_IMAGE_DEFAULT_MAP[
+				matchingLazyLoadableClassName as keyof typeof LAZY_LOADABLE_IMAGE_DEFAULT_MAP
+			] ?? '';
+		return;
+	}
+
 	if (image.onabort && image.onerror && image.onload) return;
 
 	image.setAttribute('loading', 'lazy');

@@ -1,15 +1,13 @@
 <script lang="ts">
 	import { POSTS_GRID_ANIMATION_DURATION_MS } from '$lib/client/constants/posts';
-	import {
-		getAuthenticatedUser,
-		getAuthenticatedUserPreferences,
-		getOriginalPostsPage,
-	} from '$lib/client/helpers/context';
+	import { getOriginalPostsPage } from '$lib/client/helpers/context';
+	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPostCollection } from '$lib/shared/types/collections';
+	import { onMount } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import PostCard from '../posts/card/PostCard.svelte';
 	import CollectionCardActions from './card/CollectionCardActions.svelte';
@@ -21,8 +19,6 @@
 	let { collection }: Props = $props();
 
 	const originalPostPage = getOriginalPostsPage();
-	const user = getAuthenticatedUser();
-	const userPreferences = getAuthenticatedUserPreferences();
 
 	let originalThumbnail = $state('');
 
@@ -32,13 +28,17 @@
 			collection.thumbnailImageUrls.find((imageUrl) => imageUrl.includes(ORIGINAL_IMAGE_SUFFIX)) ??
 			'';
 	});
+
+	onMount(() => {
+		applyLazyLoadingOnImageClass('whole-collection-image');
+	});
 </script>
 
 <svelte:head>
 	<title>{collection.description} - {collection.id}</title>
 </svelte:head>
 
-<img src={originalThumbnail} alt={collection.description} />
+<img class="whole-collection-image" src={originalThumbnail} alt={collection.description} />
 <div class="flex">
 	<CollectionCardActions onCollectionViewPage {collection} />
 </div>

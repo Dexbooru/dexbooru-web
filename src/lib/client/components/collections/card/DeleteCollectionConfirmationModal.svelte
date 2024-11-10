@@ -38,8 +38,6 @@
 		}
 	});
 
-	const pagePath = $page.url.pathname;
-
 	const updateCollections = (previousCollections: TPostCollection[]) =>
 		previousCollections.filter((collection) => collection.id !== collectionId);
 
@@ -49,6 +47,7 @@
 		collectionDeletionLoading = false;
 
 		if (response.ok) {
+			const pagePath = $page.url.pathname;
 			if (INDIVIDUAL_COLLECTION_PATH_REGEX.test(pagePath)) {
 				goto('/collections');
 				return;
@@ -64,7 +63,7 @@
 					posts: paginationData.collections.filter((collection) => collection.id !== collectionId),
 				};
 			});
-			toast.push('The post was deleted successfully!', SUCCESS_TOAST_OPTIONS);
+			toast.push('The collection was deleted successfully!', SUCCESS_TOAST_OPTIONS);
 			activeModal.set({
 				isOpen: false,
 				focusedModalName: null,

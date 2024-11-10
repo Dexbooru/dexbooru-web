@@ -10,17 +10,17 @@
 	}
 
 	let { errorPageType }: Props = $props();
-
-	const errorMessage = $page.error?.message;
-	const pageResponseStatus = $page.status;
-	const pageRoute = $page.url.pathname;
 </script>
 
 <svelte:head>
-	<title>{ERROR_PAGE_TITLE_MAP[errorPageType]}</title>
+	<title
+		>{$page.status === 500
+			? ERROR_PAGE_TITLE_MAP['internalServerError']
+			: ERROR_PAGE_TITLE_MAP[errorPageType]}</title
+	>
 </svelte:head>
 
-{#if pageResponseStatus === 404}
+{#if $page.status === 404}
 	<section
 		class="flex flex-col mt-20 items-center justify-center text-gray-900 dark:text-gray-100 px-4 sm:px-6 lg:px-8"
 	>
@@ -37,9 +37,11 @@
 			<p class="mt-2 text-lg text-gray-600 dark:text-gray-400">
 				Sorry, we dropped the magnifying glass and couldn't find the post you were looking for!
 			</p>
-			<code class="mt-1 p-2 rounded-md bg-gray-200 dark:bg-gray-800 text-sm font-mono"
-				>{errorMessage}
-			</code>
+		{:else if errorPageType === 'collections'}
+			<p class="mt-2 text-lg text-gray-600 dark:text-gray-400">
+				Sorry, we dropped the magnifying glass and couldn't find the collection you were looking
+				for!
+			</p>
 		{:else if errorPageType === 'general'}
 			<p class="mt-2 text-lg text-gray-600 dark:text-gray-400">
 				Sorry, we dropped the magnifying glass and couldn't find the resource you were looking for!
@@ -48,12 +50,12 @@
 				You tried to visit the following route:
 			</p>
 			<code class="mt-1 p-2 rounded-md bg-gray-200 dark:bg-gray-800 text-sm font-mono"
-				>{pageRoute}
+				>{$page.url.pathname}
 			</code>
 		{/if}
 
-		<Button color="blue" href="/" data-sveltekit-reload>Go Home</Button>
+		<Button class="mt-5" color="blue" href="/">Go Home</Button>
 	</section>
-{:else if pageResponseStatus === 500}
-	{pageResponseStatus} {errorMessage}
+{:else if $page.status === 500}
+	{$page.error?.message}
 {/if}

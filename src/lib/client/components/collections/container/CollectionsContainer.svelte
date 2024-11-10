@@ -67,6 +67,9 @@
 		});
 
 		uniqueAuthors = Array.from(collectionAuthorMap.values());
+
+		applyLazyLoadingOnImageClass('collection-carousel-image');
+		applyLazyLoadingOnImageClass('booru-avatar-collection-card');
 	});
 
 	onMount(() => {

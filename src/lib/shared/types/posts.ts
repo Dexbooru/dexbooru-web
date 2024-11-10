@@ -49,7 +49,7 @@ export type TPost = Post & {
 };
 
 export type TPostSelector = Prisma.PostSelect<DefaultArgs>;
-export type TPostOrderByColumn = 'likes' | 'createdAt' | 'views' | 'commentCount';
+export type TPostOrderByColumn = 'likes' | 'createdAt' | 'views' | 'commentCount' | 'updatedAt';
 
 export type TPostSimilarityBody = {
 	image_url?: string;
