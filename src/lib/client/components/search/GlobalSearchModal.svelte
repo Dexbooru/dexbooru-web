@@ -12,7 +12,7 @@
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Modal, Spinner } from 'flowbite-svelte';
+	import { GradientButton, Modal, Spinner } from 'flowbite-svelte';
 	import { onDestroy } from 'svelte';
 	import Searchbar from '../reusable/Searchbar.svelte';
 	import SearchResultsContainer from './SearchResultsContainer.svelte';
@@ -92,4 +92,10 @@
 	{#if currentSearchResults}
 		<SearchResultsContainer results={currentSearchResults} />
 	{/if}
+
+	<GradientButton
+		color="green"
+		on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+		href="/similarity-search">Find posts via similarity search here</GradientButton
+	>
 </Modal>

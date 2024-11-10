@@ -151,6 +151,7 @@ export const validateAndHandleRequest = async <T extends TRequestSchema>(
 	event: RequestEvent,
 	handlerType: TControllerHandlerVariant,
 	requestSchema: T,
+	// eslint-disable-next-line no-unused-vars
 	callback: (validatedData: TInferRequestSchema<T>) => Promise<unknown>,
 	isProtected: boolean = false,
 ) => {

@@ -133,3 +133,7 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 };
 
 export const POSTS_GRID_ANIMATION_DURATION_MS = 500;
+
+export const INDIVIDUAL_POST_PATH_REGEX = new RegExp(
+	'^/posts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+);

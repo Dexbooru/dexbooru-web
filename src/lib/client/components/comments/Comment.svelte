@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Comment from './Comment.svelte';
 	import { createPostCommentsPaginator } from '$lib/client/api/comments';
 	import { MAXIMUM_COMMENT_REPLY_DEPTH_LOAD } from '$lib/client/constants/comments';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
@@ -12,6 +11,7 @@
 	import { MessagesSolid } from 'flowbite-svelte-icons';
 	import { onDestroy, onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import Comment from './Comment.svelte';
 	import CommentTextbox from './CommentTextbox.svelte';
 
 	interface Props {
@@ -85,7 +85,7 @@
 				{#if comment.author}
 					<a href="/profile/{comment.author.username}">{comment.author.username}</a>
 				{:else}
-					<h2>{DELETED_ACCOUNT_HEADING}</h2>
+					<span>{DELETED_ACCOUNT_HEADING}</span>
 				{/if}
 			</p>
 			<p class="text-sm text-gray-600 dark:text-gray-400">

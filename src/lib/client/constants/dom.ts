@@ -1,3 +1,4 @@
+import DefaultPostCollectionPicture from '$lib/client/assets/default_post_collection_picture.webp';
 import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
 import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 
@@ -12,7 +13,6 @@ export const LAZY_LOADABLE_IMAGES = [
 	'booru-avatar-post-card',
 	'post-carousel-image',
 	'collection-carousel-image',
-	'collection-preview-image',
 	'whole-post-image',
 ];
 export const LAZY_LOADABLE_IMAGE_DEFAULT_MAP = {
@@ -25,7 +25,6 @@ export const LAZY_LOADABLE_IMAGE_DEFAULT_MAP = {
 	'booru-avatar-post-card': DefaultProfilePicture,
 	'booru-avatar': DefaultProfilePicture,
 	'post-carousel-image': DefaultPostPicture,
-	'collection-carousel-image': DefaultPostPicture,
+	'collection-carousel-image': DefaultPostCollectionPicture,
 	'whole-post-image': DefaultPostPicture,
-	'collection-preview-image': DefaultPostPicture,
 };

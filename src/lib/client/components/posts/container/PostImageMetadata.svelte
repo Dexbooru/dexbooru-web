@@ -74,9 +74,7 @@
 	Total images in post: <span class=" dark:text-gray-400">{originalSizedImageUrls.length}</span>
 </p>
 
-{#if $userPreferences.hidePostMetadataOnPreview}
-	<PostCardActions onPostViewPage {post} postId={post.id} likes={post.likes} author={post.author} />
-{/if}
+<PostCardActions onPostViewPage {post} postId={post.id} likes={post.likes} author={post.author} />
 
 {#if imagesMetadata.length > 0}
 	<p class="text-lg dark:text-white">Post images metadata:</p>

@@ -39,11 +39,9 @@
 </svelte:head>
 
 <img src={originalThumbnail} alt={collection.description} />
-{#if $user && $userPreferences.hideCollectionMetadataOnPreview}
-	<div class="flex">
-		<CollectionCardActions onCollectionViewPage {collection} />
-	</div>
-{/if}
+<div class="flex">
+	<CollectionCardActions onCollectionViewPage {collection} />
+</div>
 
 <section class="space-y-2">
 	<p class="text-lg dark:text-white cursor-text">

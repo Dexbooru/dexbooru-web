@@ -50,3 +50,20 @@ export type TPost = Post & {
 
 export type TPostSelector = Prisma.PostSelect<DefaultArgs>;
 export type TPostOrderByColumn = 'likes' | 'createdAt' | 'views' | 'commentCount';
+
+export type TPostSimilarityBody = {
+	image_url?: string;
+	image_file?: string;
+	k?: number;
+};
+
+export type TPostImageSimilarityResult = {
+	post_id: string;
+	distance: number;
+	image_url: string;
+};
+
+export type TPostSimilarityResponse = {
+	status: string;
+	results: TPostImageSimilarityResult[];
+};

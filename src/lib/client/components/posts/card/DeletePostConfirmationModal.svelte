@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { deletePost } from '$lib/client/api/posts';
 	import { DELETE_POST_MODAL_NAME } from '$lib/client/constants/layout';
+	import { INDIVIDUAL_POST_PATH_REGEX } from '$lib/client/constants/posts';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import {
 		getActiveModal,
@@ -33,22 +34,18 @@
 		}
 	});
 
-	const individualPostPathRegex = new RegExp(
-		'^/posts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-	);
-
-	const pagePath = $page.url.pathname;
-
 	const handleDeletePost = async () => {
 		postDeletionLoading = true;
 		const response = await deletePost(postId);
 		postDeletionLoading = false;
 
 		if (response.ok) {
-			if (individualPostPathRegex.test(pagePath)) {
+			const pagePath = $page.url.pathname;
+			if (INDIVIDUAL_POST_PATH_REGEX.test(pagePath)) {
 				goto('/posts');
 				return;
 			}
+
 			postsPage.update((previousPosts) => previousPosts.filter((post) => post.id !== postId));
 			originalPostPage.update((previousPosts) =>
 				previousPosts.filter((post) => post.id !== postId),

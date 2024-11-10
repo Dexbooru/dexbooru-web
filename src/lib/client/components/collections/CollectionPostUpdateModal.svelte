@@ -4,6 +4,7 @@
 		createGetCollectionsByAuthorPaginator,
 		updatePostCollections,
 	} from '$lib/client/api/collections';
+	import { INDIVIDUAL_COLLECTION_PATH_REGEX } from '$lib/client/constants/collections';
 	import { COLLECTIONS_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import {
@@ -35,11 +36,6 @@
 	const activeModal = getActiveModal();
 	const originalPostPage = getOriginalPostsPage();
 	const userCollectionPaginator = createGetCollectionsByAuthorPaginator();
-
-	const individualCollectionPathRegex = new RegExp(
-		'^/collections/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-	);
-	const url = $page.url;
 
 	const updateCollectionSelections = (updateSelectedCollections: boolean = false) => {
 		$userCollections.forEach((collection) => {
@@ -102,7 +98,8 @@
 							(post) => post.id !== currentPostId,
 						);
 
-						if (individualCollectionPathRegex.test(url.pathname)) {
+						const url = $page.url;
+						if (INDIVIDUAL_COLLECTION_PATH_REGEX.test(url.pathname)) {
 							originalPostPage.update((posts) => posts.filter((post) => post.id !== currentPostId));
 						}
 					}
@@ -157,7 +154,7 @@
 			<p class="m-2">
 				<span>You haven't created any collections yet!</span>
 				<br />
-				<span>Make one using the button at the top of this page</span>
+				<span>Make one using the button at the top of the collections page</span>
 			</p>
 		{:else}
 			<div class="block space-y-5">
@@ -198,7 +195,7 @@
 			</div>
 		{/if}
 	</div>
-	{#if $userCollections.length % MAXIMUM_COLLECTIONS_PER_PAGE === 0}
+	{#if $userCollections.length % MAXIMUM_COLLECTIONS_PER_PAGE === 0 && $userCollections.length > 0}
 		<Button color="blue" disabled={userCollectionsLoading} on:click={handleLoadMoreCollections}
 			>Load more collections</Button
 		>

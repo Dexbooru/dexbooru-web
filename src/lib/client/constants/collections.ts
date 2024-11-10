@@ -1,6 +1,10 @@
 import type { TCollectionOrderByColumn } from '$lib/shared/types/collections';
 import type { TOrderByTranslationMap } from '../types/collections';
 
+export const INDIVIDUAL_COLLECTION_PATH_REGEX = new RegExp(
+	'^/collections/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+);
+
 export const getLabelFromOrderby = (
 	orderBy: TCollectionOrderByColumn,
 	ascending: boolean,
