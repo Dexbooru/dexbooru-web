@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getEstimatedPostRating } from '$lib/client/api/mlApi';
+	import { ESTIMATED_TAG_RATING_LABEL_MAP } from '$lib/client/constants/labels';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import {
 		MAXIMUM_ARTIST_LENGTH,
@@ -14,7 +15,17 @@
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate, transformLabel } from '$lib/shared/helpers/labels';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Checkbox, Heading, Input, Label, Li, List, Textarea } from 'flowbite-svelte';
+	import {
+		Button,
+		Checkbox,
+		Heading,
+		Input,
+		Label,
+		Li,
+		List,
+		Spinner,
+		Textarea,
+	} from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/posts/upload/$types';
 	import PostPictureUpload from '../files/PostPictureUpload.svelte';
@@ -51,6 +62,19 @@
 				(postImage) => !isFileImage(postImage.file) || !isFileImageSmall(postImage.file, 'post'),
 			);
 		return !isValidForm;
+	});
+	let estimatedPostRating: Promise<'s' | 'q' | 'e' | null> = $derived.by(async () => {
+		if (tags.length === 0) {
+			return null;
+		}
+
+		const response = await getEstimatedPostRating(tags);
+		if (response.ok) {
+			const data = await response.json();
+			return data.predicted_rating as 's' | 'q' | 'e';
+		}
+
+		return null;
 	});
 
 	const addLabel = (labelType: 'tag' | 'artist') => {
@@ -101,12 +125,15 @@
 		}
 	};
 
-	const removeLabel = (event: Event, labelType: 'tag' | 'artist') => {
-		const target = event.target as Element;
+	const removeLabel = (
+		event: CustomEvent<any> & { explicitOriginalTarget: Element },
+		labelType: 'tag' | 'artist',
+	) => {
+		const target = event.explicitOriginalTarget as Element;
 		const badgeDiv = target.closest('div');
 
 		if (badgeDiv) {
-			const removalLabel = badgeDiv.textContent?.split(' ')[0];
+			const removalLabel = badgeDiv.textContent?.split(' ')[0].trim() ?? '';
 			if (labelType === 'tag') {
 				tags = tags.filter((t) => t !== removalLabel);
 			} else {
@@ -124,12 +151,6 @@
 			target.value = '';
 		}
 	};
-
-	$effect(() => {
-		getEstimatedPostRating(tags)
-			.then((response) => response.json())
-			.then((data) => console.log(data));
-	});
 
 	onMount(() => {
 		if (form?.reason) {
@@ -243,6 +264,35 @@
 
 			<Checkbox class="cursor-text" bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
 			<Input type="hidden" name="isNsfw" value={isNsfw} />
+			{#await estimatedPostRating}
+				<div class="flex items-center space-x-2">
+					<Spinner />
+				</div>
+			{:then rating}
+				<div class="flex items-center space-x-2 !mt-5">
+					<span class="font-semibold text-gray-800 dark:text-gray-300">Estimated Rating:</span>
+					{#if rating}
+						<span class="text-sm text-gray-900 dark:text-gray-100"
+							>{ESTIMATED_TAG_RATING_LABEL_MAP[rating]}</span
+						>
+					{:else}
+						<span class="text-sm text-gray-500 dark:text-gray-400"
+							>Will show here once tags are added</span
+						>
+					{/if}
+				</div>
+
+				{#if rating === 'q' || rating === 'e'}
+					<div class="mt-2 p-3 bg-yellow-100 text-yellow-800 rounded-md">
+						<strong>Recommendation:</strong> The provided tags are potentially rated as
+						{#if rating === 'q'}
+							{ESTIMATED_TAG_RATING_LABEL_MAP['q']}
+						{:else}
+							{ESTIMATED_TAG_RATING_LABEL_MAP['e']}
+						{/if}. It is recommended to mark this post as NSFW.
+					</div>
+				{/if}
+			{/await}
 		</section>
 
 		<Button disabled={uploadButtonDisabled} color="green" type="submit" class="!mt-5"

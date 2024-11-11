@@ -37,9 +37,17 @@
 			profilePictureUrl: string;
 		};
 		onPostViewPage?: boolean;
+		likedPost?: boolean;
 	}
 
-	let { post, postId, likes = $bindable(), author, onPostViewPage = false }: Props = $props();
+	let {
+		post,
+		postId,
+		likes = $bindable(),
+		author,
+		onPostViewPage = false,
+		likedPost = false,
+	}: Props = $props();
 
 	const user = getAuthenticatedUser();
 	const postsPage = getPostsPage();
@@ -48,10 +56,11 @@
 	const activeModal = getActiveModal();
 
 	let postLikeLoading = $state(false);
-	let hasLikedPost = $state($postPagination?.likedPosts.map((post) => post.id).includes(postId));
-
-	const pagePathName = $page.url.pathname;
-	const isPostAuthor = $user && $user.id === author.id;
+	let hasLikedPost = $state(
+		onPostViewPage
+			? likedPost
+			: $postPagination?.likedPosts.map((post) => post.id).includes(postId),
+	);
 
 	const handleModalOpen = (focusedModalName: string, data: unknown) => {
 		activeModal.set({
@@ -93,6 +102,7 @@
 				return paginationData;
 			});
 
+			const pagePathName = $page.url.pathname;
 			if (pagePathName.includes('/posts/liked') && hasLikedPost) {
 				postsPage.update((previousPosts) => previousPosts.filter((post) => post.id !== postId));
 				originalPostPage.update((previousPosts) => {
@@ -148,7 +158,7 @@
 		</Button>
 	</div>
 
-	{#if isPostAuthor}
+	{#if $user && $user.id === author.id}
 		<div class="flex justify-center gap-2">
 			<Button
 				color="green"

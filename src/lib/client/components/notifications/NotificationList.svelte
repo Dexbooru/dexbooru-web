@@ -3,7 +3,7 @@
 	import type { TFriendRequest } from '$lib/shared/types/friends';
 	import { Dropdown } from 'flowbite-svelte';
 	import { BullhornSolid } from 'flowbite-svelte-icons';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import FriendRequest from './FriendRequest.svelte';
 
 	interface Props {
@@ -21,8 +21,10 @@
 		friendRequests = notificationData.friendRequests;
 	});
 
-	onDestroy(() => {
-		userNotificationsUnsubscribe();
+	onMount(() => {
+		return () => {
+			userNotificationsUnsubscribe();
+		};
 	});
 </script>
 
@@ -31,7 +33,7 @@
 	class="w-full max-w-sm rounded divide-y divide-gray-100 shadow dark:bg-gray-800 dark:divide-gray-700"
 >
 	{#snippet header()}
-		<div  class="text-center py-2 font-bold">Notifications ({notificationCount})</div>
+		<div class="text-center py-2 font-bold">Notifications ({notificationCount})</div>
 	{/snippet}
 	{#if notificationCount > 0}
 		{#each friendRequests as friendRequest (friendRequest)}

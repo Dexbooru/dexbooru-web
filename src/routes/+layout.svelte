@@ -46,7 +46,7 @@
 	import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 	import CommentTree from '$lib/shared/helpers/comments';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import '../app.postcss';
 	import type { LayoutData } from './$types';
 
@@ -95,7 +95,6 @@
 	});
 	updateUserCollections([]);
 
-	let validateTokenIntervalId: NodeJS.Timeout;
 	const AUTH_CHECK_INTERVAL_SIZE = 60 * 2.5 * 1000;
 
 	const validateUserSession = async () => {
@@ -117,17 +116,14 @@
 
 	onMount(() => {
 		validateUserSession();
-		validateTokenIntervalId = setInterval(validateUserSession, AUTH_CHECK_INTERVAL_SIZE);
+		const validateTokenIntervalId = setInterval(validateUserSession, AUTH_CHECK_INTERVAL_SIZE);
 
 		registerDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
 
 		return () => {
 			destroyDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
+			clearInterval(validateTokenIntervalId);
 		};
-	});
-
-	onDestroy(() => {
-		clearInterval(validateTokenIntervalId);
 	});
 </script>
 

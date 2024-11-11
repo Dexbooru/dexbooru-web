@@ -11,7 +11,7 @@
 	} from '$lib/client/helpers/context';
 	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import { fade } from 'svelte/transition';
 	import Searchbar from '../../reusable/Searchbar.svelte';
@@ -81,9 +81,11 @@
 		};
 	});
 
-	onDestroy(() => {
-		postPageStoreUnsubscribe();
-		postPaginationDataUnsubscribe();
+	onMount(() => {
+		return () => {
+			postPaginationDataUnsubscribe();
+			postPageStoreUnsubscribe();
+		};
 	});
 </script>
 

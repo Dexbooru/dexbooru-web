@@ -31,6 +31,7 @@ import {
 	findPostsByAuthorId,
 	findPostsByPage,
 	getTotalPostCount,
+	hasUserLikedPost,
 	likePostById,
 	updatePost,
 } from '../db/actions/post';
@@ -226,7 +227,8 @@ export const handleGetSimilarPosts = async (
 			}
 
 			const requestBody: TPostSimilarityBody = {
-				k: 15,
+				k: 10,
+				distance_threshold: 0.45,
 			};
 
 			if (postId && postId.length > 0) {
@@ -444,6 +446,7 @@ export const handleGetPost = async (
 ) => {
 	return await validateAndHandleRequest(event, handlerType, GetPostSchema, async (data) => {
 		const postId = data.pathParams.postId;
+		const user = event.locals.user;
 
 		try {
 			const post =
@@ -458,11 +461,13 @@ export const handleGetPost = async (
 				return error;
 			}
 
+			const hasLikedPost =
+				user.id !== NULLABLE_USER.id ? await hasUserLikedPost(user.id, post.id) : false;
 			const uploadedSuccessfully = data.urlSearchParams.uploadedSuccessfully;
 			const finalData =
 				handlerType === 'api-route'
 					? post
-					: { post, uploadedSuccessfully: uploadedSuccessfully === 'true' };
+					: { post, uploadedSuccessfully: uploadedSuccessfully === 'true', hasLikedPost };
 			return createSuccessResponse(
 				handlerType,
 				`Successfully fetched post with id: ${postId}`,

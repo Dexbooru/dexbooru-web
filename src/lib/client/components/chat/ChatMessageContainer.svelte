@@ -4,7 +4,7 @@
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { chatStore } from '$lib/client/stores/chat';
 	import type { TChatMessage } from '$lib/client/types/core';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		roomId?: string | null;
@@ -27,8 +27,10 @@
 		messages = currentMessages;
 	});
 
-	onDestroy(() => {
-		chatStoreUnsubsribe();
+	onMount(() => {
+		return () => {
+			chatStoreUnsubsribe();
+		};
 	});
 </script>
 

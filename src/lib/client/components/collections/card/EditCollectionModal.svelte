@@ -15,7 +15,7 @@
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Input, Label, Modal, Textarea } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	let collection: TPostCollection;
 	let title: string = $state('');
@@ -79,8 +79,10 @@
 		}
 	};
 
-	onDestroy(() => {
-		modalStoreUnsubscribe();
+	onMount(() => {
+		return () => {
+			modalStoreUnsubscribe();
+		};
 	});
 </script>
 

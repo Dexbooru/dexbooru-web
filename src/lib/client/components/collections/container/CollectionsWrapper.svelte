@@ -8,7 +8,7 @@
 		getOriginalCollectionPage,
 	} from '$lib/client/helpers/context';
 	import type { TPostCollection } from '$lib/shared/types/collections';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import CollectionsContainer from './CollectionsContainer.svelte';
 
 	interface Props {
@@ -27,11 +27,13 @@
 		collections,
 	);
 
-	onDestroy(() => {
-		collectionPaginationData.set(null);
-		collectionsPage.set([]);
-		originalCollectionsPage.set([]);
-		nsfwCollectionsPage.set([]);
+	onMount(() => {
+		return () => {
+			collectionPaginationData.set(null);
+			collectionsPage.set([]);
+			originalCollectionsPage.set([]);
+			nsfwCollectionsPage.set([]);
+		};
 	});
 </script>
 

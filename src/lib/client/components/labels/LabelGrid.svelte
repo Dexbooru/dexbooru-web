@@ -3,11 +3,13 @@
 	import { getTags } from '$lib/client/api/tags';
 	import { CHAR_OPTIONS } from '$lib/client/constants/labels';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Spinner } from 'flowbite-svelte';
 	import { PalleteSolid, TagSolid } from 'flowbite-svelte-icons';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	interface Props {
 		labelType: 'tag' | 'artist';
@@ -19,6 +21,7 @@
 	let finishedLabelPagination = $state(false);
 	let hasLoadedLabelsOnce = $state(false);
 	let labels: string[] = $state([]);
+	let labelCounts = $state(new SvelteMap<string, number>());
 	let pageNumber = 0;
 	let selectedLabel = $state('');
 
@@ -29,6 +32,7 @@
 		loadingLabels = true;
 		if (!pressedLoadingMore) {
 			labels = [];
+			labelCounts = new SvelteMap<string, number>();
 			pageNumber = 0;
 			finishedLabelPagination = false;
 			selectedLabel = target.innerText;
@@ -44,6 +48,12 @@
 			const rawLabels: (Tag & Artist)[] = responseData.data;
 			const rawLabelNames = rawLabels.map((rawLabel) => rawLabel.name);
 			labels = !pressedLoadingMore ? rawLabelNames : [...labels, ...rawLabelNames];
+			rawLabels.forEach((rawLabel) => {
+				const labelName = rawLabel.name;
+				const labelCount = rawLabel.postCount;
+				labelCounts.set(labelName, labelCount);
+			});
+
 			pageNumber++;
 			hasLoadedLabelsOnce = true;
 			if (pressedLoadingMore && rawLabelNames.length === 0) {
@@ -76,12 +86,12 @@
 	<section class="grid gap-3 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
 		{#if hasLoadedLabelsOnce}
 			{#if labels.length > 0}
-				{#each labels as label}
+				{#each labels as label (label)}
 					<a
 						class="text-center inline-flex justify-center space-x-2 border rounded p-2 leading-none dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
 						href="/posts/{labelType}/{encodeURIComponent(label)}"
 					>
-						<span># {label}</span>
+						<span># {label} - {formatNumberWithCommas(labelCounts.get(label) ?? 0)}</span>
 						{#if labelType === 'tag'}
 							<TagSolid />
 						{:else}

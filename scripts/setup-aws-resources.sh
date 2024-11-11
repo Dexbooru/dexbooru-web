@@ -7,6 +7,9 @@ docker-compose --env-file "../../.env" up -d && \
 aws --endpoint-url=http://localhost:4566 s3 mb s3://dexbooru-dev-pfps && \
 aws --endpoint-url=http://localhost:4566 s3 mb s3://dexbooru-dev-posts && \
 aws --endpoint-url=http://localhost:4566 s3 mb s3://dexbooru-dev-collections
+aws --endpoint-url=http://localhost:4566 s3 mb s3://dexbooru-prd-pfps && \
+aws --endpoint-url=http://localhost:4566 s3 mb s3://dexbooru-prd-posts && \
+aws --endpoint-url=http://localhost:4566 s3 mb s3://dexbooru-prd-collections
 
 echo "Spun up localstack S3 container and created required application buckets"
 aws --endpoint-url=http://localhost:4566 s3 ls

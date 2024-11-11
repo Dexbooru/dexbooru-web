@@ -16,7 +16,7 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Modal } from 'flowbite-svelte';
 	import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	let targetDeletionCollection: TPostCollection | null = $state(null);
 	let collectionId: string;
@@ -47,6 +47,12 @@
 		collectionDeletionLoading = false;
 
 		if (response.ok) {
+			toast.push('The collection was deleted successfully!', SUCCESS_TOAST_OPTIONS);
+			activeModal.set({
+				isOpen: false,
+				focusedModalName: null,
+			});
+
 			const pagePath = $page.url.pathname;
 			if (INDIVIDUAL_COLLECTION_PATH_REGEX.test(pagePath)) {
 				goto('/collections');
@@ -63,18 +69,15 @@
 					posts: paginationData.collections.filter((collection) => collection.id !== collectionId),
 				};
 			});
-			toast.push('The collection was deleted successfully!', SUCCESS_TOAST_OPTIONS);
-			activeModal.set({
-				isOpen: false,
-				focusedModalName: null,
-			});
 		} else {
 			toast.push('There was an error while deleting the post!', FAILURE_TOAST_OPTIONS);
 		}
 	};
 
-	onDestroy(() => {
-		modalStoreUnsubscribe();
+	onMount(() => {
+		return () => {
+			modalStoreUnsubscribe();
+		};
 	});
 </script>
 

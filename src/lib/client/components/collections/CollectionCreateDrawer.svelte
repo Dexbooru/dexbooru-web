@@ -6,7 +6,7 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import { CloseButton, Drawer } from 'flowbite-svelte';
 	import { InfoCircleSolid } from 'flowbite-svelte-icons';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { sineIn } from 'svelte/easing';
 	import CollectionCreateForm from './CollectionCreateForm.svelte';
 
@@ -55,8 +55,10 @@
 		};
 	});
 
-	onDestroy(() => {
-		pageUnsubscribe();
+	onMount(() => {
+		return () => {
+			pageUnsubscribe();
+		};
 	});
 </script>
 

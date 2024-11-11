@@ -40,10 +40,14 @@ export type TPost = Post & {
 		profilePictureUrl: string;
 	};
 	tags: {
+		id: string;
 		name: string;
+		postCount: number;
 	}[];
 	artists: {
+		id: string;
 		name: string;
+		postCount: number;
 	}[];
 	commentCount: number;
 };
@@ -55,6 +59,7 @@ export type TPostSimilarityBody = {
 	image_url?: string;
 	image_file?: string;
 	k?: number;
+	distance_threshold?: number;
 };
 
 export type TPostImageSimilarityResult = {

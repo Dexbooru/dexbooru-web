@@ -3,6 +3,7 @@
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { fileToBase64String } from '$lib/client/helpers/images';
 	import { FILE_IMAGE_ACCEPT } from '$lib/shared/constants/images';
+	import { isFileImage } from '$lib/shared/helpers/images';
 	import type { TPostImageSimilarityResult } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Alert, Button, Fileupload, ImagePlaceholder, Input, Label } from 'flowbite-svelte';
@@ -16,16 +17,31 @@
 	let similarityResults: TPostImageSimilarityResult[] = $state([]);
 	let resultsLoading = $state(false);
 
+	const resetFileUploadState = (target: HTMLInputElement) => {
+		target.value = '';
+		imageFile = '';
+	};
+
 	const onImageFileChange = async (event: Event) => {
 		imageFile = '';
 
 		const target = event.target as HTMLInputElement;
 		if (target.files) {
 			const file = target.files[0];
-			const conversionResult = await fileToBase64String(file);
-			if (conversionResult) {
-				imageFile = conversionResult;
+			if (!isFileImage(file)) {
+				toast.push('The provided file was not an image', FAILURE_TOAST_OPTIONS);
+				resetFileUploadState(target);
+				return;
 			}
+
+			const conversionResult = await fileToBase64String(file);
+			if (!conversionResult) {
+				toast.push('An error occured while converting the image', FAILURE_TOAST_OPTIONS);
+				resetFileUploadState(target);
+				return;
+			}
+
+			imageFile = conversionResult;
 		}
 	};
 </script>
@@ -139,9 +155,7 @@
 		</Alert>
 	{/if}
 
-	<section
-		class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ml-2 mr-2"
-	>
+	<section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ml-2 mr-2">
 		{#if resultsLoading}
 			{#each Array(10) as _i}
 				<ImagePlaceholder />

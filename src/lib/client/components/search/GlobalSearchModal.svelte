@@ -13,7 +13,7 @@
 	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { GradientButton, Modal, Spinner } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import Searchbar from '../reusable/Searchbar.svelte';
 	import SearchResultsContainer from './SearchResultsContainer.svelte';
 
@@ -62,8 +62,20 @@
 		searchResultsLoading = false;
 	}, SEARCH_DEBOUNCE_TIMEOUT_MS) as (query: string) => void;
 
-	onDestroy(() => {
-		modalStoreUnsubscribe();
+	onMount(() => {
+		const searchbarInput = document.getElementById(
+			GLOBAL_SEARCH_INPUT_ELEMENT_ID,
+		) as HTMLInputElement;
+		const clearSearchResultsIntervalId = setInterval(() => {
+			if (searchbarInput && searchbarInput.value.length === 0) {
+				currentSearchResults = null;
+			}
+		}, 500);
+
+		return () => {
+			clearInterval(clearSearchResultsIntervalId);
+			modalStoreUnsubscribe();
+		};
 	});
 </script>
 

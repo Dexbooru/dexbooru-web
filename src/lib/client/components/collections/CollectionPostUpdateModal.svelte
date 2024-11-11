@@ -22,7 +22,7 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Checkbox, Modal } from 'flowbite-svelte';
 	import { UndoOutline } from 'flowbite-svelte-icons';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 
 	let userCollectionsLoading: boolean = $state(false);
@@ -135,10 +135,10 @@
 		userCollectionPaginator().then((collections) => {
 			userCollections.set(collections);
 		});
-	});
 
-	onDestroy(() => {
-		activeModalUnsubscribe();
+		return () => {
+			activeModalUnsubscribe();
+		};
 	});
 </script>
 

@@ -4,7 +4,7 @@
 	import { REPORT_REASON_CATEGORIES } from '$lib/shared/constants/reports';
 	import { ReportReasonCategory } from '$lib/shared/types/reports';
 	import { Button, Label, Modal, Select, Textarea } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	let postId: string = $state('');
 	let reportVerbalReason = $state('');
@@ -19,8 +19,10 @@
 		}
 	});
 
-	onDestroy(() => {
-		modalStoreUnsubscribe();
+	onMount(() => {
+		return () => {
+			modalStoreUnsubscribe();
+		};
 	});
 </script>
 

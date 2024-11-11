@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getChangePasswordAuthRequirements } from '$lib/client/helpers/context';
 	import { Alert, Button, Card } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 
 	interface Props {
@@ -29,8 +29,10 @@
 		},
 	);
 
-	onDestroy(() => {
-		changePasswordFormAuthRequirementsUnsubscribe();
+	onMount(() => {
+		return () => {
+			changePasswordFormAuthRequirementsUnsubscribe();
+		};
 	});
 </script>
 

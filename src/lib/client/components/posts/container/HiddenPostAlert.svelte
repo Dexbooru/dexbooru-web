@@ -9,7 +9,7 @@
 	} from '$lib/client/helpers/context';
 	import { Alert } from 'flowbite-svelte';
 	import { InfoCircleSolid } from 'flowbite-svelte-icons';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 
 	let titleParts: string[] = $state([]);
 
@@ -44,8 +44,10 @@
 		}
 	});
 
-	onDestroy(() => {
-		hiddenPostPageUnsubscribe();
+	onMount(() => {
+		return () => {
+			hiddenPostPageUnsubscribe();
+		};
 	});
 </script>
 
@@ -57,8 +59,8 @@
 		color="red"
 	>
 		{#snippet icon()}
-				<InfoCircleSolid  class="w-5 h-5" />
-			{/snippet}
+			<InfoCircleSolid class="w-5 h-5" />
+		{/snippet}
 		{`Click to display ${titleParts.join(' and ')} post(s)`}
 	</Alert>
 {/if}

@@ -11,7 +11,9 @@
 		labelColor?: ComponentProps<Badge>['color'];
 		labelIsLink?: boolean;
 		labelIsDismissable?: boolean;
-		handleLabelClose?: ((event: CustomEvent<any>) => void) | null;
+		handleLabelClose?:
+			| ((event: CustomEvent<any> & { explicitOriginalTarget: Element }) => void)
+			| null;
 	}
 
 	let {

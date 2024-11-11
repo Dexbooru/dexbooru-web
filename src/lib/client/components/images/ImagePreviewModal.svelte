@@ -2,10 +2,10 @@
 	import { IMAGE_PREVIEW_MODAL_NAME } from '$lib/client/constants/layout';
 	import { getActiveModal } from '$lib/client/helpers/context';
 	import { Modal } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
-	let imageBase64: string = $state();
-	let imageFile: File = $state();
+	let imageBase64: string = $state('');
+	let imageFile: File = $state(new File([], ''));
 	let imageAlt = $state('');
 
 	const activeModal = getActiveModal();
@@ -22,8 +22,10 @@
 		}
 	});
 
-	onDestroy(() => {
-		modalStoreUnsubscribe();
+	onMount(() => {
+		return () => {
+			modalStoreUnsubscribe();
+		};
 	});
 </script>
 

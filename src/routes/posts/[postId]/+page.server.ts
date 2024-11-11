@@ -6,5 +6,6 @@ export const load: PageServerLoad = async (event) => {
 	return (await handleGetPost(event, 'page-server-load')) as {
 		post: TPost;
 		uploadedSuccessfully: boolean;
+		hasLikedPost: boolean;
 	};
 };

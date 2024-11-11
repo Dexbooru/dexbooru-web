@@ -35,7 +35,7 @@
 		return !(
 			isLabelAppropriate(title, 'collectionTitle') &&
 			isLabelAppropriate(description, 'collectionDescription') &&
-			(thumbnailFile === null ||
+			((thumbnailFile === null && !thumbnailLoading) ||
 				(thumbnailFile !== null &&
 					thumbnailBase64.length > 0 &&
 					isFileImage(thumbnailFile) &&

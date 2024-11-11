@@ -9,16 +9,17 @@
 	interface Props {
 		post: TPost;
 		totalPostCommentCount?: string;
+		hasLikedPost?: boolean;
 	}
 
-	let { post, totalPostCommentCount = '0' }: Props = $props();
+	let { post, totalPostCommentCount = '0', hasLikedPost = false }: Props = $props();
 
 	const user = getAuthenticatedUser();
 </script>
 
 <div class="space-y-5">
 	<section class="space-y-2">
-		<PostImageMetadata {post} />
+		<PostImageMetadata {hasLikedPost} {post} />
 	</section>
 
 	<section class="space-y-2">

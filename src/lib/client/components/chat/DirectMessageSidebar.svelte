@@ -9,11 +9,12 @@
 	import type { TChatFriend } from '$lib/shared/types/friends';
 	import { Avatar, Button } from 'flowbite-svelte';
 	import { PlusSolid } from 'flowbite-svelte-icons';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import CreateChatRoomContainer from './CreateChatRoomContainer.svelte';
 
 	let filteredFriends: TChatFriend[] = $state([]);
-	let processedRooms: (Partial<TChatRoom> & Partial<TChatFriend> & { chatRoomId: string })[] = $state([]);
+	let processedRooms: (Partial<TChatRoom> & Partial<TChatFriend> & { chatRoomId: string })[] =
+		$state([]);
 
 	let currentRoomId: string = $state('');
 	run(() => {
@@ -53,11 +54,9 @@
 			if (directMessagesSidebar) {
 				directMessagesSidebar.removeEventListener('mouseup', mouseListener);
 			}
-		};
-	});
 
-	onDestroy(() => {
-		chatStoreUnsubscibe();
+			chatStoreUnsubscibe();
+		};
 	});
 </script>
 

@@ -10,7 +10,7 @@
 	} from '$lib/client/helpers/context';
 	import { generatePostWrapperMetaTags } from '$lib/client/helpers/posts';
 	import type { TPost, TPostOrderByColumn } from '$lib/shared/types/posts';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		postsSection: string;
@@ -36,12 +36,14 @@
 		pageDescription = data.description;
 	});
 
-	onDestroy(() => {
-		postPaginationData.set(null);
-		postsPage.set([]);
-		originalPostsPage.set([]);
-		nsfwPostsPage.set([]);
-		blacklistedPostsPage.set([]);
+	onMount(() => {
+		return () => {
+			postPaginationData.set(null);
+			postsPage.set([]);
+			originalPostsPage.set([]);
+			nsfwPostsPage.set([]);
+			blacklistedPostsPage.set([]);
+		};
 	});
 </script>
 

@@ -6,7 +6,7 @@
 	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { Avatar, Button, Dropdown, DropdownItem, Spinner } from 'flowbite-svelte';
 	import { AngleDownSolid } from 'flowbite-svelte-icons';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import NotificationBell from '../notifications/NotificationBell.svelte';
 	import NotificationList from '../notifications/NotificationList.svelte';
 
@@ -27,10 +27,10 @@
 
 	onMount(() => {
 		applyLazyLoadingOnImageClass('booru-avatar-navbar');
-	});
 
-	onDestroy(() => {
-		notificationUnsubscribe();
+		return () => {
+			notificationUnsubscribe();
+		};
 	});
 </script>
 

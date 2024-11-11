@@ -15,7 +15,7 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Modal } from 'flowbite-svelte';
 	import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	let targetDeletionPost: TPost | null = $state(null);
 	let postId: string;
@@ -40,6 +40,12 @@
 		postDeletionLoading = false;
 
 		if (response.ok) {
+			toast.push('The post was deleted successfully!', SUCCESS_TOAST_OPTIONS);
+			activeModal.set({
+				isOpen: false,
+				focusedModalName: null,
+			});
+
 			const pagePath = $page.url.pathname;
 			if (INDIVIDUAL_POST_PATH_REGEX.test(pagePath)) {
 				goto('/posts');
@@ -58,18 +64,15 @@
 					posts: paginationData.posts.filter((post) => post.id !== postId),
 				};
 			});
-			toast.push('The post was deleted successfully!', SUCCESS_TOAST_OPTIONS);
-			activeModal.set({
-				isOpen: false,
-				focusedModalName: null,
-			});
 		} else {
 			toast.push('There was an error while deleting the post!', FAILURE_TOAST_OPTIONS);
 		}
 	};
 
-	onDestroy(() => {
-		modalStoreUnsubscribe();
+	onMount(() => {
+		return () => {
+			modalStoreUnsubscribe();
+		};
 	});
 </script>
 

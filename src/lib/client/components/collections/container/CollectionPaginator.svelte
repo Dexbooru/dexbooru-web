@@ -5,7 +5,7 @@
 	import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
 	import { Button, PaginationItem } from 'flowbite-svelte';
 	import { ArrowLeftSolid, ArrowRightSolid } from 'flowbite-svelte-icons';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	let previousPageUrl: URL = $state(new URL('http://mock.com'));
 	let nextPageUrl: URL = $state(new URL('http://mock.com'));
@@ -39,8 +39,10 @@
 		pageNumber: '0',
 	});
 
-	onDestroy(() => {
-		postPaginationUnsubscribe();
+	onMount(() => {
+		return () => {
+			postPaginationUnsubscribe();
+		};
 	});
 </script>
 

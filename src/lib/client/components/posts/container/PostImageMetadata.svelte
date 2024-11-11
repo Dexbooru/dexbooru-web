@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
 		NSFW_PREVIEW_IMAGE_SUFFIX,
@@ -20,9 +19,10 @@
 
 	interface Props {
 		post: TPost;
+		hasLikedPost?: boolean;
 	}
 
-	let { post }: Props = $props();
+	let { post, hasLikedPost = false }: Props = $props();
 	let originalSizedImageUrls = $derived(
 		post.imageUrls.filter((imageUrl) => {
 			if (
@@ -61,8 +61,6 @@
 			.filter((metadata) => metadata.imageFileName.includes(ORIGINAL_IMAGE_SUFFIX))
 			.map((metadata) => ({ imageWidth: metadata.imageWidth, imageHeight: metadata.imageHeight })),
 	);
-
-	const userPreferences = getAuthenticatedUserPreferences();
 </script>
 
 <ImageCollection
@@ -74,7 +72,14 @@
 	Total images in post: <span class=" dark:text-gray-400">{originalSizedImageUrls.length}</span>
 </p>
 
-<PostCardActions onPostViewPage {post} postId={post.id} likes={post.likes} author={post.author} />
+<PostCardActions
+	likedPost={hasLikedPost}
+	onPostViewPage
+	{post}
+	postId={post.id}
+	likes={post.likes}
+	author={post.author}
+/>
 
 {#if imagesMetadata.length > 0}
 	<p class="text-lg dark:text-white">Post images metadata:</p>

@@ -8,7 +8,7 @@
 		getNsfwPostPage,
 	} from '$lib/client/helpers/context';
 	import { Button, Modal, TabItem, Tabs } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import PostGrid from './PostGrid.svelte';
 
 	let offendingTags: Set<string> = $state(new Set<string>());
@@ -39,8 +39,10 @@
 		offendingArtists = offendingArtists;
 	});
 
-	onDestroy(() => {
-		hiddenPostPageUnsubscribe();
+	onMount(() => {
+		return () => {
+			hiddenPostPageUnsubscribe();
+		};
 	});
 </script>
 

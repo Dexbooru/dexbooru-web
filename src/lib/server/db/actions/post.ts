@@ -1,14 +1,47 @@
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { Prisma } from '@prisma/client';
 import prisma from '../prisma';
+import { decrementArtistPostCount, incrementArtistPostCount } from './artist';
+import { decrementTagPostCount, incrementTagPostCount } from './tag';
 
-export async function deletePostById(postId: string, authorId: string) {
-	await prisma.post.delete({
+export async function hasUserLikedPost(userId: string, postId: string) {
+	const post = await prisma.post.findFirst({
+		where: {
+			id: postId,
+			likedBy: {
+				some: {
+					id: userId,
+				},
+			},
+		},
+	});
+	return !!post;
+}
+
+export async function deletePostById(postId: string, authorId: string): Promise<TPost> {
+	const deletedPost = await prisma.post.delete({
 		where: {
 			id: postId,
 			authorId,
 		},
+		select: {
+			tags: {
+				select: {
+					name: true,
+				},
+			},
+			artists: {
+				select: {
+					name: true,
+				},
+			},
+		},
 	});
+
+	decrementTagPostCount(deletedPost.tags.map((tag) => tag.name));
+	decrementArtistPostCount(deletedPost.artists.map((artist) => artist.name));
+
+	return deletedPost as TPost;
 }
 
 export async function updatePost(postId: string, newData: Prisma.PostUpdateInput) {
@@ -176,9 +209,12 @@ export async function createPost(
 		},
 	});
 
+	incrementTagPostCount(tags);
+	incrementArtistPostCount(artists);
+
 	return newPost as TPost;
 }
 
 export const getTotalPostCount = async () => {
 	return await prisma.post.count();
-}
+};

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import { Alert, Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		error?: string | null;
@@ -24,8 +24,10 @@
 		blacklistedArtists = data.blacklistedArtists.join('\n');
 	});
 
-	onDestroy(() => {
-		userPreferenceUnsubscribe();
+	onMount(() => {
+		return () => {
+			userPreferenceUnsubscribe();
+		};
 	});
 </script>
 

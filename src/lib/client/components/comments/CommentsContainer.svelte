@@ -4,7 +4,7 @@
 	import CommentTree from '$lib/shared/helpers/comments';
 	import type { TComment } from '$lib/shared/types/comments';
 	import { Button } from 'flowbite-svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import Comment from './Comment.svelte';
 
 	interface Props {
@@ -41,11 +41,11 @@
 
 	onMount(() => {
 		postCommentCount > 0 && handleLoadMoreCommentsClick(true);
-	});
 
-	onDestroy(() => {
-		commentTree.set(new CommentTree());
-		commentTreeUnsubscribe();
+		return () => {
+			commentTree.set(new CommentTree());
+			commentTreeUnsubscribe();
+		};
 	});
 </script>
 

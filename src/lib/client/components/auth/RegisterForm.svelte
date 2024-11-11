@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getRegisterFormAuthRequirements } from '$lib/client/helpers/context';
 	import { Alert, Button, Card } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/register/$types';
 	import ProfilePictureUpload from '../files/ProfilePictureUpload.svelte';
 	import AuthInput from './AuthInput.svelte';
@@ -33,8 +33,10 @@
 		registerButtonDisabled = !disabledCheck;
 	});
 
-	onDestroy(() => {
-		registerFormAuthRequirementsUnsubscribe();
+	onMount(() => {
+		return () => {
+			registerFormAuthRequirementsUnsubscribe();
+		};
 	});
 </script>
 

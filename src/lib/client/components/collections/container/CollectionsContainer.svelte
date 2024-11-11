@@ -10,7 +10,7 @@
 	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { Button } from 'flowbite-svelte';
 	import { PlusSolid } from 'flowbite-svelte-icons';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import { fade } from 'svelte/transition';
 	import Searchbar from '../../reusable/Searchbar.svelte';
@@ -90,9 +90,11 @@
 		};
 	});
 
-	onDestroy(() => {
-		collectionPageUnsubscribe();
-		collectionPaginationDataUnsubscribe();
+	onMount(() => {
+		return () => {
+			collectionPageUnsubscribe();
+			collectionPaginationDataUnsubscribe();
+		};
 	});
 </script>
 

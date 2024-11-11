@@ -6,7 +6,7 @@
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { Button, Modal } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -17,6 +17,7 @@
 
 	let post: TPost = $derived(data.post);
 	let uploadedSuccessfully = $derived(data.uploadedSuccessfully);
+	let hasLikedPost = $derived(data.hasLikedPost);
 	let totalPostCommentCount: string = $state('0');
 	let uploadSuccessModalOpen = $state(true);
 	let tagNames = $derived(data.post.tags.map((tag) => tag.name));
@@ -36,8 +37,10 @@
 		history.replaceState({}, document.title, currentUrl.pathname);
 	};
 
-	onDestroy(() => {
-		commentTreeUnsubscribe();
+	onMount(() => {
+		return () => {
+			commentTreeUnsubscribe();
+		};
 	});
 </script>
 
@@ -86,5 +89,5 @@
 {/if}
 
 <main class="m-5 space-y-5">
-	<PostPresentation {post} {totalPostCommentCount} />
+	<PostPresentation {hasLikedPost} {post} {totalPostCommentCount} />
 </main>

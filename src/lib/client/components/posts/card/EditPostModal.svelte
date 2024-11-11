@@ -7,7 +7,7 @@
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Label, Modal, Textarea } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	let post: TPost;
 	let description: string = $state('');
@@ -36,8 +36,10 @@
 		}
 	};
 
-	onDestroy(() => {
-		modalStoreUnsubscribe();
+	onMount(() => {
+		return () => {
+			modalStoreUnsubscribe();
+		};
 	});
 </script>
 

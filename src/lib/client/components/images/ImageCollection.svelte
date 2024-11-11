@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import {
 		computeDownScaledImageRatios,
 		transformImageDimensions,
@@ -50,8 +49,6 @@
 	};
 
 	onMount(() => {
-		applyLazyLoadingOnImageClass('whole-post-image');
-
 		screenWidth = window.innerWidth;
 		screenHeight = window.innerHeight;
 

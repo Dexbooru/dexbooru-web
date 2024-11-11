@@ -6,7 +6,7 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import { TabItem, Tabs } from 'flowbite-svelte';
 	import { GridSolid, LockSolid, UserCircleSolid } from 'flowbite-svelte-icons';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/profile/settings/$types';
 	import ChangePasswordForm from './ChangePasswordForm.svelte';
 	import ChangeProfilePicture from './ChangeProfilePicture.svelte';
@@ -35,7 +35,7 @@
 		goto(`?tab=${tabName}`);
 	};
 
-	const pageSubscribe = page.subscribe((data) => {
+	const pageUnsubscribe = page.subscribe((data) => {
 		const searchParams = data.url.searchParams;
 		const tabName = searchParams.get('tab') as 'personal' | 'preferences';
 		if (tabName) {
@@ -58,10 +58,10 @@
 				toast.push(message, SUCCESS_TOAST_OPTIONS);
 			}
 		}
-	});
 
-	onDestroy(() => {
-		pageSubscribe();
+		return () => {
+			pageUnsubscribe();
+		};
 	});
 </script>
 

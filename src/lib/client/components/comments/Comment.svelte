@@ -10,7 +10,7 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button } from 'flowbite-svelte';
 	import { MessagesSolid } from 'flowbite-svelte-icons';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import Comment from './Comment.svelte';
 	import CommentTextbox from './CommentTextbox.svelte';
@@ -64,10 +64,10 @@
 		if (currentDepth <= MAXIMUM_COMMENT_REPLY_DEPTH_LOAD) {
 			handleLoadRepliesClick(true);
 		}
-	});
 
-	onDestroy(() => {
-		commentTreeUnsubscribe();
+		return () => {
+			commentTreeUnsubscribe();
+		};
 	});
 </script>
 
@@ -94,6 +94,9 @@
 				<time datetime={ymdFormat(comment.createdAt)} title={getFormalDateTitle(comment.createdAt)}
 					>{formatDate(comment.createdAt)}</time
 				>
+				{#if comment.updatedAt.getTime() > comment.createdAt.getTime()}
+					<span class="text-gray-500 dark:text-gray-400"> (edited)</span>
+				{/if}
 			</p>
 		</div>
 	</div>

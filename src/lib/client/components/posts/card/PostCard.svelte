@@ -11,7 +11,7 @@
 	import type { TPost } from '$lib/shared/types/posts';
 	import { Card, Toast } from 'flowbite-svelte';
 	import { ExclamationCircleSolid } from 'flowbite-svelte-icons';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
 	import PostCardActions from './PostCardActions.svelte';
@@ -47,8 +47,10 @@
 		});
 	});
 
-	onDestroy(() => {
-		userPreferenceUnsubsribe();
+	onMount(() => {
+		return () => {
+			userPreferenceUnsubsribe();
+		};
 	});
 </script>
 
