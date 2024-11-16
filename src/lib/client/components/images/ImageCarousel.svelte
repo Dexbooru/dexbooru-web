@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { TCarouselTransitionFunction } from '$lib/client/types/images';
 	import {
+		COLLECTION_THUMBNAIL_HEIGHT,
 		COLLECTION_THUMBNAIL_WIDTH,
 		POST_PICTURE_PREVIEW_HEIGHT,
 		POST_PICTURE_PREVIEW_WIDTH,
@@ -41,7 +42,7 @@
 		return {
 			src: null,
 			width: resourceType === 'posts' ? POST_PICTURE_PREVIEW_WIDTH : COLLECTION_THUMBNAIL_WIDTH,
-			height: resourceType === 'posts' ? POST_PICTURE_PREVIEW_HEIGHT : COLLECTION_THUMBNAIL_WIDTH,
+			height: resourceType === 'posts' ? POST_PICTURE_PREVIEW_HEIGHT : COLLECTION_THUMBNAIL_HEIGHT,
 			alt: imagesAlt
 				? `${index + 1} - ${imagesAlt}`
 				: `image content id of ${crypto.randomUUID()} in carousel slide ${index + 1}`,
@@ -63,7 +64,7 @@
 		{#snippet slide({ Slide, index }: SlideProps)}
 			<a href={resourceHref}>
 				<Slide
-					class=" object-cover object-top {resourceType === 'collections'
+					class="object-contain {resourceType === 'collections'
 						? 'collection-carousel-image'
 						: 'post-carousel-image'}"
 					image={downloadSlideImage(index)}

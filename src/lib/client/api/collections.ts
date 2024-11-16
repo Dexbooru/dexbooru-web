@@ -6,14 +6,12 @@ import type {
 import { toast } from '@zerodevx/svelte-toast';
 import { get } from 'svelte/store';
 import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '../constants/toasts';
-import { getApiAuthHeaders } from '../helpers/auth';
 import { getAuthenticatedUser } from '../helpers/context';
 
 export const editCollection = async (collectionId: string, body: TUpdateCollectionBody) => {
 	return await fetch(`/api/collection/${collectionId}`, {
 		method: 'PUT',
 		body: JSON.stringify(body),
-		headers: getApiAuthHeaders(),
 	});
 };
 
@@ -29,14 +27,12 @@ export const updatePostCollections = async (
 	return await fetch('/api/posts/collections', {
 		method: 'PUT',
 		body: JSON.stringify(body),
-		headers: getApiAuthHeaders(),
 	});
 };
 
 export const deleteCollection = async (collectionId: string) => {
 	return await fetch(`/api/collection/${collectionId}`, {
 		method: 'DELETE',
-		headers: getApiAuthHeaders(),
 	});
 };
 

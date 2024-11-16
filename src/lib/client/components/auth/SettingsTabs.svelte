@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { TabItem, Tabs } from 'flowbite-svelte';
 	import { GridSolid, LockSolid, UserCircleSolid } from 'flowbite-svelte-icons';
@@ -44,12 +43,6 @@
 	});
 
 	onMount(() => {
-		const newAuthToken = form ? form.newAuthToken : null;
-
-		if (typeof newAuthToken === 'string' && newAuthToken.length > 0) {
-			localStorage.setItem(SESSION_ID_KEY, newAuthToken);
-		}
-
 		const message = form ? (form.message as string) : null;
 		if (message !== null) {
 			if (message.includes('error')) {

@@ -18,7 +18,7 @@ const getImageResizeOptions = (width: number, height: number) => {
 	return {
 		width,
 		height,
-		fit: 'cover',
+		fit: 'contain',
 		background: { r: 0, g: 0, b: 0, alpha: 0 },
 	} as ResizeOptions;
 };

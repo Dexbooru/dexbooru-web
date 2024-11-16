@@ -445,7 +445,6 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 					'The profile picture was updated successfully',
 					{
 						message: 'The profile picture was updated successfully',
-						newAuthToken: updatedUserJwtToken,
 					},
 				);
 			} catch {
@@ -581,7 +580,6 @@ export const handleChangeUsername = async (event: RequestEvent) => {
 
 				return createSuccessResponse('form-action', 'The username was changed successfully', {
 					message: 'The username was changed successfully!',
-					newAuthToken: updatedUserJwtToken,
 				});
 			} catch {
 				return createErrorResponse(
@@ -625,7 +623,7 @@ export const handleDeleteUser = async (event: RequestEvent) => {
 				await deleteUserById(event.locals.user.id);
 				event.cookies.delete(SESSION_ID_KEY, { path: '/' });
 
-				redirect(302, '/');
+				redirect(302, '/posts');
 			} catch (error) {
 				if (isRedirect(error)) throw error;
 				return createErrorResponse(
@@ -682,7 +680,7 @@ export const handleCreateUser = async (event: RequestEvent) => {
 
 			await createUserPreferences(newUser.id);
 
-			redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
+			redirect(302, `/posts`);
 		} catch (error) {
 			if (isRedirect(error)) throw error;
 			return createErrorResponse(
@@ -731,7 +729,7 @@ export const handleProcessUserTotp = async (event: RequestEvent) => {
 
 				deleteTotpChallenge(challengeId);
 
-				redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
+				redirect(302, `/posts`);
 			} catch (error) {
 				if (isRedirect(error)) throw error;
 				return createErrorResponse(
@@ -808,7 +806,7 @@ export const handleUserOauth2AuthFlowForm = async (event: RequestEvent) => {
 			const encodedAuthToken = generateEncodedUserTokenFromRecord(user, rememberMe);
 			event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(rememberMe));
 
-			redirect(302, `/?${SESSION_ID_KEY}=${encodedAuthToken}`);
+			redirect(302, `/posts`);
 		} catch (error) {
 			if (isRedirect(error)) throw error;
 			return createErrorResponse(

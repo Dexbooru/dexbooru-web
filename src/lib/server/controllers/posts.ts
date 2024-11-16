@@ -43,7 +43,7 @@ import {
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import { flattenImageBuffers, runPostImageTransformationPipelineInBatch } from '../helpers/images';
-import { getSimilarPostsBySimilaritySearch, indexPostImages } from '../helpers/ml';
+import { getSimilarPostsBySimilaritySearch, indexPostImages } from '../helpers/mlApi';
 import type {
 	TControllerHandlerVariant,
 	TPostFetchCategory,

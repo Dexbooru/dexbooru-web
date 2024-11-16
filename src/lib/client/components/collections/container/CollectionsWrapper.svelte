@@ -17,15 +17,19 @@
 	}
 
 	let { pageNumber, collections }: Props = $props();
+	let pageTitle = $state('');
+	let pageDescription = $state('');
 
 	const collectionPaginationData = getCollectionPaginationData();
 	const collectionsPage = getCollectionPage();
 	const originalCollectionsPage = getOriginalCollectionPage();
 	const nsfwCollectionsPage = getNsfwCollectionPage();
-	const { title: pageTitle, description: pageDescription } = generateCollectionWrapperMetadata(
-		pageNumber,
-		collections,
-	);
+
+	$effect(() => {
+		const { title, description } = generateCollectionWrapperMetadata(pageNumber, collections);
+		pageTitle = title;
+		pageDescription = description;
+	});
 
 	onMount(() => {
 		return () => {

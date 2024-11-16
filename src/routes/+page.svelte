@@ -1,8 +1,6 @@
 <script lang="ts">
 	import HomeChibiWallpaper from '$lib/client/assets/home_chibi_wallpaper.webp';
-	import { clearToken, storeToken } from '$lib/client/helpers/auth';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
-	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
 	type Props = {
@@ -11,11 +9,6 @@
 
 	let { data }: Props = $props();
 	let { collectionCount, userCount, tagCount, artistCount, postCount } = data;
-
-	onMount(() => {
-		clearToken();
-		storeToken();
-	});
 </script>
 
 <svelte:head>

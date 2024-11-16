@@ -1,4 +1,5 @@
-import type CommentTree from '$lib/shared/helpers/comments';
+import { NULLABLE_USER, NULLABLE_USER_USER_PREFERENCES } from '$lib/shared/constants/auth';
+import CommentTree from '$lib/shared/helpers/comments';
 import type {
 	TCollectionHiddenPageData,
 	TCollectionPaginationData,
@@ -10,6 +11,7 @@ import type { TUser } from '$lib/shared/types/users';
 import type { UserPreference } from '@prisma/client';
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
+import type { LayoutData } from '../../../routes/$types';
 import {
 	ACTIVE_MODAL_CONTEXT_KEY,
 	BLACKLISTED_POST_PAGE_CONTEXT_KEY,
@@ -34,6 +36,46 @@ import {
 	USER_PREFERENCE_CONTEXT_KEY,
 } from '../constants/context';
 import type { TAuthFormRequirementData, TFooterStoreData, TModalStoreData } from '../types/stores';
+
+export const initLayoutContexts = (data: LayoutData) => {
+	updateAuthenticatedUserNotifications(
+		data.user.id === NULLABLE_USER.id ? null : data.userNotifications,
+	);
+	updateAuthenticatedUser(data.user.id === NULLABLE_USER.id ? null : data.user);
+	updateAuthenticatedUserPreferences(
+		data.user.id === NULLABLE_USER.id ? NULLABLE_USER_USER_PREFERENCES : data.userPreferences,
+	);
+	updatePostPagination(null);
+	updatePostsPage([]);
+	updateOriginalPostsPage([]);
+	updateBlacklistedPostPage([]);
+	updateNsfwPostPage([]);
+	updateHiddenPostsPage({
+		nsfwPosts: [],
+		blacklistedPosts: [],
+	});
+	updateCommentTree(new CommentTree());
+	updateActiveModal({
+		isOpen: false,
+		focusedModalName: null,
+	});
+	updateFooter({
+		height: 0,
+		bottom: 0,
+		element: null,
+	});
+	updateChangePasswordAuthRequirements({});
+	updateRegisterFormAuthRequirements({});
+	updateChangeUsernameAuthRequirements({});
+	updateCollectionPage([]);
+	updateOriginalCollectionPage([]);
+	updateNsfwCollectionsPage([]);
+	updateCollectionPagination(null);
+	updateHiddenCollectionsPage({
+		nsfwCollections: [],
+	});
+	updateUserCollections([]);
+};
 
 export const updateUserCollections = (collections: TPostCollection[]) => {
 	const updatedCollections = writable(collections);

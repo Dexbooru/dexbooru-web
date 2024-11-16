@@ -3,10 +3,7 @@ import { populateAuthenticatedUser } from '$lib/server/helpers/controllers';
 import type { Handle, HandleServerError } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	populateAuthenticatedUser(
-		event,
-		event.url.pathname.includes('/api') ? 'api-route' : 'page-server-load',
-	);
+	populateAuthenticatedUser(event);
 	return await resolve(event);
 };
 

@@ -6,7 +6,6 @@ import type { TComment, TCommentCreateBody } from '$lib/shared/types/comments';
 import { toast } from '@zerodevx/svelte-toast';
 import type { Writable } from 'svelte/store';
 import { FAILURE_TOAST_OPTIONS } from '../constants/toasts';
-import { getApiAuthHeaders } from '../helpers/auth';
 
 export const getComments = async (
 	postId: string,
@@ -70,6 +69,5 @@ export const createComment = async (postId: string, body: TCommentCreateBody) =>
 	return await fetch(`/api/post/${postId}/comments`, {
 		method: 'POST',
 		body: JSON.stringify(body),
-		headers: getApiAuthHeaders(),
 	});
 };

@@ -15,25 +15,9 @@ import { getUserClaimsFromEncodedJWTToken } from './sessions';
 const parts: (keyof TRequestSchema)[] = ['form', 'urlSearchParams', 'pathParams', 'body'];
 const formContentTypes = ['multipart/form-data', 'application/x-www-form-urlencoded'];
 
-export const populateAuthenticatedUser = (
-	event: RequestEvent,
-	handlerType: TControllerHandlerVariant,
-) => {
-	let userJwtTokenEncoded: string | null = null;
-
+export const populateAuthenticatedUser = (event: RequestEvent) => {
 	event.locals.user = NULLABLE_USER;
-
-	if (handlerType === 'api-route') {
-		const authHeader = event.request.headers.get('Authorization');
-		if (!authHeader) return false;
-
-		const authHeaderParts = authHeader.split('Bearer ');
-		if (authHeaderParts.length < 2) return false;
-
-		userJwtTokenEncoded = authHeaderParts[1].trim();
-	} else {
-		userJwtTokenEncoded = event.cookies.get(SESSION_ID_KEY) ?? null;
-	}
+	const userJwtTokenEncoded = event.cookies.get(SESSION_ID_KEY) ?? null;
 
 	if (userJwtTokenEncoded) {
 		const sessionUser = getUserClaimsFromEncodedJWTToken(userJwtTokenEncoded);
@@ -152,11 +136,11 @@ export const validateAndHandleRequest = async <T extends TRequestSchema>(
 	isProtected: boolean = false,
 ) => {
 	if (isProtected && event.locals.user.id === NULLABLE_USER.id) {
-		const authErrorMessage =
-			handlerType === 'api-route'
-				? 'The authorization header was either missing or containing an invalid token'
-				: 'The token cookie was either missing or containing an invalid token';
-		return createErrorResponse(handlerType, 401, authErrorMessage);
+		return createErrorResponse(
+			handlerType,
+			401,
+			'The token cookie was either missing or containing an invalid/expired token',
+		);
 	}
 
 	const requestContentType = event.request.headers.get('Content-Type') ?? '';
