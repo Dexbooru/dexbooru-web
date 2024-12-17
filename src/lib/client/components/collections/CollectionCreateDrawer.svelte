@@ -1,9 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { getOriginalCollectionPage, getUserCollections } from '$lib/client/helpers/context';
-	import type { TPostCollection } from '$lib/shared/types/collections';
-	import { toast } from '@zerodevx/svelte-toast';
 	import { CloseButton, Drawer } from 'flowbite-svelte';
 	import { InfoCircleSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
@@ -16,31 +11,6 @@
 
 	let { isHidden = $bindable() }: Props = $props();
 
-	const originalCollectionPage = getOriginalCollectionPage();
-	const userCollections = getUserCollections();
-
-	const pageUnsubscribe = page.subscribe((data) => {
-		const pathname = data.url.pathname;
-
-		if (
-			data.form !== null &&
-			data.form.success &&
-			(data.form.message as string).includes('Collection created successfully')
-		) {
-			if (pathname === '/collections') {
-				const newCollection = data.form.newCollection as TPostCollection;
-				originalCollectionPage.update((collections) => {
-					if (collections.find((collection) => collection.id === newCollection.id))
-						return collections;
-					return [...collections, newCollection];
-				});
-				userCollections.update((collections) => [newCollection, ...collections]);
-			}
-			isHidden = true;
-			toast.push('The collection was created successfully!', SUCCESS_TOAST_OPTIONS);
-		}
-	});
-
 	const handleKeyPress = (event: KeyboardEvent) => {
 		if (event.key === 'Escape' && !isHidden) {
 			isHidden = true;
@@ -52,12 +22,6 @@
 
 		return () => {
 			document.removeEventListener('keydown', handleKeyPress);
-		};
-	});
-
-	onMount(() => {
-		return () => {
-			pageUnsubscribe();
 		};
 	});
 </script>
@@ -84,5 +48,5 @@
 		<CloseButton on:click={() => (isHidden = true)} class="mb-4 dark:text-white" />
 	</div>
 
-	<CollectionCreateForm />
+	<CollectionCreateForm bind:isHidden />
 </Drawer>

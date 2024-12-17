@@ -387,6 +387,8 @@ export const handleCreatePost = async (
 				artists,
 				isNsfw,
 			};
+			let newPostId: string | null = null;
+			let newPostImageUrls: string[] = [];
 
 			try {
 				const postImageBufferMaps = await runPostImageTransformationPipelineInBatch(
@@ -406,6 +408,7 @@ export const handleCreatePost = async (
 					'webp',
 					fileObjectIds,
 				);
+				newPostImageUrls = postImageUrls;
 
 				const newPost = await createPost(
 					description,
@@ -417,6 +420,7 @@ export const handleCreatePost = async (
 					postImageHeights,
 					event.locals.user.id,
 				);
+				newPostId = newPost.id;
 
 				indexPostImages(newPost.id, postImageUrls);
 
@@ -427,6 +431,14 @@ export const handleCreatePost = async (
 				return createSuccessResponse(handlerType, 'Post created successfully', { newPost }, 201);
 			} catch (error) {
 				if (isRedirect(error)) throw error;
+
+				if (newPostId) {
+					deletePostById(newPostId, event.locals.user.id);
+				}
+				if (newPostImageUrls.length > 0) {
+					deleteBatchFromBucket(AWS_POST_PICTURE_BUCKET_NAME, newPostImageUrls);
+				}
+
 				const message = 'An unexpected error occurred while creating the post';
 				return createErrorResponse(
 					handlerType,

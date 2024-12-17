@@ -40,7 +40,6 @@
 	<br />
 	<span>The maximum size allowed is: {MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB} MB</span>
 	<Fileupload
-		required={isChangingProfilePicture}
 		id={isChangingProfilePicture ? 'newProfilePictureInput' : 'profilePictureInput'}
 		name={isChangingProfilePicture ? 'newProfilePicture' : 'profilePicture'}
 		accept="image/*"

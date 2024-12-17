@@ -1,20 +1,23 @@
 <script lang="ts">
-	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
-	import { Alert, Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
+	import { enhance } from '$app/forms';
+	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import {
+		getAuthenticatedUser,
+		getAuthenticatedUserPreferences,
+	} from '$lib/client/helpers/context';
+	import { applyCustomSiteWideCss } from '$lib/client/helpers/dom';
+	import type { TUser } from '$lib/shared/types/users';
+	import { toast } from '@zerodevx/svelte-toast';
+	import { Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 
-	interface Props {
-		error?: string | null;
-		errorType?: string | null;
-	}
-
-	let { error = null, errorType = null }: Props = $props();
-
+	let preferencesChanging = $state(false);
 	let autoBlurNsfw: boolean = $state(false);
 	let browseInSafeMode: boolean = $state(false);
 	let blacklistedTags: string = $state('');
 	let blacklistedArtists: string = $state('');
 
+	const user = getAuthenticatedUser();
 	const userPreferences = getAuthenticatedUserPreferences();
 
 	const userPreferenceUnsubscribe = userPreferences.subscribe((data) => {
@@ -33,7 +36,34 @@
 
 <Card>
 	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">Posts</h3>
-	<form method="POST" action="?/postPreferences" class="flex flex-col space-y-4">
+	<form
+		use:enhance={() => {
+			preferencesChanging = true;
+			return async ({ result }) => {
+				preferencesChanging = false;
+				if (result.type === 'success') {
+					toast.push('The post preferences were updated successfully!', SUCCESS_TOAST_OPTIONS);
+
+					// @ts-ignore
+					userPreferences.update((currentPreferences) => {
+						// @ts-ignore
+						const updatedPreferences = { ...currentPreferences, ...result.data.data };
+						applyCustomSiteWideCss($user as TUser, updatedPreferences);
+
+						return updatedPreferences;
+					});
+				} else {
+					toast.push(
+						'An error occured while trying to change the post preferences',
+						FAILURE_TOAST_OPTIONS,
+					);
+				}
+			};
+		}}
+		method="POST"
+		action="?/postPreferences"
+		class="flex flex-col space-y-4"
+	>
 		<Label class="space-y-2 mb-3">
 			<span>Auto Blur NSFW Posts</span>
 			<Checkbox bind:checked={autoBlurNsfw} />
@@ -76,13 +106,8 @@
 			</Label>
 		</div>
 
-		<Button type="submit" color="primary">Save Post Preferences</Button>
-
-		{#if error !== null && errorType === 'preferences'}
-			<Alert dismissable border color="red" class="mt-2">
-				<span class="font-medium">Preferences save error!</span>
-				{error}
-			</Alert>
-		{/if}
+		<Button disabled={preferencesChanging} type="submit" color="primary"
+			>Save Post Preferences</Button
+		>
 	</form>
 </Card>

@@ -1,19 +1,22 @@
 <script lang="ts">
-	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
-	import { Alert, Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
+	import { enhance } from '$app/forms';
+	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import {
+		getAuthenticatedUser,
+		getAuthenticatedUserPreferences,
+	} from '$lib/client/helpers/context';
+	import { applyCustomSiteWideCss } from '$lib/client/helpers/dom';
+	import type { TUser } from '$lib/shared/types/users';
+	import { toast } from '@zerodevx/svelte-toast';
+	import { Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 
-	interface Props {
-		error?: string | null;
-		errorType?: string | null;
-	}
-
-	let { error = null, errorType = null }: Props = $props();
-
+	let interfacePreferenceChanging: boolean = $state(false);
 	let customSiteCss: string = $state('');
 	let hidePostMetadataOnPreview: boolean = $state(false);
 	let hideCollectionMetadataOnPreview: boolean = $state(false);
 
+	const user = getAuthenticatedUser();
 	const userPreferences = getAuthenticatedUserPreferences();
 	const userPreferenceUnsubscribe = userPreferences.subscribe((data) => {
 		customSiteCss = data.customSideWideCss;
@@ -30,12 +33,42 @@
 
 <Card>
 	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">Interface</h3>
-	<form method="POST" action="?/userInterfacePreferences" class="flex flex-col space-y-4">
+	<form
+		use:enhance={() => {
+			interfacePreferenceChanging = true;
+			return async ({ result }) => {
+				interfacePreferenceChanging = false;
+				if (result.type === 'success') {
+					toast.push(
+						'The user interface preferences were updated successfully!',
+						SUCCESS_TOAST_OPTIONS,
+					);
+
+					// @ts-ignore
+					userPreferences.update((currentPreferences) => {
+						// @ts-ignore
+						const updatedPreferences = { ...currentPreferences, ...result.data.data };
+						applyCustomSiteWideCss($user as TUser, updatedPreferences);
+
+						return updatedPreferences;
+					});
+				} else {
+					toast.push(
+						'An error occured while trying to change the user interface preferences',
+						FAILURE_TOAST_OPTIONS,
+					);
+				}
+			};
+		}}
+		method="POST"
+		action="?/userInterfacePreferences"
+		class="flex flex-col space-y-4"
+	>
 		<Label class="space-y-2 mb-3">
 			<span>Custom Site-wide CSS</span>
 			<Textarea
 				bind:value={customSiteCss}
-				rows="4"
+				rows="8"
 				name="customSiteWideCss"
 				placeholder="Enter your CSS here"
 			/>
@@ -51,10 +84,6 @@
 				Post tags, artists, uploader and other visible information will not be shown. The images
 				will be shown still.
 			</p>
-			<p class="text-sm text-gray-500">
-				The post actions (ex: like, edit, report, etc) will still be available on the specific post
-				view page.
-			</p>
 		</Label>
 		<Label class="space-y-2 mb-3">
 			<span>Hide collection metadata on your preview</span>
@@ -68,19 +97,10 @@
 				Collection titles, descriptios, uploaders and other visible information will not be shown.
 				The images will be shown still.
 			</p>
-			<p class="text-sm text-gray-500">
-				The collection actions (ex: edit, delete, etc) will still be available on the specific
-				collection view page.
-			</p>
 		</Label>
 
-		<Button type="submit" color="primary">Save Interface Preferences</Button>
-
-		{#if error !== null && errorType === 'preferences'}
-			<Alert dismissable border color="red" class="mt-2">
-				<span class="font-medium">Preferences save error!</span>
-				{error}
-			</Alert>
-		{/if}
+		<Button disabled={interfacePreferenceChanging} type="submit" color="primary"
+			>Save Interface Preferences</Button
+		>
 	</form>
 </Card>

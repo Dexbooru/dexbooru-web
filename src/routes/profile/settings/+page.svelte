@@ -1,13 +1,5 @@
 <script lang="ts">
 	import SettingsTabs from '$lib/client/components/auth/SettingsTabs.svelte';
-	import { Heading } from 'flowbite-svelte';
-	import type { ActionData } from './$types';
-
-	interface Props {
-		form: ActionData;
-	}
-
-	let { form }: Props = $props();
 </script>
 
 <svelte:head>
@@ -15,6 +7,5 @@
 </svelte:head>
 
 <main>
-	<Heading class="p-3 text-center">Account Settings</Heading>
-	<SettingsTabs {form} />
+	<SettingsTabs />
 </main>

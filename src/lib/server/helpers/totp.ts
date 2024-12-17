@@ -1,10 +1,9 @@
-import { OTP_PRIVATE_KEY } from '$env/static/private';
 import { TOTP_CHALLENGE_EXPIRY_SECONDS, TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
 import type { TTotpChallenge } from '$lib/shared/types/totp';
-import base32Encode from 'base32-encode';
 import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import {
+	BASE32_ENCODED_TOTP_SECRET,
 	TOTP_ALGORITHM,
 	TOTP_CODE_EXPIRY_TIME_SECONDS,
 	TOTP_ISSUER_NAME,
@@ -13,16 +12,13 @@ import {
 } from '../constants/totp';
 import redis from '../db/redis';
 
-const hexBuffer = Buffer.from(OTP_PRIVATE_KEY, 'hex');
-const base32EncodedTotpSecret = base32Encode(hexBuffer, 'RFC4648', { padding: false });
-
 export const generateTotpClient = (username: string) => {
 	return new OTPAuth.TOTP({
 		issuer: TOTP_ISSUER_NAME,
 		label: username,
 		digits: TOTP_CODE_LENGTH,
 		period: TOTP_CODE_EXPIRY_TIME_SECONDS,
-		secret: base32EncodedTotpSecret,
+		secret: BASE32_ENCODED_TOTP_SECRET,
 		algorithm: TOTP_ALGORITHM,
 	});
 };

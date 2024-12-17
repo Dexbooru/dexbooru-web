@@ -89,7 +89,7 @@ export async function updateCollection(id: string, title: string, description: s
 	return updatedCollection;
 }
 
-export async function deleteCollection(collectionId: string, authorId: string) {
+export async function deleteCollectionById(collectionId: string, authorId: string) {
 	const deletedCollection = await prisma.postCollection.delete({
 		where: {
 			id: collectionId,

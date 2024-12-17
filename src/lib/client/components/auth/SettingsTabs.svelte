@@ -1,12 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { toast } from '@zerodevx/svelte-toast';
 	import { TabItem, Tabs } from 'flowbite-svelte';
 	import { GridSolid, LockSolid, UserCircleSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-	import type { ActionData } from '../../../../routes/profile/settings/$types';
 	import ChangePasswordForm from './ChangePasswordForm.svelte';
 	import ChangeProfilePicture from './ChangeProfilePicture.svelte';
 	import ChangeUsernameForm from './ChangeUsernameForm.svelte';
@@ -15,16 +12,8 @@
 	import PostPreferencesForm from './PostPreferencesForm.svelte';
 	import UserInterfacePreferenceForm from './UserInterfacePreferenceForm.svelte';
 
-	interface Props {
-		form: ActionData;
-	}
-
-	let { form }: Props = $props();
-
-	const errorReason = form ? form.reason : null;
-	const errorType = form ? form.type : null;
-
 	const validTabNames = ['personal', 'preferences', 'security'] as const;
+
 	let currentTab: string = $state('personal');
 
 	const handleTabClick = (tabName: string) => {
@@ -36,22 +25,14 @@
 
 	const pageUnsubscribe = page.subscribe((data) => {
 		const searchParams = data.url.searchParams;
-		const tabName = searchParams.get('tab') as 'personal' | 'preferences';
+
+		const tabName = searchParams.get('tab') as 'personal' | 'preferences' | 'security';
 		if (tabName) {
 			currentTab = validTabNames.includes(tabName) ? tabName : 'personal';
 		}
 	});
 
 	onMount(() => {
-		const message = form ? (form.message as string) : null;
-		if (message !== null) {
-			if (message.includes('error')) {
-				toast.push(message, FAILURE_TOAST_OPTIONS);
-			} else {
-				toast.push(message, SUCCESS_TOAST_OPTIONS);
-			}
-		}
-
 		return () => {
 			pageUnsubscribe();
 		};
@@ -67,10 +48,10 @@
 			</div>
 		{/snippet}
 		<section class="flex flex-wrap gap-4 items-start">
-			<ChangeUsernameForm error={errorReason} {errorType} />
-			<ChangePasswordForm error={errorReason} {errorType} />
-			<ChangeProfilePicture error={errorReason} {errorType} />
-			<DeleteAccountForm error={errorReason} {errorType} />
+			<ChangeUsernameForm />
+			<ChangePasswordForm />
+			<ChangeProfilePicture />
+			<DeleteAccountForm />
 		</section>
 	</TabItem>
 	<TabItem on:click={() => handleTabClick('preferences')} open={currentTab === 'preferences'}>
@@ -82,8 +63,8 @@
 		{/snippet}
 
 		<section class="flex flex-wrap gap-4 items-start">
-			<PostPreferencesForm error={errorReason} {errorType} />
-			<UserInterfacePreferenceForm error={errorReason} {errorType} />
+			<PostPreferencesForm />
+			<UserInterfacePreferenceForm />
 		</section>
 	</TabItem>
 	<TabItem open={currentTab === 'security'} on:click={() => handleTabClick('security')}>
@@ -95,7 +76,7 @@
 		{/snippet}
 
 		<section class="flex flex-wrap gap-4 items-start">
-			<Enable2faForm error={errorReason} {errorType} />
+			<Enable2faForm />
 		</section>
 	</TabItem>
 </Tabs>

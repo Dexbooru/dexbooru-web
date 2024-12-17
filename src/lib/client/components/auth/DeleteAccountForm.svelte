@@ -1,15 +1,8 @@
 <script lang="ts">
 	import { ACCOUNT_DELETION_CONFIRMATION_TEXT } from '$lib/shared/constants/auth';
-	import { Alert, Button, Card, Input, Label } from 'flowbite-svelte';
+	import { Button, Card, Input, Label } from 'flowbite-svelte';
 	import { slide } from 'svelte/transition';
 	import AuthInput from './AuthInput.svelte';
-
-	interface Props {
-		error?: string | null;
-		errorType?: string | null;
-	}
-
-	let { error = null, errorType = null }: Props = $props();
 
 	let confirmedPassword: string = $state('');
 	let confirmationText: string = $state('');
@@ -46,12 +39,5 @@
 			disabled={confirmationText !== ACCOUNT_DELETION_CONFIRMATION_TEXT ||
 				confirmedPassword.length === 0}>DELETE YOUR ACCOUNT</Button
 		>
-
-		{#if error !== null && errorType === 'delete-account'}
-			<Alert dismissable border color="red" class="mt-2">
-				<span class="font-medium">Account deletion error!</span>
-				{error}
-			</Alert>
-		{/if}
 	</form>
 </Card>

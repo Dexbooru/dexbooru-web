@@ -46,7 +46,10 @@ import {
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import { buildCookieOptions } from '../helpers/cookies';
-import { runProfileImageTransformationPipeline } from '../helpers/images';
+import {
+	runDefaultProfilePictureTransformationPipeline,
+	runProfileImageTransformationPipeline,
+} from '../helpers/images';
 import { doPasswordsMatch, hashPassword } from '../helpers/password';
 import {
 	cacheResponse,
@@ -199,10 +202,10 @@ const UserDeleteSchema = {
 const UserChangeProfilePictureSchema = {
 	form: z.object({
 		newProfilePicture: z.instanceof(globalThis.File).refine((val) => {
-			if (val.size === 0) return false;
-
+			if (val.size === 0) return true;
 			return isFileImage(val) && isFileImageSmall(val, 'profilePicture');
 		}, profilePictureRefinementError),
+		removeProfilePicture: boolStrSchema,
 	}),
 } satisfies TRequestSchema;
 
@@ -259,16 +262,20 @@ export const handleUpdateUserInterfacePreferences = async (event: RequestEvent) 
 				data.form;
 
 			try {
-				await updateUserPreferences(event.locals.user.id, {
+				const data = {
 					customSideWideCss: customSiteWideCss ?? '',
 					hidePostMetadataOnPreview: hidePostMetadataOnPreview ?? false,
 					hideCollectionMetadataOnPreview: hideCollectionMetadataOnPreview ?? false,
+				};
+				await updateUserPreferences(event.locals.user.id, {
+					...data,
 					updatedAt: new Date(),
 				});
 
 				return createSuccessResponse(
 					'form-action',
 					'Successfully updated the user interface preferences of the user',
+					{ data },
 				);
 			} catch (error) {
 				return createErrorResponse(
@@ -291,16 +298,21 @@ export const handleUpdatePostPreferences = async (event: RequestEvent) => {
 			const { autoBlurNsfw, browseInSafeMode, blacklistedArtists, blacklistedTags } = data.form;
 
 			try {
-				await updateUserPreferences(event.locals.user.id, {
+				const data = {
+					autoBlurNsfw: autoBlurNsfw ?? false,
+					browseInSafeMode: browseInSafeMode ?? false,
 					blacklistedArtists: blacklistedArtists ?? [],
 					blacklistedTags: blacklistedTags ?? [],
-					browseInSafeMode: browseInSafeMode ?? false,
-					autoBlurNsfw: autoBlurNsfw ?? false,
+				};
+				await updateUserPreferences(event.locals.user.id, {
+					...data,
+					updatedAt: new Date(),
 				});
 
 				return createSuccessResponse(
 					'form-action',
 					'Successfully updated the post preferences of the user',
+					{ data },
 				);
 			} catch {
 				return createErrorResponse(
@@ -420,13 +432,22 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 		'form-action',
 		UserChangeProfilePictureSchema,
 		async (data) => {
-			const { newProfilePicture } = data.form;
+			const { newProfilePicture, removeProfilePicture } = data.form;
+
+			if (!removeProfilePicture && newProfilePicture.size === 0) {
+				return createErrorResponse(
+					'form-action',
+					400,
+					'No new profile picture was provided to update the user profile picture',
+				);
+			}
 
 			try {
 				deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, event.locals.user.profilePictureUrl);
 
-				const newProfilePictureFileBuffer =
-					await runProfileImageTransformationPipeline(newProfilePicture);
+				const newProfilePictureFileBuffer = removeProfilePicture
+					? await runDefaultProfilePictureTransformationPipeline(event.locals.user.username)
+					: await runProfileImageTransformationPipeline(newProfilePicture);
 				const updatedProfilePictureObjectUrl = await uploadToBucket(
 					AWS_PROFILE_PICTURE_BUCKET_NAME,
 					'profile_pictures',
@@ -445,6 +466,9 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 					'The profile picture was updated successfully',
 					{
 						message: 'The profile picture was updated successfully',
+						data: {
+							profilePictureUrl: updatedProfilePictureObjectUrl,
+						},
 					},
 				);
 			} catch {
@@ -580,6 +604,9 @@ export const handleChangeUsername = async (event: RequestEvent) => {
 
 				return createSuccessResponse('form-action', 'The username was changed successfully', {
 					message: 'The username was changed successfully!',
+					data: {
+						username: newUsername,
+					},
 				});
 			} catch {
 				return createErrorResponse(
@@ -659,18 +686,21 @@ export const handleCreateUser = async (event: RequestEvent) => {
 				});
 			}
 
-			let finalProfilePictureUrl = DEFAULT_PROFILE_PICTURE_URL;
-			if (profilePicture instanceof globalThis.File && profilePicture.size > 0) {
-				const finalProfilePictureBuffer =
-					await runProfileImageTransformationPipeline(profilePicture);
-				const profilePictureObjectUrl = await uploadToBucket(
-					AWS_PROFILE_PICTURE_BUCKET_NAME,
-					'profile_pictures',
-					finalProfilePictureBuffer,
-				);
+			let finalProfilePictureUrl = '';
+			let finalProfilePictureBuffer: Buffer;
 
-				finalProfilePictureUrl = profilePictureObjectUrl;
+			if (profilePicture instanceof globalThis.File && profilePicture.size > 0) {
+				finalProfilePictureBuffer = await runProfileImageTransformationPipeline(profilePicture);
+			} else {
+				finalProfilePictureBuffer = await runDefaultProfilePictureTransformationPipeline(username);
 			}
+
+			const profilePictureObjectUrl = await uploadToBucket(
+				AWS_PROFILE_PICTURE_BUCKET_NAME,
+				'profile_pictures',
+				finalProfilePictureBuffer,
+			);
+			finalProfilePictureUrl = profilePictureObjectUrl;
 
 			const hashedPassword = await hashPassword(password);
 
@@ -683,6 +713,7 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			redirect(302, `/posts`);
 		} catch (error) {
 			if (isRedirect(error)) throw error;
+			console.log(error);
 			return createErrorResponse(
 				'form-action',
 				500,

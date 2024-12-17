@@ -1,17 +1,19 @@
 <script lang="ts">
-	import { getChangePasswordAuthRequirements } from '$lib/client/helpers/context';
-	import { Alert, Button, Card } from 'flowbite-svelte';
+	import { enhance } from '$app/forms';
+	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import {
+		getAuthenticatedUser,
+		getChangePasswordAuthRequirements,
+	} from '$lib/client/helpers/context';
+	import { toast } from '@zerodevx/svelte-toast';
+	import { Button, Card } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 
-	interface Props {
-		error?: string | null;
-		errorType?: string | null;
-	}
-
-	let { error = null, errorType = null }: Props = $props();
-
 	const changePasswordRequirements = getChangePasswordAuthRequirements();
+	const user = getAuthenticatedUser();
+
+	let passwordChanging: boolean = $state(false);
 	let oldPassword: string = $state('');
 	let newPassword: string = $state('');
 	let confirmedNewPassword: string = $state('');
@@ -40,7 +42,29 @@
 	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
 		Change Password
 	</h3>
-	<form method="POST" action="?/password" class="flex flex-col space-y-4">
+	<form
+		use:enhance={() => {
+			passwordChanging = true;
+			return async ({ result }) => {
+				passwordChanging = false;
+				if (result.type === 'success') {
+					toast.push('The password was updated successfully!', SUCCESS_TOAST_OPTIONS);
+					// @ts-ignore
+					user.update((currentUser) => {
+						// @ts-ignore
+						const updatedUser = { ...currentUser, ...result.data.data };
+						console.log(updatedUser);
+						return updatedUser;
+					});
+				} else {
+					toast.push('An error occured while trying to change the password', FAILURE_TOAST_OPTIONS);
+				}
+			};
+		}}
+		method="POST"
+		action="?/password"
+		class="flex flex-col space-y-4"
+	>
 		<AuthInput
 			bind:input={oldPassword}
 			showRequirements={false}
@@ -63,13 +87,8 @@
 			inputName="confirmedNewPassword"
 			formStore={changePasswordRequirements}
 		/>
-		<Button disabled={changePasswordButtonDiabled} type="submit">Change Password</Button>
-
-		{#if error !== null && errorType === 'password'}
-			<Alert dismissable border color="red" class="mt-2">
-				<span class="font-medium">Password error!</span>
-				{error}
-			</Alert>
-		{/if}
+		<Button disabled={changePasswordButtonDiabled || passwordChanging} type="submit"
+			>Change Password</Button
+		>
 	</form>
 </Card>

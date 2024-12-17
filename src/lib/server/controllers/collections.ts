@@ -18,7 +18,7 @@ import { boolStrSchema, pageNumberSchema } from '../constants/reusableSchemas';
 import {
 	addPostToCollection,
 	createCollection,
-	deleteCollection,
+	deleteCollectionById,
 	findCollectionById,
 	findCollections,
 	findCollectionsByAuthorId,
@@ -445,7 +445,7 @@ export const handleDeleteCollection = async (event: RequestEvent) => {
 					);
 				}
 
-				await deleteCollection(collectionId, event.locals.user.id);
+				await deleteCollectionById(collectionId, event.locals.user.id);
 				if (collection.thumbnailImageUrls.length > 0) {
 					await deleteBatchFromBucket(
 						AWS_COLLECTION_PICTURE_BUCKET_NAME,
@@ -527,6 +527,9 @@ export const handleCreateCollection = async (
 				isNsfw,
 			};
 
+			let finalThumbnailImageUrls: string[] = [];
+			let finalCollectionId: string | null = null;
+
 			try {
 				let thumbnailImageUrls: string[] = [];
 				if (collectionThumbnail !== null) {
@@ -542,6 +545,7 @@ export const handleCreateCollection = async (
 						'webp',
 						fileObjectIds,
 					);
+					finalThumbnailImageUrls = thumbnailImageUrls;
 				}
 
 				const newCollection = await createCollection({
@@ -551,6 +555,7 @@ export const handleCreateCollection = async (
 					isNsfw,
 					authorId: event.locals.user.id,
 				});
+				finalCollectionId = newCollection.id;
 
 				return createSuccessResponse(
 					handlerType,
@@ -560,6 +565,15 @@ export const handleCreateCollection = async (
 				);
 			} catch (error) {
 				if (isRedirect(error)) throw error;
+
+				if (finalThumbnailImageUrls.length > 0) {
+					deleteBatchFromBucket(AWS_COLLECTION_PICTURE_BUCKET_NAME, finalThumbnailImageUrls);
+				}
+
+				if (finalCollectionId) {
+					deleteCollectionById(finalCollectionId, event.locals.user.id);
+				}
+
 				const message = 'An unexpected error occurred while creating the post';
 				return createErrorResponse(
 					handlerType,

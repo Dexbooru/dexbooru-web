@@ -9,6 +9,7 @@ import {
 	PROFILE_PICTURE_HEIGHT,
 	PROFILE_PICTURE_WIDTH,
 } from '$lib/shared/constants/images';
+import { toPng as toDefaultProfilePng } from 'jdenticon';
 import type { ResizeOptions, Sharp } from 'sharp';
 import sharp from 'sharp';
 import { WEBP_OPTIONS } from '../constants/images';
@@ -39,6 +40,15 @@ export async function fileToSharp(file: File): Promise<Sharp> {
 	const fileArrayBuffer = await file.arrayBuffer();
 	const fileBuffer = Buffer.from(fileArrayBuffer);
 	return sharp(fileBuffer);
+}
+
+export async function runDefaultProfilePictureTransformationPipeline(username: string) {
+	const imageBuffer = toDefaultProfilePng(username, 200);
+	const image = sharp(imageBuffer);
+	return image
+		.webp(WEBP_OPTIONS)
+		.resize(getImageResizeOptions(PROFILE_PICTURE_WIDTH, PROFILE_PICTURE_HEIGHT))
+		.toBuffer();
 }
 
 export async function runProfileImageTransformationPipeline(file: File): Promise<Buffer> {

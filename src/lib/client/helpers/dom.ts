@@ -50,14 +50,22 @@ const onLoadDocument = (user: TUser, userPreferences: UserPreference) => {
 	applyCustomSiteWideCss(user, userPreferences);
 };
 
-const applyCustomSiteWideCss = (user: TUser, userPreferences: UserPreference) => {
-	if (!user) return;
+export const applyCustomSiteWideCss = (user: TUser, userPreferences: UserPreference) => {
+	if (!user || !userPreferences) return;
 
 	const { customSideWideCss } = userPreferences;
-	if (typeof customSideWideCss === 'string' && customSideWideCss.length > 0) {
-		const customSideWideStylesheet = document.createElement('style');
-		customSideWideStylesheet.innerText = customSideWideCss;
-		document.head.appendChild(customSideWideStylesheet);
+	if (typeof customSideWideCss === 'string') {
+		if (customSideWideCss.length > 0) {
+			const customSideWideStylesheet = document.createElement('style');
+			customSideWideStylesheet.innerText = customSideWideCss;
+			customSideWideStylesheet.id = 'custom-site-wide-css';
+			document.head.appendChild(customSideWideStylesheet);
+		} else {
+			const customSideWideStylesheet = document.getElementById('custom-site-wide-css');
+			if (customSideWideStylesheet) {
+				customSideWideStylesheet.remove();
+			}
+		}
 	}
 };
 

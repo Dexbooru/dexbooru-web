@@ -8,8 +8,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 export const handleError: HandleServerError = async ({ error }) => {
-	console.log(error);
-
 	const errorMessage = dev ? (error as Error).toString() : 'Internal Server Error';
 	return {
 		message: errorMessage,

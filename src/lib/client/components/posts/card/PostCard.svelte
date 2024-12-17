@@ -14,7 +14,6 @@
 	import { onMount } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 	import { scale } from 'svelte/transition';
-	import PostCardActions from './PostCardActions.svelte';
 
 	interface Props {
 		post: TPost;
@@ -85,6 +84,5 @@
 			transitionFunction={(x) => scale(x, { duration: 500, easing: quintOut })}
 		/>
 		<PostCardBody {post} {author} {createdAt} {tags} {artists} />
-		<PostCardActions {post} {author} {likes} {postId} />
 	</Card>
 {/if}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { generateUserTotp } from '$lib/client/api/auth';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
@@ -6,14 +7,8 @@
 	import { TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Alert, Button, Card } from 'flowbite-svelte';
+	import { Button, Card } from 'flowbite-svelte';
 	import AuthInput from './AuthInput.svelte';
-
-	interface Props {
-		error: string | null | undefined;
-		errorType: string;
-	}
-	const { error, errorType }: Props = $props();
 
 	let currentPassword: string = $state('');
 	let totpLoading: boolean = $state(false);
@@ -53,7 +48,12 @@
 		<br />
 		<span class="text-sm">(2-factor authentication)</span>
 	</h3>
-	<form method="POST" action="?/twoFactorAuthentication" class="flex flex-col space-y-4">
+	<form
+		use:enhance
+		method="POST"
+		action="?/twoFactorAuthentication"
+		class="flex flex-col space-y-4"
+	>
 		<AuthInput
 			bind:input={currentPassword}
 			bind:comparisonInput={currentPassword}
@@ -115,13 +115,6 @@
 					totpUri.length === 0}
 				class="mt-4">Enable 2FA</Button
 			>
-		{/if}
-
-		{#if error !== null && errorType === 'otp'}
-			<Alert dismissable border color="red" class="mt-2">
-				<span class="font-medium">Invalid otp code!</span>
-				{error}
-			</Alert>
 		{/if}
 	</form>
 </Card>

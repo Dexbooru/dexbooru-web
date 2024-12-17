@@ -4,6 +4,7 @@ import { createClient } from 'redis';
 
 const redisClientSingleton = async () => {
 	if (REDIS_CACHE_ENABLED === 'false') return null;
+
 	const client = await createClient({
 		password: process.env.DB_REDIS_PASSWORD ?? '',
 	}).connect();

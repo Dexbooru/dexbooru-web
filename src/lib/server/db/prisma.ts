@@ -24,8 +24,6 @@ const CACHE_OPTIONS: Record<string, CacheOptions> = {
 };
 
 const prismaClientSingleton = () => {
-	if (redis === null) return new PrismaClient();
-
 	return new PrismaClient().$extends({
 		query: {
 			$allOperations: async ({ model, args, query, operation }) => {

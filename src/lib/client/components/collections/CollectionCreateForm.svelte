@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { page } from '$app/stores';
+	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { getOriginalCollectionPage, getUserCollections } from '$lib/client/helpers/context';
 	import { filesToBase64Strings } from '$lib/client/helpers/images';
 	import {
 		MAXIMUM_COLLECTION_DESCRIPTION_LENGTH,
@@ -14,6 +16,7 @@
 	} from '$lib/shared/constants/images';
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate } from '$lib/shared/helpers/labels';
+	import type { TPostCollection } from '$lib/shared/types/collections';
 	import { toast } from '@zerodevx/svelte-toast';
 	import {
 		Button,
@@ -26,6 +29,13 @@
 	} from 'flowbite-svelte';
 	import { CalendarEditSolid } from 'flowbite-svelte-icons';
 
+	type Props = {
+		isHidden: boolean;
+	};
+
+	let { isHidden = $bindable() }: Props = $props();
+
+	let collectionCreating: boolean = $state(false);
 	let title: string = $state('');
 	let description: string = $state('');
 	let thumbnailFile: File | null = $state(null);
@@ -43,6 +53,9 @@
 		);
 	});
 	let isNsfw: boolean = $state(false);
+
+	const originalCollectionPage = getOriginalCollectionPage();
+	const userCollections = getUserCollections();
 
 	const resetFileUploadState = () => {
 		thumbnailLoading = false;
@@ -96,7 +109,43 @@
 	};
 </script>
 
-<form use:enhance method="POST" enctype="multipart/form-data" class="mb-6">
+<form
+	use:enhance={() => {
+		collectionCreating = true;
+
+		return async ({ result }) => {
+			collectionCreating = false;
+
+			if (result.type === 'success') {
+				toast.push('Collection created successfully', SUCCESS_TOAST_OPTIONS);
+				title = '';
+				description = '';
+				isNsfw = false;
+				resetFileUploadState();
+				isHidden = true;
+
+				const pathname = $page.url.pathname;
+				if (pathname.includes('/collections')) {
+					const newCollection = result.data?.newCollection as TPostCollection;
+					originalCollectionPage.update((collections) => {
+						if (collections.find((collection) => collection.id === newCollection.id))
+							return collections;
+						return [...collections, newCollection];
+					});
+					userCollections.update((collections) => [newCollection, ...collections]);
+				}
+			} else if (result.type === 'failure') {
+				toast.push(
+					'An unexpected error occured while creating the collection',
+					FAILURE_TOAST_OPTIONS,
+				);
+			}
+		};
+	}}
+	method="POST"
+	enctype="multipart/form-data"
+	class="mb-6"
+>
 	<div class="mb-6">
 		<Label for="title" class="block mb-2 cursor-text"
 			>Title (max of {MAXIMUM_COLLECTION_TITLE_LENGTH} characters):</Label
@@ -124,7 +173,7 @@
 			bind:value={description}
 		/>
 		<p class="leading-none dark:text-gray-400 text-right mt-2 cursor-text">
-			{description.length}/{MAXIMUM_COLLECTION_TITLE_LENGTH}
+			{description.length}/{MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
 		</p>
 	</div>
 
@@ -151,7 +200,7 @@
 	{/if}
 
 	<Button
-		disabled={createCollectionButtonDisabled}
+		disabled={createCollectionButtonDisabled || collectionCreating}
 		type="submit"
 		class="w-full {thumbnailFile !== null && 'mt-5 mb-10'}"
 	>
