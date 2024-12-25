@@ -16,6 +16,7 @@
 	});
 	let similarityResults: TPostImageSimilarityResult[] = $state([]);
 	let resultsLoading = $state(false);
+	let noResultsFound = $state(false);
 
 	const resetFileUploadState = (target: HTMLInputElement) => {
 		target.value = '';
@@ -59,8 +60,10 @@
 </svelte:head>
 
 <main class="m-2 p-2">
-	<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Post Similarity Search</h1>
-	<p class="text-gray-600 dark:text-gray-400">
+	<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200 cursor-text">
+		Post Similarity Search
+	</h1>
+	<p class="text-gray-600 dark:text-gray-400 cursor-text">
 		Use the form below to find posts similar to an image by entering a post ID, image URL, or
 		uploading an image.
 	</p>
@@ -93,6 +96,7 @@
 					if (result.data) {
 						const data = result.data.results as TPostImageSimilarityResult[];
 						similarityResults = data;
+						noResultsFound = similarityResults.length === 0;
 					}
 				} else if (result.type === 'failure') {
 					toast.push(
@@ -105,7 +109,7 @@
 		class="max-w-md bg-white dark:bg-gray-800 rounded-lg space-y-4 mt-5"
 	>
 		<div class="mb-6 space-y-1">
-			<Label for="post-id-similarity-search" class="dark:text-gray-200">Post ID</Label>
+			<Label for="post-id-similarity-search" class="dark:text-gray-200 cursor-text">Post ID</Label>
 			<Input
 				name="postId"
 				bind:value={postId}
@@ -118,7 +122,9 @@
 		</div>
 
 		<div class="mb-6 space-y-1">
-			<Label for="image-url-similarity-search" class="dark:text-gray-200">Image URL</Label>
+			<Label for="image-url-similarity-search" class="dark:text-gray-200 cursor-text"
+				>Image URL</Label
+			>
 			<Input
 				name="imageUrl"
 				bind:value={imageUrl}
@@ -131,7 +137,7 @@
 		</div>
 
 		<div class="mb-6 space-y-1">
-			<Label for="image-file" class="dark:text-gray-200">Upload Image</Label>
+			<Label for="image-file" class="dark:text-gray-200 cursor-text">Upload Image</Label>
 			<Fileupload
 				on:change={onImageFileChange}
 				id="image-file"
@@ -155,7 +161,13 @@
 		</Alert>
 	{/if}
 
-	<section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ml-2 mr-2">
+	{#if noResultsFound}
+		<Alert color="red">Found no similar images in Dexbooru's post index</Alert>
+	{/if}
+
+	<section
+		class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6 ml-2 mr-2"
+	>
 		{#if resultsLoading}
 			{#each Array(10) as _i}
 				<ImagePlaceholder />
@@ -171,7 +183,7 @@
 						class="w-full object-contain"
 					/>
 					<p class="text-gray-600 dark:text-gray-400 mt-2">
-						Similarity Distance: {similarityResult.distance}
+						Similarity Distance: {similarityResult.distance.toFixed(3)}
 					</p>
 					<p class="text-gray-600 dark:text-gray-400">
 						<a

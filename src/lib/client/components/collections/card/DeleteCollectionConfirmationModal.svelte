@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { deleteCollection } from '$lib/client/api/collections';
 	import { INDIVIDUAL_COLLECTION_PATH_REGEX } from '$lib/client/constants/collections';
 	import { DELETE_COLLECTION_MODAL_NAME } from '$lib/client/constants/layout';
@@ -53,7 +53,7 @@
 				focusedModalName: null,
 			});
 
-			const pagePath = $page.url.pathname;
+			const pagePath = page.url.pathname;
 			if (INDIVIDUAL_COLLECTION_PATH_REGEX.test(pagePath)) {
 				goto('/collections');
 				return;

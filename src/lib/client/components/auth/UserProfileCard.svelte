@@ -2,14 +2,12 @@
 	import { addFriend, deleteFriend } from '$lib/client/api/friends';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
-	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button, Card, Dropdown, DropdownItem } from 'flowbite-svelte';
 	import { DotsHorizontalOutline } from 'flowbite-svelte-icons';
-	import { onMount } from 'svelte';
 
 	interface Props {
 		targetUser: TUser;
@@ -56,10 +54,6 @@
 			toast.push('An error occured while trying to unfriend this user!', FAILURE_TOAST_OPTIONS);
 		}
 	};
-
-	onMount(() => {
-		applyLazyLoadingOnImageClass('booru-avatar-profile-card');
-	});
 </script>
 
 <Card style="min-width: 300px; max-width: 550px;">
@@ -96,7 +90,7 @@
 				<strong>{targetUser.email.toLocaleLowerCase()}</strong></span
 			>
 		{/if}
-		<hr class="border-0 h-px bg-gray-300 dark:bg-gray-600 my-6" />
+		<hr class="border-0 h-px bg-gray-300 dark:bg-gray-600 my-2" />
 
 		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
 			>Total posts:
@@ -140,9 +134,11 @@
 						>View created collections</Button
 					>
 				{:else}
-					<Button href="/posts/liked" color="red">View liked posts</Button>
-					<Button href="/posts/uploaded" color="blue">View uploaded posts</Button>
-					<Button href="/collections/created" color="blue">View created collections</Button>
+					<div class="flex space-x-2">
+						<Button href="/posts/liked" color="red">Liked posts</Button>
+						<Button href="/posts/uploaded" color="blue">Uploaded posts</Button>
+						<Button href="/collections/created" color="blue">Created collections</Button>
+					</div>
 				{/if}
 			{/if}
 		</div>

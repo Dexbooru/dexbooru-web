@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { deletePost } from '$lib/client/api/posts';
 	import { DELETE_POST_MODAL_NAME } from '$lib/client/constants/layout';
 	import { INDIVIDUAL_POST_PATH_REGEX } from '$lib/client/constants/posts';
@@ -46,7 +46,7 @@
 				focusedModalName: null,
 			});
 
-			const pagePath = $page.url.pathname;
+			const pagePath = page.url.pathname;
 			if (INDIVIDUAL_POST_PATH_REGEX.test(pagePath)) {
 				goto('/posts');
 				return;

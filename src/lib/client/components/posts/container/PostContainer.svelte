@@ -9,7 +9,6 @@
 		getPostPaginationData,
 		getPostsPage,
 	} from '$lib/client/helpers/context';
-	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
@@ -48,25 +47,12 @@
 		postsPage.set(filteredPosts);
 	};
 
-	const postPaginationDataUnsubscribe = postPaginationData.subscribe((data) => {
-		if (data) {
-			applyLazyLoadingOnImageClass('post-carousel-image');
-			applyLazyLoadingOnImageClass('booru-avatar-post-card');
-		}
-	});
-
 	const postPageStoreUnsubscribe = postsPage.subscribe((updatedPosts) => {
-		applyLazyLoadingOnImageClass('post-carousel-image');
-		applyLazyLoadingOnImageClass('booru-avatar-post-card');
-
 		uniqueTags = getUniqueLabelsFromPosts(updatedPosts, 'tag');
 		uniqueArtists = getUniqueLabelsFromPosts(updatedPosts, 'artist');
 	});
 
 	onMount(() => {
-		applyLazyLoadingOnImageClass('post-carousel-image');
-		applyLazyLoadingOnImageClass('booru-avatar-post-card');
-
 		const searchInput = document.querySelector('#post-page-searchbar') as HTMLInputElement;
 
 		const postSearchResetTimeoutId = setInterval(() => {
@@ -78,12 +64,6 @@
 
 		return () => {
 			clearInterval(postSearchResetTimeoutId);
-		};
-	});
-
-	onMount(() => {
-		return () => {
-			postPaginationDataUnsubscribe();
 			postPageStoreUnsubscribe();
 		};
 	});

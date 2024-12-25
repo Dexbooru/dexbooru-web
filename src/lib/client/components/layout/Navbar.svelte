@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { getPathFromUrl } from '$lib/shared/helpers/urls';
 	import { Button, DarkMode, NavBrand, NavHamburger, NavLi, NavUl, Navbar } from 'flowbite-svelte';
 	import GlobalSearchbar from '../search/GlobalSearchbar.svelte';
 	import ProfileDropdown from './ProfileDropdown.svelte';
 
-	let activeUrl: string = $derived(getPathFromUrl($page.url.href, true));
+	let activeUrl: string = $derived(getPathFromUrl(page.url.href, true));
 
 	const user = getAuthenticatedUser();
 </script>

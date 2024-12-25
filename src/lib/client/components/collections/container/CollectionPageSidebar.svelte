@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/collections';
 	import { getCollectionPaginationData } from '$lib/client/helpers/context';
 	import {
@@ -17,7 +17,7 @@
 	let { uniqueAuthors }: Props = $props();
 
 	const collectionPaginationData = getCollectionPaginationData();
-	const collectionBaseUrl = $page.url.origin + $page.url.pathname;
+	const collectionBaseUrl = page.url.origin + page.url.pathname;
 </script>
 
 {#if $collectionPaginationData}

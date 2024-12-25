@@ -7,7 +7,7 @@
 		width?: string;
 		isGlobal?: boolean;
 		placeholder: string;
-		queryInputHandler: (query: string) => void;
+		queryInputHandler?: ((query: string) => void) | null;
 		queryChangeHandler?: ((query: string) => void) | null;
 	}
 
@@ -16,8 +16,8 @@
 		width = '300px',
 		isGlobal = false,
 		placeholder,
-		queryInputHandler,
-		queryChangeHandler = null
+		queryInputHandler = null,
+		queryChangeHandler = null,
 	}: Props = $props();
 
 	const optionalProps: Record<string, string> = $state({});
@@ -28,7 +28,9 @@
 	const handleOnInput = (event: Event) => {
 		const inputTarget = event.target as HTMLInputElement;
 		if (inputTarget.value.length > 0) {
-			queryInputHandler(inputTarget.value);
+			if (queryInputHandler) {
+				queryInputHandler(inputTarget.value);
+			}
 		}
 	};
 

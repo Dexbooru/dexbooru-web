@@ -3,7 +3,6 @@
 		getAuthenticatedUser,
 		getAuthenticatedUserNotifications,
 	} from '$lib/client/helpers/context';
-	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { Avatar, Button, Dropdown, DropdownItem, Spinner } from 'flowbite-svelte';
 	import { AngleDownSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
@@ -26,8 +25,6 @@
 	});
 
 	onMount(() => {
-		applyLazyLoadingOnImageClass('booru-avatar-navbar');
-
 		return () => {
 			notificationUnsubscribe();
 		};

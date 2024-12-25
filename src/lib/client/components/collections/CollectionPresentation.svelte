@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { POSTS_GRID_ANIMATION_DURATION_MS } from '$lib/client/constants/posts';
 	import { getOriginalPostsPage } from '$lib/client/helpers/context';
-	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPostCollection } from '$lib/shared/types/collections';
-	import { onMount } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import PostCard from '../posts/card/PostCard.svelte';
 	import CollectionCardActions from './card/CollectionCardActions.svelte';
@@ -27,10 +25,6 @@
 		originalThumbnail =
 			collection.thumbnailImageUrls.find((imageUrl) => imageUrl.includes(ORIGINAL_IMAGE_SUFFIX)) ??
 			'';
-	});
-
-	onMount(() => {
-		applyLazyLoadingOnImageClass('whole-collection-image');
 	});
 </script>
 
@@ -101,7 +95,7 @@
 
 {#if $originalPostPage.length > 0}
 	<h2 class="text-2xl font-semibold dark:text-white mt-6 mb-4">Posts in this Collection:</h2>
-	<div class="flex flex-wrap gap-5">
+	<div class="grid grid-cols-3 gap-4">
 		{#each $originalPostPage as post (post.id)}
 			<div animate:flip={{ duration: POSTS_GRID_ANIMATION_DURATION_MS }}>
 				<PostCard onCollectionViewPage {post} />

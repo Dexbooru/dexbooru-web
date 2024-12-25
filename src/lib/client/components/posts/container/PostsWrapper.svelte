@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import PostContainer from '$lib/client/components/posts/container/PostContainer.svelte';
 	import {
 		getBlacklistedPostPage,
@@ -51,7 +51,7 @@
 	<title>{pageTitle}</title>
 	<meta property="og:title" content={pageTitle} />
 	<meta property="og:description" content={pageDescription} />
-	<meta property="og:image" content={`${$page.url.href}/favicon.png`} />
+	<meta property="og:image" content={`${page.url.href}/favicon.png`} />
 </svelte:head>
 
 {#if $postPaginationData}

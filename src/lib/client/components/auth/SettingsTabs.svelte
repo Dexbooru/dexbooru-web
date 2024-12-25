@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import { TabItem, Tabs } from 'flowbite-svelte';
 	import { GridSolid, LockSolid, UserCircleSolid } from 'flowbite-svelte-icons';
-	import { onMount } from 'svelte';
 	import ChangePasswordForm from './ChangePasswordForm.svelte';
 	import ChangeProfilePicture from './ChangeProfilePicture.svelte';
 	import ChangeUsernameForm from './ChangeUsernameForm.svelte';
@@ -11,6 +9,7 @@
 	import Enable2faForm from './Enable2faForm.svelte';
 	import PostPreferencesForm from './PostPreferencesForm.svelte';
 	import UserInterfacePreferenceForm from './UserInterfacePreferenceForm.svelte';
+	import { page } from '$app/state';
 
 	const validTabNames = ['personal', 'preferences', 'security'] as const;
 
@@ -23,20 +22,11 @@
 		goto(`?tab=${tabName}`);
 	};
 
-	const pageUnsubscribe = page.subscribe((data) => {
-		const searchParams = data.url.searchParams;
-
-		const tabName = searchParams.get('tab') as 'personal' | 'preferences' | 'security';
-		if (tabName) {
-			currentTab = validTabNames.includes(tabName) ? tabName : 'personal';
-		}
-	});
-
-	onMount(() => {
-		return () => {
-			pageUnsubscribe();
-		};
-	});
+	const searchParams = page.url.searchParams;
+	const tabName = searchParams.get('tab') as 'personal' | 'preferences' | 'security';
+	if (tabName) {
+		currentTab = validTabNames.includes(tabName) ? tabName : 'personal';
+	}
 </script>
 
 <Tabs defaultClass="flex flex-wrap space-x-2 rtl:space-x-revers !p-3" style="underline">

@@ -15,7 +15,7 @@
 		TableHeadCell,
 	} from 'flowbite-svelte';
 	import ImageCollection from '../../images/ImageCollection.svelte';
-	import PostCardActions from '../card/PostCardActions.svelte';
+	import PostActions from '../PostActions.svelte';
 
 	interface Props {
 		post: TPost;
@@ -72,9 +72,8 @@
 	Total images in post: <span class=" dark:text-gray-400">{originalSizedImageUrls.length}</span>
 </p>
 
-<PostCardActions
+<PostActions
 	likedPost={hasLikedPost}
-	onPostViewPage
 	{post}
 	postId={post.id}
 	likes={post.likes}

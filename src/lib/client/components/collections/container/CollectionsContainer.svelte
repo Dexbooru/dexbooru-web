@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { CLEAR_INPUT_INTERVAL_MS } from '$lib/client/constants/search';
 	import {
 		getAuthenticatedUser,
@@ -7,7 +7,7 @@
 		getCollectionPaginationData,
 		getOriginalCollectionPage,
 	} from '$lib/client/helpers/context';
-	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
+
 	import { Button } from 'flowbite-svelte';
 	import { PlusSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
@@ -31,8 +31,8 @@
 	const collectionPage = getCollectionPage();
 	const originalCollectionPage = getOriginalCollectionPage();
 	const collectionPaginationData = getCollectionPaginationData();
-	const pathname = $page.url.pathname;
-	const collectionsUsername = $page.params.username;
+	const pathname = page.url.pathname;
+	const collectionsUsername = page.params.username;
 
 	const onCollectionSearch = (query: string) => {
 		const cleanedQuery = query.toLocaleLowerCase().trim();
@@ -50,13 +50,6 @@
 		collectionPage.set(filteredCollections);
 	};
 
-	const collectionPaginationDataUnsubscribe = collectionPaginationData.subscribe((data) => {
-		if (data) {
-			applyLazyLoadingOnImageClass('collection-carousel-image');
-			applyLazyLoadingOnImageClass('booru-avatar-collection-card');
-		}
-	});
-
 	const collectionPageUnsubscribe = collectionPage.subscribe((collections) => {
 		const collectionAuthorMap = new Map<
 			string,
@@ -67,15 +60,9 @@
 		});
 
 		uniqueAuthors = Array.from(collectionAuthorMap.values());
-
-		applyLazyLoadingOnImageClass('collection-carousel-image');
-		applyLazyLoadingOnImageClass('booru-avatar-collection-card');
 	});
 
 	onMount(() => {
-		applyLazyLoadingOnImageClass('collection-carousel-image');
-		applyLazyLoadingOnImageClass('booru-avatar-collection-card');
-
 		const searchInput = document.querySelector('#collection-page-searchbar') as HTMLInputElement;
 
 		const collectionSearchResetTimeoutId = setInterval(() => {
@@ -93,7 +80,6 @@
 	onMount(() => {
 		return () => {
 			collectionPageUnsubscribe();
-			collectionPaginationDataUnsubscribe();
 		};
 	});
 </script>

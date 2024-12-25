@@ -105,6 +105,11 @@
 		const transformedLabel = transformLabel(label);
 		if (!isLabelAppropriate(transformedLabel, labelType)) {
 			toast.push(`${transformedLabel} is not an allowed ${labelType}`, FAILURE_TOAST_OPTIONS);
+			if (labelType === 'tag') {
+				tag = '';
+			} else {
+				artist = '';
+			}
 			return;
 		}
 

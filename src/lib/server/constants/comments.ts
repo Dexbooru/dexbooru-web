@@ -5,6 +5,7 @@ export const PUBLIC_COMMENT_SELECTORS: TCommentSelector = {
 	id: true,
 	postId: true,
 	parentCommentId: true,
+	replyCount: true,
 	content: true,
 	createdAt: true,
 	updatedAt: true,

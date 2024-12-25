@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { getCollectionPaginationData } from '$lib/client/helpers/context';
 	import { buildUrl } from '$lib/client/helpers/urls';
 	import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
@@ -30,8 +30,8 @@
 				ascending: paginationData.ascending,
 			};
 
-			previousPageUrl = buildUrl($page.url.pathname, previousPageLinkParams);
-			nextPageUrl = buildUrl($page.url.pathname, nextPageLinkParams);
+			previousPageUrl = buildUrl(page.url.pathname, previousPageLinkParams);
+			nextPageUrl = buildUrl(page.url.pathname, nextPageLinkParams);
 		}
 	});
 
@@ -51,7 +51,7 @@
 		id="pagination-container"
 		class="flex space-x-3 justify-center {noCollectionsLeft && 'mt-5'}"
 	>
-		{#if noCollectionsOnPage && !!!['collections/created'].find( (item) => $page.url.href.includes(item), )}
+		{#if noCollectionsOnPage && !!!['collections/created'].find( (item) => page.url.href.includes(item), )}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}
 			{#if ($collectionPaginationData.pageNumber - 1 >= 0 || noCollectionsLeft) && $collectionPaginationData.pageNumber !== 0}

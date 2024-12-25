@@ -1,6 +1,6 @@
 import type sanitize from 'sanitize-html';
 
-export const MAXIMUM_COMMENT_REPLY_DEPTH_LOAD = 3;
+export const MAXIMUM_COMMENT_REPLY_DEPTH_LOAD = 1;
 export const MAXIMUM_COMMENT_REPLY_DEPTH_ABSOLUTE = 10;
 
 export const COMMENT_SANITIZATION_OPTIONS: sanitize.IOptions = {

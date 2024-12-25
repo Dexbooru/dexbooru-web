@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import {
@@ -11,17 +10,12 @@
 		TableHead,
 		TableHeadCell,
 	} from 'flowbite-svelte';
-	import { onMount } from 'svelte';
 
 	type Props = {
 		collections: TAppSearchResult['collections'];
 	};
 
 	let { collections }: Props = $props();
-
-	onMount(() => {
-		applyLazyLoadingOnImageClass('booru-avatar-search-table-collections');
-	});
 </script>
 
 <Table hoverable>
@@ -61,7 +55,8 @@
 				<TableBodyCell>
 					<a
 						href="/collections/{collection.id}"
-						class="font-medium text-primary-600 hover:underline dark:text-primary-500">View collection</a
+						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+						>View collection</a
 					>
 				</TableBodyCell>
 			</TableBodyRow>

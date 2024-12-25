@@ -39,6 +39,19 @@ export async function deleteCommentById(
 		},
 	});
 
+	if (deletedComment.parentCommentId) {
+		await prisma.comment.update({
+			where: {
+				id: deletedComment.parentCommentId,
+			},
+			data: {
+				replyCount: {
+					decrement: 1,
+				},
+			},
+		});
+	}
+
 	await prisma.post.update({
 		where: {
 			id: postId,
@@ -111,6 +124,19 @@ export async function createComment(
 			parentCommentId,
 		},
 	});
+
+	if (parentCommentId) {
+		await prisma.comment.update({
+			where: {
+				id: parentCommentId,
+			}, 
+			data: {
+				replyCount: {
+					increment: 1,
+				}
+			}
+		});
+	}
 
 	await prisma.post.update({
 		where: {

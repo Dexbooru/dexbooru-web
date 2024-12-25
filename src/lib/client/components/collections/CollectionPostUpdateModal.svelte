@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import {
 		createGetCollectionsByAuthorPaginator,
 		updatePostCollections,
@@ -98,7 +98,7 @@
 							(post) => post.id !== currentPostId,
 						);
 
-						const url = $page.url;
+						const url = page.url;
 						if (INDIVIDUAL_COLLECTION_PATH_REGEX.test(url.pathname)) {
 							originalPostPage.update((posts) => posts.filter((post) => post.id !== currentPostId));
 						}

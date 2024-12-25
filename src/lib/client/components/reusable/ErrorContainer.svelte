@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Image404 from '$lib/client/assets/404graphic.png';
 	import { ERROR_PAGE_TITLE_MAP } from '$lib/client/constants/pages';
 	import type { TErrorPageType } from '$lib/client/types/page';
@@ -14,13 +14,13 @@
 
 <svelte:head>
 	<title
-		>{$page.status === 500
+		>{page.status === 500
 			? ERROR_PAGE_TITLE_MAP['internalServerError']
 			: ERROR_PAGE_TITLE_MAP[errorPageType]}</title
 	>
 </svelte:head>
 
-{#if $page.status === 404}
+{#if page.status === 404}
 	<section
 		class="flex flex-col mt-20 items-center justify-center text-gray-900 dark:text-gray-100 px-4 sm:px-6 lg:px-8"
 	>
@@ -50,12 +50,12 @@
 				You tried to visit the following route:
 			</p>
 			<code class="mt-1 p-2 rounded-md bg-gray-200 dark:bg-gray-800 text-sm font-mono"
-				>{$page.url.pathname}
+				>{page.url.pathname}
 			</code>
 		{/if}
 
 		<Button class="mt-5" color="blue" href="/">Go Home</Button>
 	</section>
-{:else if $page.status === 500}
-	{$page.error?.message}
+{:else if page.status === 500}
+	{page.error?.message}
 {/if}

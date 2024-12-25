@@ -1,7 +1,6 @@
 import type { TUser } from '$lib/shared/types/users';
 import type { UserPreference } from '@prisma/client';
 import type { Writable } from 'svelte/store';
-import { LAZY_LOADABLE_IMAGES, LAZY_LOADABLE_IMAGE_DEFAULT_MAP } from '../constants/dom';
 import { GLOBAL_SEARCH_MODAL_NAME } from '../constants/layout';
 import type { IDeviceStoreData } from '../types/device';
 import type { TModalStoreData } from '../types/stores';
@@ -86,51 +85,6 @@ const onKeyDownDocument = (event: KeyboardEvent, activeModal: Writable<TModalSto
 	}
 };
 
-export const applyLazyLoadingOnImageClass = (
-	className: keyof typeof LAZY_LOADABLE_IMAGE_DEFAULT_MAP,
-) => {
-	const matchingImageElements = Array.from(
-		document.getElementsByClassName(className),
-	) as HTMLImageElement[];
-	matchingImageElements.forEach((matchingImageElement) => lazyLoadImage(matchingImageElement));
-};
-
-export const lazyLoadImage = (image: HTMLImageElement) => {
-	const imageClassList = Array.from(image.classList);
-	const matchingLazyLoadableClassName = LAZY_LOADABLE_IMAGES.find((className) =>
-		imageClassList.includes(className),
-	);
-	if (!matchingLazyLoadableClassName) return;
-
-	if (!image.complete) {
-		image.src =
-			LAZY_LOADABLE_IMAGE_DEFAULT_MAP[
-				matchingLazyLoadableClassName as keyof typeof LAZY_LOADABLE_IMAGE_DEFAULT_MAP
-			] ?? '';
-		return;
-	}
-
-	if (image.onabort && image.onerror && image.onload) return;
-
-	image.setAttribute('loading', 'lazy');
-	image.style.transition = 'filter 0.5s ease, opacity 0.5s ease';
-	image.style.filter = 'blur(5px)';
-	image.style.opacity = '0';
-
-	const assignFallbackImage = () => {
-		image.src =
-			LAZY_LOADABLE_IMAGE_DEFAULT_MAP[
-				matchingLazyLoadableClassName as keyof typeof LAZY_LOADABLE_IMAGE_DEFAULT_MAP
-			] ?? '';
-	};
-
-	image.onload = () => {
-		image.style.filter = 'blur(0px)';
-		image.style.opacity = '1';
-	};
-	image.onabort = assignFallbackImage;
-	image.onerror = assignFallbackImage;
-};
 
 const updateFooterData = () => {
 	const footerElement = document.querySelector('#app-footer') as HTMLElement;

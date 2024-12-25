@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import DeleteCollectionConfirmationModal from '$lib/client/components/collections/card/DeleteCollectionConfirmationModal.svelte';
 	import EditCollectionModal from '$lib/client/components/collections/card/EditCollectionModal.svelte';
 	import CollectionsPostUpdateModal from '$lib/client/components/collections/CollectionPostUpdateModal.svelte';
@@ -43,7 +43,7 @@
 <svelte:head>
 	<meta property="og:site_name" content="Dexbooru" />
 	<meta property="og:type" content="website" />
-	<meta property="og:url" content={$page.url.href} />
+	<meta property="og:url" content={page.url.href} />
 	<meta property="og:locale" content="en_US" />
 </svelte:head>
 

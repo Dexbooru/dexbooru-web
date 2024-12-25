@@ -16,8 +16,7 @@ MAXIMUM_TAG_LENGTH = 75
 
 
 async def fetch_random_danbooru_post(client: aiohttp.ClientSession, post_id: int):
-    random_post_api_endpoint_url = f"{
-        DANBOORU_API_BASE_URL}/posts/{post_id}.json"
+    random_post_api_endpoint_url = f"{DANBOORU_API_BASE_URL}/posts/{post_id}.json"
     response_data = None
 
     async with client.get(random_post_api_endpoint_url) as response:
@@ -91,11 +90,10 @@ async def main():
                 processed_post_ids.add(post_id)
 
                 print(f"Processed random post with id: {post_id}")
-                print(f"Currently done {
-                      len(processed_post_ids)} posts!")
+                print(f"Currently done {len(processed_post_ids)} posts!")
                 print("\n"*2)
 
     save_posts(posts)
 
 if __name__ == "__main__":
-    asyncio.run(main_())
+    asyncio.run(main())

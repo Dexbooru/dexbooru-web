@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { SIDEBAR_WIDTH_STORAGE_KEY } from '$lib/client/constants/chat';
 	import { chatStore } from '$lib/client/stores/chat';
 	import type { TChatRoom } from '$lib/client/types/core';
@@ -18,7 +18,7 @@
 
 	let currentRoomId: string = $state('');
 	run(() => {
-		currentRoomId = $page.params.roomId;
+		currentRoomId = page.params.roomId;
 	});
 
 	const persistSidebarWidth = (sidebarElement: HTMLElement | null) => {

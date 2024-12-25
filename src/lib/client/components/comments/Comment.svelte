@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { createPostCommentsPaginator } from '$lib/client/api/comments';
-	import { MAXIMUM_COMMENT_REPLY_DEPTH_LOAD } from '$lib/client/constants/comments';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
-	import { applyLazyLoadingOnImageClass } from '$lib/client/helpers/dom';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate, getFormalDateTitle, ymdFormat } from '$lib/shared/helpers/dates';
 	import type { TComment } from '$lib/shared/types/comments';
@@ -55,16 +53,10 @@
 	};
 
 	const commentTreeUnsubscribe = commentTree.subscribe((commentTree) => {
-		applyLazyLoadingOnImageClass('booru-avatar-comment');
 		replies = commentTree.getReplies(comment.id);
 	});
 
 	onMount(() => {
-		// simulate a loading click with the initial load param set to true
-		if (currentDepth <= MAXIMUM_COMMENT_REPLY_DEPTH_LOAD) {
-			handleLoadRepliesClick(true);
-		}
-
 		return () => {
 			commentTreeUnsubscribe();
 		};
@@ -110,7 +102,7 @@
 			<MessagesSolid />
 			<span>{replyBoxOpen ? 'Hide reply' : 'Reply'}</span>
 		</Button>
-		{#if !noMoreComments}
+		{#if !noMoreComments && comment.replyCount > 0}
 			<Button on:click={() => handleLoadRepliesClick(false)} class="flex space-x-2" color="blue">
 				<MessagesSolid />
 				<span>{loadMoreButtonText}</span>

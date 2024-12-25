@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import PostsWrapper from '$lib/client/components/posts/container/PostsWrapper.svelte';
 	import { updatePostStores } from '$lib/client/helpers/posts';
 	import type { PageData } from './$types';
@@ -9,7 +9,7 @@
 	}
 
 	let { data }: Props = $props();
-	const tagName = $page.params.name;
+	const tagName = page.params.name;
 
 	$effect(() => {
 		updatePostStores(data);

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getOriginalCollectionPage, getUserCollections } from '$lib/client/helpers/context';
 	import { filesToBase64Strings } from '$lib/client/helpers/images';
@@ -124,7 +124,7 @@
 				resetFileUploadState();
 				isHidden = true;
 
-				const pathname = $page.url.pathname;
+				const pathname = page.url.pathname;
 				if (pathname.includes('/collections')) {
 					const newCollection = result.data?.newCollection as TPostCollection;
 					originalCollectionPage.update((collections) => {

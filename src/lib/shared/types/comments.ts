@@ -15,6 +15,7 @@ export type TCommentEditBody = {
 };
 
 export type TComment = Comment & {
+	replyCount: number;
 	author: {
 		id: string;
 		username: string;

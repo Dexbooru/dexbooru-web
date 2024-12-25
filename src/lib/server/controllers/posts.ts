@@ -30,10 +30,9 @@ import {
 	findPostByIdWithUpdatedViewCount,
 	findPostsByAuthorId,
 	findPostsByPage,
-	getTotalPostCount,
 	hasUserLikedPost,
 	likePostById,
-	updatePost,
+	updatePost
 } from '../db/actions/post';
 import { findPostsByTagName } from '../db/actions/tag';
 import { findLikedPostsByAuthorId, findLikedPostsFromSubset } from '../db/actions/user';
@@ -228,7 +227,7 @@ export const handleGetSimilarPosts = async (
 
 			const requestBody: TPostSimilarityBody = {
 				k: 10,
-				distance_threshold: 0.45,
+				distance_threshold: 0.35,
 			};
 
 			if (postId && postId.length > 0) {
@@ -684,19 +683,13 @@ export const handleGetPosts = async (
 				);
 			}
 
-			const likedPosts =
-				user.id !== NULLABLE_USER.id && category !== 'liked'
-					? await findLikedPostsFromSubset(user.id, posts)
-					: posts;
+	
 			const responseData = {
 				posts,
-				likedPosts: user.id !== NULLABLE_USER.id ? likedPosts : [],
 				pageNumber,
 				ascending,
 				orderBy,
-				postCount: await getTotalPostCount(),
 			};
-
 			return createSuccessResponse(
 				handlerType,
 				'Successfully fetched paginated posts',

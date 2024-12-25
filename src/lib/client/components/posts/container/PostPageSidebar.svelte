@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/posts';
 	import { getPostPaginationData } from '$lib/client/helpers/context';
@@ -26,7 +26,7 @@
 
 	const postPaginationData = getPostPaginationData();
 
-	const postsBaseUrl = $page.url.origin + $page.url.pathname;
+	const postsBaseUrl = page.url.origin + page.url.pathname;
 </script>
 
 {#if $postPaginationData}

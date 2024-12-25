@@ -1,7 +1,7 @@
-import { MAXIMUM_CONTENT_LENGTH } from '$lib/shared/constants/comments';
+import { MAXIMUM_COMMENTS_PER_PAGE, MAXIMUM_CONTENT_LENGTH } from '$lib/shared/constants/comments';
 import type { RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
-import { MAX_COMMENTS_PER_PAGE, PUBLIC_COMMENT_SELECTORS } from '../constants/comments';
+import { PUBLIC_COMMENT_SELECTORS } from '../constants/comments';
 import { pageNumberSchema } from '../constants/reusableSchemas';
 import {
 	createComment,
@@ -195,7 +195,7 @@ export const handleGetPostComments = async (event: RequestEvent) => {
 				postId,
 				parentCommentId === 'null' ? null : parentCommentId,
 				pageNumber,
-				MAX_COMMENTS_PER_PAGE,
+				MAXIMUM_COMMENTS_PER_PAGE,
 				PUBLIC_COMMENT_SELECTORS,
 			);
 

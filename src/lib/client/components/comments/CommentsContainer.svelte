@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createPostCommentsPaginator } from '$lib/client/api/comments';
 	import { getCommentTree } from '$lib/client/helpers/context';
+	import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
 	import CommentTree from '$lib/shared/helpers/comments';
 	import type { TComment } from '$lib/shared/types/comments';
 	import { Button } from 'flowbite-svelte';
@@ -55,7 +56,7 @@
 			<Comment currentDepth={1} {comment} />
 		{/each}
 
-		{#if !noMoreComments}
+		{#if !noMoreComments && topLevelComments.length % MAXIMUM_COMMENTS_PER_PAGE === 0}
 			<Button on:click={() => handleLoadMoreCommentsClick(false)} color="blue" class="mt-2"
 				>{loadMoreButtonText}</Button
 			>
