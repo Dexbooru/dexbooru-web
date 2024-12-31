@@ -4,7 +4,6 @@
 	import {
 		getAuthenticatedUser,
 		getCollectionPage,
-		getCollectionPaginationData,
 		getOriginalCollectionPage,
 	} from '$lib/client/helpers/context';
 
@@ -12,7 +11,6 @@
 	import { PlusSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
-	import { fade } from 'svelte/transition';
 	import Searchbar from '../../reusable/Searchbar.svelte';
 	import CollectionCreateDrawer from '../CollectionCreateDrawer.svelte';
 	import CollectionPageSidebar from './CollectionPageSidebar.svelte';
@@ -30,7 +28,6 @@
 	const user = getAuthenticatedUser();
 	const collectionPage = getCollectionPage();
 	const originalCollectionPage = getOriginalCollectionPage();
-	const collectionPaginationData = getCollectionPaginationData();
 	const pathname = page.url.pathname;
 	const collectionsUsername = page.params.username;
 
@@ -74,23 +71,18 @@
 
 		return () => {
 			clearInterval(collectionSearchResetTimeoutId);
-		};
-	});
-
-	onMount(() => {
-		return () => {
 			collectionPageUnsubscribe();
 		};
 	});
 </script>
 
-<main in:fade id="collection-container" class="mt-5">
+<main id="collection-container" class="mt-5">
 	<div id="collection-container-sidebar">
 		<CollectionPageSidebar {uniqueAuthors} />
 	</div>
 	<div id="collection-container-body" class="space-y-4 mb-5">
 		<div id="collection-container-title" class="block space-y-3">
-			<h1 class="text-4xl dark:text-white cursor-text">{collectionContainerTitle}</h1>
+			<h1 class="text-4xl dark:text-white">{collectionContainerTitle}</h1>
 			<div class="flex">
 				<Searchbar
 					inputElementId="collection-page-searchbar"

@@ -16,10 +16,4 @@
 	});
 </script>
 
-<PostsWrapper
-	orderBy={data.orderBy}
-	pageNumber={data.pageNumber}
-	ascending={data.ascending}
-	posts={data.posts}
-	postsSection="Posts with the tag: {tagName}"
-/>
+<PostsWrapper postsSection="Posts with the tag: {tagName}" />

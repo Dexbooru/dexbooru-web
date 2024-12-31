@@ -38,19 +38,19 @@
 </div>
 
 <section class="space-y-2">
-	<p class="text-lg dark:text-white cursor-text">
+	<p class="text-lg dark:text-white">
 		ID: <span class=" dark:text-gray-400">{collection.id}</span>
 	</p>
 
-	<p class="text-lg dark:text-white cursor-text">
+	<p class="text-lg dark:text-white">
 		Uploaded at: <span class=" dark:text-gray-400">{formatDate(collection.createdAt)}</span>
 	</p>
 
-	<p class="text-lg dark:text-white cursor-text">
+	<p class="text-lg dark:text-white">
 		Last updated at: <span class=" dark:text-gray-400">{formatDate(collection.updatedAt)}</span>
 	</p>
 
-	<p class="text-lg dark:text-white cursor-text">
+	<p class="text-lg dark:text-white">
 		Author Username: <span class=" dark:text-gray-400">
 			{#if collection.author}
 				<a class="underline" href="/profile/{collection.author.username}"
@@ -62,7 +62,7 @@
 		</span>
 	</p>
 
-	<p class="text-lg dark:text-white cursor-text">
+	<p class="text-lg dark:text-white">
 		Author ID: <span class=" dark:text-gray-400">
 			{#if collection.author}
 				<a class="underline" href="/profile/{collection.author.username}">{collection.author.id}</a>
@@ -72,23 +72,23 @@
 		</span>
 	</p>
 
-	<p class="text-lg dark:text-white cursor-text">
+	<p class="text-lg dark:text-white">
 		Total posts: <span class=" dark:text-gray-400"
 			>{formatNumberWithCommas($originalPostPage.length)}</span
 		>
 	</p>
 
-	<p class="text-lg dark:text-white whitespace-pre-wrap cursor-text">
+	<p class="text-lg dark:text-white whitespace-pre-wrap">
 		Title: <br /><span id="collection-title" class=" dark:text-gray-400">{collection.title}</span>
 	</p>
 
-	<p class="text-lg dark:text-white whitespace-pre-wrap cursor-text">
+	<p class="text-lg dark:text-white whitespace-pre-wrap">
 		Description: <br /><span id="collection-description" class=" dark:text-gray-400"
 			>{collection.description}</span
 		>
 	</p>
 
-	<p class="text-lg dark:text-white cursor-text">
+	<p class="text-lg dark:text-white">
 		Is Nsfw?: <span class=" dark:text-gray-400">{collection.isNsfw ? 'Yes' : 'No'}</span>
 	</p>
 </section>
@@ -104,7 +104,7 @@
 	</div>
 {:else}
 	<div class="flex flex-col items-center justify-center py-10">
-		<p class="text-xl text-gray-500 dark:text-gray-300 cursor-text">
+		<p class="text-xl text-gray-500 dark:text-gray-300">
 			No posts are in this collection currently.
 		</p>
 	</div>

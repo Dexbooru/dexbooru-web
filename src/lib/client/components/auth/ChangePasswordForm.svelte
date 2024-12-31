@@ -53,7 +53,6 @@
 					user.update((currentUser) => {
 						// @ts-ignore
 						const updatedUser = { ...currentUser, ...result.data.data };
-						console.log(updatedUser);
 						return updatedUser;
 					});
 				} else {

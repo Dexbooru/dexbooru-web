@@ -1,5 +1,7 @@
 import type { TCollectionPaginationData, TPostCollection } from '$lib/shared/types/collections';
 import { get } from 'svelte/store';
+import type { TCollectionOrderByColumn } from '../../shared/types/collections';
+import { ORDER_BY_TRANSLATION_MAP } from '../constants/collections';
 import {
 	getAuthenticatedUserPreferences,
 	getCollectionPage,
@@ -11,10 +13,21 @@ import {
 
 export const generateCollectionWrapperMetadata = (
 	pageNumber: number,
+	orderBy: TCollectionOrderByColumn,
+	ascending: boolean,
 	collections: TPostCollection[],
 ) => {
 	const title = `Collections - Page ${pageNumber + 1}`;
-	const description = `${collections.length} post(s) sorted by the Most recent criterion`;
+	let description = '';
+
+	const orderTranslationOptions = ORDER_BY_TRANSLATION_MAP[orderBy];
+	const matchingOrderTranslationOption = orderTranslationOptions.find((translationOption) =>
+		translationOption.isActive(orderBy, ascending),
+	);
+
+	if (matchingOrderTranslationOption) {
+		description = `${collections.length} post(s) sorted by the ${matchingOrderTranslationOption.label} criterion`;
+	}
 
 	return { title, description };
 };

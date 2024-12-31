@@ -1,9 +1,14 @@
 <script lang="ts">
+	import {
+		MAXIMUM_RENDERABLE_ARTISTS,
+		MAXIMUM_RENDERABLE_TAGS,
+	} from '$lib/client/constants/labels';
 	import { MAXIMUM_ARTIST_LENGTH, MAXIMUM_TAG_LENGTH } from '$lib/shared/constants/labels';
-	import { Badge } from 'flowbite-svelte';
+	import { Badge, Button } from 'flowbite-svelte';
 	import type { ComponentProps } from 'svelte';
 
 	interface Props {
+		sliceLabels?: boolean;
 		labels?: string[] | { name: string }[];
 		labelType: 'tag' | 'artist';
 		onPostsViewPage?: boolean;
@@ -17,6 +22,7 @@
 	}
 
 	let {
+		sliceLabels = false,
 		onPostsViewPage = false,
 		labels = [],
 		labelType,
@@ -27,9 +33,19 @@
 		handleLabelClose = null,
 	}: Props = $props();
 
-	let processedLabels: string[] = $derived(
+	const maximumLabelsLength = $derived(
+		labelType === 'tag' ? MAXIMUM_RENDERABLE_TAGS : MAXIMUM_RENDERABLE_ARTISTS,
+	);
+	const unwrappedLabels = $derived(
 		labels.map((label) => (typeof label === 'object' ? label.name : label)),
 	);
+	const slicedUnwrappedLabels = $derived(unwrappedLabels.slice(0, maximumLabelsLength));
+
+	let showAllLabels = $state(false);
+	let processedLabels: string[] = $derived.by(() => {
+		if (!sliceLabels) return unwrappedLabels;
+		return showAllLabels ? unwrappedLabels : slicedUnwrappedLabels;
+	});
 
 	const renderLabel = (label: string) => {
 		if (onPostsViewPage) return label;
@@ -53,3 +69,8 @@
 		</Badge>
 	{/each}
 </div>
+{#if sliceLabels && labels.length > maximumLabelsLength}
+	<Button size="sm" class="ml-1 mr-1 mb-1" on:click={() => (showAllLabels = !showAllLabels)}
+		>{showAllLabels ? 'Show less' : 'Show all'}
+	</Button>
+{/if}

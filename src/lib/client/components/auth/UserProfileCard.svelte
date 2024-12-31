@@ -67,48 +67,48 @@
 		</Dropdown>
 	</div>
 	<div class="flex flex-col items-center pb-4">
-		<Avatar size="lg" class="booru-avatar-profile-card" src={targetUser.profilePictureUrl} />
-		<h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white cursor-text">
+		<Avatar size="lg" src={targetUser.profilePictureUrl} />
+		<h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">
 			{targetUser.username}
 		</h5>
 
-		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
+		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Account id:
 			<strong>{targetUser.id}</strong></span
 		>
-		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
+		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Account creation date:
 			<strong>{formatDate(new Date(targetUser.createdAt))}</strong></span
 		>
 		{#if $user && $user.id === targetUser.id}
-			<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
+			<span class="text-sm text-gray-500 dark:text-gray-400"
 				>Account last updated at date:
 				<strong>{formatDate(new Date(targetUser.updatedAt))}</strong></span
 			>
-			<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
+			<span class="text-sm text-gray-500 dark:text-gray-400"
 				>Account email:
 				<strong>{targetUser.email.toLocaleLowerCase()}</strong></span
 			>
 		{/if}
 		<hr class="border-0 h-px bg-gray-300 dark:bg-gray-600 my-2" />
 
-		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
+		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Total posts:
 			<strong>{userStatistics.totalPosts}</strong></span
 		>
-		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
+		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Total views on all posts:
 			<strong>{userStatistics.totalViews}</strong></span
 		>
-		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
+		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Average views on all posts:
 			<strong>{userStatistics.averageViews}</strong></span
 		>
-		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
+		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Total likes on all posts:
 			<strong>{userStatistics.totalLikes}</strong></span
 		>
-		<span class="text-sm text-gray-500 dark:text-gray-400 cursor-text"
+		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Average likes on all posts:
 			<strong>{userStatistics.averageViews}</strong></span
 		>

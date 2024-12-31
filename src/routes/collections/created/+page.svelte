@@ -13,4 +13,7 @@
 	});
 </script>
 
-<CollectionsWrapper pageNumber={data.pageNumber} collections={data.collections} />
+<CollectionsWrapper
+	containerTitle="Collections Created - Page {data.pageNumber + 1}"
+	collections={data.collections}
+/>

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { TCarouselTransitionFunction } from '$lib/client/types/images';
 	import {
+		COLLECTION_CAROUSEL_IMAGE_CLASS_NAME,
 		COLLECTION_THUMBNAIL_HEIGHT,
 		COLLECTION_THUMBNAIL_WIDTH,
+		POST_CAROUSEL_IMAGE_CLASS_NAME,
 		POST_PICTURE_PREVIEW_HEIGHT,
 		POST_PICTURE_PREVIEW_WIDTH,
 	} from '$lib/shared/constants/images';
@@ -38,17 +40,20 @@
 		transitionFunction = null,
 	}: Props = $props();
 
-	const imagesData: HTMLImgAttributes[] = imageUrls.map((_, index) => {
-		return {
-			src: null,
-			width: resourceType === 'posts' ? POST_PICTURE_PREVIEW_WIDTH : COLLECTION_THUMBNAIL_WIDTH,
-			height: resourceType === 'posts' ? POST_PICTURE_PREVIEW_HEIGHT : COLLECTION_THUMBNAIL_HEIGHT,
-			alt: imagesAlt
-				? `${index + 1} - ${imagesAlt}`
-				: `image content id of ${crypto.randomUUID()} in carousel slide ${index + 1}`,
-			loading: 'lazy',
-		};
-	});
+	let imagesData: HTMLImgAttributes[] = $derived(
+		imageUrls.map((_, index) => {
+			return {
+				src: null,
+				width: resourceType === 'posts' ? POST_PICTURE_PREVIEW_WIDTH : COLLECTION_THUMBNAIL_WIDTH,
+				height:
+					resourceType === 'posts' ? POST_PICTURE_PREVIEW_HEIGHT : COLLECTION_THUMBNAIL_HEIGHT,
+				alt: imagesAlt
+					? `${index + 1} - ${imagesAlt}`
+					: `image content in carousel slide ${index + 1}`,
+				loading: 'lazy',
+			};
+		}),
+	);
 
 	const downloadSlideImage = (slideIndex: number) => {
 		const image = imagesData[slideIndex];
@@ -65,8 +70,8 @@
 			<a href={resourceHref}>
 				<Slide
 					class="object-contain {resourceType === 'collections'
-						? 'collection-carousel-image'
-						: 'post-carousel-image'}"
+						? COLLECTION_CAROUSEL_IMAGE_CLASS_NAME
+						: POST_CAROUSEL_IMAGE_CLASS_NAME}"
 					image={downloadSlideImage(index)}
 				/>
 			</a>

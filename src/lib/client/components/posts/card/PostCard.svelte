@@ -2,6 +2,10 @@
 	import ImageCarousel from '$lib/client/components/images/ImageCarousel.svelte';
 	import PostCardBody from '$lib/client/components/posts/card/PostCardBody.svelte';
 	import { HIDDEN_POSTS_MODAL_NAME } from '$lib/client/constants/layout';
+	import {
+		POST_CARD_CAROUSEL_SLIDE_DURATION,
+		POST_CARD_CAROUSEL_TRANSITION_FUNCTION,
+	} from '$lib/client/constants/posts';
 	import { getActiveModal, getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
@@ -12,8 +16,6 @@
 	import { Card, Toast } from 'flowbite-svelte';
 	import { ExclamationCircleSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-	import { quintOut } from 'svelte/easing';
-	import { scale } from 'svelte/transition';
 
 	interface Props {
 		post: TPost;
@@ -22,10 +24,10 @@
 
 	let { post, onCollectionViewPage = false }: Props = $props();
 
-	const { id: postId, description, author, tags, artists, createdAt, isNsfw } = post;
+	const { id: postId, tags, artists, isNsfw } = post;
 	let imageUrls = $state(post.imageUrls);
-	let likes = post.likes;
 
+	const imagesAlt = `${tags.map((tag) => tag.name).join(', ')} by ${artists.map((artist) => artist.name).join(', ')}`;
 	const userPreferences = getAuthenticatedUserPreferences();
 	const activeModal = getActiveModal();
 
@@ -58,9 +60,9 @@
 		resourceType="posts"
 		resourceHref="/posts/{postId}"
 		{imageUrls}
-		imagesAlt={description}
-		slideDuration={350}
-		transitionFunction={(x) => scale(x, { duration: 500, easing: quintOut })}
+		{imagesAlt}
+		slideDuration={POST_CARD_CAROUSEL_SLIDE_DURATION}
+		transitionFunction={POST_CARD_CAROUSEL_TRANSITION_FUNCTION}
 	/>
 {:else}
 	<Card class="self-start">
@@ -79,10 +81,10 @@
 			resourceType="posts"
 			resourceHref="/posts/{postId}"
 			{imageUrls}
-			imagesAlt={description}
-			slideDuration={350}
-			transitionFunction={(x) => scale(x, { duration: 500, easing: quintOut })}
+			{imagesAlt}
+			slideDuration={POST_CARD_CAROUSEL_SLIDE_DURATION}
+			transitionFunction={POST_CARD_CAROUSEL_TRANSITION_FUNCTION}
 		/>
-		<PostCardBody {post} {author} {createdAt} {tags} {artists} />
+		<PostCardBody {post} />
 	</Card>
 {/if}

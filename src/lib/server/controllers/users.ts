@@ -713,7 +713,6 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			redirect(302, `/posts`);
 		} catch (error) {
 			if (isRedirect(error)) throw error;
-			console.log(error);
 			return createErrorResponse(
 				'form-action',
 				500,

@@ -31,9 +31,9 @@
 	const commentTree = getCommentTree();
 	const replyCommentLoader = createPostCommentsPaginator(comment.postId, comment.id, commentTree);
 
-	const handleLoadRepliesClick = async (isInitialLoad: boolean = false) => {
+	const handleLoadRepliesClick = async () => {
 		repliesLoading = true;
-		const paginationData = await replyCommentLoader(isInitialLoad);
+		const paginationData = await replyCommentLoader();
 		repliesLoading = false;
 
 		const { pageNumber: pageNumberResult, noMoreComments: noMoreCommentsResult } = paginationData;
@@ -70,7 +70,6 @@
 				class="inline-flex space-x-2 items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold"
 			>
 				<Avatar
-					class="booru-avatar-comment"
 					src={comment.author?.profilePictureUrl ?? undefined}
 					alt={comment.authorId
 						? `profile picture of ${comment.author.username}`
@@ -103,7 +102,7 @@
 			<span>{replyBoxOpen ? 'Hide reply' : 'Reply'}</span>
 		</Button>
 		{#if !noMoreComments && comment.replyCount > 0}
-			<Button on:click={() => handleLoadRepliesClick(false)} class="flex space-x-2" color="blue">
+			<Button on:click={() => handleLoadRepliesClick()} class="flex space-x-2" color="blue">
 				<MessagesSolid />
 				<span>{loadMoreButtonText}</span>
 			</Button>

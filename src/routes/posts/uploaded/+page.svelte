@@ -13,10 +13,4 @@
 	});
 </script>
 
-<PostsWrapper
-	orderBy={data.orderBy}
-	pageNumber={data.pageNumber}
-	ascending={data.ascending}
-	posts={data.posts}
-	postsSection="Uploaded Posts"
-/>
+<PostsWrapper postsSection="Uploaded Posts" />

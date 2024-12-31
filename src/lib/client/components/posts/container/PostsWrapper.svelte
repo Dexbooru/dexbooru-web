@@ -9,20 +9,13 @@
 		getPostsPage,
 	} from '$lib/client/helpers/context';
 	import { generatePostWrapperMetaTags } from '$lib/client/helpers/posts';
-	import type { TPost, TPostOrderByColumn } from '$lib/shared/types/posts';
 	import { onMount } from 'svelte';
 
 	interface Props {
 		postsSection: string;
-		orderBy: TPostOrderByColumn;
-		pageNumber: number;
-		ascending: boolean;
-		posts: TPost[];
 	}
 
-	let { postsSection, pageNumber, posts, ascending, orderBy }: Props = $props();
-	let pageTitle = $state('');
-	let pageDescription = $state('');
+	let { postsSection }: Props = $props();
 
 	const postPaginationData = getPostPaginationData();
 	const postsPage = getPostsPage();
@@ -30,10 +23,14 @@
 	const nsfwPostsPage = getNsfwPostPage();
 	const blacklistedPostsPage = getBlacklistedPostPage();
 
-	$effect(() => {
-		const data = generatePostWrapperMetaTags(postsSection, pageNumber, ascending, orderBy, posts);
-		pageTitle = data.title;
-		pageDescription = data.description;
+	let titleData = $derived.by(() => {
+		return generatePostWrapperMetaTags(
+			postsSection,
+			page.data.pageNumber ?? 0,
+			page.data.ascending ?? false,
+			page.data.orderBy ?? 'createdAt',
+			page.data.posts ?? [],
+		);
 	});
 
 	onMount(() => {
@@ -48,12 +45,10 @@
 </script>
 
 <svelte:head>
-	<title>{pageTitle}</title>
-	<meta property="og:title" content={pageTitle} />
-	<meta property="og:description" content={pageDescription} />
+	<title>{titleData.title}</title>
+	<meta property="og:title" content={titleData.title} />
+	<meta property="og:description" content={titleData.description} />
 	<meta property="og:image" content={`${page.url.href}/favicon.png`} />
 </svelte:head>
 
-{#if $postPaginationData}
-	<PostContainer postContainerTitle={pageTitle} />
-{/if}
+<PostContainer postContainerTitle={titleData.title} />

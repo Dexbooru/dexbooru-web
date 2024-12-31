@@ -108,7 +108,7 @@
 	});
 </script>
 
-<Label class="space-y-2 cursor-text">
+<Label class="space-y-2 ">
 	<span
 		>Upload up to {MAXIMUM_IMAGES_PER_POST} images, each of which should not exceed {MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB}
 		MB:</span

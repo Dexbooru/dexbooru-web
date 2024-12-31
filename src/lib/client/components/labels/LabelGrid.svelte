@@ -69,7 +69,7 @@
 </script>
 
 <main class="flex flex-col justify-center m-7 space-y-5">
-	<h1 class="text-4xl dark:text-white text-center cursor-text">
+	<h1 class="text-4xl dark:text-white text-center">
 		{labelType === 'tag' ? 'Tags' : 'Artists'} Index
 	</h1>
 	<div class="flex flex-wrap">
@@ -116,7 +116,7 @@
 	{/if}
 
 	{#if !loadingLabels && hasLoadedLabelsOnce && labels.length === 0}
-		<p class="text-2xl dark:text-white text-center cursor-texta">
+		<p class="text-2xl dark:text-white text-center a">
 			No {labelType}s were indexed that start with {selectedLabel}
 		</p>
 	{/if}

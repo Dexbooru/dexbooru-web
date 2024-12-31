@@ -44,13 +44,14 @@
 						SUCCESS_TOAST_OPTIONS,
 					);
 
-					// @ts-ignore
 					userPreferences.update((currentPreferences) => {
-						// @ts-ignore
-						const updatedPreferences = { ...currentPreferences, ...result.data.data };
-						applyCustomSiteWideCss($user as TUser, updatedPreferences);
+						if (result.data) {
+							const updatedPreferences = { ...currentPreferences, ...(result.data.data as object) };
+							applyCustomSiteWideCss($user as TUser, updatedPreferences);
+							return updatedPreferences;
+						}
 
-						return updatedPreferences;
+						return currentPreferences;
 					});
 				} else {
 					toast.push(

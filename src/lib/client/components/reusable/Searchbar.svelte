@@ -4,15 +4,21 @@
 
 	interface Props {
 		inputElementId?: string | null;
+		required?: boolean;
 		width?: string;
 		isGlobal?: boolean;
 		placeholder: string;
+		autofocus?: boolean;
+		name?: string | null;
 		queryInputHandler?: ((query: string) => void) | null;
 		queryChangeHandler?: ((query: string) => void) | null;
 	}
 
 	let {
+		required = false,
+		name = null,
 		inputElementId = null,
+		autofocus = false,
 		width = '300px',
 		isGlobal = false,
 		placeholder,
@@ -23,6 +29,9 @@
 	const optionalProps: Record<string, string> = $state({});
 	if (inputElementId) {
 		optionalProps.id = inputElementId;
+	}
+	if (name) {
+		optionalProps.name = name;
 	}
 
 	const handleOnInput = (event: Event) => {
@@ -47,10 +56,12 @@
 		<SearchOutline class="w-4 h-4" />
 	</div>
 	<Input
+		{autofocus}
 		{...optionalProps}
 		on:input={handleOnInput}
 		on:input={handleOnChange}
 		class="ps-10"
 		{placeholder}
+		{required}
 	/>
 </div>

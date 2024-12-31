@@ -147,7 +147,7 @@
 	class="mb-6"
 >
 	<div class="mb-6">
-		<Label for="title" class="block mb-2 cursor-text"
+		<Label for="title" class="block mb-2 "
 			>Title (max of {MAXIMUM_COLLECTION_TITLE_LENGTH} characters):</Label
 		>
 		<Input
@@ -157,12 +157,12 @@
 			required
 			placeholder="Enter a title"
 		/>
-		<p class="leading-none dark:text-gray-400 text-right mt-2 cursor-text">
+		<p class="leading-none dark:text-gray-400 text-right mt-2">
 			{title.length}/{MAXIMUM_COLLECTION_TITLE_LENGTH}
 		</p>
 	</div>
 	<div class="mb-6">
-		<Label for="description" class="mb-2 cursor-text"
+		<Label for="description" class="mb-2 "
 			>Description (max of {MAXIMUM_COLLECTION_DESCRIPTION_LENGTH} characters):</Label
 		>
 		<Textarea
@@ -172,18 +172,18 @@
 			name="description"
 			bind:value={description}
 		/>
-		<p class="leading-none dark:text-gray-400 text-right mt-2 cursor-text">
+		<p class="leading-none dark:text-gray-400 text-right mt-2">
 			{description.length}/{MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
 		</p>
 	</div>
 
 	<div class="mb-6">
-		<Checkbox class="cursor-text" bind:checked={isNsfw}>Is NSFW?</Checkbox>
+		<Checkbox class="" bind:checked={isNsfw}>Is NSFW?</Checkbox>
 		<Input type="hidden" value={isNsfw} name="isNsfw" />
 	</div>
 
 	<div class="mb-6">
-		<Label for="collectionThumbnail" class="mb-2 cursor-text"
+		<Label for="collectionThumbnail" class="mb-2 "
 			>Collection Thumbnnail (maximum image size is {MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB} MB)</Label
 		>
 		<Fileupload on:change={onFileChange} accept={FILE_IMAGE_ACCEPT} name="collectionThumbnail" />

@@ -1,4 +1,7 @@
+import { page } from '$app/state';
 import type { TPostOrderByColumn } from '$lib/shared/types/posts';
+import { quintOut } from 'svelte/easing';
+import { scale } from 'svelte/transition';
 import type { TOrderByTranslationMap } from '../types/posts';
 
 export const getLabelFromOrderby = (
@@ -21,6 +24,9 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 				url.searchParams.append('pageNumber', '0');
 				url.searchParams.append('orderBy', 'createdAt');
 				url.searchParams.append('ascending', 'false');
+				if (page.url.pathname === '/search') {
+					url.searchParams.append('query', page.url.searchParams.get('query') ?? '');
+				}
 
 				return url.href;
 			},
@@ -35,6 +41,9 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 				url.searchParams.append('pageNumber', '0');
 				url.searchParams.append('orderBy', 'createdAt');
 				url.searchParams.append('ascending', 'true');
+				if (page.url.pathname === '/search') {
+					url.searchParams.append('query', page.url.searchParams.get('query') ?? '');
+				}
 
 				return url.href;
 			},
@@ -51,6 +60,9 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 				url.searchParams.append('pageNumber', '0');
 				url.searchParams.append('orderBy', 'updatedAt');
 				url.searchParams.append('ascending', 'false');
+				if (page.url.pathname === '/search') {
+					url.searchParams.append('query', page.url.searchParams.get('query') ?? '');
+				}
 
 				return url.href;
 			},
@@ -65,6 +77,9 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 				url.searchParams.append('pageNumber', '0');
 				url.searchParams.append('orderBy', 'updatedAt');
 				url.searchParams.append('ascending', 'true');
+				if (page.url.pathname === '/search') {
+					url.searchParams.append('query', page.url.searchParams.get('query') ?? '');
+				}
 
 				return url.href;
 			},
@@ -81,6 +96,9 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 				url.searchParams.append('pageNumber', '0');
 				url.searchParams.append('orderBy', 'likes');
 				url.searchParams.append('ascending', 'false');
+				if (page.url.pathname === '/search') {
+					url.searchParams.append('query', page.url.searchParams.get('query') ?? '');
+				}
 
 				return url.href;
 			},
@@ -95,6 +113,9 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 				url.searchParams.append('pageNumber', '0');
 				url.searchParams.append('orderBy', 'likes');
 				url.searchParams.append('ascending', 'true');
+				if (page.url.pathname === '/search') {
+					url.searchParams.append('query', page.url.searchParams.get('query') ?? '');
+				}
 
 				return url.href;
 			},
@@ -111,6 +132,9 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 				url.searchParams.append('pageNumber', '0');
 				url.searchParams.append('orderBy', 'views');
 				url.searchParams.append('ascending', 'false');
+				if (page.url.pathname === '/search') {
+					url.searchParams.append('query', page.url.searchParams.get('query') ?? '');
+				}
 
 				return url.href;
 			},
@@ -125,6 +149,9 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 				url.searchParams.append('pageNumber', '0');
 				url.searchParams.append('orderBy', 'views');
 				url.searchParams.append('ascending', 'true');
+				if (page.url.pathname === '/search') {
+					url.searchParams.append('query', page.url.searchParams.get('query') ?? '');
+				}
 
 				return url.href;
 			},
@@ -141,6 +168,9 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 				url.searchParams.append('pageNumber', '0');
 				url.searchParams.append('orderBy', 'commentCount');
 				url.searchParams.append('ascending', 'false');
+				if (page.url.pathname === '/search') {
+					url.searchParams.append('query', page.url.searchParams.get('query') ?? '');
+				}
 
 				return url.href;
 			},
@@ -155,6 +185,9 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 				url.searchParams.append('pageNumber', '0');
 				url.searchParams.append('orderBy', 'commentCount');
 				url.searchParams.append('ascending', 'true');
+				if (page.url.pathname === '/search') {
+					url.searchParams.append('query', page.url.searchParams.get('query') ?? '');
+				}
 
 				return url.href;
 			},
@@ -163,6 +196,9 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 };
 
 export const POSTS_GRID_ANIMATION_DURATION_MS = 500;
+export const POST_CARD_CAROUSEL_SLIDE_DURATION = 350;
+export const POST_CARD_CAROUSEL_TRANSITION_FUNCTION = (x: Element) =>
+	scale(x, { duration: POSTS_GRID_ANIMATION_DURATION_MS, easing: quintOut });
 
 export const INDIVIDUAL_POST_PATH_REGEX = new RegExp(
 	'^/posts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',

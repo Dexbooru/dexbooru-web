@@ -33,7 +33,7 @@
 				<TableBodyCell>{user.id}</TableBodyCell>
 				<TableBodyCell class="text-center">
 					<Avatar
-						class="ml-auto mr-auto booru-avatar-search-table-users"
+						class="ml-auto mr-auto"
 						src={user.profilePictureUrl}
 						alt="profile picture of {user.username}"
 					/>

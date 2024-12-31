@@ -72,7 +72,7 @@
 				>
 					<Avatar
 						size="md"
-						class="hide-alt-text booru-avatar-collection-card"
+						class="hide-alt-text"
 						src={collection.author.profilePictureUrl}
 						alt={collection.authorId
 							? `profile picture of ${collection.author.username}`
@@ -83,9 +83,9 @@
 					</p>
 				</a>
 			</div>
-			<p class="text-base dark:text-white cursor-text">Created Date</p>
+			<p class="text-base dark:text-white">Created Date</p>
 			<div class="space-x-2 flex align-middle flex-wrap">
-				<p class="text-md dark:text-white cursor-text">
+				<p class="text-md dark:text-white">
 					<span class="leading-none text-sm dark:text-gray-400"
 						>{formatDate(collection.createdAt)}</span
 					>

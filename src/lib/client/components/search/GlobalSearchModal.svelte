@@ -91,6 +91,7 @@
 		<Searchbar
 			inputElementId={GLOBAL_SEARCH_INPUT_ELEMENT_ID}
 			isGlobal
+			autofocus
 			width="100%"
 			placeholder="Enter your search query"
 			queryInputHandler={debouncedFetchQueryResults}

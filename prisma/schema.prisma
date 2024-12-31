@@ -29,6 +29,7 @@ model User {
   preferences              UserPreference?           @relation(name: "user profile preferences")
 
   @@index([id])
+  @@index([username])
 }
 
 model UserPreference {

@@ -165,7 +165,7 @@
 </script>
 
 <main class="flex flex-col justify-center items-center m-5">
-	<Heading class="mb-5 px-2.5 text-center cursor-text">Upload a post!</Heading>
+	<Heading class="mb-5 px-2.5 text-center ">Upload a post!</Heading>
 	<form
 		id="upload-form"
 		method="POST"
@@ -173,7 +173,7 @@
 		enctype="multipart/form-data"
 	>
 		<section class="space-y-2">
-			<Label class="mb-1 cursor-text" for="description-textarea">
+			<Label class="mb-1 " for="description-textarea">
 				Please enter a description for your post (max {MAXIMUM_POST_DESCRIPTION_LENGTH} characters):
 			</Label>
 			<Textarea
@@ -185,17 +185,17 @@
 				placeholder="Enter a description"
 				required
 			/>
-			<p class="leading-none dark:text-gray-400 text-right mt-2 cursor-text">
+			<p class="leading-none dark:text-gray-400 text-right mt-2">
 				{description.length}/{MAXIMUM_POST_DESCRIPTION_LENGTH}
 			</p>
 
-			<List class="dark:text-gray-400 cursor-text" list="disc">
+			<List class="dark:text-gray-400 " list="disc">
 				{#each SEPERATOR_CHARACTER_UI as message}
 					<Li>{message}</Li>
 				{/each}
 			</List>
 
-			<Label class="cursor-text" for="tag-input"
+			<Label class="" for="tag-input"
 				>Please specify one or more tags (max of {MAXIMUM_TAGS_PER_POST}):</Label
 			>
 			<div class="flex gap-2 mt-2 justify-around">
@@ -209,7 +209,7 @@
 					placeholder="Enter a tag name"
 					class="flex-grow"
 				/>
-				<p class="leading-none dark:text-gray-400 text-right mt-2 cursor-text">
+				<p class="leading-none dark:text-gray-400 text-right mt-2">
 					{tag.length}/{MAXIMUM_TAG_LENGTH}
 				</p>
 				<Button
@@ -230,7 +230,7 @@
 			</div>
 			<Input type="hidden" name="tags" value={tags.join(',')} />
 
-			<Label class="cursor-text" for="artist-input"
+			<Label class="" for="artist-input"
 				>Please specify one or more artists (max of {MAXIMUM_ARTISTS_PER_POST}):</Label
 			>
 			<div class="flex gap-2 mt-2">
@@ -244,7 +244,7 @@
 					placeholder="Enter an artist name"
 					class="flex-grow"
 				/>
-				<p class="leading-none dark:text-gray-400 text-right mt-2 cursor-text">
+				<p class="leading-none dark:text-gray-400 text-right mt-2">
 					{artist.length}/{MAXIMUM_ARTIST_LENGTH}
 				</p>
 				<Button
@@ -267,7 +267,7 @@
 
 			<PostPictureUpload bind:loadingPictures={loadingPostPictures} bind:images={postImages} />
 
-			<Checkbox class="cursor-text" bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
+			<Checkbox class="" bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
 			<Input type="hidden" name="isNsfw" value={isNsfw} />
 			{#await estimatedPostRating}
 				<div class="flex items-center space-x-2">

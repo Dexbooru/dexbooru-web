@@ -13,6 +13,7 @@ import { isLabelAppropriate, transformLabels } from '$lib/shared/helpers/labels'
 import type {
 	TPost,
 	TPostOrderByColumn,
+	TPostPaginationData,
 	TPostSimilarityBody,
 	TPostSimilarityResponse,
 } from '$lib/shared/types/posts';
@@ -20,7 +21,7 @@ import { isHttpError, isRedirect, redirect, type RequestEvent } from '@sveltejs/
 import { z } from 'zod';
 import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../constants/aws';
-import { PUBLIC_POST_SELECTORS } from '../constants/posts';
+import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../constants/posts';
 import { boolStrSchema, pageNumberSchema } from '../constants/reusableSchemas';
 import { findPostsByArtistName } from '../db/actions/artist';
 import {
@@ -32,7 +33,7 @@ import {
 	findPostsByPage,
 	hasUserLikedPost,
 	likePostById,
-	updatePost
+	updatePost,
 } from '../db/actions/post';
 import { findPostsByTagName } from '../db/actions/tag';
 import { findLikedPostsByAuthorId, findLikedPostsFromSubset } from '../db/actions/user';
@@ -43,11 +44,37 @@ import {
 } from '../helpers/controllers';
 import { flattenImageBuffers, runPostImageTransformationPipelineInBatch } from '../helpers/images';
 import { getSimilarPostsBySimilaritySearch, indexPostImages } from '../helpers/mlApi';
+import { cacheResponseRemotely, getRemoteResponseFromCache } from '../helpers/sessions';
 import type {
 	TControllerHandlerVariant,
 	TPostFetchCategory,
 	TRequestSchema,
 } from '../types/controllers';
+
+const getCacheCategoryWithLabel = (
+	type: 'artist' | 'tag',
+	name: string,
+	pageNumber: number,
+	orderBy: TPostOrderByColumn,
+	ascending: boolean,
+) => {
+	if (type === 'artist') {
+		return `artist-${name}-${pageNumber}-${orderBy}-${ascending}`;
+	}
+	return `tag-${name}-${pageNumber}-${orderBy}-${ascending}`;
+};
+
+const getCacheKeyWithCategory = (
+	category: TPostFetchCategory,
+	pageNumber: number,
+	orderBy: TPostOrderByColumn,
+	ascending: boolean,
+) => {
+	return `${category}-${pageNumber}-${orderBy}-${ascending}`;
+};
+const CACHE_TIME_GENERAL_POSTS = 60;
+const CACHE_TIME_TAG_POSTS = 60;
+const CACHE_TIME_ARTIST_POSTS = 120;
 
 const postPaginationSchema = z.object({
 	category: z
@@ -507,31 +534,45 @@ export const handleGetPostsWithArtistName = async (
 		handlerType,
 		GetPostsWithArtistNameSchema,
 		async (data) => {
-			const user = event.locals.user;
 			const artistName = data.pathParams.name;
 			const { ascending, orderBy, pageNumber } = data.urlSearchParams;
+			const selectors =
+				handlerType === 'page-server-load'
+					? PAGE_SERVER_LOAD_POST_SELECTORS
+					: PUBLIC_POST_SELECTORS;
+
+			let responseData: TPostPaginationData;
+			const cacheKey = getCacheCategoryWithLabel(
+				'artist',
+				artistName,
+				pageNumber,
+				orderBy,
+				ascending,
+			);
 
 			try {
-				const posts = await findPostsByArtistName(
-					artistName,
-					pageNumber,
-					MAXIMUM_POSTS_PER_PAGE,
-					orderBy as TPostOrderByColumn,
-					ascending,
-					PUBLIC_POST_SELECTORS,
-				);
-				const likedPosts =
-					user.id !== NULLABLE_USER.id && handlerType !== 'api-route'
-						? await findLikedPostsFromSubset(user.id, posts)
-						: [];
+				const cachedData = await getRemoteResponseFromCache<TPostPaginationData>(cacheKey);
+				if (cachedData) {
+					responseData = cachedData;
+				} else {
+					const posts = await findPostsByArtistName(
+						artistName,
+						pageNumber,
+						MAXIMUM_POSTS_PER_PAGE,
+						orderBy as TPostOrderByColumn,
+						ascending,
+						selectors,
+					);
 
-				const responseData = {
-					posts,
-					...(handlerType !== 'api-route' && { likedPosts }),
-					pageNumber,
-					ascending,
-					orderBy: orderBy as TPostOrderByColumn,
-				};
+					responseData = {
+						posts,
+						pageNumber,
+						ascending,
+						orderBy: orderBy as TPostOrderByColumn,
+					};
+					cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_ARTIST_POSTS);
+				}
+
 				return createSuccessResponse(
 					handlerType,
 					`Successfully fetched the posts with the artist name of: ${artistName}`,
@@ -562,31 +603,39 @@ export const handleGetPostsWithTagName = async (
 		handlerType,
 		GetPostsWithTagNameSchema,
 		async (data) => {
-			const user = event.locals.user;
 			const tagName = data.pathParams.name;
 			const { ascending, orderBy, pageNumber } = data.urlSearchParams;
+			const selectors =
+				handlerType === 'page-server-load'
+					? PAGE_SERVER_LOAD_POST_SELECTORS
+					: PUBLIC_POST_SELECTORS;
+
+			let responseData: TPostPaginationData;
+			const cacheKey = getCacheCategoryWithLabel('tag', tagName, pageNumber, orderBy, ascending);
 
 			try {
-				const posts = await findPostsByTagName(
-					tagName,
-					pageNumber,
-					MAXIMUM_POSTS_PER_PAGE,
-					orderBy as TPostOrderByColumn,
-					ascending,
-					PUBLIC_POST_SELECTORS,
-				);
-				const likedPosts =
-					user.id !== NULLABLE_USER.id && handlerType !== 'api-route'
-						? await findLikedPostsFromSubset(user.id, posts)
-						: [];
+				const cachedData = await getRemoteResponseFromCache<TPostPaginationData>(cacheKey);
+				if (cachedData) {
+					responseData = cachedData;
+				} else {
+					const posts = await findPostsByTagName(
+						tagName,
+						pageNumber,
+						MAXIMUM_POSTS_PER_PAGE,
+						orderBy as TPostOrderByColumn,
+						ascending,
+						selectors,
+					);
 
-				const responseData = {
-					posts,
-					...(handlerType !== 'api-route' && { likedPosts }),
-					pageNumber,
-					ascending,
-					orderBy: orderBy as TPostOrderByColumn,
-				};
+					responseData = {
+						posts,
+						pageNumber,
+						ascending,
+						orderBy: orderBy as TPostOrderByColumn,
+					};
+					cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_TAG_POSTS);
+				}
+
 				return createSuccessResponse(
 					handlerType,
 					`Successfully fetched the posts with the artist name of: ${tagName}`,
@@ -617,6 +666,8 @@ export const handleGetPosts = async (
 		const category = overrideCategory ?? data.urlSearchParams.category;
 		const { ascending, orderBy, pageNumber, userId } = data.urlSearchParams;
 		const user = event.locals.user;
+		const selectors =
+			handlerType === 'page-server-load' ? PAGE_SERVER_LOAD_POST_SELECTORS : PUBLIC_POST_SELECTORS;
 
 		if (user.id === NULLABLE_USER.id && ['uploaded', 'liked'].includes(category)) {
 			redirect(302, '/');
@@ -633,63 +684,67 @@ export const handleGetPosts = async (
 			}
 		}
 
-		try {
-			let posts: TPost[] = [];
-			switch (category) {
-				case 'general':
-					posts = await findPostsByPage(
-						pageNumber,
-						MAXIMUM_POSTS_PER_PAGE,
-						orderBy as TPostOrderByColumn,
-						ascending,
-						PUBLIC_POST_SELECTORS,
-					);
-					break;
-				case 'liked':
-					posts =
-						(await findLikedPostsByAuthorId(
-							pageNumber,
-							MAXIMUM_POSTS_PER_PAGE,
-							user.id,
-							orderBy as TPostOrderByColumn,
-							ascending,
-							PUBLIC_POST_SELECTORS,
-						)) ?? [];
-					break;
-				case 'uploaded':
-					posts =
-						(await findPostsByAuthorId(
-							pageNumber,
-							MAXIMUM_POSTS_PER_PAGE,
-							userId ?? user.id,
-							orderBy as TPostOrderByColumn,
-							ascending,
-							PUBLIC_POST_SELECTORS,
-						)) ?? [];
-					break;
-			}
+		const cacheKey = getCacheKeyWithCategory(
+			category,
+			pageNumber,
+			orderBy as TPostOrderByColumn,
+			ascending,
+		);
 
-			if (handlerType === 'api-route') {
-				const responseData = {
+		try {
+			let responseData: TPostPaginationData;
+			const cachedData = await getRemoteResponseFromCache<TPostPaginationData>(cacheKey);
+
+			if (cachedData) {
+				responseData = cachedData;
+			} else {
+				let posts: TPost[] = [];
+				switch (category) {
+					case 'general':
+						posts = await findPostsByPage(
+							pageNumber,
+							MAXIMUM_POSTS_PER_PAGE,
+							orderBy as TPostOrderByColumn,
+							ascending,
+							selectors,
+						);
+						break;
+					case 'liked':
+						posts =
+							(await findLikedPostsByAuthorId(
+								pageNumber,
+								MAXIMUM_POSTS_PER_PAGE,
+								user.id,
+								orderBy as TPostOrderByColumn,
+								ascending,
+								selectors,
+							)) ?? [];
+						break;
+					case 'uploaded':
+						posts =
+							(await findPostsByAuthorId(
+								pageNumber,
+								MAXIMUM_POSTS_PER_PAGE,
+								userId ?? user.id,
+								orderBy as TPostOrderByColumn,
+								ascending,
+								selectors,
+							)) ?? [];
+						break;
+				}
+
+				responseData = {
 					posts,
 					pageNumber,
 					ascending,
 					orderBy,
 				};
-				return createSuccessResponse(
-					handlerType,
-					'Successfully fetched paginated posts',
-					responseData,
-				);
 			}
 
-	
-			const responseData = {
-				posts,
-				pageNumber,
-				ascending,
-				orderBy,
-			};
+			if (category === 'general') {
+				cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_GENERAL_POSTS);
+			}
+
 			return createSuccessResponse(
 				handlerType,
 				'Successfully fetched paginated posts',

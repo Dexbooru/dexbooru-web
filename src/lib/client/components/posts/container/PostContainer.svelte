@@ -1,18 +1,14 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import CollectionCreateDrawer from '$lib/client/components/collections/CollectionCreateDrawer.svelte';
 	import PostGrid from '$lib/client/components/posts/container/PostGrid.svelte';
 	import PostPageSidebar from '$lib/client/components/posts/container/PostPageSidebar.svelte';
 	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
 	import { CLEAR_INPUT_INTERVAL_MS } from '$lib/client/constants/search';
-	import {
-		getOriginalPostsPage,
-		getPostPaginationData,
-		getPostsPage,
-	} from '$lib/client/helpers/context';
+	import { getOriginalPostsPage, getPostsPage } from '$lib/client/helpers/context';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
-	import { fade } from 'svelte/transition';
 	import Searchbar from '../../reusable/Searchbar.svelte';
 
 	interface Props {
@@ -24,13 +20,11 @@
 	let uniqueArtists: string[] = $state([]);
 	let collectionCreateDrawerHidden: boolean = $state(true);
 
-	const postPaginationData = getPostPaginationData();
 	const originalPostPage = getOriginalPostsPage();
 	const postsPage = getPostsPage();
 
 	const onPostSearch = (query: string) => {
 		const cleanedQuery = query.toLocaleLowerCase().trim();
-
 		const filteredPosts = $originalPostPage.filter((post) => {
 			const tagHasQuery = post.tags
 				.map((tag) => tag.name)
@@ -38,10 +32,8 @@
 			const artistHasQuery = post.artists
 				.map((artist) => artist.name)
 				.find((artistName) => artistName.toLocaleLowerCase().includes(cleanedQuery));
-			const descriptionHasQuery = post.description.toLocaleLowerCase().includes(cleanedQuery);
-			const uploaderHasQuery = post.author.username.toLocaleLowerCase().includes(cleanedQuery);
 
-			return tagHasQuery || artistHasQuery || descriptionHasQuery || uploaderHasQuery;
+			return tagHasQuery || artistHasQuery;
 		});
 
 		postsPage.set(filteredPosts);
@@ -69,22 +61,24 @@
 	});
 </script>
 
-<main in:fade id="post-container" class="mt-5">
+<main id="post-container" class="mt-5">
 	<div id="post-container-sidebar">
 		<PostPageSidebar {uniqueTags} {uniqueArtists} />
 	</div>
 	<div id="post-container-body" class="space-y-4 mb-5">
 		<div id="post-container-title" class="block space-y-3">
-			<h1 class="text-4xl dark:text-white cursor-text">{postContainerTitle}</h1>
-			<Searchbar
-				inputElementId="post-page-searchbar"
-				width="25rem"
-				queryInputHandler={onPostSearch}
-				placeholder="Search by keyword(s) on this page"
-			/>
+			<h1 class="text-4xl dark:text-white">{postContainerTitle}</h1>
+			{#if (page.data.posts ?? []).length > 0}
+				<Searchbar
+					inputElementId="post-page-searchbar"
+					width="25rem"
+					queryInputHandler={onPostSearch}
+					placeholder="Search by post/artist keyword(s) on this page"
+				/>
+			{/if}
 		</div>
 		<PostGrid />
-		{#if $postsPage.length > 0}
+		{#if $originalPostPage.length > 0}
 			<PostPaginator />
 		{/if}
 	</div>

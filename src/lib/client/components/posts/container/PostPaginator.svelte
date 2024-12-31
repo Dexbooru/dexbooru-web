@@ -20,11 +20,13 @@
 			noPostsOnPage = paginationData.posts.length === 0;
 
 			const previousPageLinkParams = {
+				...(page.url.pathname === '/search' ? { query: page.url.searchParams.get('query') } : {}),
 				pageNumber: paginationData.pageNumber - 1,
 				orderBy: paginationData.orderBy,
 				ascending: paginationData.ascending,
 			};
 			const nextPageLinkParams = {
+				...(page.url.pathname === '/search' ? { query: page.url.searchParams.get('query') } : {}),	
 				pageNumber: paginationData.pageNumber + 1,
 				orderBy: paginationData.orderBy,
 				ascending: paginationData.ascending,
@@ -35,8 +37,11 @@
 		}
 	});
 
-	const firstPageUrl = buildUrl('/', {
+	const firstPageUrl = buildUrl(page.url.pathname, {
+		...(page.url.pathname === '/search' ? { query: page.url.searchParams.get('query') } : {}),
 		pageNumber: '0',
+		orderBy: page.url.searchParams.get('orderBy') ?? null,
+		ascending: page.url.searchParams.get('ascending') ?? null,
 	});
 
 	onMount(() => {
@@ -47,7 +52,7 @@
 </script>
 
 {#if $postPaginationData}
-	<div id="pagination-container" class="flex space-x-3 justify-center {noPostsLeft && 'mt-5'}">
+	<div id="pagination-container" class="flex space-x-3 justify-center">
 		{#if noPostsOnPage && !!!['uploaded', 'liked'].find((item) => page.url.href.includes(item))}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}

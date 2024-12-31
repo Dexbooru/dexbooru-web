@@ -1,5 +1,5 @@
-import { OTP_PRIVATE_KEY } from "$env/static/private";
-import base32Encode from "base32-encode";
+import { OTP_PRIVATE_KEY } from '$env/static/private';
+import base32Encode from 'base32-encode';
 
 export const TOTP_ISSUER_NAME = 'Dexbooru';
 export const TOTP_CODE_EXPIRY_TIME_SECONDS = 30;

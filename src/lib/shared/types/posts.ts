@@ -18,11 +18,9 @@ export type THiddenPagePostData = {
 
 export type TPostPaginationData = {
 	posts: TPost[];
-	likedPosts: TPost[];
 	pageNumber: number;
 	ascending: boolean;
 	orderBy: TPostOrderByColumn;
-	postCount: number;
 };
 
 export type TPost = Post & {

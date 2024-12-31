@@ -26,3 +26,6 @@ export const MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB = 3.5;
 export const MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB = 1.75;
 
 export const MAXIMUM_IMAGES_PER_POST = 3;
+
+export const COLLECTION_CAROUSEL_IMAGE_CLASS_NAME = 'collection-carousel-image';
+export const POST_CAROUSEL_IMAGE_CLASS_NAME = 'post-carousel-image';

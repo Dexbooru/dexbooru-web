@@ -132,6 +132,15 @@ export const handleSendFriendRequest = async (event: RequestEvent) => {
 			const receiverUsername = data.pathParams.username;
 
 			try {
+				const authenticatedUsername = event.locals.user.username;
+				if (authenticatedUsername === receiverUsername) {
+					return createErrorResponse(
+						'api-route',
+						409,
+						'You cannot send a friend request to yourself',
+					);
+				}
+				
 				const receiverUser = await findUserByName(receiverUsername, { username: true, id: true });
 				if (!receiverUser) {
 					return createErrorResponse(

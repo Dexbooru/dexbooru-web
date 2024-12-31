@@ -90,6 +90,9 @@ const tryDateConvert = (key: string, target: unknown): Date | unknown => {
 
 export const convertDataStructureToIncludeDatetimes = (target: object) => {
 	if (target === null) return target;
+	if (typeof target === 'string') {
+		target = JSON.parse(target);
+	}
 
 	const convertedObject = Array.isArray(target)
 		? ([] as unknown[])

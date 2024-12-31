@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/collections';
-	import { getCollectionPaginationData } from '$lib/client/helpers/context';
+	import type { TCollectionOrderByColumn } from '$lib/shared/types/collections';
 	import {
 		Sidebar,
 		SidebarDropdownItem,
@@ -16,11 +16,10 @@
 	};
 	let { uniqueAuthors }: Props = $props();
 
-	const collectionPaginationData = getCollectionPaginationData();
 	const collectionBaseUrl = page.url.origin + page.url.pathname;
 </script>
 
-{#if $collectionPaginationData}
+{#if page.data.collections}
 	<Sidebar>
 		<SidebarWrapper>
 			<SidebarGroup>
@@ -36,8 +35,8 @@
 								href={getHref(collectionBaseUrl)}
 								{label}
 								active={isActive(
-									$collectionPaginationData.orderBy,
-									$collectionPaginationData.ascending,
+									page.data.orderBy as TCollectionOrderByColumn,
+									page.data.ascending,
 								)}
 							/>
 						{/each}

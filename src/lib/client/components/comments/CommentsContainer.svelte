@@ -23,9 +23,9 @@
 	const commentTree = getCommentTree();
 	const rootLevelCommentLoader = createPostCommentsPaginator(postId, null, commentTree);
 
-	const handleLoadMoreCommentsClick = async (isInitialLoad: boolean = false) => {
+	const handleLoadMoreCommentsClick = async () => {
 		commentsLoading = true;
-		const paginationData = await rootLevelCommentLoader(isInitialLoad);
+		const paginationData = await rootLevelCommentLoader();
 		commentsLoading = false;
 
 		const { pageNumber, noMoreComments: noMoreCommentsResult } = paginationData;
@@ -41,7 +41,7 @@
 	});
 
 	onMount(() => {
-		postCommentCount > 0 && handleLoadMoreCommentsClick(true);
+		if (postCommentCount > 0) handleLoadMoreCommentsClick();
 
 		return () => {
 			commentTree.set(new CommentTree());
@@ -57,7 +57,7 @@
 		{/each}
 
 		{#if !noMoreComments && topLevelComments.length % MAXIMUM_COMMENTS_PER_PAGE === 0}
-			<Button on:click={() => handleLoadMoreCommentsClick(false)} color="blue" class="mt-2"
+			<Button on:click={() => handleLoadMoreCommentsClick()} color="blue" class="mt-2"
 				>{loadMoreButtonText}</Button
 			>
 		{/if}

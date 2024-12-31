@@ -29,7 +29,7 @@ export const createPostCommentsPaginator = (
 	let pageNumber = 0;
 	let noMoreComments = false;
 
-	return async (isInitialLoad: boolean = false) => {
+	return async () => {
 		if (noMoreComments) {
 			return { pageNumber, noMoreComments };
 		}
@@ -48,7 +48,7 @@ export const createPostCommentsPaginator = (
 				return currentCommentTree;
 			});
 
-			if (comments.length === 0 && !isInitialLoad) {
+			if (comments.length === 0) {
 				toast.push('There are no more comments left to load', FAILURE_TOAST_OPTIONS);
 				noMoreComments = true;
 			} else {

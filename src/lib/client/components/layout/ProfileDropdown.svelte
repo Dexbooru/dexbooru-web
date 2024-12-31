@@ -42,7 +42,7 @@
 	<Avatar
 		src={$user?.profilePictureUrl}
 		alt="profile picture of {$user?.username}"
-		class="mr-2 booru-avatar-navbar hide-alt-text"
+		class="mr-2 hide-alt-text"
 	/>
 	{$user?.username}
 	<AngleDownSolid size="sm" class="!mr-2" />

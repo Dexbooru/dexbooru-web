@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { generateUserTotp } from '$lib/client/api/auth';
-	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import type { TGeneratedOtpData } from '$lib/client/types/auth';
 	import { TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
@@ -49,7 +49,28 @@
 		<span class="text-sm">(2-factor authentication)</span>
 	</h3>
 	<form
-		use:enhance
+		use:enhance={async ({ cancel }) => {
+			if (totpUri.length === 0) {
+				handleTotpGeneration();
+				cancel();
+			}
+
+			totpLoading = true;
+			return async ({ result }) => {
+				totpLoading = false;
+				if (result.type === 'success') {
+					toast.push('The 2FA was enabled successfully on your account!', SUCCESS_TOAST_OPTIONS);
+					userPreferences.update((currentPreferences) => {
+						return { ...currentPreferences, twoFactorAuthenticationEnabled: true };
+					});
+				} else {
+					toast.push(
+						'An error occured while trying to enable 2FA on your account',
+						FAILURE_TOAST_OPTIONS,
+					);
+				}
+			};
+		}}
 		method="POST"
 		action="?/twoFactorAuthentication"
 		class="flex flex-col space-y-4"

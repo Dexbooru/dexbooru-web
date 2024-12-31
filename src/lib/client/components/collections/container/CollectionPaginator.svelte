@@ -35,7 +35,7 @@
 		}
 	});
 
-	const firstPageUrl = buildUrl('/', {
+	const firstPageUrl = buildUrl(page.url.pathname, {
 		pageNumber: '0',
 	});
 

@@ -63,7 +63,7 @@
 </script>
 
 <DropdownItem class="flex space-x-4 rtl:space-x-reverse cursor-auto hover:bg-inherit">
-	<Avatar class="mt-6 booru-avatar" src={friendRequest.senderUser.profilePictureUrl} rounded />
+	<Avatar class="mt-6" src={friendRequest.senderUser.profilePictureUrl} rounded />
 	<div class="ps-3 w-full">
 		<div class="text-gray-500 text-sm mb-1.5 dark:text-gray-400">
 			New friend request from <a

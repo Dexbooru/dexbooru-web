@@ -38,7 +38,7 @@
 				<TableBodyCell>{formatDate(new Date(post.createdAt))}</TableBodyCell>
 				<TableBodyCell class="text-center">
 					<Avatar
-						class="ml-auto mr-auto booru-avatar-search-table-posts"
+						class="ml-auto mr-auto"
 						src={post.uploaderProfilePictureUrl}
 						alt="profile picture of {post.uploaderName}"
 					/>

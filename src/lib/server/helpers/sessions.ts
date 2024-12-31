@@ -1,4 +1,5 @@
 import { JWT_PRIVATE_KEY } from '$env/static/private';
+import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
 import type { TUser } from '$lib/shared/types/users';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import {
@@ -6,6 +7,7 @@ import {
 	SESSION_JWT_EXPIRES_IN_SUPER_AGE,
 } from '../constants/cookies';
 import { PUBLIC_USER_SELECTORS } from '../constants/users';
+import redis from '../db/redis';
 import type { TSetHeadersFunction } from '../types/sessions';
 
 const generateUserClaims = (userRecord: Partial<TUser>): Partial<TUser> => {
@@ -55,6 +57,25 @@ export function getUserClaimsFromEncodedJWTToken(encodedJwtToken: string): TUser
 		return null;
 	}
 }
+
+export const getRemoteResponseFromCache = async <T>(key: string): Promise<T | null> => {
+	const cachedResponse = await redis.get(key);
+	if (cachedResponse) {
+		const parsedData = JSON.parse(cachedResponse);
+		return convertDataStructureToIncludeDatetimes(parsedData) as T;
+	}
+	return null;
+};
+
+export const cacheResponseRemotely = async (
+	key: string,
+	value: unknown,
+	expiryTimeSeconds: number,
+) => {
+	await redis.set(key, JSON.stringify(value), {
+		EX: expiryTimeSeconds,
+	});
+};
 
 export function cacheResponse(setHeaders: TSetHeadersFunction, cacheTimeInSeconds: number): void {
 	setHeaders({

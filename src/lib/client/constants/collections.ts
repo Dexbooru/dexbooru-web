@@ -1,6 +1,8 @@
 import type { TCollectionOrderByColumn } from '$lib/shared/types/collections';
 import type { TOrderByTranslationMap } from '../types/collections';
 
+export const COLLECTIONS_ANIMATION_DURATION_MS = 500;
+
 export const INDIVIDUAL_COLLECTION_PATH_REGEX = new RegExp(
 	'^/collections/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
 );
