@@ -1,3 +1,4 @@
+import { URL_REGEX } from '$lib/shared/constants/urls';
 import { UUID_REGEX } from '$lib/shared/constants/search';
 import type { TPostOrderByColumn } from '$lib/shared/types/posts';
 import type { Prisma } from '@prisma/client';
@@ -14,6 +15,7 @@ const VALID_PREFIXES: readonly TPrefix[] = [
 	'likes',
 	'views',
 	'moderationStatus',
+	'sourceLink',
 ];
 const NEGATION_TABLE: Record<TOperation, TOperation> = {
 	'!=': '=',
@@ -36,6 +38,7 @@ type TOperation = '!=' | '=' | '>' | '<' | '>=' | '<=';
 type TPrefix =
 	| 'uploader'
 	| 'moderationStatus'
+	| 'sourceLink'
 	| 'likes'
 	| 'views'
 	| 'createdAt'
@@ -90,21 +93,26 @@ class QueryBuilder {
 			case 'createdAt':
 			case 'updatedAt':
 				parsedDate = new Date(value);
-				if (isNaN(parsedDate.getTime())) throw new Error('Value provided was not a date format');
+				if (isNaN(parsedDate.getTime()))
+					throw new Error(`Value provided for ${prefix} was not a date format`);
 				return parsedDate;
+
+			case 'sourceLink':
+				if (!URL_REGEX.test(value)) throw new Error('Invalid URL format for source link');
+				return value;
 
 			case 'moderationStatus':
 			case 'uploader':
 				return value;
 
 			case 'id':
-				if (!UUID_REGEX.test(value)) throw new Error('Invalid UUIDv4 format');
+				if (!UUID_REGEX.test(value)) throw new Error('Invalid UUIDv4 format for post id');
 				return value;
 
 			case 'views':
 			case 'likes':
 				parsedNum = parseInt(value);
-				if (isNaN(parsedNum)) throw new Error('Value provided was not a number');
+				if (isNaN(parsedNum)) throw new Error(`Value provided for ${prefix} was not a number`);
 				return parsedNum;
 		}
 	}

@@ -36,7 +36,7 @@ import {
 	updatePost,
 } from '../db/actions/post';
 import { findPostsByTagName } from '../db/actions/tag';
-import { findLikedPostsByAuthorId, findLikedPostsFromSubset } from '../db/actions/user';
+import { findLikedPostsByAuthorId } from '../db/actions/user';
 import {
 	createErrorResponse,
 	createSuccessResponse,
@@ -107,11 +107,6 @@ const GetPostsByAuthorSchema = {
 	urlSearchParams: postPaginationSchema,
 } satisfies TRequestSchema;
 
-const GetPostSelectors = {
-	...PUBLIC_POST_SELECTORS,
-	imageWidths: true,
-	imageHeights: true,
-};
 const GetPostSchema = {
 	urlSearchParams: z.object({
 		uploadedSuccessfully: z.string().optional(),
@@ -160,6 +155,7 @@ const GetPostsWithArtistNameSchema = {
 
 const CreatePostSchema = {
 	form: z.object({
+		sourceLink: z.string().url(),
 		description: descriptionSchema,
 		postPictures: z
 			.union([z.instanceof(globalThis.File), z.array(z.instanceof(globalThis.File))])
@@ -355,6 +351,10 @@ export const handleGetPostsByAuthor = async (
 		async (data) => {
 			const { pageNumber, orderBy, ascending } = data.urlSearchParams;
 			const { username } = data.pathParams;
+			const selectors =
+				handlerType === 'page-server-load'
+					? PAGE_SERVER_LOAD_POST_SELECTORS
+					: PUBLIC_POST_SELECTORS;
 
 			try {
 				const posts =
@@ -364,16 +364,11 @@ export const handleGetPostsByAuthor = async (
 						username,
 						orderBy as TPostOrderByColumn,
 						ascending,
-						PUBLIC_POST_SELECTORS,
+						selectors,
 					)) ?? [];
 
-				const likedPosts =
-					event.locals.user.id !== NULLABLE_USER.id && handlerType !== 'api-route'
-						? await findLikedPostsFromSubset(event.locals.user.id, posts)
-						: [];
 				const responseData = {
 					posts,
-					...(handlerType !== 'api-route' && { likedPosts }),
 					pageNumber,
 					ascending,
 					orderBy: orderBy as TPostOrderByColumn,
@@ -406,8 +401,9 @@ export const handleCreatePost = async (
 		handlerType,
 		CreatePostSchema,
 		async (data) => {
-			const { description, tags, artists, isNsfw, postPictures } = data.form;
+			const { description, tags, artists, isNsfw, postPictures, sourceLink } = data.form;
 			const errorData = {
+				sourceLink,
 				description,
 				tags,
 				artists,
@@ -437,6 +433,7 @@ export const handleCreatePost = async (
 				newPostImageUrls = postImageUrls;
 
 				const newPost = await createPost(
+					sourceLink,
 					description,
 					isNsfw,
 					tags,
@@ -489,8 +486,8 @@ export const handleGetPost = async (
 		try {
 			const post =
 				handlerType === 'api-route'
-					? await findPostById(postId, GetPostSelectors)
-					: await findPostByIdWithUpdatedViewCount(postId, GetPostSelectors);
+					? await findPostById(postId, PUBLIC_POST_SELECTORS)
+					: await findPostByIdWithUpdatedViewCount(postId, PUBLIC_POST_SELECTORS);
 			if (!post) {
 				const error = createErrorResponse(handlerType, 404, `Post with id ${postId} not found`);
 				if (handlerType === 'page-server-load') {

@@ -142,10 +142,11 @@ export const handleGetAdvancedPostSearchResults = async (
 					searchResponse,
 				);
 			} catch (error) {
+				const searchErrorMessage = (error as Error).message;
 				return createErrorResponse(
 					handlerType,
 					500,
-					'An unexpected error occured while fetching the search results',
+					`An unexpected error occured while fetching the search results: ${searchErrorMessage}`,
 				);
 			}
 		},

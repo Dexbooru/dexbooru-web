@@ -1,7 +1,31 @@
-import { MAX_TAGS_PER_PAGE } from '$lib/server/constants/tags';
+import { MAXIMUM_TAGS_PER_PAGE } from '$lib/server/constants/tags';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { Tag } from '@prisma/client';
 import prisma from '../prisma';
+
+export async function updateTagMetadata(tagName: string, description: string | null) {
+	const updatedTag = await prisma.tag.update({
+		where: {
+			name: tagName,
+		},
+		data: {
+			updatedAt: new Date(),
+			description,
+		},
+	});
+
+	return updatedTag;
+}
+
+export async function getTagMetadata(tagName: string): Promise<Tag | null> {
+	const tag = await prisma.tag.findUnique({
+		where: {
+			name: tagName,
+		},
+	});
+
+	return tag;
+}
 
 export async function decrementTagPostCount(tags: string[]) {
 	await prisma.tag.updateMany({
@@ -73,8 +97,8 @@ export async function getTagsWithStartingLetter(
 			},
 		},
 		orderBy: { name: 'asc' },
-		skip: pageNumber * MAX_TAGS_PER_PAGE,
-		take: MAX_TAGS_PER_PAGE,
+		skip: pageNumber * MAXIMUM_TAGS_PER_PAGE,
+		take: MAXIMUM_TAGS_PER_PAGE,
 	});
 
 	return tags;

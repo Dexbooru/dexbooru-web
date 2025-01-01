@@ -4,9 +4,12 @@
 	import PostGrid from '$lib/client/components/posts/container/PostGrid.svelte';
 	import PostPageSidebar from '$lib/client/components/posts/container/PostPageSidebar.svelte';
 	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
+	import { LABEL_METADATA_MODAL_NAME } from '$lib/client/constants/layout';
 	import { CLEAR_INPUT_INTERVAL_MS } from '$lib/client/constants/search';
-	import { getOriginalPostsPage, getPostsPage } from '$lib/client/helpers/context';
+	import { getActiveModal, getOriginalPostsPage, getPostsPage } from '$lib/client/helpers/context';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
+	import { Button } from 'flowbite-svelte';
+	import { PalleteSolid, TagSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import Searchbar from '../../reusable/Searchbar.svelte';
@@ -22,6 +25,13 @@
 
 	const originalPostPage = getOriginalPostsPage();
 	const postsPage = getPostsPage();
+	const activeModal = getActiveModal();
+
+	const getPageLabelType = (): 'tag' | 'artist' | null => {
+		if (page.url.pathname.includes('/posts/tag')) return 'tag';
+		if (page.url.pathname.includes('/posts/artist')) return 'artist';
+		return null;
+	};
 
 	const onPostSearch = (query: string) => {
 		const cleanedQuery = query.toLocaleLowerCase().trim();
@@ -68,17 +78,37 @@
 	<div id="post-container-body" class="space-y-4 mb-5">
 		<div id="post-container-title" class="block space-y-3">
 			<h1 class="text-4xl dark:text-white">{postContainerTitle}</h1>
-			{#if (page.data.posts ?? []).length > 0}
-				<Searchbar
-					inputElementId="post-page-searchbar"
-					width="25rem"
-					queryInputHandler={onPostSearch}
-					placeholder="Search by post/artist keyword(s) on this page"
-				/>
-			{/if}
+			<div class="flex flex-row space-x-2">
+				{#if (page.data.posts ?? []).length > 0}
+					<Searchbar
+						inputElementId="post-page-searchbar"
+						width="25rem"
+						queryInputHandler={onPostSearch}
+						placeholder="Search by tag/artist keyword(s) on this page"
+					/>
+				{/if}
+				{#if ['/posts/tag', '/posts/artist'].some( (path) => page.url.pathname.includes(path), ) && getPageLabelType()}
+					<Button
+						on:click={() =>
+							activeModal.set({
+								focusedModalName: LABEL_METADATA_MODAL_NAME,
+								modalData: { labelType: getPageLabelType() },
+								isOpen: true,
+							})}
+						color="blue"
+					>
+						{#if getPageLabelType() === 'tag'}
+							<TagSolid class="mr-2" />
+						{:else}
+							<PalleteSolid class="mr-2" />
+						{/if}
+						View metadata for this {getPageLabelType()}</Button
+					>
+				{/if}
+			</div>
 		</div>
 		<PostGrid />
-		{#if $originalPostPage.length > 0}
+		{#if $postsPage.length > 0 && $originalPostPage.length > 0}
 			<PostPaginator />
 		{/if}
 	</div>

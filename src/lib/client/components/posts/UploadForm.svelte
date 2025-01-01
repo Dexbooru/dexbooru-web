@@ -10,6 +10,7 @@
 	import {
 		MAXIMUM_ARTISTS_PER_POST,
 		MAXIMUM_POST_DESCRIPTION_LENGTH,
+		MAXIMUM_SOURCE_LINK_LENGTH,
 		MAXIMUM_TAGS_PER_POST,
 	} from '$lib/shared/constants/posts';
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
@@ -43,6 +44,7 @@
 	let tag: string = $state('');
 	let artist: string = $state('');
 	let description: string = $state(form?.description || '');
+	let sourceLink: string = $state(form?.sourceLink || '');
 	let postImages: {
 		imageBase64: string;
 		file: File;
@@ -52,6 +54,7 @@
 		const isValidForm =
 			!loadingPostPictures &&
 			description.length > 0 &&
+			sourceLink.length > 0 &&
 			isLabelAppropriate(description, 'postDescription') &&
 			tags.length > 0 &&
 			artists.length > 0 &&
@@ -264,6 +267,16 @@
 				/>
 			</div>
 			<Input type="hidden" name="artists" value={artists.join(',')} />
+
+			<Label for="sourceLink">Specify the source url of the post:</Label>
+			<Input
+				placeholder="Enter the source url"
+				type="url"
+				required
+				name="sourceLink"
+				maxlength={MAXIMUM_SOURCE_LINK_LENGTH}
+				bind:value={sourceLink}
+			/>
 
 			<PostPictureUpload bind:loadingPictures={loadingPostPictures} bind:images={postImages} />
 

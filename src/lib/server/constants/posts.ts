@@ -4,9 +4,9 @@ export const VALID_ORDERBY_COLUMNS: TPostOrderByColumn[] = ['createdAt', 'likes'
 
 export const POST_LIKE_ACTIONS: TPostLikeAction[] = ['like', 'dislike'];
 
-
 export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	id: true,
+	sourceLink: true,
 	description: true,
 	isNsfw: true,
 	createdAt: true,
@@ -37,6 +37,7 @@ export const PUBLIC_POST_SELECTORS: TPostSelector = {
 
 export const PAGE_SERVER_LOAD_POST_SELECTORS: TPostSelector = {
 	...PUBLIC_POST_SELECTORS,
+	sourceLink: false,
 	description: false,
 	likes: false,
 	views: false,
@@ -44,6 +45,8 @@ export const PAGE_SERVER_LOAD_POST_SELECTORS: TPostSelector = {
 	createdAt: false,
 	author: false,
 	authorId: false,
+	imageHeights: false,
+	imageWidths: false,
 	tags: {
 		select: {
 			name: true,
@@ -54,4 +57,4 @@ export const PAGE_SERVER_LOAD_POST_SELECTORS: TPostSelector = {
 			name: true,
 		},
 	},
-}
+};

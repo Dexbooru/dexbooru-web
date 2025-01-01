@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createPostCommentsPaginator } from '$lib/client/api/comments';
-	import { getCommentTree } from '$lib/client/helpers/context';
+	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
 	import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
 	import CommentTree from '$lib/shared/helpers/comments';
 	import type { TComment } from '$lib/shared/types/comments';
@@ -21,6 +21,7 @@
 	let loadMoreButtonText = $state('Load comments');
 
 	const commentTree = getCommentTree();
+	const user = getAuthenticatedUser();
 	const rootLevelCommentLoader = createPostCommentsPaginator(postId, null, commentTree);
 
 	const handleLoadMoreCommentsClick = async () => {
@@ -65,7 +66,10 @@
 {:else if postCommentCount === 0}
 	<div class="flex justify-left p-2">
 		<p class="text-gray-500 dark:text-gray-400 text-lg italic">
-			No comments found. Be the first to comment!
+			No comments found.
+			{#if $user}
+				Be the first to comment!
+			{/if}
 		</p>
 	</div>
 {/if}

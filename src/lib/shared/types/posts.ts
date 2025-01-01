@@ -25,6 +25,7 @@ export type TPostPaginationData = {
 
 export type TPost = Post & {
 	id: string;
+	sourceLink: string;
 	isNsfw: boolean;
 	description: string;
 	createdAt: Date;

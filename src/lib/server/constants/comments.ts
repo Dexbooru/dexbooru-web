@@ -1,6 +1,6 @@
 import type { TCommentSelector } from '../types/comments';
 
-export const MAX_COMMENTS_PER_PAGE = 35;
+export const MAXIMUM_COMMENTS_PER_PAGE = 35;
 export const PUBLIC_COMMENT_SELECTORS: TCommentSelector = {
 	id: true,
 	postId: true,

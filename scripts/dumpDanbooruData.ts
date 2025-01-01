@@ -43,6 +43,7 @@ const getRandomUser = (users: User[]) => {
 const generatePostCreationPromise = (user: User, post: DanbooruPost, artists: string[], description: string, prismaClient: PrismaClient) => {
     return prismaClient.post.create({
         data: {
+            sourceLink: 'https://danbooru.donmai.us/posts/' + post.imageUrl.split('/')[4],
             authorId: user.id,
             description,
             isNsfw: post.isNsfw,

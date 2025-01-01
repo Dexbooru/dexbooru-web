@@ -1,7 +1,38 @@
-import { MAX_ARTISTS_PER_PAGE } from '$lib/server/constants/artists';
+import { MAXIMUM_ARTISTS_PER_PAGE } from '$lib/server/constants/artists';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { Artist } from '@prisma/client';
 import prisma from '../prisma';
+
+export async function updateArtistMetadata(
+	artistName: string,
+	description: string | null,
+	socialMediaLinks: string[],
+) {
+	const updatedArtist = await prisma.artist.update({
+		where: {
+			name: artistName,
+		},
+		data: {
+			updatedAt: new Date(),
+			description,
+			socialMediaLinks: {
+				set: socialMediaLinks,
+			},
+		},
+	});
+
+	return updatedArtist;
+}
+
+export async function getArtistMetadata(artistName: string): Promise<Artist | null> {
+	const artist = await prisma.artist.findUnique({
+		where: {
+			name: artistName,
+		},
+	});
+
+	return artist;
+}
 
 export async function decrementArtistPostCount(artists: string[]) {
 	await prisma.artist.updateMany({
@@ -78,8 +109,8 @@ export async function getArtistsWithStartingLetter(
 			],
 		},
 		orderBy: { name: 'asc' },
-		skip: pageNumber * MAX_ARTISTS_PER_PAGE,
-		take: MAX_ARTISTS_PER_PAGE,
+		skip: pageNumber * MAXIMUM_ARTISTS_PER_PAGE,
+		take: MAXIMUM_ARTISTS_PER_PAGE,
 	});
 
 	return artists;

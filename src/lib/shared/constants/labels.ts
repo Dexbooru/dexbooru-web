@@ -17,3 +17,8 @@ export const BLACKLISTED_LABELS = ['loli', 'lolicon', 'shota', 'shotcon', 'nigga
 export const LABEL_REGEX = /^[a-z0-9!@#$%^&*()_+={}\\[\]:;"'<>,.?\\/\\|`~]*$/;
 
 export const MAXIMUM_LABELS_ON_POST_CARD = 15;
+
+export const MAXIMUM_TAG_DESCRIPTION_LENGTH = 200;
+export const MAXIMUM_ARTIST_DESCRIPTION_LENGTH = 200;
+export const MAXIMUM_ARTIST_SOCIAL_MEDIA_LENGTH = 450;
+export const MAXIMUM_ARTIST_SOCIAL_MEDIAS_LENGTH = 5;

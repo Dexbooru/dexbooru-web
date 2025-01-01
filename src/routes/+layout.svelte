@@ -10,6 +10,7 @@
 	import EditPostModal from '$lib/client/components/posts/card/EditPostModal.svelte';
 	import PostCardReportModal from '$lib/client/components/posts/card/PostCardReportModal.svelte';
 	import HiddenPostModal from '$lib/client/components/posts/container/HiddenPostModal.svelte';
+	import LabelMetadataModal from '$lib/client/components/labels/LabelMetadataModal.svelte';
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
 	import { getActiveModal, initLayoutContexts } from '$lib/client/helpers/context';
@@ -62,3 +63,4 @@
 <CollectionsPostUpdateModal />
 <EditCollectionModal />
 <DeleteCollectionConfirmationModal />
+<LabelMetadataModal />

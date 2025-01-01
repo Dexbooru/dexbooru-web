@@ -60,6 +60,7 @@ model Post {
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @default(now())
   description      String               @db.VarChar(500)
+  sourceLink       String               @db.VarChar(450)
   isNsfw           Boolean              @default(false)
   likes            Int                  @default(0)
   views            Int                  @default(0)
@@ -116,11 +117,13 @@ model Comment {
 }
 
 model Tag {
-  id        String   @id @default(uuid())
-  name      String   @unique @db.VarChar(75)
-  createdAt DateTime @default(now())
-  postCount Int      @default(0)
-  posts     Post[]
+  id          String   @id @default(uuid())
+  name        String   @unique @db.VarChar(75)
+  description String?  @db.VarChar(200)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  postCount   Int      @default(0)
+  posts       Post[]
 
   @@index([name])
 }

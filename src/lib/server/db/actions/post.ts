@@ -173,6 +173,7 @@ export async function likePostById(
 }
 
 export async function createPost(
+	sourceLink: string,
 	description: string,
 	isNsfw: boolean,
 	tags: string[],
@@ -184,6 +185,7 @@ export async function createPost(
 ): Promise<TPost> {
 	const newPost = await prisma.post.create({
 		data: {
+			sourceLink,
 			description,
 			authorId,
 			imageUrls,

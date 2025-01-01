@@ -13,7 +13,7 @@
 		getUserCollections,
 	} from '$lib/client/helpers/context';
 	import {
-		COLLECTION_TITLE_UPDATE_MODAL_MAX_LENGTH,
+		COLLECTION_TITLE_UPDATE_MODAL_MAXIMUM_LENGTH,
 		MAXIMUM_COLLECTIONS_PER_PAGE,
 		MAXIMUM_POSTS_PER_COLLECTION,
 	} from '$lib/shared/constants/collections';
@@ -173,9 +173,10 @@
 						>
 							<div class="flex space-x-3 mb-2">
 								<h4 class="text-lg font-semibold text-gray-900 dark:text-white">
-									{collection.title.length <= COLLECTION_TITLE_UPDATE_MODAL_MAX_LENGTH
+									{collection.title.length <= COLLECTION_TITLE_UPDATE_MODAL_MAXIMUM_LENGTH
 										? collection.title
-										: collection.title.slice(0, COLLECTION_TITLE_UPDATE_MODAL_MAX_LENGTH) + '...'}
+										: collection.title.slice(0, COLLECTION_TITLE_UPDATE_MODAL_MAXIMUM_LENGTH) +
+											'...'}
 								</h4>
 								<Checkbox
 									class={collection.posts.length === MAXIMUM_POSTS_PER_COLLECTION

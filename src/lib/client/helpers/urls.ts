@@ -1,6 +1,15 @@
 import type { TUrlSearchParams } from '$lib/shared/types/urls';
 import { APP_BASE_URL } from '../constants/urls';
 
+export const getFaviconFromUrl = (url: string) => {
+	try {
+		const domain = new URL(url).origin;
+		return `${domain}/favicon.ico`;
+	} catch (e) {
+		return '/default-icon.ico';
+	}
+};
+
 export function buildUrl(relativeUrlPath: string, params: TUrlSearchParams = {}): URL {
 	const resultantUrl = new URL(relativeUrlPath, APP_BASE_URL);
 

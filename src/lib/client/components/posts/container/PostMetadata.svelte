@@ -48,11 +48,15 @@
 </p>
 
 <p class="text-lg dark:text-white whitespace-pre-wrap">
-	Description: <br /><span class=" dark:text-gray-400">{post.description}</span>
+	Source link: <a target="_blank" class="underline" href={post.sourceLink}>{post.sourceLink}</a>
+</p>
+
+<p class="text-lg dark:text-white whitespace-pre-wrap">
+	Description: <br /><span class="dark:text-gray-400">{post.description}</span>
 </p>
 
 <p class="text-lg dark:text-white">
-	Is Nsfw?: <span class=" dark:text-gray-400">{post.isNsfw ? 'Yes' : 'No'}</span>
+	Is Nsfw?: <span class="dark:text-gray-400">{post.isNsfw ? 'Yes' : 'No'}</span>
 </p>
 
 <p class="text-lg dark:text-white">

@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import PostCard from '$lib/client/components/posts/card/PostCard.svelte';
-	import { POSTS_GRID_ANIMATION_DURATION_MS } from '$lib/client/constants/posts';
 	import {
 		getBlacklistedPostPage,
 		getNsfwPostPage,
 		getPostPaginationData,
 		getPostsPage,
 	} from '$lib/client/helpers/context';
-	import { flip } from 'svelte/animate';
 	import PostPaginator from './PostPaginator.svelte';
 
 	interface Props {
@@ -32,9 +30,7 @@
 			'md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'} gap-4 auto-rows-min"
 	>
 		{#each !$postPaginationData ? (page.data.posts ?? []) : useHiddenPosts ? $blacklistedPostPage : useNsfwPosts ? $nsfwPostPage : $postPage as post (post.id)}
-			<div animate:flip={{ duration: POSTS_GRID_ANIMATION_DURATION_MS }}>
-				<PostCard {post} />
-			</div>
+			<PostCard {post} />
 		{/each}
 	</div>
 {:else}

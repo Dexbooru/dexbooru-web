@@ -59,6 +59,7 @@ async function main() {
 		return client.post.create({
 			data: {
 				...mockPost,
+				sourceLink: 'https://example.com',
 				artists: {
 					connectOrCreate: mockPost.artists.map((artist) => {
 						return {
