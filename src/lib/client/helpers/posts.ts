@@ -65,22 +65,22 @@ export const updatePostStores = (updatePostPaginationData: TPostPaginationData) 
 			blacklistedArtists.includes(artist.name),
 		);
 
-		let canDisplayPost = false;
+		const canDisplayPost: boolean[] = [];
 		if (!containsBlacklistedArtist && !containsBlacklistedTag) {
-			canDisplayPost = true;
+			canDisplayPost.push(true);
 		} else {
 			blacklistedPosts.push(post);
-			canDisplayPost = false;
+			canDisplayPost.push(false);
 		}
 
 		if (browseInSafeMode && post.isNsfw) {
 			nsfwPosts.push(post);
-			canDisplayPost = false;
+			canDisplayPost.push(false);
 		} else {
-			canDisplayPost = true;
+			canDisplayPost.push(true);
 		}
 
-		if (canDisplayPost) {
+		if (canDisplayPost.every((canDisplay) => canDisplay)) {
 			displayPosts.push(post);
 		}
 	}

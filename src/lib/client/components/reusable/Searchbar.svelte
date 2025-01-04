@@ -51,7 +51,7 @@
 	};
 </script>
 
-<div class="hidden relative md:block {!isGlobal && 'mr-4'}" style="width: {width}">
+<div class="relative {!isGlobal && 'mr-4'}" style="width: {width}">
 	<div class="flex absolute inset-y-0 start-0 items-center ps-3 pointer-events-none">
 		<SearchOutline class="w-4 h-4" />
 	</div>

@@ -1,4 +1,3 @@
-import type { Artist } from '@prisma/client';
 import type { RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { pageNumberSchema } from '../constants/reusableSchemas';
@@ -31,7 +30,7 @@ export const handleGetArtists = async (event: RequestEvent) => {
 			const cacheKey = getCacheKey(pageNumber, letter);
 
 			const artists =
-				(await getRemoteResponseFromCache<Artist[]>(cacheKey)) ??
+				(await getRemoteResponseFromCache<{ name: string }[]>(cacheKey)) ??
 				(await getArtistsWithStartingLetter(letter, pageNumber));
 
 			cacheResponseRemotely(cacheKey, artists, ARTISTS_PAGINATION_CACHE_TIME_SECONDS);

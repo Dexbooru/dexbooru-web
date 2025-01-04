@@ -21,10 +21,10 @@
 	</h1>
 	<form action="/search" method="GET" class="w-full flex justify-center">
 		<Searchbar
+			width="50%"
 			required
 			name="query"
 			autofocus
-			width="50%"
 			inputElementId="advanced-searchbar"
 			placeholder="example: tag1 -tag2 artist1 -artist2 uploader:bobby views:>1000 likes:<100"
 		/>

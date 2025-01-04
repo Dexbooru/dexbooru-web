@@ -86,10 +86,7 @@ export async function findPostsByTagName(
 	return data.posts as TPost[];
 }
 
-export async function getTagsWithStartingLetter(
-	letter: string,
-	pageNumber: number,
-): Promise<Tag[]> {
+export async function getTagsWithStartingLetter(letter: string, pageNumber: number) {
 	const tags = await prisma.tag.findMany({
 		where: {
 			name: {
@@ -99,6 +96,9 @@ export async function getTagsWithStartingLetter(
 		orderBy: { name: 'asc' },
 		skip: pageNumber * MAXIMUM_TAGS_PER_PAGE,
 		take: MAXIMUM_TAGS_PER_PAGE,
+		select: {
+			name: true,
+		},
 	});
 
 	return tags;

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getGlobalQuery } from '$lib/client/helpers/context';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import {
@@ -10,12 +11,15 @@
 		TableHead,
 		TableHeadCell,
 	} from 'flowbite-svelte';
+	import HighlightedText from '../reusable/HighlightedText.svelte';
 
 	interface Props {
 		users: TAppSearchResult['users'];
 	}
 
 	let { users }: Props = $props();
+
+	const globalQuery = getGlobalQuery();
 </script>
 
 <Table hoverable>
@@ -28,9 +32,11 @@
 		</TableHeadCell>
 	</TableHead>
 	<TableBody tableBodyClass="divide-y">
-		{#each users || [] as user}
+		{#each users ?? [] as user (user.id)}
 			<TableBodyRow>
-				<TableBodyCell>{user.id}</TableBodyCell>
+				<TableBodyCell>
+					<HighlightedText query={$globalQuery} fullText={user.id} />
+				</TableBodyCell>
 				<TableBodyCell class="text-center">
 					<Avatar
 						class="ml-auto mr-auto"
@@ -40,8 +46,9 @@
 					<a
 						href="/profile/{user.username}"
 						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-						>{user.username}</a
 					>
+						<HighlightedText query={$globalQuery} fullText={user.username} />
+					</a>
 				</TableBodyCell>
 				<TableBodyCell>{formatDate(new Date(user.createdAt))}</TableBodyCell>
 				<TableBodyCell>

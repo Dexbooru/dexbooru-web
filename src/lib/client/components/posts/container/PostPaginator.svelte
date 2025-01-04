@@ -26,7 +26,7 @@
 				ascending: paginationData.ascending,
 			};
 			const nextPageLinkParams = {
-				...(page.url.pathname === '/search' ? { query: page.url.searchParams.get('query') } : {}),	
+				...(page.url.pathname === '/search' ? { query: page.url.searchParams.get('query') } : {}),
 				pageNumber: paginationData.pageNumber + 1,
 				orderBy: paginationData.orderBy,
 				ascending: paginationData.ascending,
@@ -53,7 +53,7 @@
 
 {#if $postPaginationData}
 	<div id="pagination-container" class="flex space-x-3 justify-center">
-		{#if noPostsOnPage && !!!['uploaded', 'liked'].find((item) => page.url.href.includes(item))}
+		{#if noPostsOnPage && !!!['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $postPaginationData.pageNumber > 0}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}
 			{#if ($postPaginationData.pageNumber - 1 >= 0 || noPostsLeft) && $postPaginationData.pageNumber !== 0}

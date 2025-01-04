@@ -3,9 +3,10 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"dev": "dotenv -e .env -- vite dev",
+		"dev": "dotenv -e .env -o -- vite dev",
 		"build": "prisma generate && vite build",
-		"preview": "dotenv -e .env -- vite preview",
+		"preview": "dotenv -e .env -o -- vite preview",
+		"run-build": "dotenv -e .env -o -- node build/index.js",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "prisma generate",
 		"dbseed:dev": "dotenv -e .env -- prisma db push --force-reset && prisma db seed",

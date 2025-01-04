@@ -108,6 +108,7 @@ export const updateLabelMetadata = async (event: RequestEvent, labelType: 'tag' 
 				);
 			}
 		},
+		true,
 	);
 };
 

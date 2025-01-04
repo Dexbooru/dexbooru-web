@@ -2,14 +2,14 @@
 	import { getQueryParts } from '$lib/client/helpers/search';
 	import { normalizeQuery } from '$lib/shared/helpers/search';
 
-	interface Props {
+	type Props = {
 		query: string;
 		fullText: string;
-	}
+	};
 
 	let { query, fullText }: Props = $props();
 
-	const fullTextParts = getQueryParts(normalizeQuery(fullText), normalizeQuery(query));
+	let fullTextParts = $derived(getQueryParts(normalizeQuery(fullText), normalizeQuery(query)));
 </script>
 
 <p>

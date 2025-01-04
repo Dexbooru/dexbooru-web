@@ -11,30 +11,33 @@ export function debounce(fn: Function, timeoutMs: number) {
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function memoize(fn: Function, isAsync: boolean = false) {
-	const cachedResults: Map<string, never> = new Map<string, never>();
+export function memoize<T extends (..._args: unknown[]) => unknown>(
+	fn: T,
+	isAsync: boolean = false,
+): T {
+	const cachedResults: Map<string, ReturnType<T>> = new Map();
 
 	if (isAsync) {
-		return async (...args: never[]) => {
+		return (async (...args: Parameters<T>): Promise<ReturnType<T>> => {
 			const stringifiedArgs = JSON.stringify(args);
 			if (cachedResults.has(stringifiedArgs)) {
-				return cachedResults.get(stringifiedArgs);
+				return cachedResults.get(stringifiedArgs)!;
 			}
 
-			const result = await fn(args);
-			cachedResults.set(stringifiedArgs, result as never);
+			const result = await (fn(...args) as Promise<ReturnType<T>>);
+			cachedResults.set(stringifiedArgs, result);
 			return result;
-		};
+		}) as T;
 	}
 
-	return (...args: never[]) => {
+	return ((...args: Parameters<T>): ReturnType<T> => {
 		const stringifiedArgs = JSON.stringify(args);
 		if (cachedResults.has(stringifiedArgs)) {
-			return cachedResults.get(stringifiedArgs);
+			return cachedResults.get(stringifiedArgs)!;
 		}
 
-		const result = fn(args);
-		cachedResults.set(stringifiedArgs, result as never);
+		const result = fn(...args);
+		cachedResults.set(stringifiedArgs, result);
 		return result;
-	};
+	}) as T;
 }

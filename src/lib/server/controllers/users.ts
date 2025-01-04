@@ -7,6 +7,12 @@ import {
 	USERNAME_REQUIREMENTS,
 } from '$lib/shared/constants/auth';
 import { MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB } from '$lib/shared/constants/images';
+import {
+	MAXIMUM_ARTIST_LENGTH,
+	MAXIMUM_BLACKLISTED_ARTISTS,
+	MAXIMUM_BLACKLISTED_TAGS,
+	MAXIMUM_TAG_LENGTH,
+} from '$lib/shared/constants/labels';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
 import { getEmailRequirements } from '$lib/shared/helpers/auth/email';
@@ -235,11 +241,23 @@ const UpdateUserPersonalPreferencesSchema = {
 		browseInSafeMode: boolStrSchema.optional(),
 		blacklistedTags: z
 			.string()
-			.transform((val) => val.toLocaleLowerCase().split('\n'))
+			.transform((val) => val.toLocaleLowerCase().trim().split('\n'))
+			.refine(
+				(val) =>
+					val.length <= MAXIMUM_BLACKLISTED_TAGS &&
+					val.every((tag) => tag.length <= MAXIMUM_TAG_LENGTH),
+				`The blacklisted tags exceed the maximum allowed length of ${MAXIMUM_TAG_LENGTH} characters or the maximum allowed amount of ${MAXIMUM_BLACKLISTED_TAGS} tags`,
+			)
 			.optional(),
 		blacklistedArtists: z
 			.string()
-			.transform((val) => val.toLocaleLowerCase().split('\n'))
+			.transform((val) => val.toLowerCase().trim().split('\n'))
+			.refine(
+				(val) =>
+					val.length <= MAXIMUM_BLACKLISTED_ARTISTS &&
+					val.every((artist) => artist.length <= MAXIMUM_ARTIST_LENGTH),
+				`The blacklisted artists exceed the maximum allowed length of ${MAXIMUM_ARTIST_LENGTH} characters or the maximum allowed amount of ${MAXIMUM_BLACKLISTED_ARTISTS} artists`,
+			)
 			.optional(),
 	}),
 } satisfies TRequestSchema;

@@ -45,6 +45,7 @@
 		<Label class="space-y-2">
 			<span>OTP Code</span>
 			<Input
+				autofocus
 				bind:value={otpCode}
 				type="text"
 				name="otpCode"

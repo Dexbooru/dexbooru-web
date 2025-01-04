@@ -134,13 +134,6 @@
 	}
 
 	@media screen and (max-width: 767px) {
-		#post-container,
-		#post-container-body {
-			display: block;
-			margin-left: auto;
-			margin-right: auto;
-		}
-
 		#post-container-sidebar {
 			display: none;
 		}

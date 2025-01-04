@@ -96,7 +96,7 @@ export async function findPostsByArtistName(
 export async function getArtistsWithStartingLetter(
 	letter: string,
 	pageNumber: number,
-): Promise<Artist[]> {
+) {
 	const artists = await prisma.artist.findMany({
 		where: {
 			OR: [
@@ -111,6 +111,9 @@ export async function getArtistsWithStartingLetter(
 		orderBy: { name: 'asc' },
 		skip: pageNumber * MAXIMUM_ARTISTS_PER_PAGE,
 		take: MAXIMUM_ARTISTS_PER_PAGE,
+		select: {
+			name: true,
+		},
 	});
 
 	return artists;

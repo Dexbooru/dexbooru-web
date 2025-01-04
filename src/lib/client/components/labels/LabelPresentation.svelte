@@ -10,6 +10,9 @@
 	};
 
 	let { metadata, labelType }: Props = $props();
+	let displayedSocialMediaLinks = $derived(
+		metadata?.socialMediaLinks.filter((link) => link.length > 0) ?? [],
+	);
 </script>
 
 {#if metadata && labelType}
@@ -39,11 +42,11 @@
 
 		{#if labelType === 'artist'}
 			<p class="font-semibold text-md mb-2">Social Media Links:</p>
-			{#if metadata.socialMediaLinks.length === 0}
+			{#if displayedSocialMediaLinks.length === 0}
 				<p class="text-sm text-gray-600 dark:text-gray-400">No social media links available.</p>
 			{:else}
 				<ul class="list-none mb-4">
-					{#each metadata.socialMediaLinks as link}
+					{#each displayedSocialMediaLinks as link}
 						<li class="flex items-center gap-4 mb-2">
 							<img src={getFaviconFromUrl(link)} alt="social-icon" class="w-4 h-4" />
 							<a

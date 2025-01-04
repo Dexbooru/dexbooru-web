@@ -95,7 +95,7 @@
 				value={hideCollectionMetadataOnPreview}
 			/>
 			<p class="text-sm text-gray-500">
-				Collection titles, descriptios, uploaders and other visible information will not be shown.
+				Collection titles, descriptions, uploaders and other visible information will not be shown.
 				The images will be shown still.
 			</p>
 		</Label>

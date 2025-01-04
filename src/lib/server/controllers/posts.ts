@@ -44,7 +44,11 @@ import {
 } from '../helpers/controllers';
 import { flattenImageBuffers, runPostImageTransformationPipelineInBatch } from '../helpers/images';
 import { getSimilarPostsBySimilaritySearch, indexPostImages } from '../helpers/mlApi';
-import { cacheResponseRemotely, getRemoteResponseFromCache } from '../helpers/sessions';
+import {
+	cacheResponseRemotely,
+	getRemoteResponseFromCache,
+	invalidateCacheRemotely,
+} from '../helpers/sessions';
 import type {
 	TControllerHandlerVariant,
 	TPostFetchCategory,
@@ -423,6 +427,7 @@ export const handleCreatePost = async (
 					imageHeights: postImageHeights,
 					imageWidths: postImageWidths,
 				} = flattenImageBuffers(postImageBufferMaps);
+
 				const postImageUrls = await uploadBatchToBucket(
 					AWS_POST_PICTURE_BUCKET_NAME,
 					'posts',
@@ -446,6 +451,8 @@ export const handleCreatePost = async (
 				newPostId = newPost.id;
 
 				indexPostImages(newPost.id, postImageUrls);
+
+				invalidateCacheRemotely(getCacheKeyWithCategory('general', 0, 'createdAt', false));
 
 				if (handlerType === 'form-action') {
 					redirect(302, `/posts/${newPost.id}?uploadedSuccessfully=true`);
@@ -482,6 +489,7 @@ export const handleGetPost = async (
 	return await validateAndHandleRequest(event, handlerType, GetPostSchema, async (data) => {
 		const postId = data.pathParams.postId;
 		const user = event.locals.user;
+		const uploadedSuccessfully = data.urlSearchParams.uploadedSuccessfully === 'true';
 
 		try {
 			const post =
@@ -498,11 +506,10 @@ export const handleGetPost = async (
 
 			const hasLikedPost =
 				user.id !== NULLABLE_USER.id ? await hasUserLikedPost(user.id, post.id) : false;
-			const uploadedSuccessfully = data.urlSearchParams.uploadedSuccessfully;
+
 			const finalData =
-				handlerType === 'api-route'
-					? post
-					: { post, uploadedSuccessfully: uploadedSuccessfully === 'true', hasLikedPost };
+				handlerType === 'api-route' ? post : { post, uploadedSuccessfully, hasLikedPost };
+
 			return createSuccessResponse(
 				handlerType,
 				`Successfully fetched post with id: ${postId}`,

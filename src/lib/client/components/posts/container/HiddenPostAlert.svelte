@@ -7,8 +7,7 @@
 		getHiddenPostsPage,
 		getNsfwPostPage,
 	} from '$lib/client/helpers/context';
-	import { Alert } from 'flowbite-svelte';
-	import { InfoCircleSolid } from 'flowbite-svelte-icons';
+	import { Button } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 
 	let titleParts: string[] = $state([]);
@@ -36,15 +35,6 @@
 	});
 
 	onMount(() => {
-		const hiddenPostAlert = document.getElementById('hidden-posts-page-alert');
-		if (hiddenPostAlert) {
-			hiddenPostAlert.addEventListener('click', () => {
-				activeModal.set({ isOpen: true, focusedModalName: HIDDEN_POSTS_MODAL_NAME });
-			});
-		}
-	});
-
-	onMount(() => {
 		return () => {
 			hiddenPostPageUnsubscribe();
 		};
@@ -53,14 +43,10 @@
 
 {#if $user && ($blacklistedPostsPage.length > 0 || $nsfwPostsPage.length > 0)}
 	<hr class="mt-2 mb-2" />
-	<Alert
-		id="hidden-posts-page-alert"
-		defaultClass="p-2 space-x-2 hover:cursor-pointer bg-gray-50 hover:bg-gray-200 hover:dark:bg-gray-700 text-sm text-wrap"
+	<Button
+		on:click={() => activeModal.set({ isOpen: true, focusedModalName: HIDDEN_POSTS_MODAL_NAME })}
 		color="red"
 	>
-		{#snippet icon()}
-			<InfoCircleSolid class="w-5 h-5" />
-		{/snippet}
 		{`Click to display ${titleParts.join(' and ')} post(s)`}
-	</Alert>
+	</Button>
 {/if}

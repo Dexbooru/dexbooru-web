@@ -6,6 +6,10 @@
 		getAuthenticatedUserPreferences,
 	} from '$lib/client/helpers/context';
 	import { applyCustomSiteWideCss } from '$lib/client/helpers/dom';
+	import {
+		MAXIMUM_BLACKLISTED_ARTISTS,
+		MAXIMUM_BLACKLISTED_TAGS,
+	} from '$lib/shared/constants/labels';
 	import type { TUser } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
@@ -80,7 +84,7 @@
 
 		<div class="flex flex-row flex-wrap">
 			<Label class="space-y-2 mb-3">
-				<span>Blacklisted Tags (One per line)</span>
+				<span>Blacklisted Tags (One per line with a max of {MAXIMUM_BLACKLISTED_TAGS})</span>
 				<Textarea
 					bind:value={blacklistedTags}
 					rows="4"
@@ -93,7 +97,7 @@
 			</Label>
 
 			<Label class="space-y-2 mb-3">
-				<span>Blacklisted Artists (One per line)</span>
+				<span>Blacklisted Artists (One per line with a max of {MAXIMUM_BLACKLISTED_ARTISTS})</span>
 				<Textarea
 					bind:value={blacklistedArtists}
 					rows="4"

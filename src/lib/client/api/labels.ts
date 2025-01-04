@@ -1,3 +1,5 @@
+import { getApiAuthHeaders } from '../helpers/auth';
+
 export const updateLabelMetadata = async (
 	labelType: 'tag' | 'artist',
 	labelName: string,
@@ -6,6 +8,7 @@ export const updateLabelMetadata = async (
 	const path = `/api/${labelType + 's'}/metadata/${labelName}`;
 	return await fetch(path, {
 		method: 'PUT',
+		headers: getApiAuthHeaders(),
 		body: JSON.stringify(body),
 	});
 };

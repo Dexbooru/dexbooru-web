@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getGlobalQuery } from '$lib/client/helpers/context';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import {
@@ -10,12 +11,15 @@
 		TableHead,
 		TableHeadCell,
 	} from 'flowbite-svelte';
+	import HighlightedText from '../reusable/HighlightedText.svelte';
 
 	interface Props {
 		posts: TAppSearchResult['posts'];
 	}
 
 	let { posts }: Props = $props();
+
+	const globalQuery = getGlobalQuery();
 </script>
 
 <Table hoverable>
@@ -29,11 +33,13 @@
 		</TableHeadCell>
 	</TableHead>
 	<TableBody tableBodyClass="divide-y">
-		{#each posts || [] as post}
+		{#each posts ?? [] as post (post.id)}
 			<TableBodyRow>
-				<TableBodyCell>{post.id}</TableBodyCell>
+				<TableBodyCell>
+					<HighlightedText query={$globalQuery} fullText={post.id} /></TableBodyCell
+				>
 				<TableBodyCell tdClass="px-1 py-4 whitespace-wrap font-medium">
-					{post.description}
+					<HighlightedText query={$globalQuery} fullText={post.description} />
 				</TableBodyCell>
 				<TableBodyCell>{formatDate(new Date(post.createdAt))}</TableBodyCell>
 				<TableBodyCell class="text-center">

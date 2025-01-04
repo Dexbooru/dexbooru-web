@@ -29,6 +29,7 @@ import {
 	ORIGINAL_POSTS_PAGE_CONTEXT_KEY,
 	POSTS_PAGE_CONTEXT_KEY,
 	POST_PAGINATION_DATA_CONTEXT_KEY,
+	QUERY_CONTEXT_KEY,
 	REGISTER_FORM_AUTH_REQUIREMENTS_CONTEXT_KEY,
 	USER_COLLECTIONS_CONTEXT_KEY,
 	USER_CONTEXT_KEY,
@@ -75,6 +76,12 @@ export const initLayoutContexts = (data: LayoutData) => {
 		nsfwCollections: [],
 	});
 	updateUserCollections([]);
+	updateGlobalQuery('');
+};
+
+export const updateGlobalQuery = (query: string) => {
+	const updatedQuery = writable(query);
+	setContext(QUERY_CONTEXT_KEY, updatedQuery);
 };
 
 export const updateUserCollections = (collections: TPostCollection[]) => {
@@ -180,6 +187,10 @@ export const updateAuthenticatedUserNotifications = (notifications: TUserNotific
 export const updateAuthenticatedUserPreferences = (userPreferences: UserPreference) => {
 	const updatedUserPreferences = writable(userPreferences);
 	setContext(USER_PREFERENCE_CONTEXT_KEY, updatedUserPreferences);
+};
+
+export const getGlobalQuery = () => {
+	return getContext<Writable<string>>(QUERY_CONTEXT_KEY);
 };
 
 export const getUserCollections = () => {

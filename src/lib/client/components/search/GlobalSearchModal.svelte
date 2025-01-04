@@ -6,9 +6,8 @@
 		SEARCH_DEBOUNCE_TIMEOUT_MS,
 	} from '$lib/client/constants/search';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { getActiveModal } from '$lib/client/helpers/context';
+	import { getActiveModal, getGlobalQuery } from '$lib/client/helpers/context';
 	import { debounce, memoize } from '$lib/client/helpers/util';
-	import { queryStore } from '$lib/client/stores/search';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -21,6 +20,7 @@
 	let searchResultsLoading = $state(false);
 
 	const activeModal = getActiveModal();
+	const globalQuery = getGlobalQuery();
 
 	const modalStoreUnsubscribe = activeModal.subscribe((data) => {
 		if (data.focusedModalName === GLOBAL_SEARCH_MODAL_NAME) {
@@ -57,8 +57,8 @@
 
 	const debouncedFetchQueryResults = debounce(async (query: string) => {
 		searchResultsLoading = true;
-		queryStore.set(query);
-		currentSearchResults = query ? await fetchQueryResults(query as never) : null;
+		globalQuery.set(query);
+		currentSearchResults = query ? await fetchQueryResults(query) : null;
 		searchResultsLoading = false;
 	}, SEARCH_DEBOUNCE_TIMEOUT_MS) as (query: string) => void;
 

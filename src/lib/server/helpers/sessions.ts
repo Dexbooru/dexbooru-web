@@ -67,6 +67,10 @@ export const getRemoteResponseFromCache = async <T>(key: string): Promise<T | nu
 	return null;
 };
 
+export const invalidateCacheRemotely = async (key: string) => {
+	await redis.del(key);
+};
+
 export const cacheResponseRemotely = async (
 	key: string,
 	value: unknown,

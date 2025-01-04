@@ -11,6 +11,8 @@ export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	isNsfw: true,
 	createdAt: true,
 	imageUrls: true,
+	imageHeights: true,
+	imageWidths: true,
 	likes: true,
 	views: true,
 	commentCount: true,

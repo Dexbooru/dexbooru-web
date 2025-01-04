@@ -51,6 +51,7 @@
 		title="Hidden posts on this page based on your preferences"
 		open={$activeModal.isOpen && $activeModal.focusedModalName === HIDDEN_POSTS_MODAL_NAME}
 		outsideclose
+		on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	>
 		<Tabs style="underline">
 			<TabItem
@@ -58,13 +59,13 @@
 				disabled={$blacklistedPostPage.length === 0}
 				title="Blacklisted ({$blacklistedPostPage.length})"
 			>
-				<p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-					<span class="text-red-600">Offending tags: </span>{offendingTags.size > 0
-						? Array.from(offendingTags).join(', ')
+				<p class="text-base leading-relaxed text-gray-500 dark:text-gray-400 mb-2">
+					<span class="text-red-600">Offending tags:</span>{offendingTags.size > 0
+						? ' ' + Array.from(offendingTags).join(', ')
 						: 'None found'}
 					<br />
 					<span class="text-red-600">Offending artists:</span>
-					{offendingArtists.size > 0 ? Array.from(offendingArtists).join(', ') : 'None found'}
+					{offendingArtists.size > 0 ? ' ' + Array.from(offendingArtists).join(', ') : 'None found'}
 				</p>
 				<PostGrid useHiddenPosts />
 			</TabItem>

@@ -37,6 +37,8 @@
 
 	const firstPageUrl = buildUrl(page.url.pathname, {
 		pageNumber: '0',
+		orderBy: page.url.searchParams.get('orderBy') ?? null,
+		ascending: page.url.searchParams.get('ascending') ?? null,
 	});
 
 	onMount(() => {
@@ -51,7 +53,7 @@
 		id="pagination-container"
 		class="flex space-x-3 justify-center {noCollectionsLeft && 'mt-5'}"
 	>
-		{#if noCollectionsOnPage && !!!['collections/created'].find( (item) => page.url.href.includes(item), )}
+		{#if noCollectionsOnPage && !!!['collections/created'].find( (item) => page.url.href.includes(item), ) && $collectionPaginationData.pageNumber > 0}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}
 			{#if ($collectionPaginationData.pageNumber - 1 >= 0 || noCollectionsLeft) && $collectionPaginationData.pageNumber !== 0}

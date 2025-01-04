@@ -7,6 +7,7 @@
 		getPostPaginationData,
 		getPostsPage,
 	} from '$lib/client/helpers/context';
+	import { CardPlaceholder } from 'flowbite-svelte';
 	import PostPaginator from './PostPaginator.svelte';
 
 	interface Props {
@@ -22,16 +23,22 @@
 	const blacklistedPostPage = getBlacklistedPostPage();
 </script>
 
-{#if (!$postPaginationData ? (page.data.posts ?? []) : useHiddenPosts ? $blacklistedPostPage : useNsfwPosts ? $nsfwPostPage : $postPage).length > 0}
+{#if (page.data.posts ?? []).length > 0}
 	<div
-		class="grid grid-cols-1 {(useHiddenPosts || useNsfwPosts) &&
+		class="p-3 md:grid lg:grid xl:grid grid-cols-1 {(useHiddenPosts || useNsfwPosts) &&
 			'place-items-left'} {!useHiddenPosts &&
 			!useNsfwPosts &&
-			'md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'} gap-4 auto-rows-min"
+			'sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'} gap-4 auto-rows-min"
 	>
-		{#each !$postPaginationData ? (page.data.posts ?? []) : useHiddenPosts ? $blacklistedPostPage : useNsfwPosts ? $nsfwPostPage : $postPage as post (post.id)}
-			<PostCard {post} />
-		{/each}
+		{#if $postPaginationData}
+			{#each useHiddenPosts ? $blacklistedPostPage : useNsfwPosts ? $nsfwPostPage : $postPage as post (post.id)}
+				<PostCard {post} />
+			{/each}
+		{:else}
+			{#each Array(page.data.posts?.length).fill(0) as _, i}
+				<CardPlaceholder size="md" />
+			{/each}
+		{/if}
 	</div>
 {:else}
 	<div class="flex flex-col space-y-5 !mt-20">
