@@ -31,7 +31,7 @@ type TSearchResults = {
 	ascending: boolean;
 };
 
-const getCacheKey = (
+const getCacheKeyAdvanced = (
 	query: string,
 	limit: number,
 	pageNumber: number,
@@ -40,6 +40,11 @@ const getCacheKey = (
 ) => {
 	return `${query}-${limit}-${pageNumber}-${orderBy}-${ascending}`;
 };
+
+const getCacheKeyGeneral = (query: string, searchSection: string, limit: number) => {
+	return `${query}-${searchSection}-${limit}`;
+};
+
 const CACHE_TIME_SECONDS = 60;
 const CACHE_TIME_NO_RESULTS_SECONDS = 300;
 
@@ -52,7 +57,13 @@ const limitSchema = z
 
 const AdvancedPostSearchResultsSchema = {
 	urlSearchParams: z.object({
-		query: z.string().min(1, 'The query length needs to be least one character long'),
+		query: z
+			.string()
+			.min(1, 'The query length needs to be least one character long')
+			.transform((val) => {
+				const tokens = normalizeQuery(val).split(' ');
+				return tokens.toSorted().join(' ');
+			}),
 		limit: limitSchema,
 		pageNumber: pageNumberSchema,
 		orderBy: z
@@ -73,10 +84,7 @@ const GetSearchResultsSchema = {
 		query: z
 			.string()
 			.min(1, 'The query length needs to be least one character one long')
-			.transform((val) => {
-				const tokens = val.trim().split(' ');
-				return tokens.toSorted().join(' ');
-			}),
+			.transform((val) => normalizeQuery(val)),
 		limit: limitSchema,
 		searchSection: z
 			.union([
@@ -105,7 +113,7 @@ export const handleGetAdvancedPostSearchResults = async (
 
 			try {
 				let searchResponse: TSearchResults;
-				const cacheKey = getCacheKey(query, finalLimit, pageNumber, orderBy, ascending);
+				const cacheKey = getCacheKeyAdvanced(query, finalLimit, pageNumber, orderBy, ascending);
 				const cachedData = await getRemoteResponseFromCache<TSearchResults>(cacheKey);
 
 				if (cachedData) {
@@ -160,30 +168,37 @@ export const handleGetSearchResults = async (event: RequestEvent) => {
 		GetSearchResultsSchema,
 		async (data) => {
 			const { query, limit, searchSection } = data.urlSearchParams;
-			const normalizedQuery = normalizeQuery(query);
+			const cacheKey = getCacheKeyGeneral(query, searchSection, limit);
 
 			try {
 				let finalSearchResults: TAppSearchResult | null = null;
 
-				switch (searchSection) {
-					case 'all':
-						finalSearchResults = await searchAllSections(normalizedQuery, limit);
-						break;
-					case 'artists':
-						finalSearchResults = await searchForArtists(normalizedQuery, limit);
-						break;
-					case 'tags':
-						finalSearchResults = await searchForTags(normalizedQuery, limit);
-						break;
-					case 'users':
-						finalSearchResults = await searchForUsers(normalizedQuery, limit);
-						break;
-					case 'posts':
-						finalSearchResults = await searchForPosts(normalizedQuery, limit);
-						break;
-					case 'collections':
-						finalSearchResults = await searchForCollections(normalizedQuery, limit);
-						break;
+				const cachedData = await getRemoteResponseFromCache<TAppSearchResult>(cacheKey);
+				if (cachedData) {
+					finalSearchResults = cachedData;
+				} else {
+					switch (searchSection) {
+						case 'all':
+							finalSearchResults = await searchAllSections(query, limit);
+							break;
+						case 'artists':
+							finalSearchResults = await searchForArtists(query, limit);
+							break;
+						case 'tags':
+							finalSearchResults = await searchForTags(query, limit);
+							break;
+						case 'users':
+							finalSearchResults = await searchForUsers(query, limit);
+							break;
+						case 'posts':
+							finalSearchResults = await searchForPosts(query, limit);
+							break;
+						case 'collections':
+							finalSearchResults = await searchForCollections(query, limit);
+							break;
+					}
+
+					cacheResponseRemotely(cacheKey, finalSearchResults, CACHE_TIME_SECONDS);
 				}
 
 				return createSuccessResponse(

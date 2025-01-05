@@ -37,7 +37,7 @@ export function memoize<T extends (..._args: unknown[]) => unknown>(
 		}
 
 		const result = fn(...args);
-		cachedResults.set(stringifiedArgs, result);
-		return result;
+		cachedResults.set(stringifiedArgs, result as ReturnType<T>);
+		return result as ReturnType<T>;
 	}) as T;
 }
