@@ -21,7 +21,7 @@
 	});
 </script>
 
-<Card class="w-full max-w-md mt-20">
+<Card class="mt-20">
 	<form class="flex flex-col space-y-6" method="POST">
 		<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">
 			Login to Dexbooru!

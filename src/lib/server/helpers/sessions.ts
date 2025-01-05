@@ -1,6 +1,7 @@
 import { JWT_PRIVATE_KEY } from '$env/static/private';
 import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
 import type { TUser } from '$lib/shared/types/users';
+import type { $Enums } from '@prisma/client';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import {
 	SESSION_JWT_EXPIRES_IN_STANDARD_AGE,
@@ -16,7 +17,7 @@ const generateUserClaims = (userRecord: Partial<TUser>): Partial<TUser> => {
 	Object.keys(PUBLIC_USER_SELECTORS).forEach((key) => {
 		const claimKey = key as keyof TUser;
 		if (userRecord[claimKey]) {
-			userClaims[claimKey] = userRecord[claimKey] as (string & Date) | undefined;
+			userClaims[claimKey] = userRecord[claimKey] as string | Date | undefined | $Enums.UserRole | (string & Date);
 		}
 	});
 

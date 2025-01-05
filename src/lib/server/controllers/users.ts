@@ -1,4 +1,3 @@
-import { DEFAULT_PROFILE_PICTURE_URL } from '$env/static/private';
 import {
 	ACCOUNT_DELETION_CONFIRMATION_TEXT,
 	EMAIL_REQUIREMENTS,
@@ -45,6 +44,7 @@ import {
 	findUserByName,
 	findUserByNameOrEmail,
 	getUserStatistics,
+	updateUserRole,
 } from '../db/actions/user';
 import {
 	createErrorResponse,
@@ -132,6 +132,15 @@ const emailRequirementSchema = z
 		},
 	);
 
+const UserRoleUpdateSchema = {
+	pathParams: z.object({
+		username: z.string().min(1, 'The username cannot be empty'),
+	}),
+	body: z.object({
+		newRole: z.enum(['OWNER', 'MODERATOR', 'USER']),
+	}),
+} satisfies TRequestSchema;
+
 const UserGetTotpSchema = {
 	pathParams: z.object({
 		challengeId: z.string().uuid(),
@@ -189,7 +198,7 @@ const UserCreateSchema = {
 		confirmedPassword: z.string().min(1, 'The confirmed password cannot be empty'),
 		profilePicture: z
 			.instanceof(globalThis.File)
-			.transform((val) => (val.size > 0 ? val : DEFAULT_PROFILE_PICTURE_URL))
+			.transform((val) => (val.size > 0 ? val : ''))
 			.refine((val) => {
 				if (typeof val === 'string') return true;
 
@@ -269,6 +278,50 @@ const UpdateUserUserInterfacePreferencesSchema = {
 		hideCollectionMetadataOnPreview: boolStrSchema.optional(),
 	}),
 } satisfies TRequestSchema;
+
+export const handleUpdateUserRole = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'api-route',
+		UserRoleUpdateSchema,
+		async (data) => {
+			const user = event.locals.user;
+			const targetUsername = data.pathParams.username;
+			const newRole = data.body.newRole;
+
+			try {
+				if (user.role !== 'OWNER') {
+					return createErrorResponse(
+						'api-route',
+						403,
+						'Only imageboard owners are authorized to promote/demote user roles',
+					);
+				}
+
+				const updatedUser = await updateUserRole(targetUsername, newRole);
+				if (!updatedUser) {
+					return createErrorResponse(
+						'api-route',
+						404,
+						`A user with the name: ${targetUsername} does not exist`,
+					);
+				}
+
+				return createSuccessResponse(
+					'api-route',
+					`Successfully updated the user role of the user: ${targetUsername} to ${newRole}`,
+				);
+			} catch {
+				return createErrorResponse(
+					'api-route',
+					500,
+					'An unexpected error occured while trying to update the user role',
+				);
+			}
+		},
+		true,
+	);
+};
 
 export const handleUpdateUserInterfacePreferences = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -825,7 +878,7 @@ export const handleGetUserTotp = async (event: RequestEvent) => {
 	);
 };
 
-export const handleUserOauth2AuthFlowForm = async (event: RequestEvent) => {
+export const handleUserAuthFlowForm = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(event, 'form-action', UserAuthFormSchema, async (data) => {
 		const { username, password, rememberMe } = data.form;
 		const errorData = {
@@ -851,6 +904,7 @@ export const handleUserOauth2AuthFlowForm = async (event: RequestEvent) => {
 				redirect(302, `/login/totp/${newTotpChallengeId}`);
 			}
 
+			console.log(user);
 			const encodedAuthToken = generateEncodedUserTokenFromRecord(user, rememberMe);
 			event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(rememberMe));
 

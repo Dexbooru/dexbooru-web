@@ -1,16 +1,26 @@
 <script lang="ts">
 	import { REPORT_MODAL_NAME } from '$lib/client/constants/layout';
 	import { getActiveModal } from '$lib/client/helpers/context';
-	import { REPORT_REASON_CATEGORIES } from '$lib/shared/constants/reports';
-	import { ReportReasonCategory } from '$lib/shared/types/reports';
+	import {
+		MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH,
+		REPORT_REASON_CATEGORIES,
+	} from '$lib/shared/constants/reports';
+	import type { PostReportCategory } from '@prisma/client';
 	import { Button, Label, Modal, Select, Textarea } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 
 	let postId: string = $state('');
 	let reportVerbalReason = $state('');
-	let selectedReportReasonCategory: ReportReasonCategory | '' = $state('');
+	let selectedReportReasonCategory: PostReportCategory | '' = $state('');
 
 	const activeModal = getActiveModal();
+
+	const normalizePostReportReasonName = (reasonCategory: PostReportCategory) => {
+		return (
+			reasonCategory.charAt(0).toUpperCase() +
+			reasonCategory.slice(1).toLocaleLowerCase().replace('_', ' ')
+		);
+	};
 
 	const modalStoreUnsubscribe = activeModal.subscribe((data) => {
 		if (data.focusedModalName === REPORT_MODAL_NAME) {
@@ -41,18 +51,21 @@
 			bind:value={selectedReportReasonCategory}
 			items={REPORT_REASON_CATEGORIES.map((category) => {
 				return {
-					name: category,
+					name: normalizePostReportReasonName(category),
 					value: category,
 				};
 			})}
 		/>
 	</Label>
 	<Label class="space-y-2">
-		<span>Additional report description</span>
+		<span
+			>Additional report description (max of {MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH} characters)</span
+		>
 		<Textarea
 			rows="4"
 			placeholder="Enter a brief description/reason for this report in order to give more context to us"
 			bind:value={reportVerbalReason}
+			maxlength={MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH}
 		/>
 	</Label>
 	<Button class="w-full" color="red">Report this post</Button>

@@ -36,6 +36,7 @@ export const NULLABLE_USER: TUser = {
 	id: NONEXISTENT_USER_ID,
 	createdAt: new Date(0),
 	updatedAt: new Date(0),
+	role: 'USER',
 	password: '',
 	profilePictureUrl: '',
 	username: '',

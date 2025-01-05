@@ -1,10 +1,10 @@
-import { handleUserOauth2AuthFlowForm } from '$lib/server/controllers/users';
+import { handleUserAuthFlowForm } from '$lib/server/controllers/users';
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { redirect } from '@sveltejs/kit';
 import type { Action, Actions, PageServerLoad } from './$types';
 
 const handleLogin: Action = async (event) => {
-	return await handleUserOauth2AuthFlowForm(event);
+	return await handleUserAuthFlowForm(event);
 };
 
 export const actions = {

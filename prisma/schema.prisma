@@ -9,6 +9,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  OWNER
+  MODERATOR
+  USER
+}
+
 model User {
   id                       String                    @id @default(uuid())
   username                 String                    @unique() @db.VarChar(12)
@@ -17,6 +23,7 @@ model User {
   email                    String                    @unique() @db.VarChar(254)
   profilePictureUrl        String
   password                 String
+  role                     UserRole                  @default(USER)
   createdPosts             Post[]                    @relation(name: "created posts")
   likedPosts               Post[]                    @relation(name: "liked posts")
   createdComments          Comment[]
@@ -172,9 +179,9 @@ enum PostReportCategory {
 model PostReport {
   id           String                 @id @default(uuid())
   category     PostReportCategory
-  description  String                 @db.VarChar(250)
-  reviewStatus PostReportReviewStatus
-  post         Post?                  @relation(fields: [postId], references: [id])
+  description  String?                @db.VarChar(250)
+  reviewStatus PostReportReviewStatus @default(NOT_REVIEWED)
+  post         Post?                  @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId       String?
 }
 

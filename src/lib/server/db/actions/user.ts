@@ -2,7 +2,21 @@ import { roundNumber } from '$lib/client/helpers/posts';
 import type { TUserSelector } from '$lib/server/types/users';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { TUser } from '$lib/shared/types/users';
+import type { $Enums } from '@prisma/client';
 import prisma from '../prisma';
+
+export async function updateUserRole(username: string, newRole: $Enums.UserRole) {
+	const updatedUser = await prisma.user.update({
+		where: {
+			username,
+		},
+		data: {
+			role: newRole,
+		},
+	});
+
+	return updatedUser;
+}
 
 export async function getUserStatistics(userId: string) {
 	const totalPostsPromise = prisma.post.count({
