@@ -1,1 +1,1 @@
-export type TS3ObjectSource = 'posts' | 'profile_pictures';
+export type TS3ObjectSource = 'posts' | 'profile_pictures' | 'collections';

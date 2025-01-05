@@ -1,20 +1,26 @@
 <script lang="ts">
-	import type { IAppSearchResult } from '$lib/shared/types/search';
+	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import { TabItem, Tabs } from 'flowbite-svelte';
 	import { slide } from 'svelte/transition';
+	import CollectionTable from '../tables/CollectionTable.svelte';
 	import LabelTable from '../tables/LabelTable.svelte';
 	import PostTable from '../tables/PostTable.svelte';
 	import UserTable from '../tables/UserTable.svelte';
 
-	export let results: IAppSearchResult;
-	let { posts, artists, tags, users } = results;
+	interface Props {
+		results: TAppSearchResult;
+	}
 
-	$: {
+	let { results }: Props = $props();
+	let { posts, artists, tags, users, collections } = $state(results);
+
+	$effect(() => {
 		posts = results.posts;
 		artists = results.artists;
 		tags = results.tags;
 		users = results.users;
-	}
+		collections = results.collections;
+	});
 </script>
 
 <div in:slide out:slide>
@@ -38,6 +44,13 @@
 				<PostTable {posts} />
 			{:else}
 				<p>No posts were found matching that query</p>
+			{/if}
+		</TabItem>
+		<TabItem title="Collections">
+			{#if collections && collections.length > 0}
+				<CollectionTable {collections} />
+			{:else}
+				<p>No collections were found matching that query</p>
 			{/if}
 		</TabItem>
 		<TabItem title="Users">

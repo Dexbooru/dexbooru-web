@@ -3,13 +3,22 @@
 	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
 	import type { ActionData } from '../../../../routes/login/$types';
 
-	let showPassword = false;
+	interface Props {
+		form: ActionData;
+	}
 
-	export let form: ActionData;
+	let { form }: Props = $props();
+
+	let showPassword = $state(false);
 
 	const loginErrorReason: string | undefined = form?.reason;
-	let username: string = form?.username || '';
-	let password: string = '';
+
+	let username: string = $state(form?.username || '');
+	let password: string = $state('');
+	let rememberMe: boolean = $state(false);
+	let loginFormButtonDisabled = $derived.by(() => {
+		return !(username.length > 0 && password.length > 0);
+	});
 </script>
 
 <Card class="w-full max-w-md mt-20">
@@ -51,22 +60,33 @@
 			</div>
 		</Label>
 		<div class="flex items-start">
-			<Checkbox name="rememberMe">Remember me</Checkbox>
+			<Checkbox bind:checked={rememberMe}>Remember me</Checkbox>
+			<Input type="hidden" name="rememberMe" value={rememberMe} />
 		</div>
-		<Button type="submit" class="w-full">Log in</Button>
+		<Button disabled={loginFormButtonDisabled} type="submit" class="w-full">Log in</Button>
 		{#if loginErrorReason}
 			<Alert color="red">
 				<span class="font-medium">Login error!</span>
 				{loginErrorReason}
 			</Alert>
 		{/if}
-		<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-			Not registered? <a
-				href="/register"
-				class="text-primary-700 hover:underline dark:text-primary-500"
-			>
-				Create account
-			</a>
+		<div class="flex-col space-y-1">
+			<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+				Not registered? <a
+					href="/register"
+					class="text-primary-700 hover:underline dark:text-primary-500"
+				>
+					Create account
+				</a>
+			</div>
+			<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+				Having trouble logging in? <a
+					href="/forgot-password"
+					class="text-primary-700 hover:underline dark:text-primary-500"
+				>
+					Forgot password
+				</a>
+			</div>
 		</div>
 	</form>
 </Card>

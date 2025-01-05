@@ -2,17 +2,27 @@
 	import {
 		EMAIL_REQUIREMENTS,
 		PASSWORD_REQUIREMENTS,
-		USERNAME_REQUIREMENTS
+		USERNAME_REQUIREMENTS,
 	} from '$lib/shared/constants/auth';
-	import type { Placement } from '@floating-ui/dom';
 	import { Li, List, P, Popover } from 'flowbite-svelte';
 	import { CheckCircleSolid, CloseCircleSolid, QuestionCircleSolid } from 'flowbite-svelte-icons';
+	import type { ComponentProps } from 'svelte';
 
-	export let requirementsPlacement: Placement = 'bottom-start';
-	export let requirementsType: 'email' | 'username' | 'password';
-	export let popoverButtonId: string;
-	export let satisifedRequirements: string[] = [];
-	export let unsatisfiedRequirements: string[] = [];
+	interface Props {
+		requirementsPlacement?: ComponentProps<Popover>['placement'];
+		requirementsType: 'email' | 'username' | 'password';
+		popoverButtonId: string;
+		satisifedRequirements?: string[];
+		unsatisfiedRequirements?: string[];
+	}
+
+	let {
+		requirementsPlacement = 'bottom-start',
+		requirementsType,
+		popoverButtonId,
+		satisifedRequirements = [],
+		unsatisfiedRequirements = [],
+	}: Props = $props();
 </script>
 
 <button type="button" id={popoverButtonId}>
@@ -21,13 +31,13 @@
 </button>
 <Popover
 	triggeredBy="#{popoverButtonId}"
-	class="w-72 text-sm font-light text-gray-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
+	class="w-72 z-50 text-sm font-light text-gray-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
 	placement={requirementsPlacement}
 >
 	<P>Satisfied {requirementsType} requirements:</P>
 	<List list="disc">
 		{#each satisifedRequirements as satisifedRequirement}
-			<Li icon>
+			<Li liClass="mt-2" icon>
 				<CheckCircleSolid class="w-4 h-4 mr-1 text-green-500 inline" />
 				<p>{satisifedRequirement}</p>
 			</Li>
@@ -36,7 +46,7 @@
 
 	<List list="disc">
 		{#each unsatisfiedRequirements as unsatisfiedRequirement}
-			<Li icon>
+			<Li liClass="mt-2" icon>
 				<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
 
 				<p>{unsatisfiedRequirement}</p>
@@ -47,21 +57,21 @@
 	{#if unsatisfiedRequirements.length === 0 && satisifedRequirements.length === 0}
 		{#if requirementsType === 'username'}
 			{#each Object.values(USERNAME_REQUIREMENTS) as requirement}
-				<Li icon>
+				<Li liClass="mt-2" icon>
 					<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
 					{requirement}
 				</Li>
 			{/each}
 		{:else if requirementsType === 'email'}
 			{#each Object.values(EMAIL_REQUIREMENTS) as requirement}
-				<Li icon>
+				<Li liClass="mt-2" icon>
 					<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
 					{requirement}
 				</Li>
 			{/each}
 		{:else if requirementsType === 'password'}
 			{#each Object.values(PASSWORD_REQUIREMENTS) as requirement}
-				<Li icon>
+				<Li liClass="mt-2" icon>
 					<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
 					{requirement}
 				</Li>

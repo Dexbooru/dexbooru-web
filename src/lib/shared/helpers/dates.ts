@@ -1,49 +1,37 @@
 import { MONTHS } from '../constants/dates';
 
+const DATE_KEYS = ['createdAt', 'updatedAt'];
+
+const minute = 60 * 1000;
+const hour = 60 * minute;
+const day = 24 * hour;
+const month = 30 * day;
+const year = 365 * day;
+
 export function getTimeDifferenceString(targetDatetime: Date) {
-	const today = new Date();
-	const timeDifference = today.getUTCMilliseconds() - targetDatetime.getUTCMilliseconds();
+	const now = new Date().getTime();
+	const targetTime = targetDatetime.getTime();
+	const timeDifference = now - targetTime;
 
-	const minute = 60 * 1000;
-	const hour = 60 * minute;
-	const day = 24 * hour;
-	const month = 30 * day;
-	const year = 365 * day;
+	const times = [
+		{ limit: year, label: 'year' },
+		{ limit: month, label: 'month' },
+		{ limit: day, label: 'day' },
+		{ limit: hour, label: 'hour' },
+		{ limit: minute, label: 'minute' },
+		{ limit: 1000, label: 'second' },
+	];
 
-	if (timeDifference < minute) {
-		const seconds = Math.floor(timeDifference / 1000);
-		return `${seconds} second${seconds !== 1 ? 's' : ''} ago`;
+	for (const { limit, label } of times) {
+		if (timeDifference >= limit) {
+			const time = Math.floor(timeDifference / limit);
+			return `${time} ${label}${time !== 1 ? 's' : ''} ago`;
+		}
 	}
 
-	if (timeDifference < hour) {
-		const minutes = Math.floor(timeDifference / minute);
-		return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
-	}
-
-	if (timeDifference < day) {
-		const hours = Math.floor(timeDifference / hour);
-		return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
-	}
-
-	if (timeDifference < month) {
-		const days = Math.floor(timeDifference / day);
-		return `${days} day${days !== 1 ? 's' : ''} ago`;
-	}
-
-	if (timeDifference < year) {
-		const months = Math.floor(timeDifference / month);
-		return `${months} month${months !== 1 ? 's' : ''} ago`;
-	}
-
-	const years = Math.floor(timeDifference / year);
-	return `${years} year${years !== 1 ? 's' : ''} ago`;
+	return 'just now';
 }
-
-export function formatDate(date: Date | string): string {
-	if (typeof date === 'string') {
-		date = new Date(date);
-	}
-	
+export function formatDate(date: Date): string {
 	const options: Intl.DateTimeFormatOptions = {
 		year: 'numeric',
 		month: '2-digit',
@@ -51,7 +39,7 @@ export function formatDate(date: Date | string): string {
 		hour: '2-digit',
 		minute: '2-digit',
 		hour12: false,
-		timeZoneName: 'short'
+		timeZoneName: 'short',
 	};
 
 	const formatter = new Intl.DateTimeFormat('en-US', options);
@@ -89,21 +77,41 @@ export function getFormalDateTitle(date: Date) {
 	return `${month} ${formattedDay}, ${year}`;
 }
 
-export function convertDataStructureToIncludeDatetimes<T>(
-	items: T[],
-	dateFields: (keyof T)[]
-): T[] {
-	return items.map((item) => {
-		const parsedDateStructure: Partial<T> = {};
+const tryDateConvert = (key: string, target: unknown): Date | unknown => {
+	try {
+		if (!DATE_KEYS.includes(key)) return target;
 
-		dateFields.forEach((dateField) => {
-			const convertedDate = new Date(item[dateField] as string);
-			parsedDateStructure[dateField] = convertedDate as T[keyof T];
-		});
+		const testDate = new Date(target as string | number | Date);
+		return testDate;
+	} catch {
+		return target;
+	}
+};
 
-		return {
-			...item,
-			...parsedDateStructure
-		};
-	});
-}
+export const convertDataStructureToIncludeDatetimes = (target: object) => {
+	if (target === null) return target;
+	if (typeof target === 'string') {
+		target = JSON.parse(target);
+	}
+
+	const convertedObject = Array.isArray(target)
+		? ([] as unknown[])
+		: ({} as Record<string, unknown>);
+
+	for (const [key, value] of Object.entries(target)) {
+		let convertedValue;
+		if (typeof value === 'object') {
+			convertedValue = convertDataStructureToIncludeDatetimes(value);
+		} else {
+			convertedValue = tryDateConvert(key, value);
+		}
+
+		if (Array.isArray(convertedObject)) {
+			convertedObject.push(convertedValue);
+		} else {
+			convertedObject[key] = convertedValue;
+		}
+	}
+
+	return convertedObject;
+};

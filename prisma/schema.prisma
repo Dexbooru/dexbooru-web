@@ -10,45 +10,100 @@ datasource db {
 }
 
 model User {
-  id                     String          @id @default(uuid())
-  username               String          @unique() @db.VarChar(12)
-  createdAt              DateTime        @default(now())
-  email                  String          @unique() @db.VarChar(254)
-  profilePictureUrl      String
-  password               String
-  createdPosts           Post[]          @relation(name: "created posts")
-  likedPosts             Post[]          @relation(name: "liked posts")
-  createdComments        Comment[]
-  friends                User[]          @relation("user friends")
-  symmetricFriends       User[]          @relation("user friends")
-  sentFriendRequests     FriendRequest[] @relation(name: "friend requests sent")
-  receivedFriendRequests FriendRequest[] @relation(name: "friend requests received")
+  id                       String                    @id @default(uuid())
+  username                 String                    @unique() @db.VarChar(12)
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @default(now())
+  email                    String                    @unique() @db.VarChar(254)
+  profilePictureUrl        String
+  password                 String
+  createdPosts             Post[]                    @relation(name: "created posts")
+  likedPosts               Post[]                    @relation(name: "liked posts")
+  createdComments          Comment[]
+  friends                  User[]                    @relation(name: "user friends")
+  symmetricFriends         User[]                    @relation(name: "user friends")
+  sentFriendRequests       FriendRequest[]           @relation(name: "friend requests sent")
+  receivedFriendRequests   FriendRequest[]           @relation(name: "friend requests received")
+  passwordRecoveryAttempts PasswordRecoveryAttempt[]
+  postCollections          PostCollection[]          @relation(name: "post collection author")
+  preferences              UserPreference?           @relation(name: "user profile preferences")
 
   @@index([id])
+  @@index([username])
+}
+
+model UserPreference {
+  twoFactorAuthenticationEnabled  Boolean  @default(false)
+  browseInSafeMode                Boolean  @default(false)
+  autoBlurNsfw                    Boolean  @default(true)
+  blacklistedTags                 String[] @default([]) @db.Text
+  blacklistedArtists              String[] @default([]) @db.Text
+  customSideWideCss               String   @default("") @db.Text
+  hidePostMetadataOnPreview       Boolean  @default(false)
+  hideCollectionMetadataOnPreview Boolean  @default(false)
+  user                            User?    @relation(name: "user profile preferences", fields: [userId], references: [id], onDelete: Cascade)
+  userId                          String   @unique
+  createdAt                       DateTime @default(now())
+  updatedAt                       DateTime @default(now())
+
+  @@id([userId])
+}
+
+enum PostModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model Post {
-  id          String       @id @default(uuid())
-  createdAt   DateTime     @default(now())
-  description String       @db.Text
-  likes       Int          @default(0)
-  views       Int          @default(0)
-  imageUrls   String[]
-  artists     Artist[]
-  comments    Comment[]
-  tags        Tag[]
-  author      User?        @relation(name: "created posts", fields: [authorId], references: [id], onDelete: SetNull)
-  authorId    String?
-  likedBy     User[]       @relation(name: "liked posts")
-  postReports PostReport[]
+  id               String               @id @default(uuid())
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @default(now())
+  description      String               @db.VarChar(500)
+  sourceLink       String               @db.VarChar(450)
+  isNsfw           Boolean              @default(false)
+  likes            Int                  @default(0)
+  views            Int                  @default(0)
+  moderationStatus PostModerationStatus @default(PENDING)
+  imageUrls        String[]
+  imageWidths      Int[]
+  imageHeights     Int[]
+  artists          Artist[]
+  commentCount     Int                  @default(0)
+  comments         Comment[]
+  tags             Tag[]
+  author           User?                @relation(name: "created posts", fields: [authorId], references: [id], onDelete: SetNull)
+  authorId         String?
+  likedBy          User[]               @relation(name: "liked posts")
+  reports          PostReport[]
+  collections      PostCollection[]
 
   @@index([id])
+  @@index([authorId])
+}
+
+model PostCollection {
+  id                 String   @id @default(uuid())
+  title              String   @db.VarChar(150)
+  description        String   @db.VarChar(250)
+  isNsfw             Boolean  @default(false)
+  thumbnailImageUrls String[] @default([])
+  posts              Post[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now())
+  author             User?    @relation(name: "post collection author", fields: [authorId], references: [id])
+  authorId           String?
+
+  @@index([id])
+  @@index([authorId])
 }
 
 model Comment {
   id              String    @id @default(uuid())
   createdAt       DateTime  @default(now())
-  content         String    @db.VarChar(350)
+  updatedAt       DateTime  @default(now())
+  content         String    @db.VarChar(1500)
+  replyCount      Int       @default(0)
   replies         Comment[] @relation(name: "replies")
   post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId          String
@@ -56,20 +111,32 @@ model Comment {
   parentCommentId String?
   author          User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId        String?
+
+  @@index([authorId])
+  @@index([postId])
 }
 
 model Tag {
-  id    String @id @default(uuid())
-  name  String @unique @db.VarChar(40)
-  posts Post[]
+  id          String   @id @default(uuid())
+  name        String   @unique @db.VarChar(75)
+  description String?  @db.VarChar(200)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  postCount   Int      @default(0)
+  posts       Post[]
 
   @@index([name])
 }
 
 model Artist {
-  id    String @id @default(uuid())
-  name  String @unique @db.VarChar(40)
-  posts Post[]
+  id               String   @id @default(uuid())
+  name             String   @unique @db.VarChar(75)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now())
+  socialMediaLinks String[] @default([])
+  description      String?  @db.VarChar(200)
+  postCount        Int      @default(0)
+  posts            Post[]
 
   @@index([name])
 }
@@ -93,11 +160,30 @@ enum PostReportReviewStatus {
   ACCEPTED
 }
 
+enum PostReportCategory {
+  OFF_TOPIC
+  SPAM
+  INAPPROPRIATE
+  IMPROPER_TAGGING
+  ILLEGAL
+  OTHER
+}
+
 model PostReport {
   id           String                 @id @default(uuid())
-  category     String
-  description  String                 @db.Text
+  category     PostReportCategory
+  description  String                 @db.VarChar(250)
   reviewStatus PostReportReviewStatus
   post         Post?                  @relation(fields: [postId], references: [id])
   postId       String?
+}
+
+model PasswordRecoveryAttempt {
+  id              String   @id
+  createdAt       DateTime @default(now())
+  senderIpAddress String   @db.VarChar(15)
+  user            User?    @relation(fields: [userId], references: [id])
+  userId          String?
+
+  @@index([id])
 }

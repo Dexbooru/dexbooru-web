@@ -1,0 +1,117 @@
+<script lang="ts">
+	import { enhance } from '$app/forms';
+	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import {
+		getAuthenticatedUser,
+		getAuthenticatedUserPreferences,
+	} from '$lib/client/helpers/context';
+	import { applyCustomSiteWideCss } from '$lib/client/helpers/dom';
+	import {
+		MAXIMUM_BLACKLISTED_ARTISTS,
+		MAXIMUM_BLACKLISTED_TAGS,
+	} from '$lib/shared/constants/labels';
+	import type { TUser } from '$lib/shared/types/users';
+	import { toast } from '@zerodevx/svelte-toast';
+	import { Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
+	import { onMount } from 'svelte';
+
+	let preferencesChanging = $state(false);
+	let autoBlurNsfw: boolean = $state(false);
+	let browseInSafeMode: boolean = $state(false);
+	let blacklistedTags: string = $state('');
+	let blacklistedArtists: string = $state('');
+
+	const user = getAuthenticatedUser();
+	const userPreferences = getAuthenticatedUserPreferences();
+
+	const userPreferenceUnsubscribe = userPreferences.subscribe((data) => {
+		autoBlurNsfw = data.autoBlurNsfw;
+		browseInSafeMode = data.browseInSafeMode;
+		blacklistedTags = data.blacklistedTags.join('\n');
+		blacklistedArtists = data.blacklistedArtists.join('\n');
+	});
+
+	onMount(() => {
+		return () => {
+			userPreferenceUnsubscribe();
+		};
+	});
+</script>
+
+<Card>
+	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">Posts</h3>
+	<form
+		use:enhance={() => {
+			preferencesChanging = true;
+			return async ({ result }) => {
+				preferencesChanging = false;
+				if (result.type === 'success') {
+					toast.push('The post preferences were updated successfully!', SUCCESS_TOAST_OPTIONS);
+
+					// @ts-ignore
+					userPreferences.update((currentPreferences) => {
+						// @ts-ignore
+						const updatedPreferences = { ...currentPreferences, ...result.data.data };
+						applyCustomSiteWideCss($user as TUser, updatedPreferences);
+
+						return updatedPreferences;
+					});
+				} else {
+					toast.push(
+						'An error occured while trying to change the post preferences',
+						FAILURE_TOAST_OPTIONS,
+					);
+				}
+			};
+		}}
+		method="POST"
+		action="?/postPreferences"
+		class="flex flex-col space-y-4"
+	>
+		<Label class="space-y-2 mb-3">
+			<span>Auto Blur NSFW Posts</span>
+			<Checkbox bind:checked={autoBlurNsfw} />
+			<input type="hidden" name="autoBlurNsfw" value={autoBlurNsfw} />
+			<p class="text-sm text-gray-500">Removes the automatic blur on posts marked as NSFW</p>
+		</Label>
+
+		<Label class="space-y-2 mb-3">
+			<span>Browse in Safe Mode</span>
+			<Checkbox bind:checked={browseInSafeMode} />
+			<p class="text-sm text-gray-500">Safe mode hides NSFW marked posts automatically</p>
+			<input type="hidden" name="browseInSafeMode" value={browseInSafeMode} />
+		</Label>
+
+		<div class="flex flex-row flex-wrap">
+			<Label class="space-y-2 mb-3">
+				<span>Blacklisted Tags (One per line with a max of {MAXIMUM_BLACKLISTED_TAGS})</span>
+				<Textarea
+					bind:value={blacklistedTags}
+					rows="4"
+					name="blacklistedTags"
+					placeholder="Enter one tag per line"
+				/>
+				<p class="text-sm text-gray-500">
+					All posts with the provided blacklist of tags will not be displayed
+				</p>
+			</Label>
+
+			<Label class="space-y-2 mb-3">
+				<span>Blacklisted Artists (One per line with a max of {MAXIMUM_BLACKLISTED_ARTISTS})</span>
+				<Textarea
+					bind:value={blacklistedArtists}
+					rows="4"
+					name="blacklistedArtists"
+					placeholder="Enter one artist per line"
+				/>
+				<p class="text-sm text-gray-500">
+					All posts with the provided blacklist of artists will not be displayed
+				</p>
+			</Label>
+		</div>
+
+		<Button disabled={preferencesChanging} type="submit" color="primary"
+			>Save Post Preferences</Button
+		>
+	</form>
+</Card>

@@ -1,16 +1,24 @@
-import type { IUser } from '$lib/shared/types/users';
+import type { TCollectionOrderByColumn, TPostCollection } from '$lib/shared/types/collections';
+import type { TPost, TPostOrderByColumn } from '$lib/shared/types/posts';
+import type { TUser } from '$lib/shared/types/users';
+import type { UserPreference } from '@prisma/client';
 
 declare global {
 	namespace App {
-		// interface Error {}
 		interface Locals {
-			user: IUser | null | undefined;
+			user: TUser;
 		}
 		interface PageData {
-			user: IUser | null | undefined;
+			user: TUser;
+			userPreferences?: UserPreference;
+			posts?: TPost[];
+			collections?: TPostCollection[];
+			orderBy?: TPostOrderByColumn | TCollectionOrderByColumn;
+			ascending?: boolean;
+			pageNumber?: number;
 		}
-		// interface Platform {}
 	}
 }
 
-export {};
+export { };
+

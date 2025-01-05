@@ -1,22 +1,23 @@
+import { dev } from '$app/environment';
+import { DB_REDIS_PASSWORD } from '$env/static/private';
 import { createClient } from 'redis';
-import { REDIS_URL } from '../constants/database';
-
-type RedisClientSingleton = Awaited<ReturnType<typeof redisClientSingleton>>;
 
 const redisClientSingleton = async () => {
-	return await createClient({
-		url: REDIS_URL
+	const client = await createClient({
+		password: DB_REDIS_PASSWORD,
 	}).connect();
+
+	return client;
 };
 
-const globalForRedis = globalThis as unknown as {
-	redis: RedisClientSingleton | undefined;
+type RedisClientSingleton = ReturnType<typeof redisClientSingleton>;
+
+const globalForPrisma = globalThis as unknown as {
+	redis: Awaited<RedisClientSingleton | undefined>;
 };
 
-const redis = globalForRedis.redis ?? (await redisClientSingleton());
+const redis = globalForPrisma.redis ?? (await redisClientSingleton());
 
-if (process.env.NODE_ENV !== 'production') {
-	globalForRedis.redis = redis;
-}
+if (dev) globalForPrisma.redis = redis;
 
 export default redis;

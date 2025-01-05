@@ -1,36 +1,47 @@
 <script lang="ts">
 	import { fileToBase64String } from '$lib/client/helpers/images';
+	import { MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB } from '$lib/shared/constants/images';
 	import { Avatar, Fileupload, ImagePlaceholder, Label } from 'flowbite-svelte';
 
+	interface Props {
+		isChangingProfilePicture?: boolean;
+		profilePictureFile?: File | null;
+	}
+
+	let { isChangingProfilePicture = false, profilePictureFile = $bindable(null) }: Props = $props();
+
+	let profilePictureBase64String: string | null = $state(null);
+	let parsingProfilePicture = $state(false);
+
 	const onProfilePictureChange = async (event: Event) => {
+		profilePictureFile = null;
+		parsingProfilePicture = true;
+
 		const target = event.target as HTMLInputElement;
-		if (target.files && target.files.length > 0) {
-			profilePictureFile = target.files.item(0);
+		const files = Array.from(target.files ?? []);
+		if (files.length === 1) {
+			profilePictureFile = files[0];
 
 			if (profilePictureFile) {
-				parsingProfilePicture = true;
-
 				try {
 					profilePictureBase64String = await fileToBase64String(profilePictureFile);
 				} catch {
 					profilePictureBase64String = null;
 				}
-
-				parsingProfilePicture = false;
 			}
 		}
-	};
 
-	let profilePictureFile: File | null = null;
-	let profilePictureBase64String: string | null = null;
-	let parsingProfilePicture = false;
+		parsingProfilePicture = false;
+	};
 </script>
 
 <Label style="margin-top: 0px;" class="space-y-2">
-	<span>Upload a profile picture (optional)</span>
+	<span>Upload a profile picture{isChangingProfilePicture ? '' : ' (optional)'}</span>
+	<br />
+	<span>The maximum size allowed is: {MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB} MB</span>
 	<Fileupload
-		id="profilePictureInput"
-		name="profilePicture"
+		id={isChangingProfilePicture ? 'newProfilePictureInput' : 'profilePictureInput'}
+		name={isChangingProfilePicture ? 'newProfilePicture' : 'profilePicture'}
 		accept="image/*"
 		on:change={onProfilePictureChange}
 	/>

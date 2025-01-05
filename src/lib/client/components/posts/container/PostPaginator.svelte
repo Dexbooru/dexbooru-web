@@ -1,57 +1,78 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { postPaginationStore } from '$lib/client/stores/posts';
-	import { buildUrl } from '$lib/shared/helpers/urls';
-	import { PaginationItem } from 'flowbite-svelte';
+	import { page } from '$app/state';
+	import { getPostPaginationData } from '$lib/client/helpers/context';
+	import { buildUrl } from '$lib/client/helpers/urls';
+	import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
+	import { Button, PaginationItem } from 'flowbite-svelte';
 	import { ArrowLeftSolid, ArrowRightSolid } from 'flowbite-svelte-icons';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
-	export let noPostsLeft: boolean = false;
+	let previousPageUrl: URL = $state(new URL('http://mock.com'));
+	let nextPageUrl: URL = $state(new URL('http://mock.com'));
+	let noPostsLeft: boolean = $state(false);
+	let noPostsOnPage: boolean = $state(false);
 
-	let previousPageUrl: URL;
-	let nextPageUrl: URL;
+	const postPaginationData = getPostPaginationData();
 
-	const postPaginationUnsubscribe = postPaginationStore.subscribe((paginationData) => {
+	const postPaginationUnsubscribe = postPaginationData.subscribe((paginationData) => {
 		if (paginationData) {
+			noPostsLeft = paginationData.posts.length !== MAXIMUM_POSTS_PER_PAGE;
+			noPostsOnPage = paginationData.posts.length === 0;
+
 			const previousPageLinkParams = {
+				...(page.url.pathname === '/search' ? { query: page.url.searchParams.get('query') } : {}),
 				pageNumber: paginationData.pageNumber - 1,
 				orderBy: paginationData.orderBy,
-				ascending: paginationData.ascending
+				ascending: paginationData.ascending,
 			};
-
 			const nextPageLinkParams = {
+				...(page.url.pathname === '/search' ? { query: page.url.searchParams.get('query') } : {}),
 				pageNumber: paginationData.pageNumber + 1,
 				orderBy: paginationData.orderBy,
-				ascending: paginationData.ascending
+				ascending: paginationData.ascending,
 			};
-			previousPageUrl = buildUrl($page.url.pathname, previousPageLinkParams);
-			nextPageUrl = buildUrl($page.url.pathname, nextPageLinkParams);
+
+			previousPageUrl = buildUrl(page.url.pathname, previousPageLinkParams);
+			nextPageUrl = buildUrl(page.url.pathname, nextPageLinkParams);
 		}
 	});
 
-	onDestroy(() => {
-		postPaginationUnsubscribe();
+	const firstPageUrl = buildUrl(page.url.pathname, {
+		...(page.url.pathname === '/search' ? { query: page.url.searchParams.get('query') } : {}),
+		pageNumber: '0',
+		orderBy: page.url.searchParams.get('orderBy') ?? null,
+		ascending: page.url.searchParams.get('ascending') ?? null,
+	});
+
+	onMount(() => {
+		return () => {
+			postPaginationUnsubscribe();
+		};
 	});
 </script>
 
-{#if $postPaginationStore}
-	<div id="pagination-container" class="flex space-x-3 justify-center {noPostsLeft && 'mt-5'}">
-		{#if ($postPaginationStore.pageNumber - 1 >= 0 || noPostsLeft) && $postPaginationStore.pageNumber !== 0}
-			<PaginationItem
-				href={previousPageUrl.href}
-				large
-				class="flex items-center previous-page-link"
-			>
-				<ArrowLeftSolid class="mr-2 w-5 h-5" />
-				Previous
-			</PaginationItem>
-		{/if}
+{#if $postPaginationData}
+	<div id="pagination-container" class="flex space-x-3 justify-center">
+		{#if noPostsOnPage && !!!['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $postPaginationData.pageNumber > 0}
+			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
+		{:else}
+			{#if ($postPaginationData.pageNumber - 1 >= 0 || noPostsLeft) && $postPaginationData.pageNumber !== 0}
+				<PaginationItem
+					href={previousPageUrl.href}
+					large
+					class="flex items-center previous-page-link"
+				>
+					<ArrowLeftSolid class="mr-2 w-5 h-5" />
+					Previous
+				</PaginationItem>
+			{/if}
 
-		{#if !noPostsLeft}
-			<PaginationItem href={nextPageUrl.href} large class="flex items-center next-page-link">
-				Next
-				<ArrowRightSolid class="ml-2 w-5 h-5" />
-			</PaginationItem>
+			{#if !noPostsLeft}
+				<PaginationItem href={nextPageUrl.href} large class="flex items-center next-page-link">
+					Next
+					<ArrowRightSolid class="ml-2 w-5 h-5" />
+				</PaginationItem>
+			{/if}
 		{/if}
 	</div>
 {/if}

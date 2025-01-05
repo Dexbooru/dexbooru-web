@@ -1,58 +1,66 @@
 <script lang="ts">
-	import { dev } from '$app/environment';
-	import { page } from '$app/stores';
-	import { getNotifications } from '$lib/client/api/notifications';
+	import { page } from '$app/state';
+	import DeleteCollectionConfirmationModal from '$lib/client/components/collections/card/DeleteCollectionConfirmationModal.svelte';
+	import EditCollectionModal from '$lib/client/components/collections/card/EditCollectionModal.svelte';
+	import CollectionsPostUpdateModal from '$lib/client/components/collections/CollectionPostUpdateModal.svelte';
+	import ImagePreviewModal from '$lib/client/components/images/ImagePreviewModal.svelte';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
 	import Navbar from '$lib/client/components/layout/Navbar.svelte';
+	import DeletePostConfirmationModal from '$lib/client/components/posts/card/DeletePostConfirmationModal.svelte';
+	import EditPostModal from '$lib/client/components/posts/card/EditPostModal.svelte';
+	import PostCardReportModal from '$lib/client/components/posts/card/PostCardReportModal.svelte';
+	import HiddenPostModal from '$lib/client/components/posts/container/HiddenPostModal.svelte';
+	import LabelMetadataModal from '$lib/client/components/labels/LabelMetadataModal.svelte';
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
+	import { getActiveModal, initLayoutContexts } from '$lib/client/helpers/context';
 	import {
-		getDeviceDetectionDataFromWindow,
-		registerDocumentEventListeners
+		destroyDocumentEventListeners,
+		registerDocumentEventListeners,
 	} from '$lib/client/helpers/dom';
-	import {
-		deviceStore,
-		isDesktopStore,
-		isMobileStore,
-		isTabletStore
-	} from '$lib/client/stores/device';
-	import { notificationStore } from '$lib/client/stores/notifications';
-	import { authenticatedUserStore } from '$lib/client/stores/users';
-	import type { IUserNotifications } from '$lib/shared/types/notifcations';
-	import { inject as injectAnalytics } from '@vercel/analytics';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import { onMount } from 'svelte';
 	import '../app.postcss';
+	import type { LayoutData } from './$types';
 
-	authenticatedUserStore.set($page.data.user || null);
+	interface Props {
+		data: LayoutData;
+		children?: import('svelte').Snippet;
+	}
 
-	onMount(async () => {
-		injectAnalytics({ mode: dev ? 'development' : 'production' });
+	let { data, children }: Props = $props();
 
-		registerDocumentEventListeners();
+	initLayoutContexts(data);
 
-		const deviceData = getDeviceDetectionDataFromWindow();
-		deviceStore.set(deviceData);
+	onMount(() => {
+		registerDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
 
-		const { isMobile, isDesktop, isTablet } = deviceData;
-		isMobileStore.set(isMobile);
-		isDesktopStore.set(isDesktop);
-		isTabletStore.set(isTablet);
-
-		if ($authenticatedUserStore) {
-			const notificationResponse = await getNotifications();
-			if (notificationResponse.ok) {
-				const notificationData: IUserNotifications = await notificationResponse.json();
-				notificationStore.set(notificationData);
-			}
-		}
+		return () => {
+			destroyDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
+		};
 	});
 </script>
 
+<svelte:head>
+	<meta property="og:site_name" content="Dexbooru" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content={page.url.href} />
+	<meta property="og:locale" content="en_US" />
+</svelte:head>
+
 <Navbar />
-<div style="flex:1">
-	<slot />
+<div class="flex-grow">
+	{@render children?.()}
 </div>
 <Footer />
 <SvelteToast options={TOAST_DEFAULT_OPTIONS} />
 <GlobalSearchModal />
+<HiddenPostModal />
+<PostCardReportModal />
+<EditPostModal />
+<DeletePostConfirmationModal />
+<ImagePreviewModal />
+<CollectionsPostUpdateModal />
+<EditCollectionModal />
+<DeleteCollectionConfirmationModal />
+<LabelMetadataModal />

@@ -3,19 +3,27 @@
 	import { getTags } from '$lib/client/api/tags';
 	import { CHAR_OPTIONS } from '$lib/client/constants/labels';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
+	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Spinner } from 'flowbite-svelte';
 	import { PalleteSolid, TagSolid } from 'flowbite-svelte-icons';
+	import { SvelteMap } from 'svelte/reactivity';
 
-	export let labelType: 'tag' | 'artist';
+	interface Props {
+		labelType: 'tag' | 'artist';
+	}
 
-	let loadingLabels = false;
-	let finishedLabelPagination = false;
-	let hasLoadedLabelsOnce = false;
-	let labels: string[] = [];
+	let { labelType }: Props = $props();
+
+	let loadingLabels = $state(false);
+	let finishedLabelPagination = $state(false);
+	let hasLoadedLabelsOnce = $state(false);
+	let labels: string[] = $state([]);
+	let labelCounts = $state(new SvelteMap<string, number>());
 	let pageNumber = 0;
-	let selectedLabel = '';
+	let selectedLabel = $state('');
 
 	const getLabelsOnCurrentPage = async (event: Event, pressedLoadingMore: boolean) => {
 		const target = event.target as HTMLButtonElement;
@@ -24,6 +32,7 @@
 		loadingLabels = true;
 		if (!pressedLoadingMore) {
 			labels = [];
+			labelCounts = new SvelteMap<string, number>();
 			pageNumber = 0;
 			finishedLabelPagination = false;
 			selectedLabel = target.innerText;
@@ -35,9 +44,16 @@
 				: await getArtists(letter, pageNumber);
 
 		if (response.ok) {
-			const rawLabels: (Tag & Artist)[] = await response.json();
+			const responseData: TApiResponse<(Tag & Artist)[]> = await response.json();
+			const rawLabels: (Tag & Artist)[] = responseData.data;
 			const rawLabelNames = rawLabels.map((rawLabel) => rawLabel.name);
 			labels = !pressedLoadingMore ? rawLabelNames : [...labels, ...rawLabelNames];
+			rawLabels.forEach((rawLabel) => {
+				const labelName = rawLabel.name;
+				const labelCount = rawLabel.postCount;
+				labelCounts.set(labelName, labelCount);
+			});
+
 			pageNumber++;
 			hasLoadedLabelsOnce = true;
 			if (pressedLoadingMore && rawLabelNames.length === 0) {
@@ -53,9 +69,9 @@
 </script>
 
 <main class="flex flex-col justify-center m-7 space-y-5">
-	<p class="text-3xl dark:text-white text-center">
+	<h1 class="text-4xl dark:text-white text-center">
 		{labelType === 'tag' ? 'Tags' : 'Artists'} Index
-	</p>
+	</h1>
 	<div class="flex flex-wrap">
 		{#each CHAR_OPTIONS as option}
 			<Button
@@ -70,12 +86,12 @@
 	<section class="grid gap-3 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
 		{#if hasLoadedLabelsOnce}
 			{#if labels.length > 0}
-				{#each labels as label}
+				{#each labels as label (label)}
 					<a
 						class="text-center inline-flex justify-center space-x-2 border rounded p-2 leading-none dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-						href="/posts/{labelType}/{label}"
+						href="/posts/{labelType}/{encodeURIComponent(label)}"
 					>
-						<span># {label}</span>
+						<span># {label} - {formatNumberWithCommas(labelCounts.get(label) ?? 0)}</span>
 						{#if labelType === 'tag'}
 							<TagSolid />
 						{:else}
@@ -100,7 +116,7 @@
 	{/if}
 
 	{#if !loadingLabels && hasLoadedLabelsOnce && labels.length === 0}
-		<p class="text-6xl dark:text-white text-center">
+		<p class="text-2xl dark:text-white text-center a">
 			No {labelType}s were indexed that start with {selectedLabel}
 		</p>
 	{/if}

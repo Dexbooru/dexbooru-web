@@ -5,6 +5,17 @@ body {
 	padding: 0;
 }
 
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6
+ {
+	cursor: text !important;
+}
+
 #app-container {
 	min-height: 100%;
 	display: flex;
@@ -14,4 +25,10 @@ body {
 
 #footer-copyright {
 	align-self: 'center';
+}
+
+.hide-alt-text {
+	text-indent: 100%;
+	white-space: nowrap;
+	overflow: hidden;
 }

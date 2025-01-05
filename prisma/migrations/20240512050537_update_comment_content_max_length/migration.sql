@@ -1,0 +1,5 @@
+
+-- AlterTable
+ALTER TABLE "Comment" ALTER COLUMN "content" SET DATA TYPE VARCHAR(1500);
+
+

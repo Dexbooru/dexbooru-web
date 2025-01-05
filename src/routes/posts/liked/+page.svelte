@@ -1,0 +1,16 @@
+<script lang="ts">
+	import PostsWrapper from '$lib/client/components/posts/container/PostsWrapper.svelte';
+	import { updatePostStores } from '$lib/client/helpers/posts';
+	import type { PageData } from './$types';
+
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
+	$effect(() => {
+		updatePostStores(data);
+	});
+</script>
+
+<PostsWrapper postsSection="Liked Posts" />

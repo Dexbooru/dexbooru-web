@@ -1,78 +1,75 @@
 <script lang="ts">
-	import { getComments } from '$lib/client/api/comments';
-	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { commentTreeStore } from '$lib/client/stores/comments';
+	import { createPostCommentsPaginator } from '$lib/client/api/comments';
+	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
+	import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
 	import CommentTree from '$lib/shared/helpers/comments';
-	import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
-	import type { IComment } from '$lib/shared/types/comments';
-	import { toast } from '@zerodevx/svelte-toast';
+	import type { TComment } from '$lib/shared/types/comments';
 	import { Button } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import Comment from './Comment.svelte';
 
-	export let postId: string;
-	export let parentCommentId: string | null = null;
+	interface Props {
+		postId: string;
+		postCommentCount: number;
+	}
 
-	let replies: IComment[] = [];
+	let { postId, postCommentCount = $bindable() }: Props = $props();
+
+	let noMoreComments = $state(false);
+	let topLevelComments: TComment[] = $state([]);
 	let commentsLoading = false;
-	let loadMoreButtonText = 'Load comments';
+	let loadMoreButtonText = $state('Load comments');
 
-	const createLoadRepliesClickHandler = (
-		postId: string,
-		parentCommentId: string | null
-	): (() => Promise<void>) => {
-		let pageNumber = 0;
+	const commentTree = getCommentTree();
+	const user = getAuthenticatedUser();
+	const rootLevelCommentLoader = createPostCommentsPaginator(postId, null, commentTree);
 
-		return async () => {
-			commentsLoading = true;
-			const response = await getComments(postId, parentCommentId, pageNumber);
-			commentsLoading = false;
+	const handleLoadMoreCommentsClick = async () => {
+		commentsLoading = true;
+		const paginationData = await rootLevelCommentLoader();
+		commentsLoading = false;
 
-			if (response.ok) {
-				const comments: IComment[] = convertDataStructureToIncludeDatetimes<IComment>(
-					(await response.json()) as IComment[],
-					['createdAt']
-				);
-
-				commentTreeStore.update((currentCommentTree) => {
-					comments.forEach((comment) => {
-						currentCommentTree.addComment(comment);
-					});
-
-					return currentCommentTree;
-				});
-
-				pageNumber++;
-				loadMoreButtonText = pageNumber > 0 ? 'Load more comments' : 'Load comments';
-			} else {
-				toast.push(
-					'There was an error that occured while loading the comments',
-					FAILURE_TOAST_OPTIONS
-				);
-			}
-		};
+		const { pageNumber, noMoreComments: noMoreCommentsResult } = paginationData;
+		loadMoreButtonText = pageNumber > 0 ? 'Load more comments' : 'Load comments';
+		noMoreComments = noMoreCommentsResult;
 	};
 
-	const commentTreeUnsubscribe = commentTreeStore.subscribe((currentCommentTree) => {
-		replies = currentCommentTree.getReplies(parentCommentId === null ? 'root' : parentCommentId);
+	const commentTreeUnsubscribe = commentTree.subscribe((currentCommentTree) => {
+		topLevelComments = currentCommentTree.getReplies('root');
+		if (currentCommentTree.getCount() > 0) {
+			postCommentCount = currentCommentTree.getCount();
+		}
 	});
 
-	onDestroy(() => {
-		commentTreeStore.set(new CommentTree());
-		commentTreeUnsubscribe();
+	onMount(() => {
+		if (postCommentCount > 0) handleLoadMoreCommentsClick();
+
+		return () => {
+			commentTree.set(new CommentTree());
+			commentTreeUnsubscribe();
+		};
 	});
 </script>
 
-<section class="ml-2">
-	{#each replies as reply}
-		<Comment onLoadRepliesClick={createLoadRepliesClickHandler(postId, reply.id)} comment={reply} />
-		<svelte:self {postId} parentCommentId={reply.id} />
-	{/each}
+{#if $commentTree.getCount() > 0}
+	<section class="ml-2">
+		{#each topLevelComments as comment (comment.id)}
+			<Comment currentDepth={1} {comment} />
+		{/each}
 
-	<Button
-		on:click={createLoadRepliesClickHandler(postId, parentCommentId)}
-		color="blue"
-		class="mt-2"
-		>{loadMoreButtonText}
-	</Button>
-</section>
+		{#if !noMoreComments && topLevelComments.length % MAXIMUM_COMMENTS_PER_PAGE === 0}
+			<Button on:click={() => handleLoadMoreCommentsClick()} color="blue" class="mt-2"
+				>{loadMoreButtonText}</Button
+			>
+		{/if}
+	</section>
+{:else if postCommentCount === 0}
+	<div class="flex justify-left p-2">
+		<p class="text-gray-500 dark:text-gray-400 text-lg italic">
+			No comments found.
+			{#if $user}
+				Be the first to comment!
+			{/if}
+		</p>
+	</div>
+{/if}

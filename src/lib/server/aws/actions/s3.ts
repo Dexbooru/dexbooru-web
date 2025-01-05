@@ -1,13 +1,35 @@
-import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import awsS3 from '../s3';
+import { dev } from '$app/environment';
+import {
+	AWS_CLOUDFRONT_COLLECTION_PICTURE_BASE_URL,
+	AWS_CLOUDFRONT_POSTS_BASE_URL,
+	AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL,
+} from '$env/static/private';
+import {
+	AWS_LOCAL_COLLECTION_PICTURE_BASE_URL,
+	AWS_LOCAL_POSTS_BASE_URL,
+	AWS_LOCAL_PROFILE_PICTURE_BASE_URL,
+} from '$lib/server/constants/aws';
 import type { TS3ObjectSource } from '$lib/server/types/aws';
-import { AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL, AWS_CLOUDFRONT_POSTS_BASE_URL } from '$lib/server/constants/aws';
+import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import awsS3 from '../s3';
+
+const getObjectBaseUrl = (objectSource: TS3ObjectSource): string => {
+	switch (objectSource) {
+		case 'collections':
+			return dev
+				? AWS_LOCAL_COLLECTION_PICTURE_BASE_URL
+				: AWS_CLOUDFRONT_COLLECTION_PICTURE_BASE_URL;
+		case 'posts':
+			return dev ? AWS_LOCAL_POSTS_BASE_URL : AWS_CLOUDFRONT_POSTS_BASE_URL;
+		case 'profile_pictures':
+			return dev ? AWS_LOCAL_PROFILE_PICTURE_BASE_URL : AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL;
+		default:
+			return '';
+	}
+};
 
 export const buildObjectUrl = (objectSource: TS3ObjectSource, objectId: string): string => {
-	const baseUrl =
-		objectSource === 'profile_pictures'
-			? AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL
-			: AWS_CLOUDFRONT_POSTS_BASE_URL;
+	const baseUrl = getObjectBaseUrl(objectSource);
 	return `${baseUrl}/${objectId}`;
 };
 
@@ -20,14 +42,15 @@ export async function uploadToBucket(
 	bucketName: string,
 	objectSource: TS3ObjectSource,
 	fileBuffer: Buffer,
-	contentType: string = 'webp'
+	contentType: string = 'webp',
+	overrideObjectId: string = '',
 ): Promise<string> {
-	const objectId = crypto.randomUUID();
+	const objectId = overrideObjectId.length > 0 ? overrideObjectId : crypto.randomUUID();
 	const uploadParams = {
 		Bucket: bucketName,
 		Key: objectId,
 		Body: fileBuffer,
-		ContentType: contentType
+		ContentType: contentType,
 	};
 
 	await awsS3.send(new PutObjectCommand(uploadParams));
@@ -39,7 +62,7 @@ export async function deleteFromBucket(bucketName: string, objectUrl: string): P
 	const objectId = extractOjbectIdFromUrl(objectUrl);
 	const deleteParams = {
 		Bucket: bucketName,
-		Key: objectId
+		Key: objectId,
 	};
 
 	await awsS3.send(new DeleteObjectCommand(deleteParams));
@@ -47,7 +70,7 @@ export async function deleteFromBucket(bucketName: string, objectUrl: string): P
 
 export async function deleteBatchFromBucket(
 	bucketName: string,
-	objectUrls: string[]
+	objectUrls: string[],
 ): Promise<void> {
 	await Promise.all(objectUrls.map((objectUrl) => deleteFromBucket(bucketName, objectUrl)));
 }
@@ -56,12 +79,13 @@ export async function uploadBatchToBucket(
 	bucketName: string,
 	objectSources: TS3ObjectSource,
 	fileBuffers: Buffer[],
-	contentType: string = 'webp'
+	contentType: string = 'webp',
+	objectIds: string[] = [],
 ): Promise<string[]> {
 	const objectUrls = await Promise.all(
-		fileBuffers.map((fileBuffer) =>
-			uploadToBucket(bucketName, objectSources, fileBuffer, contentType)
-		)
+		fileBuffers.map((fileBuffer, index) =>
+			uploadToBucket(bucketName, objectSources, fileBuffer, contentType, objectIds[index]),
+		),
 	);
 	return objectUrls;
 }

@@ -1,18 +1,30 @@
 <script lang="ts">
-	import { notificationStore } from '$lib/client/stores/notifications';
-	import type { IFriendRequest } from '$lib/shared/types/friends';
+	import { getAuthenticatedUserNotifications } from '$lib/client/helpers/context';
+	import type { TFriendRequest } from '$lib/shared/types/friends';
 	import { Dropdown } from 'flowbite-svelte';
 	import { BullhornSolid } from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
 	import FriendRequest from './FriendRequest.svelte';
 
-	export let notificationCount: number;
+	interface Props {
+		notificationCount: number;
+	}
 
-	let friendRequests: IFriendRequest[] = [];
+	let { notificationCount }: Props = $props();
 
-	notificationStore.subscribe((notificationData) => {
+	let friendRequests: TFriendRequest[] = $state([]);
+
+	const userNotifications = getAuthenticatedUserNotifications();
+	const userNotificationsUnsubscribe = userNotifications.subscribe((notificationData) => {
 		if (!notificationData) return;
 
 		friendRequests = notificationData.friendRequests;
+	});
+
+	onMount(() => {
+		return () => {
+			userNotificationsUnsubscribe();
+		};
 	});
 </script>
 
@@ -20,7 +32,9 @@
 	triggeredBy="#notification-bell"
 	class="w-full max-w-sm rounded divide-y divide-gray-100 shadow dark:bg-gray-800 dark:divide-gray-700"
 >
-	<div slot="header" class="text-center py-2 font-bold">Notifications ({notificationCount})</div>
+	{#snippet header()}
+		<div class="text-center py-2 font-bold">Notifications ({notificationCount})</div>
+	{/snippet}
 	{#if notificationCount > 0}
 		{#each friendRequests as friendRequest (friendRequest)}
 			<FriendRequest {friendRequest} />

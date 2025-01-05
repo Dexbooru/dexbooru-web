@@ -9,7 +9,6 @@ import {
 import { MAXIMUM_CONTENT_LENGTH } from '../src/lib/shared/constants/comments';
 import { MAXIMUM_IMAGES_PER_POST } from '../src/lib/shared/constants/images';
 import CommentTree from '../src/lib/shared/helpers/comments';
-import { IComment } from '../src/lib/shared/types/comments';
 
 export type IMockPost = Post & { tags: Tag[]; artists: Artist[] };
 
@@ -133,7 +132,6 @@ class FakerMockGenerator {
 					this.enFaker.helpers.rangeToNumber({ min: 1, max: MAXIMUM_IMAGES_PER_POST })
 				)
 					.fill(-1)
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars
 					.map((_) => this.enFaker.image.urlLoremFlickr({ width: 400, height: 400 }))
 			};
 

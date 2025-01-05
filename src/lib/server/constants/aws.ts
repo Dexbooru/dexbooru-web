@@ -1,5 +1,17 @@
-export const AWS_DEFAULT_REGION = process.env.AWS_DEFAULT_REGION || 'us-west-2';
-export const AWS_CLOUDFRONT_POSTS_BASE_URL = process.env.AWS_CLOUDFRONT_POSTS_BASE_URL || '';
-export const AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL = process.env.AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL || '';
-export const AWS_PROFILE_PICTURE_BUCKET_NAME = process.env.AWS_PROFILE_PICTURE_BUCKET_NAME || '';
-export const AWS_POST_PICTURE_BUCKET_NAME = process.env.AWS_POST_PICTURE_BUCKET_NAME || '';
+import { dev } from '$app/environment';
+
+export const AWS_DEFAULT_REGION = 'us-west-2';
+export const AWS_PROFILE_PICTURE_BUCKET_NAME = dev ? 'dexbooru-dev-pfps' : 'dexbooru-prd-pfps';
+export const AWS_POST_PICTURE_BUCKET_NAME = dev ? 'dexbooru-dev-posts' : 'dexbooru-prd-posts';
+export const AWS_COLLECTION_PICTURE_BUCKET_NAME = dev
+	? 'dexbooru-dev-collections'
+	: 'dexbooru-prd-collections';
+export const AWS_BUCKET_NAMES = [
+	AWS_POST_PICTURE_BUCKET_NAME,
+	AWS_PROFILE_PICTURE_BUCKET_NAME,
+	AWS_COLLECTION_PICTURE_BUCKET_NAME,
+];
+export const AWS_S3_LOCAL_ENDPOINT = 'http://localhost:4566';
+export const AWS_LOCAL_POSTS_BASE_URL = `${AWS_S3_LOCAL_ENDPOINT}/${AWS_POST_PICTURE_BUCKET_NAME}`;
+export const AWS_LOCAL_PROFILE_PICTURE_BASE_URL = `${AWS_S3_LOCAL_ENDPOINT}/${AWS_PROFILE_PICTURE_BUCKET_NAME}`;
+export const AWS_LOCAL_COLLECTION_PICTURE_BASE_URL = `${AWS_S3_LOCAL_ENDPOINT}/${AWS_COLLECTION_PICTURE_BUCKET_NAME}`;

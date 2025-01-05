@@ -1,0 +1,30 @@
+
+-- CreateEnum
+CREATE TYPE "PostModerationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+
+-- CreateEnum
+CREATE TYPE "PostReportCategory" AS ENUM ('OFF_TOPIC', 'SPAM', 'INAPPROPRIATE', 'IMPROPER_TAGGING', 'ILLEGAL', 'OTHER');
+
+
+-- AlterTable
+ALTER TABLE "Artist"
+ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "description" VARCHAR(200),
+ADD COLUMN     "postCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "socialMediaLinks" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "Post"
+ADD COLUMN     "moderationStatus" "PostModerationStatus" NOT NULL DEFAULT 'PENDING';
+
+
+-- AlterTable
+ALTER TABLE "PostReport" DROP COLUMN "category",
+ADD COLUMN     "category" "PostReportCategory" NOT NULL,
+ALTER COLUMN "description" SET DATA TYPE VARCHAR(250);
+
+-- AlterTable
+ALTER TABLE "Tag"
+ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "postCount" INTEGER NOT NULL DEFAULT 0;

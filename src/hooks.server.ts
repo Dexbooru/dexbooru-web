@@ -1,17 +1,15 @@
-import { SESSION_ID_KEY } from '$lib/server/constants/cookies';
-import { getUserClaimsFromEncodedJWTToken } from '$lib/server/helpers/sessions';
-import type { Handle } from '@sveltejs/kit';
+import { dev } from '$app/environment';
+import { populateAuthenticatedUser } from '$lib/server/helpers/controllers';
+import type { Handle, HandleServerError } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const userJwtTokenEncoded = event.cookies.get(SESSION_ID_KEY);
-	if (userJwtTokenEncoded) {
-		const sessionUser = getUserClaimsFromEncodedJWTToken(userJwtTokenEncoded);
-		if (sessionUser) {
-			event.locals.user = sessionUser;
-		}
-	} else {
-		event.locals.user = null;
-	}
-
+	populateAuthenticatedUser(event);
 	return await resolve(event);
+};
+
+export const handleError: HandleServerError = async ({ error }) => {
+	const errorMessage = dev ? (error as Error).toString() : 'Internal Server Error';
+	return {
+		message: errorMessage,
+	};
 };

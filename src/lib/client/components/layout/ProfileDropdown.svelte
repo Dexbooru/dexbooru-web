@@ -1,15 +1,20 @@
 <script lang="ts">
-	import { notificationStore } from '$lib/client/stores/notifications';
-	import { authenticatedUserStore } from '$lib/client/stores/users';
+	import {
+		getAuthenticatedUser,
+		getAuthenticatedUserNotifications,
+	} from '$lib/client/helpers/context';
 	import { Avatar, Button, Dropdown, DropdownItem, Spinner } from 'flowbite-svelte';
 	import { AngleDownSolid } from 'flowbite-svelte-icons';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import NotificationBell from '../notifications/NotificationBell.svelte';
 	import NotificationList from '../notifications/NotificationList.svelte';
 
-	let notificationCount: number;
+	let notificationCount: number = $state(0);
 
-	const notificationUnsubscribe = notificationStore.subscribe((currentNotificationData) => {
+	const user = getAuthenticatedUser();
+	const notifications = getAuthenticatedUserNotifications();
+
+	const notificationUnsubscribe = notifications.subscribe((currentNotificationData) => {
 		if (!currentNotificationData) return;
 
 		notificationCount = Object.values(currentNotificationData)
@@ -19,12 +24,14 @@
 			.reduce((prev, cur) => prev + cur, 0);
 	});
 
-	onDestroy(() => {
-		notificationUnsubscribe();
+	onMount(() => {
+		return () => {
+			notificationUnsubscribe();
+		};
 	});
 </script>
 
-{#if $notificationStore}
+{#if $notifications}
 	<NotificationBell {notificationCount} />
 	<NotificationList {notificationCount} />
 {:else}
@@ -33,23 +40,20 @@
 
 <Button color="light" id="navbar-profile-picture" class="!p-1 flex space-x-4">
 	<Avatar
-		src={$authenticatedUserStore?.profilePictureUrl}
-		alt="profile picture of {$authenticatedUserStore?.username}"
-		class="mr-2"
+		src={$user?.profilePictureUrl}
+		alt="profile picture of {$user?.username}"
+		class="mr-2 hide-alt-text"
 	/>
-	{$authenticatedUserStore?.username}
+	{$user?.username}
 	<AngleDownSolid size="sm" class="!mr-2" />
 </Button>
 <Dropdown triggeredBy="#navbar-profile-picture">
-	<div slot="header" class="px-4 py-2">
-		<span class="block text-sm text-gray-900 dark:text-white"
-			>{$authenticatedUserStore?.username}</span
-		>
-		<span class="block truncate text-sm font-medium">{$authenticatedUserStore?.email}</span>
-	</div>
-	<DropdownItem href="/profile/{$authenticatedUserStore?.username}">Your Profile</DropdownItem>
-	<DropdownItem href="/profile/posts/uploaded">Your Posts</DropdownItem>
-	<DropdownItem href="/profile/posts/liked">Liked Posts</DropdownItem>
+	<DropdownItem href="/profile/{$user?.username}">Your Profile</DropdownItem>
+	<DropdownItem href="/posts/uploaded">Your Posts</DropdownItem>
+	<DropdownItem href="/collections/created">Your Collections</DropdownItem>
+	<DropdownItem href="/posts/liked">Liked Posts</DropdownItem>
 	<DropdownItem href="/profile/settings">Settings</DropdownItem>
-	<DropdownItem href="/profile/logout" slot="footer">Sign out</DropdownItem>
+	{#snippet footer()}
+		<DropdownItem href="/profile/logout">Sign out</DropdownItem>
+	{/snippet}
 </Dropdown>

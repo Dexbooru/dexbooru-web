@@ -1,16 +1,24 @@
 <script lang="ts">
-	import type { IAppSearchResult } from '$lib/shared/types/search';
+	import { getGlobalQuery } from '$lib/client/helpers/context';
+	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import {
 		Table,
 		TableBody,
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell
+		TableHeadCell,
 	} from 'flowbite-svelte';
+	import HighlightedText from '../reusable/HighlightedText.svelte';
 
-	export let labels: IAppSearchResult['tags'] | IAppSearchResult['artists'];
-	export let labelType: 'tag' | 'artist';
+	interface Props {
+		labels: TAppSearchResult['tags'] | TAppSearchResult['artists'];
+		labelType: 'tag' | 'artist';
+	}
+
+	let { labels, labelType }: Props = $props();
+
+	const globalQuery = getGlobalQuery();
 </script>
 
 <Table hoverable>
@@ -22,10 +30,14 @@
 		</TableHeadCell>
 	</TableHead>
 	<TableBody tableBodyClass="divide-y">
-		{#each labels || [] as label}
+		{#each labels ?? [] as label (label.id)}
 			<TableBodyRow>
-				<TableBodyCell>{label.id}</TableBodyCell>
-				<TableBodyCell>{label.name}</TableBodyCell>
+				<TableBodyCell>
+					<HighlightedText query={$globalQuery} fullText={label.id} />
+				</TableBodyCell>
+				<TableBodyCell>
+					<HighlightedText query={$globalQuery} fullText={label.name} />
+				</TableBodyCell>
 				<TableBodyCell>
 					<a
 						href="/posts/{labelType}/{label.name}"

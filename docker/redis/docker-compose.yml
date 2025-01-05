@@ -1,8 +1,8 @@
-version: '3.8'
-
 services:
   redis:
     image: redis:latest
+    restart: always
+    command: redis-server --requirepass ${DB_REDIS_PASSWORD}
     ports:
       - "${DB_REDIS_PORT}:${DB_REDIS_PORT}"
     environment:
@@ -10,6 +10,8 @@ services:
       REDIS_USER: ${DB_REDIS_USER}
       REDIS_PASSWORD: ${DB_REDIS_PASSWORD}
       REDIS_DISABLE_COMMANDS: "FLUSHDB,FLUSHALL"
+      REDIS_DATABASES: 16
+      REDIS_PORT: ${DB_REDIS_PORT}
     volumes:
       - ./data:/data
     container_name: dexbooru-redis

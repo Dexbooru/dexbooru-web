@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { getGlobalQuery } from '$lib/client/helpers/context';
 	import { formatDate } from '$lib/shared/helpers/dates';
-	import type { IAppSearchResult } from '$lib/shared/types/search';
+	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import {
 		Avatar,
 		Table,
@@ -8,10 +9,17 @@
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell
+		TableHeadCell,
 	} from 'flowbite-svelte';
+	import HighlightedText from '../reusable/HighlightedText.svelte';
 
-	export let users: IAppSearchResult['users'];
+	interface Props {
+		users: TAppSearchResult['users'];
+	}
+
+	let { users }: Props = $props();
+
+	const globalQuery = getGlobalQuery();
 </script>
 
 <Table hoverable>
@@ -24,10 +32,12 @@
 		</TableHeadCell>
 	</TableHead>
 	<TableBody tableBodyClass="divide-y">
-		{#each users || [] as user}
+		{#each users ?? [] as user (user.id)}
 			<TableBodyRow>
-				<TableBodyCell>{user.id}</TableBodyCell>
-                <TableBodyCell class="text-center">
+				<TableBodyCell>
+					<HighlightedText query={$globalQuery} fullText={user.id} />
+				</TableBodyCell>
+				<TableBodyCell class="text-center">
 					<Avatar
 						class="ml-auto mr-auto"
 						src={user.profilePictureUrl}
@@ -36,14 +46,16 @@
 					<a
 						href="/profile/{user.username}"
 						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-						>{user.username}</a
 					>
+						<HighlightedText query={$globalQuery} fullText={user.username} />
+					</a>
 				</TableBodyCell>
 				<TableBodyCell>{formatDate(new Date(user.createdAt))}</TableBodyCell>
 				<TableBodyCell>
 					<a
 						href="/profile/{user.username}"
-						class="font-medium text-primary-600 hover:underline dark:text-primary-500">View profile</a
+						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+						>View profile</a
 					>
 				</TableBodyCell>
 			</TableBodyRow>

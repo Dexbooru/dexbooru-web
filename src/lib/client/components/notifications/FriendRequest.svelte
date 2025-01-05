@@ -1,21 +1,27 @@
 <script lang="ts">
 	import { handleFriendRequest } from '$lib/client/api/friends';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { notificationStore } from '$lib/client/stores/notifications';
+	import { getAuthenticatedUserNotifications } from '$lib/client/helpers/context';
+	import { chatStore } from '$lib/client/stores/chat';
 	import { getTimeDifferenceString } from '$lib/shared/helpers/dates';
-	import type { IFriendRequest, TFriendRequestAction } from '$lib/shared/types/friends';
+	import type { TFriendRequest, TFriendRequestAction } from '$lib/shared/types/friends';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button, DropdownItem } from 'flowbite-svelte';
 
-	export let friendRequest: IFriendRequest;
+	interface Props {
+		friendRequest: TFriendRequest;
+	}
 
-	let friendshipActionLoading = false;
+	let { friendRequest }: Props = $props();
+
+	let friendshipActionLoading = $state(false);
+
+	const userNotifications = getAuthenticatedUserNotifications();
 
 	const handleFriendshipAction = async (action: TFriendRequestAction) => {
 		friendshipActionLoading = true;
-		const response = await handleFriendRequest({
-			senderUserId: friendRequest.senderUser.id,
-			action
+		const response = await handleFriendRequest(friendRequest.senderUser.username, {
+			action,
 		});
 		friendshipActionLoading = false;
 
@@ -26,20 +32,31 @@
 					: 'You rejected the friend request successfully!';
 			toast.push(toastMessage, SUCCESS_TOAST_OPTIONS);
 
-			notificationStore.update((currentNotificationData) => {
+			userNotifications.update((currentNotificationData) => {
 				if (!currentNotificationData) return null;
 
 				currentNotificationData.friendRequests = currentNotificationData.friendRequests.filter(
-					(currentFriendRequest) => currentFriendRequest.id !== friendRequest.id
+					(currentFriendRequest) => currentFriendRequest.id !== friendRequest.id,
 				);
 
 				return currentNotificationData;
 			});
+
+			if (action === 'accept') {
+				chatStore.update((currentChatData) => {
+					currentChatData.friends.push({
+						id: friendRequest.senderUser.id,
+						username: friendRequest.senderUser.username,
+						profilePictureUrl: friendRequest.senderUser.profilePictureUrl,
+					});
+
+					return currentChatData;
+				});
+			}
 		} else {
-			console.log(await response.json());
 			toast.push(
 				'An error occured while trying to accept the friend request!',
-				FAILURE_TOAST_OPTIONS
+				FAILURE_TOAST_OPTIONS,
 			);
 		}
 	};

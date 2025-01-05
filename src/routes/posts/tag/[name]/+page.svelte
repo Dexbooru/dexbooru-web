@@ -1,21 +1,19 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import PostWrapper from '$lib/client/components/posts/container/PostWrapper.svelte';
-	import {
-		originalPostsPageStore,
-		postPaginationStore,
-		postsPageStore
-	} from '$lib/client/stores/posts';
+	import { page } from '$app/state';
+	import PostsWrapper from '$lib/client/components/posts/container/PostsWrapper.svelte';
+	import { updatePostStores } from '$lib/client/helpers/posts';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
-	const tagName = $page.params.name;
-
-	$: {
-		postPaginationStore.set(data);
-		postsPageStore.set(data.posts);
-		originalPostsPageStore.set(data.posts);
+	interface Props {
+		data: PageData;
 	}
+
+	let { data }: Props = $props();
+	const tagName = page.params.name;
+
+	$effect(() => {
+		updatePostStores(data);
+	});
 </script>
 
-<PostWrapper postsSection="Posts with the tag: {tagName}" />
+<PostsWrapper postsSection="Posts with the tag: {tagName}" />

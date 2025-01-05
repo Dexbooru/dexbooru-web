@@ -1,1 +1,1 @@
-export const MAX_ARTISTS_PER_PAGE = 100;
+export const MAXIMUM_ARTISTS_PER_PAGE = 100;

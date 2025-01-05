@@ -1,28 +1,39 @@
 <script lang="ts">
 	import { REPORT_MODAL_NAME } from '$lib/client/constants/layout';
-	import { modalStore } from '$lib/client/stores/layout';
+	import { getActiveModal } from '$lib/client/helpers/context';
 	import { REPORT_REASON_CATEGORIES } from '$lib/shared/constants/reports';
-	import type { ReportReasonCategory } from '$lib/shared/types/reports';
+	import { ReportReasonCategory } from '$lib/shared/types/reports';
 	import { Button, Label, Modal, Select, Textarea } from 'flowbite-svelte';
+	import { onMount } from 'svelte';
 
-	export let postId: string;
+	let postId: string = $state('');
+	let reportVerbalReason = $state('');
+	let selectedReportReasonCategory: ReportReasonCategory | '' = $state('');
 
-	let reportVerbalReason = '';
-	let selectedReportReasonCategory: ReportReasonCategory;
+	const activeModal = getActiveModal();
+
+	const modalStoreUnsubscribe = activeModal.subscribe((data) => {
+		if (data.focusedModalName === REPORT_MODAL_NAME) {
+			const { postId: focusedPostId } = data.modalData as { postId: string };
+			postId = focusedPostId;
+		}
+	});
+
+	onMount(() => {
+		return () => {
+			modalStoreUnsubscribe();
+		};
+	});
 </script>
 
 <Modal
-	open={$modalStore.isOpen && $modalStore.focusedModalName === REPORT_MODAL_NAME}
-	on:close={() => modalStore.set({ isOpen: false, focusedModalName: null })}
+	open={$activeModal.isOpen && $activeModal.focusedModalName === REPORT_MODAL_NAME}
+	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	size="xs"
 	outsideclose
 	class="w-full"
+	title="Report this post anonymously!"
 >
-	<h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
-		Report this post anonymously!
-		{postId}
-	</h3>
-
 	<Label class="space-y-2">
 		<span>Report category</span>
 		<Select
@@ -31,7 +42,7 @@
 			items={REPORT_REASON_CATEGORIES.map((category) => {
 				return {
 					name: category,
-					value: category
+					value: category,
 				};
 			})}
 		/>

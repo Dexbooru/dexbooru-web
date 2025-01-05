@@ -1,4 +1,4 @@
-import { buildUrl } from '$lib/shared/helpers/urls';
+import { buildUrl } from '$lib/client/helpers/urls';
 
 export const getArtists = async (letter: string, pageNumber: number): Promise<Response> => {
 	const finalUrl = buildUrl(`/api/artists/${letter}`, { pageNumber });

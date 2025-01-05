@@ -1,27 +1,57 @@
 <script lang="ts">
+	import type { TAuthFormRequirementData } from '$lib/client/types/stores';
+	import {
+		MAXIMUM_EMAIL_LENGTH,
+		MAXIMUM_PASSWORD_LENGTH,
+		MAXIMUM_USERNAME_LENGTH,
+	} from '$lib/shared/constants/auth';
 	import { getEmailRequirements } from '$lib/shared/helpers/auth/email';
 	import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
 	import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
 	import { Input, Label, Toggle } from 'flowbite-svelte';
+	import type { Writable } from 'svelte/store';
 	import FieldRequirements from '../reusable/FieldRequirements.svelte';
 
-	export let input: string;
-	export let inputName: string;
-	export let comparisonInput: string | null = null;
-	export let labelTitle: string;
-	export let labelStyling: string = '';
-	export let inputFieldType: 'username' | 'email' | 'password' | 'password-confirm';
-	export let showRequirements: boolean = true;
+	interface Props {
+		input: string;
+		inputName: string;
+		comparisonInput?: string | null;
+		labelTitle: string;
+		labelStyling?: string;
+		inputFieldType: 'username' | 'email' | 'password' | 'password-confirm' | 'otp-code';
+		showRequirements?: boolean;
+		formStore?: Writable<TAuthFormRequirementData> | null;
+	}
 
-	let satisfiedRequirements: string[] = [];
-	let unsatisfiedRequirements: string[] = [];
-	let showPassword = false;
-	let showConfirmedPassword = false;
+	let {
+		input = $bindable(),
+		inputName,
+		comparisonInput = $bindable(),
+		labelTitle,
+		labelStyling = '',
+		inputFieldType,
+		showRequirements = true,
+		formStore = null,
+	}: Props = $props();
+
+	let satisfiedRequirements: string[] = $state([]);
+	let unsatisfiedRequirements: string[] = $state([]);
+	let showPassword = $state(false);
+	let showConfirmedPassword = $state(false);
 
 	const onUsernameChange = () => {
 		const { satisfied, unsatisfied } = getUsernameRequirements(input);
 		satisfiedRequirements = satisfied;
 		unsatisfiedRequirements = unsatisfied;
+
+		if (formStore) {
+			formStore.update((data) => {
+				return {
+					...data,
+					username: { satisfied, unsatisfied },
+				};
+			});
+		}
 	};
 
 	const onPasswordChange = () => {
@@ -29,6 +59,26 @@
 
 		satisfiedRequirements = satisfied;
 		unsatisfiedRequirements = unsatisfied;
+
+		if (formStore) {
+			formStore.update((data) => {
+				return {
+					...data,
+					password: { satisfied, unsatisfied },
+				};
+			});
+		}
+	};
+
+	const onConfirmedPasswordChange = () => {
+		if (formStore) {
+			formStore.update((data) => {
+				return {
+					...data,
+					confirmedPassword: input === comparisonInput,
+				};
+			});
+		}
 	};
 
 	const onEmailChange = () => {
@@ -36,6 +86,15 @@
 
 		satisfiedRequirements = satisfied;
 		unsatisfiedRequirements = unsatisfied;
+
+		if (formStore) {
+			formStore.update((data) => {
+				return {
+					...data,
+					email: { satisfied, unsatisfied },
+				};
+			});
+		}
 	};
 </script>
 
@@ -51,6 +110,7 @@
 					name={inputName}
 					placeholder="•••••"
 					required
+					maxlength={MAXIMUM_PASSWORD_LENGTH}
 				/>
 				{#if showRequirements}
 					<FieldRequirements
@@ -69,10 +129,12 @@
 		<div class="flex flex-col space-y-2">
 			<Input
 				bind:value={input}
+				on:input={onConfirmedPasswordChange}
 				type={showConfirmedPassword ? 'text' : 'password'}
 				name={inputName}
 				placeholder="•••••"
 				required
+				maxlength={MAXIMUM_PASSWORD_LENGTH}
 			/>
 			<Toggle bind:checked={showConfirmedPassword}>Show password</Toggle>
 
@@ -90,6 +152,7 @@
 				name={inputName}
 				placeholder="Your username"
 				required
+				maxlength={MAXIMUM_USERNAME_LENGTH}
 			/>
 			<FieldRequirements
 				requirementsPlacement="right-end"
@@ -109,6 +172,7 @@
 				name={inputName}
 				placeholder="Your email"
 				required
+				maxlength={MAXIMUM_EMAIL_LENGTH}
 			/>
 
 			<FieldRequirements
@@ -119,5 +183,18 @@
 				{unsatisfiedRequirements}
 			/>
 		</div>
+	{:else if inputFieldType === 'otp-code'}
+		<span>{labelTitle}</span>
+		<Input
+			id="otpCode"
+			name="otpCode"
+			type="text"
+			maxlength={6}
+			pattern="[0-9]*"
+			bind:value={input}
+			placeholder="Enter the code from your app"
+			required
+			autocomplete="off"
+		/>
 	{/if}
 </Label>

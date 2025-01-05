@@ -1,29 +1,32 @@
 <script lang="ts">
 	import { getGlobalSearchResults } from '$lib/client/api/search';
+	import { GLOBAL_SEARCH_MODAL_NAME } from '$lib/client/constants/layout';
 	import {
 		GLOBAL_SEARCH_INPUT_ELEMENT_ID,
-		SEARCH_DEBOUNCE_TIMEOUT_MS
+		SEARCH_DEBOUNCE_TIMEOUT_MS,
 	} from '$lib/client/constants/search';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { getActiveModal, getGlobalQuery } from '$lib/client/helpers/context';
 	import { debounce, memoize } from '$lib/client/helpers/util';
-	import { searchModalActiveStore } from '$lib/client/stores/layout';
-	import { queryStore } from '$lib/client/stores/search';
-	import type { IAppSearchResult } from '$lib/shared/types/search';
+	import type { TApiResponse } from '$lib/shared/types/api';
+	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Modal, Spinner } from 'flowbite-svelte';
-	import { onDestroy } from 'svelte';
+	import { GradientButton, Modal, Spinner } from 'flowbite-svelte';
+	import { onMount } from 'svelte';
 	import Searchbar from '../reusable/Searchbar.svelte';
 	import SearchResultsContainer from './SearchResultsContainer.svelte';
 
-	let currentSearchResults: IAppSearchResult | null = null;
-	let searchResultsLoading = false;
+	let currentSearchResults: TAppSearchResult | null = $state(null);
+	let searchResultsLoading = $state(false);
 
-	const searchModalUnsubsribe = searchModalActiveStore.subscribe((active) => {
-		if (active) {
+	const activeModal = getActiveModal();
+	const globalQuery = getGlobalQuery();
+
+	const modalStoreUnsubscribe = activeModal.subscribe((data) => {
+		if (data.focusedModalName === GLOBAL_SEARCH_MODAL_NAME) {
 			const globalSearchInput = document.querySelector(
-				`#${GLOBAL_SEARCH_INPUT_ELEMENT_ID}`
+				`#${GLOBAL_SEARCH_INPUT_ELEMENT_ID}`,
 			) as HTMLInputElement | null;
-
 			if (globalSearchInput) {
 				globalSearchInput.focus();
 			}
@@ -35,11 +38,12 @@
 	const fetchQueryResults = memoize(async (query: string) => {
 		const response = await getGlobalSearchResults(query);
 		if (response.ok) {
-			return (await response.json()) as IAppSearchResult;
+			const responseData: TApiResponse<TAppSearchResult> = await response.json();
+			return responseData.data;
 		} else {
 			toast.push(
 				'An unexpected error occured while retrieving the search results',
-				FAILURE_TOAST_OPTIONS
+				FAILURE_TOAST_OPTIONS,
 			);
 			return null;
 		}
@@ -53,28 +57,41 @@
 
 	const debouncedFetchQueryResults = debounce(async (query: string) => {
 		searchResultsLoading = true;
-		queryStore.set(query);
-		currentSearchResults = query ? await fetchQueryResults(query as never) : null;
+		globalQuery.set(query);
+		currentSearchResults = query ? await fetchQueryResults(query) : null;
 		searchResultsLoading = false;
 	}, SEARCH_DEBOUNCE_TIMEOUT_MS) as (query: string) => void;
 
-	onDestroy(() => {
-		searchModalUnsubsribe();
+	onMount(() => {
+		const searchbarInput = document.getElementById(
+			GLOBAL_SEARCH_INPUT_ELEMENT_ID,
+		) as HTMLInputElement;
+		const clearSearchResultsIntervalId = setInterval(() => {
+			if (searchbarInput && searchbarInput.value.length === 0) {
+				currentSearchResults = null;
+			}
+		}, 500);
+
+		return () => {
+			clearInterval(clearSearchResultsIntervalId);
+			modalStoreUnsubscribe();
+		};
 	});
 </script>
 
 <Modal
-	title="Find tags, artists, users and posts"
-	open={$searchModalActiveStore}
+	title="Find global resources"
+	open={$activeModal.isOpen && $activeModal.focusedModalName === GLOBAL_SEARCH_MODAL_NAME}
 	outsideclose
 	class="w-screen"
 	placement="top-center"
-	on:close={() => searchModalActiveStore.set(false)}
+	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 >
 	<div class="flex relative">
 		<Searchbar
 			inputElementId={GLOBAL_SEARCH_INPUT_ELEMENT_ID}
 			isGlobal
+			autofocus
 			width="100%"
 			placeholder="Enter your search query"
 			queryInputHandler={debouncedFetchQueryResults}
@@ -88,4 +105,10 @@
 	{#if currentSearchResults}
 		<SearchResultsContainer results={currentSearchResults} />
 	{/if}
+
+	<GradientButton
+		color="green"
+		on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+		href="/similarity-search">Find posts via similarity search here</GradientButton
+	>
 </Modal>

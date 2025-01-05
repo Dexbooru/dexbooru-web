@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { ACCOUNT_DELETION_CONFIRMATION_TEXT } from '$lib/shared/constants/auth';
-	import { Alert, Button, Card, Input, Label } from 'flowbite-svelte';
+	import { Button, Card, Input, Label } from 'flowbite-svelte';
 	import { slide } from 'svelte/transition';
+	import AuthInput from './AuthInput.svelte';
 
-	export let error: string | null = null;
-	export let errorType: string | null = null;
-
-	let confirmationText: string = '';
+	let confirmedPassword: string = $state('');
+	let confirmationText: string = $state('');
 </script>
 
 <Card>
@@ -23,17 +22,22 @@
 				placeholder={ACCOUNT_DELETION_CONFIRMATION_TEXT}
 				required
 			/>
+			<AuthInput
+				bind:input={confirmedPassword}
+				bind:comparisonInput={confirmedPassword}
+				labelTitle="Confirm your password"
+				inputFieldType="password-confirm"
+				inputName="confirmedNewPassword"
+			/>
 			{#if confirmationText === ACCOUNT_DELETION_CONFIRMATION_TEXT}
 				<p transition:slide>We are sad to see you leave 😭</p>
 			{/if}
 		</Label>
-		<Button type="submit" color="red">DELETE YOUR ACCOUNT</Button>
-
-		{#if error !== null && errorType === 'delete-account'}
-			<Alert dismissable border color="red" class="mt-2">
-				<span class="font-medium">Account deletion error!</span>
-				{error}
-			</Alert>
-		{/if}
+		<Button
+			type="submit"
+			color="red"
+			disabled={confirmationText !== ACCOUNT_DELETION_CONFIRMATION_TEXT ||
+				confirmedPassword.length === 0}>DELETE YOUR ACCOUNT</Button
+		>
 	</form>
 </Card>

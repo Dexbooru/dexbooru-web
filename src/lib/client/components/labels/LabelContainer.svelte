@@ -1,31 +1,76 @@
 <script lang="ts">
-	import { Badge } from 'flowbite-svelte';
+	import {
+		MAXIMUM_RENDERABLE_ARTISTS,
+		MAXIMUM_RENDERABLE_TAGS,
+	} from '$lib/client/constants/labels';
+	import { MAXIMUM_ARTIST_LENGTH, MAXIMUM_TAG_LENGTH } from '$lib/shared/constants/labels';
+	import { Badge, Button } from 'flowbite-svelte';
+	import type { ComponentProps } from 'svelte';
 
-	export let labels: string[] | { name: string }[] = [];
-	export let labelType: 'tag' | 'artist';
-	export let labelsAreLarge: boolean = false;
-	export let labelColor:
-		| 'none'
-		| 'red'
-		| 'yellow'
-		| 'green'
-		| 'indigo'
-		| 'purple'
-		| 'pink'
-		| 'blue'
-		| 'dark'
-		| 'primary'
-		| undefined = 'red';
+	interface Props {
+		sliceLabels?: boolean;
+		labels?: string[] | { name: string }[];
+		labelType: 'tag' | 'artist';
+		onPostsViewPage?: boolean;
+		labelsAreLarge?: boolean;
+		labelColor?: ComponentProps<Badge>['color'];
+		labelIsLink?: boolean;
+		labelIsDismissable?: boolean;
+		handleLabelClose?:
+			| ((event: CustomEvent<any> & { explicitOriginalTarget: Element }) => void)
+			| null;
+	}
+
+	let {
+		sliceLabels = false,
+		onPostsViewPage = false,
+		labels = [],
+		labelType,
+		labelsAreLarge = false,
+		labelColor = 'red',
+		labelIsLink = true,
+		labelIsDismissable = false,
+		handleLabelClose = null,
+	}: Props = $props();
+
+	const maximumLabelsLength = $derived(
+		labelType === 'tag' ? MAXIMUM_RENDERABLE_TAGS : MAXIMUM_RENDERABLE_ARTISTS,
+	);
+	const unwrappedLabels = $derived(
+		labels.map((label) => (typeof label === 'object' ? label.name : label)),
+	);
+	const slicedUnwrappedLabels = $derived(unwrappedLabels.slice(0, maximumLabelsLength));
+
+	let showAllLabels = $state(false);
+	let processedLabels: string[] = $derived.by(() => {
+		if (!sliceLabels) return unwrappedLabels;
+		return showAllLabels ? unwrappedLabels : slicedUnwrappedLabels;
+	});
+
+	const renderLabel = (label: string) => {
+		if (onPostsViewPage) return label;
+		return label.length >= 0.75 * maximumLabelLength ? label.slice(0, 20) + '...' : label;
+	};
+
+	const maximumLabelLength = labelType === 'tag' ? MAXIMUM_TAG_LENGTH : MAXIMUM_ARTIST_LENGTH;
 </script>
 
 <div class="flex flex-wrap">
-	{#each labels as label}
+	{#each processedLabels as label (label)}
 		<Badge
-			href="/posts/{labelType}/{typeof label === 'object' ? label.name : label}"
+			dismissable={labelIsDismissable}
+			on:close={handleLabelClose}
+			href={labelIsLink ? `/posts/${labelType}/${label}` : undefined}
 			large={labelsAreLarge}
 			class="ml-1 mr-1 mb-1"
 			rounded
-			color={labelColor}>{typeof label === 'object' ? label.name : label}</Badge
-		>
+			color={labelColor}
+			>{renderLabel(label)}
+		</Badge>
 	{/each}
 </div>
+{#if sliceLabels && labels.length > maximumLabelsLength}
+	<Button size="sm" class="ml-1 mr-1 mb-1" on:click={() => (showAllLabels = !showAllLabels)}
+		>{showAllLabels ? 'Show less' : 'Show all'}
+	</Button>
+{/if}

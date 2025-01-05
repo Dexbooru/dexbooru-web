@@ -1,18 +1,21 @@
-import type { TCommentSelector } from "../types/comments";
+import type { TCommentSelector } from '../types/comments';
 
-export const MAX_COMMENTS_PER_PAGE = 35;
+export const MAXIMUM_COMMENTS_PER_PAGE = 35;
 export const PUBLIC_COMMENT_SELECTORS: TCommentSelector = {
 	id: true,
+	postId: true,
 	parentCommentId: true,
+	replyCount: true,
 	content: true,
 	createdAt: true,
+	updatedAt: true,
 	author: {
 		select: {
 			id: true,
 			username: true,
-			profilePictureUrl: true
-		}
-	}
+			profilePictureUrl: true,
+		},
+	},
 };
 export const PUBLIC_AUTHOR_COMMENT_SELECTIONS: TCommentSelector = {
 	id: true,
@@ -28,9 +31,9 @@ export const PUBLIC_AUTHOR_COMMENT_SELECTIONS: TCommentSelector = {
 				select: {
 					id: true,
 					username: true,
-					profilePictureUrl: true
-				}
-			}
-		}
-	}
+					profilePictureUrl: true,
+				},
+			},
+		},
+	},
 };

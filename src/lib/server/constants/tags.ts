@@ -1,1 +1,1 @@
-export const MAX_TAGS_PER_PAGE = 100;
+export const MAXIMUM_TAGS_PER_PAGE = 100;

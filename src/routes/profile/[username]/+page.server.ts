@@ -1,38 +1,14 @@
-import { checkIfUserIsFriended } from '$lib/server/db/actions/friends';
-import { checkIfUsersAreFriends, findUserByName } from '$lib/server/db/actions/user';
+import { handleGetUser } from '$lib/server/controllers/users';
 import type { TFriendStatus } from '$lib/shared/types/friends';
-import { error } from '@sveltejs/kit';
+import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ parent, params }) => {
-	const { user } = await parent();
-	const targetUsername = params.username;
-	let friendStatus: TFriendStatus = 'not-friends';
+type UserResponse = {
+	targetUser: TUser;
+	friendStatus: TFriendStatus;
+	userStatistics: TUserStatistics;
+};
 
-	if (user && user.username === targetUsername) {
-		return {
-			targetUser: user,
-			friendStatus: 'is-self' as TFriendStatus
-		};
-	}
-
-	const targetUser = await findUserByName(targetUsername);
-	if (!targetUser) {
-		throw error(404, { message: `A user named ${targetUsername} does not exist!` });
-	}
-
-	const friendRequestPending = user ? await checkIfUserIsFriended(user.id, targetUser.id) : false;
-	if (friendRequestPending) {
-		friendStatus = 'request-pending';
-	} else {
-		const areFriends = user ? await checkIfUsersAreFriends(user.id, targetUser.id) : false;
-		if (areFriends) {
-			friendStatus = 'are-friends';
-		}
-	}
-
-	return {
-		targetUser,
-		friendStatus: friendStatus as TFriendStatus
-	};
+export const load: PageServerLoad = async (event) => {
+	return (await handleGetUser(event, 'page-server-load')) as UserResponse;
 };

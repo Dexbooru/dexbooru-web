@@ -1,0 +1,11 @@
+.git
+*Dockerfile*
+*docker-compose*
+node_modules
+.svelte-kit
+.vscode
+.github
+docker
+scripts
+dist
+*.md

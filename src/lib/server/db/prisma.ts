@@ -1,48 +1,12 @@
+import { dev } from '$app/environment';
 import { PrismaClient } from '@prisma/client';
-import { cacheQuery } from '../helpers/database';
 
-type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
 
 const prismaClientSingleton = () => {
-	return new PrismaClient().$extends({
-		name: 'redis-query-cache',
-		query: {
-			post: {
-				async findFirst({ args, query }) {
-					return await cacheQuery<typeof args>(args, query);
-				},
-				async findMany({ args, query }) {
-					return await cacheQuery<typeof args>(args, query);
-				},
-				async findUnique({ args, query }) {
-					return await cacheQuery<typeof args>(args, query);
-				}
-			},
-			tag: {
-				async findFirst({ args, query }) {
-					return await cacheQuery<typeof args>(args, query);
-				},
-				async findMany({ args, query }) {
-					return await cacheQuery<typeof args>(args, query);
-				},
-				async findUnique({ args, query }) {
-					return await cacheQuery<typeof args>(args, query);
-				}
-			},
-			artist: {
-				async findFirst({ args, query }) {
-					return await cacheQuery<typeof args>(args, query);
-				},
-				async findMany({ args, query }) {
-					return await cacheQuery<typeof args>(args, query);
-				},
-				async findUnique({ args, query }) {
-					return await cacheQuery<typeof args>(args, query);
-				}
-			}
-		}
-	});
+	return new PrismaClient();
 };
+
+type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
 
 const globalForPrisma = globalThis as unknown as {
 	prisma: PrismaClientSingleton | undefined;
@@ -50,6 +14,6 @@ const globalForPrisma = globalThis as unknown as {
 
 const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+if (dev) globalForPrisma.prisma = prisma;
 
 export default prisma;
