@@ -21,4 +21,14 @@ export type TComment = Comment & {
 		username: string;
 		profilePictureUrl: string;
 	};
+	parentComment?: TComment;
+};
+
+export type TCommentOrderByColumn = 'createdAt' | 'updatedAt';
+
+export type TCommentPaginationData = {
+	pageNumber: number;
+	ascending: boolean;
+	orderBy: TCommentOrderByColumn;
+	comments: TComment[];
 };

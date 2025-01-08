@@ -51,6 +51,7 @@
 	<DropdownItem href="/profile/{$user?.username}">Your Profile</DropdownItem>
 	<DropdownItem href="/posts/uploaded">Your Posts</DropdownItem>
 	<DropdownItem href="/collections/created">Your Collections</DropdownItem>
+	<DropdownItem href="/comments/created">Your Comments</DropdownItem>
 	<DropdownItem href="/posts/liked">Liked Posts</DropdownItem>
 	<DropdownItem href="/profile/settings">Settings</DropdownItem>
 	{#snippet footer()}

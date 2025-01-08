@@ -514,7 +514,12 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 			}
 
 			try {
-				deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, event.locals.user.profilePictureUrl);
+				if (
+					typeof event.locals.user.profilePictureUrl === 'string' &&
+					event.locals.user.profilePictureUrl.length > 0
+				) {
+					deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, event.locals.user.profilePictureUrl);
+				}
 
 				const newProfilePictureFileBuffer = removeProfilePicture
 					? await runDefaultProfilePictureTransformationPipeline(event.locals.user.username)
@@ -542,7 +547,8 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 						},
 					},
 				);
-			} catch {
+			} catch (error) {
+				console.log(error);
 				return createErrorResponse(
 					'form-action',
 					500,

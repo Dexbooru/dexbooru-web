@@ -5,6 +5,7 @@ import type {
 	TCollectionPaginationData,
 	TPostCollection,
 } from '$lib/shared/types/collections';
+import type { TComment, TCommentPaginationData } from '$lib/shared/types/comments';
 import type { TUserNotifications } from '$lib/shared/types/notifcations';
 import type { THiddenPagePostData, TPost, TPostPaginationData } from '$lib/shared/types/posts';
 import type { TUser } from '$lib/shared/types/users';
@@ -19,6 +20,8 @@ import {
 	CHANGE_USERNAME_AUTH_REQUIREMENTS_CONTEXT_KEY,
 	COLLECTIONS_PAGE_CONTEXT_KEY,
 	COLLECTION_PAGINATION_DATA_CONTEXT_KEY,
+	COMMENTS_PAGE_CONTEXT_KEY,
+	COMMENT_PAGINATION_DATA_CONTEXT_KEY,
 	COMMENT_TREE_CONTEXT_KEY,
 	FOOTER_CONTEXT_KEY,
 	HIDDEN_COLLECTIONS_PAGE_CONTEXT_KEY,
@@ -77,6 +80,18 @@ export const initLayoutContexts = (data: LayoutData) => {
 	});
 	updateUserCollections([]);
 	updateGlobalQuery('');
+	updateCommentsPage([]);
+	updateCommentPaginationData(null);
+};
+
+export const updateCommentsPage = (comments: TComment[]) => {
+	const updatedComments = writable(comments);
+	setContext(COMMENTS_PAGE_CONTEXT_KEY, updatedComments);
+};
+
+export const updateCommentPaginationData = (data: TCommentPaginationData | null) => {
+	const updatedData = writable(data);
+	setContext(COMMENT_PAGINATION_DATA_CONTEXT_KEY, updatedData);
 };
 
 export const updateGlobalQuery = (query: string) => {
@@ -187,6 +202,14 @@ export const updateAuthenticatedUserNotifications = (notifications: TUserNotific
 export const updateAuthenticatedUserPreferences = (userPreferences: UserPreference) => {
 	const updatedUserPreferences = writable(userPreferences);
 	setContext(USER_PREFERENCE_CONTEXT_KEY, updatedUserPreferences);
+};
+
+export const getCommentsPage = () => {
+	return getContext<Writable<TComment[]>>(COMMENTS_PAGE_CONTEXT_KEY);
+};
+
+export const getCommentPaginationData = () => {
+	return getContext<Writable<TCommentPaginationData | null>>(COMMENT_PAGINATION_DATA_CONTEXT_KEY);
 };
 
 export const getGlobalQuery = () => {

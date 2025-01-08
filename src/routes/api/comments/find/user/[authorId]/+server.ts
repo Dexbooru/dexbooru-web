@@ -27,6 +27,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 		authorId,
 		convertedPageNumber,
 		convertedPageLimit,
+		'createdAt',
 		PUBLIC_AUTHOR_COMMENT_SELECTIONS
 	);
 	if (!comments) {

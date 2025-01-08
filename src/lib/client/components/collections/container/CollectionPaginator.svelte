@@ -37,8 +37,8 @@
 
 	const firstPageUrl = buildUrl(page.url.pathname, {
 		pageNumber: '0',
-		orderBy: page.url.searchParams.get('orderBy') ?? null,
-		ascending: page.url.searchParams.get('ascending') ?? null,
+		orderBy: page.url.searchParams.get('orderBy') ?? 'createdAt',
+		ascending: page.url.searchParams.get('ascending') ?? false,
 	});
 
 	onMount(() => {

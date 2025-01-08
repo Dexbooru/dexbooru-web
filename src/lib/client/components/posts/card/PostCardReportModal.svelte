@@ -1,17 +1,21 @@
 <script lang="ts">
+	import { createPostReport } from '$lib/client/api/postReports';
 	import { REPORT_MODAL_NAME } from '$lib/client/constants/layout';
+	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getActiveModal } from '$lib/client/helpers/context';
 	import {
 		MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH,
 		REPORT_REASON_CATEGORIES,
 	} from '$lib/shared/constants/reports';
 	import type { PostReportCategory } from '@prisma/client';
+	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Label, Modal, Select, Textarea } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 
 	let postId: string = $state('');
 	let reportVerbalReason = $state('');
 	let selectedReportReasonCategory: PostReportCategory | '' = $state('');
+	let reportSending = $state(false);
 
 	const activeModal = getActiveModal();
 
@@ -28,6 +32,35 @@
 			postId = focusedPostId;
 		}
 	});
+
+	const sendReport = async () => {
+		if (selectedReportReasonCategory === '') {
+			toast.push(
+				'Please select a category in order to send the post report',
+				FAILURE_TOAST_OPTIONS,
+			);
+			return;
+		}
+
+		reportSending = true;
+
+		const response = await createPostReport(
+			postId,
+			selectedReportReasonCategory,
+			reportVerbalReason,
+		);
+		if (response.ok) {
+			toast.push('The post was reported successfully!', SUCCESS_TOAST_OPTIONS);
+			activeModal.set({ isOpen: false, focusedModalName: null });
+		} else {
+			toast.push(
+				'An error occurred while sending the report. Please try again later',
+				FAILURE_TOAST_OPTIONS,
+			);
+		}
+
+		reportSending = false;
+	};
 
 	onMount(() => {
 		return () => {
@@ -68,5 +101,10 @@
 			maxlength={MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH}
 		/>
 	</Label>
-	<Button class="w-full" color="red">Report this post</Button>
+	<Button
+		disabled={reportSending || selectedReportReasonCategory === ''}
+		on:click={sendReport}
+		class="w-full"
+		color="red">Report this post</Button
+	>
 </Modal>

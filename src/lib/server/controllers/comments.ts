@@ -2,12 +2,14 @@ import { MAXIMUM_COMMENTS_PER_PAGE, MAXIMUM_CONTENT_LENGTH } from '$lib/shared/c
 import type { RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { PUBLIC_COMMENT_SELECTORS } from '../constants/comments';
-import { pageNumberSchema } from '../constants/reusableSchemas';
+import { boolStrSchema, pageNumberSchema } from '../constants/reusableSchemas';
 import {
 	createComment,
 	deleteCommentById,
 	editCommentContentById,
 	findCommentById,
+	findComments,
+	findCommentsByAuthorId,
 	findCommentsByPostId,
 } from '../db/actions/comment';
 import { findPostById } from '../db/actions/post';
@@ -16,7 +18,16 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
-import type { TRequestSchema } from '../types/controllers';
+import type { TCommentSelector } from '../types/comments';
+import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
+
+const GeneralCommentsSchema = {
+	urlSearchParams: z.object({
+		pageNumber: pageNumberSchema,
+		ascending: boolStrSchema,
+		orderBy: z.enum(['createdAt', 'updatedAt']).default('createdAt'),
+	}),
+} satisfies TRequestSchema;
 
 const DeletePostCommentsSchema = {
 	pathParams: z.object({
@@ -68,6 +79,101 @@ const CreateCommentSchema = {
 			}),
 	}),
 } satisfies TRequestSchema;
+
+const generalCommentsSelectors: TCommentSelector = {
+	id: true,
+	content: true,
+	postId: true,
+	createdAt: true,
+	updatedAt: true,
+	parentComment: {
+		select: {
+			id: true,
+			createdAt: true,
+			updatedAt: true,
+			content: true,
+			author: {
+				select: {
+					username: true,
+					profilePictureUrl: true,
+				},
+			},
+		},
+	},
+	author: {
+		select: {
+			username: true,
+			profilePictureUrl: true,
+		},
+	},
+};
+
+export const handleGetAuthenticatedUserComments = async (
+	event: RequestEvent,
+	handlerType: TControllerHandlerVariant,
+) => {
+	return await validateAndHandleRequest(
+		event,
+		handlerType,
+		GeneralCommentsSchema,
+		async (data) => {
+			const user = event.locals.user;
+			const { orderBy, pageNumber } = data.urlSearchParams;
+
+			try {
+				const comments = await findCommentsByAuthorId(
+					user.id,
+					pageNumber,
+					MAXIMUM_COMMENTS_PER_PAGE,
+					orderBy,
+					generalCommentsSelectors,
+				);
+
+				const responseData = {
+					comments,
+					pageNumber,
+					orderBy,
+					ascending: false,
+				};
+
+				return createSuccessResponse(handlerType, 'Comments fetched successfully', responseData);
+			} catch {
+				return createErrorResponse(
+					handlerType,
+					500,
+					"An unexpected error occurred while fetching authenticated user's the comments",
+				);
+			}
+		},
+		true,
+	);
+};
+
+export const handleGetGeneralComments = async (
+	event: RequestEvent,
+	handlerType: TControllerHandlerVariant,
+) => {
+	return await validateAndHandleRequest(event, handlerType, GeneralCommentsSchema, async (data) => {
+		const { orderBy, ascending, pageNumber } = data.urlSearchParams;
+		try {
+			const comments = await findComments(pageNumber, orderBy, ascending, generalCommentsSelectors);
+			const responseData = {
+				comments,
+				pageNumber,
+				orderBy,
+				ascending,
+			};
+
+			return createSuccessResponse(handlerType, 'Comments fetched successfully', responseData);
+		} catch {
+			return createErrorResponse(
+				handlerType,
+				500,
+				'An unexpected error occurred while fetching the comments',
+			);
+		}
+	});
+};
 
 export const handleDeletePostComments = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(

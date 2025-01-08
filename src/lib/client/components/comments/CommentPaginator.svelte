@@ -1,32 +1,30 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { getPostPaginationData } from '$lib/client/helpers/context';
+	import { getCommentPaginationData } from '$lib/client/helpers/context';
 	import { buildUrl } from '$lib/client/helpers/urls';
-	import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
+	import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
 	import { Button, PaginationItem } from 'flowbite-svelte';
 	import { ArrowLeftSolid, ArrowRightSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 
 	let previousPageUrl: URL = $state(new URL('http://mock.com'));
 	let nextPageUrl: URL = $state(new URL('http://mock.com'));
-	let noPostsLeft: boolean = $state(false);
-	let noPostsOnPage: boolean = $state(false);
+	let noCommentsLeft: boolean = $state(false);
+	let noCommentsOnPage: boolean = $state(false);
 
-	const postPaginationData = getPostPaginationData();
+	const commentPaginationData = getCommentPaginationData();
 
-	const postPaginationUnsubscribe = postPaginationData.subscribe((paginationData) => {
+	const commentPaginationUnsubscribe = commentPaginationData.subscribe((paginationData) => {
 		if (paginationData) {
-			noPostsLeft = paginationData.posts.length !== MAXIMUM_POSTS_PER_PAGE;
-			noPostsOnPage = paginationData.posts.length === 0;
+			noCommentsLeft = paginationData.comments.length !== MAXIMUM_COMMENTS_PER_PAGE;
+			noCommentsOnPage = paginationData.comments.length === 0;
 
 			const previousPageLinkParams = {
-				...(page.url.pathname === '/search' ? { query: page.url.searchParams.get('query') } : {}),
 				pageNumber: paginationData.pageNumber - 1,
 				orderBy: paginationData.orderBy,
 				ascending: paginationData.ascending,
 			};
 			const nextPageLinkParams = {
-				...(page.url.pathname === '/search' ? { query: page.url.searchParams.get('query') } : {}),
 				pageNumber: paginationData.pageNumber + 1,
 				orderBy: paginationData.orderBy,
 				ascending: paginationData.ascending,
@@ -38,7 +36,6 @@
 	});
 
 	const firstPageUrl = buildUrl(page.url.pathname, {
-		...(page.url.pathname === '/search' ? { query: page.url.searchParams.get('query') } : {}),
 		pageNumber: '0',
 		orderBy: page.url.searchParams.get('orderBy') ?? 'createdAt',
 		ascending: page.url.searchParams.get('ascending') ?? false,
@@ -46,17 +43,17 @@
 
 	onMount(() => {
 		return () => {
-			postPaginationUnsubscribe();
+			commentPaginationUnsubscribe();
 		};
 	});
 </script>
 
-{#if $postPaginationData}
+{#if $commentPaginationData}
 	<div id="pagination-container" class="flex space-x-3 justify-center">
-		{#if noPostsOnPage && !!!['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $postPaginationData.pageNumber > 0}
+		{#if noCommentsOnPage && !!!['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $commentPaginationData.pageNumber > 0}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}
-			{#if ($postPaginationData.pageNumber - 1 >= 0 || noPostsLeft) && $postPaginationData.pageNumber !== 0}
+			{#if ($commentPaginationData.pageNumber - 1 >= 0 || noCommentsLeft) && $commentPaginationData.pageNumber !== 0}
 				<PaginationItem
 					href={previousPageUrl.href}
 					large
@@ -67,7 +64,7 @@
 				</PaginationItem>
 			{/if}
 
-			{#if !noPostsLeft}
+			{#if !noCommentsLeft}
 				<PaginationItem href={nextPageUrl.href} large class="flex items-center next-page-link">
 					Next
 					<ArrowRightSolid class="ml-2 w-5 h-5" />

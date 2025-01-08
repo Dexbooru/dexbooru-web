@@ -1,6 +1,26 @@
 import type { TCommentSelector } from '$lib/server/types/comments';
+import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
+import type { TCommentOrderByColumn } from '$lib/shared/types/comments';
 import type { Comment } from '@prisma/client';
 import prisma from '../prisma';
+
+export async function findComments(
+	pageNumber: number,
+	orderBy: TCommentOrderByColumn,
+	ascending: boolean,
+	selectors?: TCommentSelector,
+) {
+	const comments = await prisma.comment.findMany({
+		select: selectors,
+		skip: pageNumber * MAXIMUM_COMMENTS_PER_PAGE,
+		take: MAXIMUM_COMMENTS_PER_PAGE,
+		orderBy: {
+			[orderBy]: ascending ? 'asc' : 'desc',
+		},
+	});
+
+	return comments;
+}
 
 export async function findCommentById(commentId: string) {
 	return await prisma.comment.findFirst({
@@ -70,6 +90,7 @@ export async function findCommentsByAuthorId(
 	authorId: string,
 	pageNumber: number,
 	pageLimit: number,
+	orderBy: TCommentOrderByColumn,
 	selectors?: TCommentSelector,
 ): Promise<Comment[] | null> {
 	const comments = await prisma.comment.findMany({
@@ -80,7 +101,7 @@ export async function findCommentsByAuthorId(
 		skip: pageNumber * pageLimit,
 		take: pageLimit,
 		orderBy: {
-			createdAt: 'desc',
+			[orderBy]: 'desc',
 		},
 	});
 
@@ -129,12 +150,12 @@ export async function createComment(
 		await prisma.comment.update({
 			where: {
 				id: parentCommentId,
-			}, 
+			},
 			data: {
 				replyCount: {
 					increment: 1,
-				}
-			}
+				},
+			},
 		});
 	}
 
