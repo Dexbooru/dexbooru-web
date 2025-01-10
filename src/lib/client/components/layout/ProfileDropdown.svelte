@@ -52,6 +52,7 @@
 	<DropdownItem href="/posts/uploaded">Your Posts</DropdownItem>
 	<DropdownItem href="/collections/created">Your Collections</DropdownItem>
 	<DropdownItem href="/comments/created">Your Comments</DropdownItem>
+	<DropdownItem href="/friends">Your Friends</DropdownItem>
 	<DropdownItem href="/posts/liked">Liked Posts</DropdownItem>
 	<DropdownItem href="/profile/settings">Settings</DropdownItem>
 	{#snippet footer()}

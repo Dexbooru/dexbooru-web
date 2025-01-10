@@ -113,7 +113,7 @@
 			<strong>{userStatistics.averageViews}</strong></span
 		>
 
-		<div class="flex mt-3 space-x-3">
+		<div class="flex flex-col mt-3 space-y-3">
 			{#if $user}
 				{#if $user.id !== targetUser.id}
 					{#if friendStatus === 'not-friends'}

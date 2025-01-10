@@ -6,6 +6,73 @@ import type {
 import type { FriendRequest } from '@prisma/client';
 import prisma from '../prisma';
 
+export async function findAllUserFriendRequests(userId: string) {
+	const friendRequests = await prisma.friendRequest.findMany({
+		where: {
+			OR: [
+				{
+					senderUserId: userId,
+				},
+				{
+					receiverUserId: userId,
+				},
+			],
+		},
+		select: {
+			sentAt: true,
+			senderUser: {
+				select: {
+					id: true,
+					username: true,
+					profilePictureUrl: true,
+				},
+			},
+			receiverUser: {
+				select: {
+					id: true,
+					username: true,
+					profilePictureUrl: true,
+				},
+			},
+		},
+	});
+
+	const sentFriendRequests = friendRequests
+		.filter((friendRequest) => friendRequest.senderUser.id === userId)
+		.map((friendRequest) => ({ ...friendRequest.receiverUser, sentAt: friendRequest.sentAt }));
+	const receivedFriendRequests = friendRequests
+		.filter((friendRequest) => friendRequest.receiverUser.id === userId)
+		.map((friendRequest) => ({ ...friendRequest.senderUser, sentAt: friendRequest.sentAt }));
+
+	return {
+		sentFriendRequests,
+		receivedFriendRequests,
+	};
+}
+
+export async function findFriendRequestsSent(senderUserId: string) {
+	const friendRequestsSent = await prisma.friendRequest.findMany({
+		where: {
+			senderUserId,
+		},
+		orderBy: {
+			sentAt: 'desc',
+		},
+		select: {
+			sentAt: true,
+			receiverUser: {
+				select: {
+					id: true,
+					username: true,
+					profilePictureUrl: true,
+				},
+			},
+		},
+	});
+
+	return friendRequestsSent as TFriendRequest[];
+}
+
 export async function findFriendRequests(
 	receiverUserId: string,
 	selectors?: TFriendRequestSelector,

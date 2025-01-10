@@ -1,13 +1,18 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
-import { createFriendRequest, deleteFriendRequest } from '../db/actions/friends';
+import {
+	createFriendRequest,
+	deleteFriendRequest,
+	findAllUserFriendRequests,
+	findFriendsForUser,
+} from '../db/actions/friends';
 import { createFriend, deleteFriend, findUserByName } from '../db/actions/user';
 import {
 	createErrorResponse,
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
-import type { TRequestSchema } from '../types/controllers';
+import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
 const CreateFriendRequestSchema = {
 	pathParams: z.object({
@@ -29,6 +34,40 @@ const DeleteFriendSchema = {
 		username: z.string(),
 	}),
 } satisfies TRequestSchema;
+
+export const handleGetFriendData = async (
+	event: RequestEvent,
+	handlerType: TControllerHandlerVariant,
+) => {
+	return await validateAndHandleRequest(
+		event,
+		handlerType,
+		{} as TRequestSchema,
+		async (_) => {
+			const user = event.locals.user;
+
+			try {
+				const friends = await findFriendsForUser(user.id);
+				const { sentFriendRequests, receivedFriendRequests } = await findAllUserFriendRequests(
+					user.id,
+				);
+
+				return createSuccessResponse(handlerType, 'Fetched the friend data successfully', {
+					friends,
+					sentFriendRequests,
+					receivedFriendRequests,
+				});
+			} catch {
+				return createErrorResponse(
+					handlerType,
+					500,
+					'An unexpected error occured while trying to get the friend data',
+				);
+			}
+		},
+		true,
+	);
+};
 
 export const handleDeleteFriend = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -140,7 +179,7 @@ export const handleSendFriendRequest = async (event: RequestEvent) => {
 						'You cannot send a friend request to yourself',
 					);
 				}
-				
+
 				const receiverUser = await findUserByName(receiverUsername, { username: true, id: true });
 				if (!receiverUser) {
 					return createErrorResponse(

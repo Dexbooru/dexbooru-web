@@ -16,7 +16,7 @@ export const handleGetNotifications = async (event: RequestEvent) => {
 		GetNotificationsSchema,
 		async (_) => {
 			try {
-				const userId = event.locals.user?.id ?? '';
+				const userId = event.locals.user.id;
 				const notificationData = await getUserNotificationsFromId(userId);
 
 				return createSuccessResponse(

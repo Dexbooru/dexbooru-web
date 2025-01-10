@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { getAuthenticatedUserNotifications } from '$lib/client/helpers/context';
-	import type { TFriendRequest } from '$lib/shared/types/friends';
 	import { Dropdown } from 'flowbite-svelte';
 	import { BullhornSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-	import FriendRequest from './FriendRequest.svelte';
 
 	interface Props {
 		notificationCount: number;
@@ -12,13 +10,9 @@
 
 	let { notificationCount }: Props = $props();
 
-	let friendRequests: TFriendRequest[] = $state([]);
-
 	const userNotifications = getAuthenticatedUserNotifications();
 	const userNotificationsUnsubscribe = userNotifications.subscribe((notificationData) => {
 		if (!notificationData) return;
-
-		friendRequests = notificationData.friendRequests;
 	});
 
 	onMount(() => {
@@ -35,11 +29,7 @@
 	{#snippet header()}
 		<div class="text-center py-2 font-bold">Notifications ({notificationCount})</div>
 	{/snippet}
-	{#if notificationCount > 0}
-		{#each friendRequests as friendRequest (friendRequest)}
-			<FriendRequest {friendRequest} />
-		{/each}
-	{:else}
+	{#if notificationCount > 0}{:else}
 		<div class="p-4 text-center space-y-2 flex-col justify-center">
 			<p>We have nothing for you at the moment!</p>
 			<BullhornSolid class="ml-auto mr-auto" />

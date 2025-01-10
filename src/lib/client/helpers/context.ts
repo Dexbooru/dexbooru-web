@@ -6,6 +6,7 @@ import type {
 	TPostCollection,
 } from '$lib/shared/types/collections';
 import type { TComment, TCommentPaginationData } from '$lib/shared/types/comments';
+import type { TFriendData } from '$lib/shared/types/friends';
 import type { TUserNotifications } from '$lib/shared/types/notifcations';
 import type { THiddenPagePostData, TPost, TPostPaginationData } from '$lib/shared/types/posts';
 import type { TUser } from '$lib/shared/types/users';
@@ -24,6 +25,7 @@ import {
 	COMMENT_PAGINATION_DATA_CONTEXT_KEY,
 	COMMENT_TREE_CONTEXT_KEY,
 	FOOTER_CONTEXT_KEY,
+	FRIEND_DATA_CONTEXT_KEY,
 	HIDDEN_COLLECTIONS_PAGE_CONTEXT_KEY,
 	HIDDEN_POSTS_PAGE_CONTEXT_KEY,
 	NSFW_COLLECTIONS_PAGE_CONTEXT_KEY,
@@ -82,6 +84,12 @@ export const initLayoutContexts = (data: LayoutData) => {
 	updateGlobalQuery('');
 	updateCommentsPage([]);
 	updateCommentPaginationData(null);
+	updateFriendsData(null);
+};
+
+export const updateFriendsData = (friendsData: TFriendData | null) => {
+	const updatedFriendsData = writable(friendsData);
+	setContext(FRIEND_DATA_CONTEXT_KEY, updatedFriendsData);
 };
 
 export const updateCommentsPage = (comments: TComment[]) => {
@@ -202,6 +210,10 @@ export const updateAuthenticatedUserNotifications = (notifications: TUserNotific
 export const updateAuthenticatedUserPreferences = (userPreferences: UserPreference) => {
 	const updatedUserPreferences = writable(userPreferences);
 	setContext(USER_PREFERENCE_CONTEXT_KEY, updatedUserPreferences);
+};
+
+export const getFriendData = () => {
+	return getContext<Writable<TFriendData | null>>(FRIEND_DATA_CONTEXT_KEY);
 };
 
 export const getCommentsPage = () => {

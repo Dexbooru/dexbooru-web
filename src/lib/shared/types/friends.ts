@@ -1,8 +1,20 @@
 import type { FriendRequest, Prisma } from '@prisma/client';
 import type { DefaultArgs } from '@prisma/client/runtime/library';
 
+export type TFriendData = {
+	friends: TChatFriend[];
+	sentFriendRequests: (TChatFriend & { sentAt: Date })[];
+	receivedFriendRequests: (TChatFriend & { sentAt: Date })[];
+};
+
 export type TFriendRequest = FriendRequest & {
+	sentAt: Date;
 	senderUser: {
+		id: string;
+		profilePictureUrl: string;
+		username: string;
+	};
+	receiverUser: {
 		id: string;
 		profilePictureUrl: string;
 		username: string;

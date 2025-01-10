@@ -548,7 +548,6 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 					},
 				);
 			} catch (error) {
-				console.log(error);
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -910,7 +909,6 @@ export const handleUserAuthFlowForm = async (event: RequestEvent) => {
 				redirect(302, `/login/totp/${newTotpChallengeId}`);
 			}
 
-			console.log(user);
 			const encodedAuthToken = generateEncodedUserTokenFromRecord(user, rememberMe);
 			event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(rememberMe));
 
