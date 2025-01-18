@@ -6,9 +6,9 @@
 	import ProfilePictureUpload from '../files/ProfilePictureUpload.svelte';
 	import AuthInput from './AuthInput.svelte';
 
-	interface Props {
+	type Props = {
 		form: ActionData;
-	}
+	};
 
 	let { form }: Props = $props();
 

@@ -8,10 +8,10 @@
 	import { onMount } from 'svelte';
 	import Comment from './Comment.svelte';
 
-	interface Props {
+	type Props = {
 		postId: string;
 		postCommentCount: number;
-	}
+	};
 
 	let { postId, postCommentCount = $bindable() }: Props = $props();
 

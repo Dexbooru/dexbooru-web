@@ -11,9 +11,9 @@
 	import { PalleteSolid, TagSolid } from 'flowbite-svelte-icons';
 	import { SvelteMap } from 'svelte/reactivity';
 
-	interface Props {
+	type Props = {
 		labelType: 'tag' | 'artist';
-	}
+	};
 
 	let { labelType }: Props = $props();
 
@@ -91,7 +91,7 @@
 						class="text-center inline-flex justify-center space-x-2 border rounded p-2 leading-none dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
 						href="/posts/{labelType}/{encodeURIComponent(label)}"
 					>
-						<span># {label} - {formatNumberWithCommas(labelCounts.get(label) ?? 0)}</span>
+						<span class="mt-0.5"># {label} - {formatNumberWithCommas(labelCounts.get(label) ?? 0)}</span>
 						{#if labelType === 'tag'}
 							<TagSolid />
 						{:else}

@@ -7,11 +7,11 @@
 	import { Alert, Button } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 
-	interface Props {
+	type Props = {
 		imageUrls: string[];
 		imageDimensions: { imageWidth: number; imageHeight: number }[];
 		imagesAlt: string;
-	}
+	};
 
 	let { imageUrls, imageDimensions, imagesAlt }: Props = $props();
 

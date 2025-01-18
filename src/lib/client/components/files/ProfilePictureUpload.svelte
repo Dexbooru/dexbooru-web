@@ -3,10 +3,10 @@
 	import { MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB } from '$lib/shared/constants/images';
 	import { Avatar, Fileupload, ImagePlaceholder, Label } from 'flowbite-svelte';
 
-	interface Props {
+	type Props = {
 		isChangingProfilePicture?: boolean;
 		profilePictureFile?: File | null;
-	}
+	};
 
 	let { isChangingProfilePicture = false, profilePictureFile = $bindable(null) }: Props = $props();
 

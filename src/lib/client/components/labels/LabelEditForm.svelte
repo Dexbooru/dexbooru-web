@@ -45,7 +45,7 @@
 
 	const handleSocialMediaInput = (event: Event, index: number) => {
 		const target = event.target as HTMLInputElement;
-		const socialMediaLink = target.value.toLowerCase().trim();
+		const socialMediaLink = target.value.toLocaleLowerCase().trim();
 		if (socialMediaLink.length === 0 || socialMediaLinks.includes(socialMediaLink)) return;
 		socialMediaLinks[index] = socialMediaLink;
 	};

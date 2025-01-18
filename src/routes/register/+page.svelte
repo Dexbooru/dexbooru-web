@@ -3,9 +3,9 @@
 	import RegisterForm from '$lib/client/components/auth/RegisterForm.svelte';
 	import type { ActionData } from './$types';
 
-	interface Props {
+	type Props = {
 		form: ActionData;
-	}
+	};
 
 	let { form }: Props = $props();
 </script>

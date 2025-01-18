@@ -2,7 +2,7 @@
 	import { Input } from 'flowbite-svelte';
 	import { SearchOutline } from 'flowbite-svelte-icons';
 
-	interface Props {
+	type Props = {
 		inputElementId?: string | null;
 		required?: boolean;
 		width?: string;
@@ -12,7 +12,7 @@
 		name?: string | null;
 		queryInputHandler?: ((query: string) => void) | null;
 		queryChangeHandler?: ((query: string) => void) | null;
-	}
+	};
 
 	let {
 		required = false,

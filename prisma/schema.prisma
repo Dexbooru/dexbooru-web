@@ -15,6 +15,12 @@ enum UserRole {
   USER
 }
 
+enum UserAuthenticationSource {
+  GOOGLE
+  GITHUB
+  DISCORD
+}
+
 model User {
   id                       String                    @id @default(uuid())
   username                 String                    @unique() @db.VarChar(12)
@@ -34,9 +40,22 @@ model User {
   passwordRecoveryAttempts PasswordRecoveryAttempt[]
   postCollections          PostCollection[]          @relation(name: "post collection author")
   preferences              UserPreference?           @relation(name: "user profile preferences")
+  linkedAccounts           LinkedUserAccount[]
 
   @@index([id])
   @@index([username])
+}
+
+model LinkedUserAccount {
+  id               String                   @id @default(uuid())
+  platform         UserAuthenticationSource
+  platformUserId   String
+  platformUsername String
+  isPublic         Boolean                  @default(false)
+  user             User?                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+
+  @@unique([platform, userId])
 }
 
 model UserPreference {

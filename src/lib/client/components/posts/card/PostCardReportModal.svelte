@@ -7,6 +7,7 @@
 		MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH,
 		REPORT_REASON_CATEGORIES,
 	} from '$lib/shared/constants/reports';
+	import { capitalize } from '$lib/shared/helpers/util';
 	import type { PostReportCategory } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Label, Modal, Select, Textarea } from 'flowbite-svelte';
@@ -20,10 +21,7 @@
 	const activeModal = getActiveModal();
 
 	const normalizePostReportReasonName = (reasonCategory: PostReportCategory) => {
-		return (
-			reasonCategory.charAt(0).toUpperCase() +
-			reasonCategory.slice(1).toLocaleLowerCase().replace('_', ' ')
-		);
+		return capitalize(reasonCategory).replace('_', ' ');
 	};
 
 	const modalStoreUnsubscribe = activeModal.subscribe((data) => {

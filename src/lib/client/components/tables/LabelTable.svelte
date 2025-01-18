@@ -11,10 +11,10 @@
 	} from 'flowbite-svelte';
 	import HighlightedText from '../reusable/HighlightedText.svelte';
 
-	interface Props {
+	type Props = {
 		labels: TAppSearchResult['tags'] | TAppSearchResult['artists'];
 		labelType: 'tag' | 'artist';
-	}
+	};
 
 	let { labels, labelType }: Props = $props();
 

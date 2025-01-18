@@ -14,3 +14,7 @@ export const groupBy = <T>(
 		{} as Record<string | number, T[]>,
 	);
 };
+
+export const capitalize = (target: string): string => {
+	return target.charAt(0).toLocaleUpperCase() + target.slice(1).toLocaleLowerCase();
+};

@@ -4,9 +4,9 @@
 	import { updatePostStores } from '$lib/client/helpers/posts';
 	import type { PageData } from './$types';
 
-	interface Props {
+	type Props = {
 		data: PageData;
-	}
+	};
 
 	let { data }: Props = $props();
 	const tagName = page.params.name;

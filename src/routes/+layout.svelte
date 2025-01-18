@@ -4,13 +4,13 @@
 	import EditCollectionModal from '$lib/client/components/collections/card/EditCollectionModal.svelte';
 	import CollectionsPostUpdateModal from '$lib/client/components/collections/CollectionPostUpdateModal.svelte';
 	import ImagePreviewModal from '$lib/client/components/images/ImagePreviewModal.svelte';
+	import LabelMetadataModal from '$lib/client/components/labels/LabelMetadataModal.svelte';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
 	import Navbar from '$lib/client/components/layout/Navbar.svelte';
 	import DeletePostConfirmationModal from '$lib/client/components/posts/card/DeletePostConfirmationModal.svelte';
 	import EditPostModal from '$lib/client/components/posts/card/EditPostModal.svelte';
 	import PostCardReportModal from '$lib/client/components/posts/card/PostCardReportModal.svelte';
 	import HiddenPostModal from '$lib/client/components/posts/container/HiddenPostModal.svelte';
-	import LabelMetadataModal from '$lib/client/components/labels/LabelMetadataModal.svelte';
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
 	import { getActiveModal, initLayoutContexts } from '$lib/client/helpers/context';
@@ -23,10 +23,10 @@
 	import '../app.postcss';
 	import type { LayoutData } from './$types';
 
-	interface Props {
+	type Props = {
 		data: LayoutData;
 		children?: import('svelte').Snippet;
-	}
+	};
 
 	let { data, children }: Props = $props();
 

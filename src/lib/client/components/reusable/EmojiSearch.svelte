@@ -3,9 +3,9 @@
 	import { FaceGrinSolid } from 'flowbite-svelte-icons';
 	import VirtualizedList from './VirtualizedList.svelte';
 
-	interface Props {
+	type Props = {
 		handleEmoji: (targetEmoji: string) => void;
-	}
+	};
 
 	let { handleEmoji }: Props = $props();
 
@@ -20,7 +20,7 @@
 		if (emojiEntries.length > 0) return;
 		loadingEmojis = true;
 		emojiEntries = Object.entries(await import('$lib/client/assets/emoji-set.json')).filter(
-			(item) => item[0] !== 'default'
+			(item) => item[0] !== 'default',
 		) as [string, string][];
 		loadingEmojis = false;
 		filteredEmojiEntries = emojiEntries;
@@ -35,7 +35,7 @@
 	const handleOnInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
 		filteredEmojiEntries = emojiEntries.filter(([name]) =>
-			name.toLowerCase().includes(target.value.toLowerCase())
+			name.toLocaleLowerCase().includes(target.value.toLowerCase()),
 		);
 	};
 

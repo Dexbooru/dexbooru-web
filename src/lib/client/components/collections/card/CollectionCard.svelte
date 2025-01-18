@@ -11,9 +11,9 @@
 	import { Avatar, Card } from 'flowbite-svelte';
 	import ImageCarousel from '../../images/ImageCarousel.svelte';
 
-	interface Props {
+	type Props = {
 		collection: TPostCollection;
-	}
+	};
 
 	let { collection }: Props = $props();
 	let title = $derived.by(() => {

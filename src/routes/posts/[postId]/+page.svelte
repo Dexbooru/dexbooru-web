@@ -9,9 +9,9 @@
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
-	interface Props {
+	type Props = {
 		data: PageData;
-	}
+	};
 
 	let { data }: Props = $props();
 

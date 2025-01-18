@@ -13,10 +13,10 @@
 	import { Button, Fileupload, Label, P, Spinner } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 
-	interface Props {
+	type Props = {
 		images?: { imageBase64: string; file: File }[];
 		loadingPictures?: boolean;
-	}
+	};
 
 	let { images = $bindable([]), loadingPictures = $bindable(false) }: Props = $props();
 

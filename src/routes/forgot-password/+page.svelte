@@ -2,9 +2,9 @@
 	import ForgotPasswordForm from '$lib/client/components/auth/ForgotPasswordForm.svelte';
 	import type { ActionData } from './$types';
 
-	interface Props {
+	type Props = {
 		form: ActionData;
-	}
+	};
 
 	let { form }: Props = $props();
 

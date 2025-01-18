@@ -4,9 +4,9 @@
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 	import type { PageData } from './$types';
 
-	interface Props {
+	type Props = {
 		data: PageData;
-	}
+	};
 
 	let { data }: Props = $props();
 

@@ -11,9 +11,9 @@
 	import { generatePostWrapperMetaTags } from '$lib/client/helpers/posts';
 	import { onMount } from 'svelte';
 
-	interface Props {
+	type Props = {
 		postsSection: string;
-	}
+	};
 
 	let { postsSection }: Props = $props();
 

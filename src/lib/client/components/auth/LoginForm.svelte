@@ -2,12 +2,17 @@
 	import { Alert, Button, Card, Checkbox, Input, Label } from 'flowbite-svelte';
 	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
 	import type { ActionData } from '../../../../routes/login/$types';
+	import OauthLinks from './OauthLinks.svelte';
 
-	interface Props {
+	type Props = {
 		form: ActionData;
-	}
+		googleAuthorizationUrl: string;
+		discordAuthorizationUrl: string;
+		githubAuthorizationUrl: string;
+	};
 
-	let { form }: Props = $props();
+	let { form, googleAuthorizationUrl, discordAuthorizationUrl, githubAuthorizationUrl }: Props =
+		$props();
 
 	let showPassword = $state(false);
 
@@ -64,6 +69,9 @@
 			<Input type="hidden" name="rememberMe" value={rememberMe} />
 		</div>
 		<Button disabled={loginFormButtonDisabled} type="submit" class="w-full">Log in</Button>
+
+		<OauthLinks {discordAuthorizationUrl} {googleAuthorizationUrl} {githubAuthorizationUrl} />
+
 		{#if loginErrorReason}
 			<Alert color="red">
 				<span class="font-medium">Login error!</span>

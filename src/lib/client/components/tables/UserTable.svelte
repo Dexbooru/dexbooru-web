@@ -13,9 +13,9 @@
 	} from 'flowbite-svelte';
 	import HighlightedText from '../reusable/HighlightedText.svelte';
 
-	interface Props {
+	type Props = {
 		users: TAppSearchResult['users'];
-	}
+	};
 
 	let { users }: Props = $props();
 

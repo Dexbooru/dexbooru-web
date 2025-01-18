@@ -6,11 +6,11 @@
 	import PostImageMetadata from './PostImageMetadata.svelte';
 	import PostMetadata from './PostMetadata.svelte';
 
-	interface Props {
+	type Props = {
 		post: TPost;
 		totalPostCommentCount?: string;
 		hasLikedPost?: boolean;
-	}
+	};
 
 	let { post, totalPostCommentCount = '0', hasLikedPost = false }: Props = $props();
 

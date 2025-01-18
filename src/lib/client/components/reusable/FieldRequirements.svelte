@@ -8,13 +8,13 @@
 	import { CheckCircleSolid, CloseCircleSolid, QuestionCircleSolid } from 'flowbite-svelte-icons';
 	import type { ComponentProps } from 'svelte';
 
-	interface Props {
+	type Props = {
 		requirementsPlacement?: ComponentProps<Popover>['placement'];
 		requirementsType: 'email' | 'username' | 'password';
 		popoverButtonId: string;
 		satisifedRequirements?: string[];
 		unsatisfiedRequirements?: string[];
-	}
+	};
 
 	let {
 		requirementsPlacement = 'bottom-start',

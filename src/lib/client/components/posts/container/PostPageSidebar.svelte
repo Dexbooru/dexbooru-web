@@ -16,7 +16,7 @@
 	} from 'flowbite-svelte-icons';
 	import HiddenPostAlert from './HiddenPostAlert.svelte';
 
-	interface Props {
+	type Props =  {
 		uniqueTags?: string[];
 		uniqueArtists?: string[];
 	}

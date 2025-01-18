@@ -11,10 +11,10 @@
 	import { onMount } from 'svelte';
 	import CollectionsContainer from './CollectionsContainer.svelte';
 
-	interface Props {
+	type Props = {
 		containerTitle: string;
 		collections: TPostCollection[];
-	}
+	};
 
 	let { collections, containerTitle }: Props = $props();
 	let titleData = $derived.by(() => {

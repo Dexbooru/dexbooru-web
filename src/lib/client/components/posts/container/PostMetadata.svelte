@@ -6,9 +6,9 @@
 	import type { TPost } from '$lib/shared/types/posts';
 	import LabelContainer from '../../labels/LabelContainer.svelte';
 
-	interface Props {
+	type Props = {
 		post: TPost;
-	}
+	};
 
 	let { post }: Props = $props();
 

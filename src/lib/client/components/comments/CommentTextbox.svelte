@@ -10,11 +10,11 @@
 	import { Button, TabItem, Tabs, Textarea } from 'flowbite-svelte';
 	import EmojiSearch from '../reusable/EmojiSearch.svelte';
 
-	interface Props {
+	type Props = {
 		onCommentCreate?: (() => void) | null;
 		postId: string;
 		parentCommentId?: string | null;
-	}
+	};
 
 	let { onCommentCreate = null, postId, parentCommentId = null }: Props = $props();
 

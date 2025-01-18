@@ -9,11 +9,11 @@
 	import { Avatar, Button, Card, Dropdown, DropdownItem } from 'flowbite-svelte';
 	import { DotsHorizontalOutline } from 'flowbite-svelte-icons';
 
-	interface Props {
+	type Props = {
 		targetUser: TUser;
 		friendStatus: TFriendStatus;
 		userStatistics: TUserStatistics;
-	}
+	};
 
 	let { targetUser, friendStatus = $bindable(), userStatistics }: Props = $props();
 
@@ -134,11 +134,9 @@
 						>View created collections</Button
 					>
 				{:else}
-					<div class="flex space-x-2">
-						<Button href="/posts/liked" color="red">Liked posts</Button>
-						<Button href="/posts/uploaded" color="blue">Uploaded posts</Button>
-						<Button href="/collections/created" color="blue">Created collections</Button>
-					</div>
+					<Button href="/posts/liked" color="red">Liked posts</Button>
+					<Button href="/posts/uploaded" color="blue">Uploaded posts</Button>
+					<Button href="/collections/created" color="blue">Created collections</Button>
 				{/if}
 			{/if}
 		</div>

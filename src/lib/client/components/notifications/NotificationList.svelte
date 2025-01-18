@@ -4,9 +4,9 @@
 	import { BullhornSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 
-	interface Props {
+	type Props = {
 		notificationCount: number;
-	}
+	};
 
 	let { notificationCount }: Props = $props();
 

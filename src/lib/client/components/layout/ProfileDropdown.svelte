@@ -10,6 +10,7 @@
 	import NotificationList from '../notifications/NotificationList.svelte';
 
 	let notificationCount: number = $state(0);
+	let dropdownOpen: boolean = $state(false);
 
 	const user = getAuthenticatedUser();
 	const notifications = getAuthenticatedUserNotifications();
@@ -47,7 +48,8 @@
 	{$user?.username}
 	<AngleDownSolid size="sm" class="!mr-2" />
 </Button>
-<Dropdown triggeredBy="#navbar-profile-picture">
+
+<Dropdown bind:open={dropdownOpen}>
 	<DropdownItem href="/profile/{$user?.username}">Your Profile</DropdownItem>
 	<DropdownItem href="/posts/uploaded">Your Posts</DropdownItem>
 	<DropdownItem href="/collections/created">Your Collections</DropdownItem>

@@ -5,10 +5,10 @@
 	import { PapperPlaneSolid } from 'flowbite-svelte-icons';
 	import { get } from 'svelte/store';
 
-	interface Props {
+	type Props = {
 		roomId: string;
 		friend: TChatFriend;
-	}
+	};
 
 	let { roomId, friend }: Props = $props();
 

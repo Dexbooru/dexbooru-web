@@ -7,9 +7,9 @@
 	import PostTable from '../tables/PostTable.svelte';
 	import UserTable from '../tables/UserTable.svelte';
 
-	interface Props {
+	type Props = {
 		results: TAppSearchResult;
-	}
+	};
 
 	let { results }: Props = $props();
 	let { posts, artists, tags, users, collections } = $state(results);

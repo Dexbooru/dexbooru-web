@@ -50,7 +50,10 @@ const UpdateArtistMetadataSchema = {
 	}),
 } satisfies TRequestSchema;
 
-export const updateLabelMetadata = async (event: RequestEvent, labelType: 'tag' | 'artist') => {
+export const handleUpdateLabelMetadata = async (
+	event: RequestEvent,
+	labelType: 'tag' | 'artist',
+) => {
 	return await validateAndHandleRequest(
 		event,
 		'api-route',
@@ -112,7 +115,7 @@ export const updateLabelMetadata = async (event: RequestEvent, labelType: 'tag' 
 	);
 };
 
-export const getLabelMetadata = async (event: RequestEvent, labelType: 'tag' | 'artist') => {
+export const handleGetLabelMetadata = async (event: RequestEvent, labelType: 'tag' | 'artist') => {
 	return await validateAndHandleRequest(
 		event,
 		'api-route',

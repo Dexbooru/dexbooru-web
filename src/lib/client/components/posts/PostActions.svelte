@@ -19,7 +19,7 @@
 		TrashBinSolid,
 	} from 'flowbite-svelte-icons';
 
-	interface Props {
+	type Props = {
 		post: TPost;
 		postId: string;
 		likes: number;
@@ -29,15 +29,9 @@
 			profilePictureUrl: string;
 		};
 		likedPost?: boolean;
-	}
+	};
 
-	let {
-		post,
-		postId,
-		likes = $bindable(),
-		author,
-		likedPost = false,
-	}: Props = $props();
+	let { post, postId, likes = $bindable(), author, likedPost = false }: Props = $props();
 
 	const user = getAuthenticatedUser();
 	const activeModal = getActiveModal();

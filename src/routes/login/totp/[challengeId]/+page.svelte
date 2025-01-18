@@ -2,10 +2,10 @@
 	import TotpForm from '$lib/client/components/auth/TotpForm.svelte';
 	import type { ActionData, PageData } from './$types';
 
-	interface Props {
+	type Props = {
 		form: ActionData;
 		data: PageData;
-	}
+	};
 
 	let { form, data }: Props = $props();
 

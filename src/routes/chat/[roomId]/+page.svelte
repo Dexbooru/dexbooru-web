@@ -5,9 +5,9 @@
 	import ChatMessageContainer from '$lib/client/components/chat/ChatMessageContainer.svelte';
 	import type { PageData } from './$types';
 
-	interface Props {
+	type Props = {
 		data: PageData;
-	}
+	};
 
 	let { data }: Props = $props();
 	let { friend, roomId } = $state(data);

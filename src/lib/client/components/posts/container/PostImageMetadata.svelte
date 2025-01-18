@@ -17,10 +17,10 @@
 	import ImageCollection from '../../images/ImageCollection.svelte';
 	import PostActions from '../PostActions.svelte';
 
-	interface Props {
+	type Props = {
 		post: TPost;
 		hasLikedPost?: boolean;
-	}
+	};
 
 	let { post, hasLikedPost = false }: Props = $props();
 	let originalSizedImageUrls = $derived(

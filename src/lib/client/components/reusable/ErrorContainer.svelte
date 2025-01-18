@@ -5,9 +5,9 @@
 	import type { TErrorPageType } from '$lib/client/types/page';
 	import { Button } from 'flowbite-svelte';
 
-	interface Props {
+	type Props = {
 		errorPageType: TErrorPageType;
-	}
+	};
 
 	let { errorPageType }: Props = $props();
 </script>

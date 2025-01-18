@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Button, Card, Input, Label } from 'flowbite-svelte';
 
-	interface Props {
+	type Props = {
 		error?: string | null;
-	}
+	};
 
 	let { error = null }: Props = $props();
 

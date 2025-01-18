@@ -2,9 +2,9 @@
 	import UploadForm from '$lib/client/components/posts/UploadForm.svelte';
 	import type { ActionData } from './$types';
 
-	interface Props {
+	type Props = {
 		form: ActionData;
-	}
+	};
 
 	let { form }: Props = $props();
 </script>

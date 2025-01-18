@@ -43,10 +43,11 @@
 				usernameChanging = false;
 				if (result.type === 'success') {
 					toast.push('The username was updated successfully!', SUCCESS_TOAST_OPTIONS);
-					// @ts-ignore
 					user.update((currentUser) => {
-						// @ts-ignore
-						const updatedUser = { ...currentUser, ...result.data.data };
+						if (!currentUser || !result.data) return currentUser;
+
+						const resultData = result.data.data as { username: string };
+						const updatedUser = { ...currentUser, ...resultData };
 						return updatedUser;
 					});
 				} else {
@@ -66,8 +67,9 @@
 			labelStyling="margin-bottom: 10px;"
 			formStore={changeUsernameRequirements}
 		/>
-		<Button disabled={changeUsernameButtonDisabled || usernameChanging} type="submit"
-			>Change Username</Button
+		<Button
+			disabled={changeUsernameButtonDisabled || usernameChanging || newUsername === $user?.username}
+			type="submit">Change Username</Button
 		>
 	</form>
 </Card>

@@ -5,9 +5,9 @@
 	import { sineIn } from 'svelte/easing';
 	import CollectionCreateForm from './CollectionCreateForm.svelte';
 
-	interface Props {
+	type Props = {
 		isHidden: boolean;
-	}
+	};
 
 	let { isHidden = $bindable() }: Props = $props();
 

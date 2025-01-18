@@ -13,10 +13,10 @@
 	import Comment from './Comment.svelte';
 	import CommentTextbox from './CommentTextbox.svelte';
 
-	interface Props {
+	type Props = {
 		comment: TComment;
 		currentDepth?: number;
-	}
+	};
 
 	let { comment, currentDepth = 1 }: Props = $props();
 

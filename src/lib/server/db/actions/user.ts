@@ -301,5 +301,35 @@ export async function createUser(
 		},
 	});
 
-	return newUser;
+	return newUser as TUser;
 }
+
+export const getUserSelf = async (userId: string) => {
+	const user = await prisma.user.findUnique({
+		select: {
+			id: true,
+			profilePictureUrl: true,
+			username: true,
+			email: true,
+			role: true,
+			createdAt: true,
+			updatedAt: true,
+			preferences: {
+				select: {
+					autoBlurNsfw: true,
+					twoFactorAuthenticationEnabled: true,
+					hidePostMetadataOnPreview: true,
+					hideCollectionMetadataOnPreview: true,
+					customSideWideCss: true,
+					blacklistedArtists: true,
+					blacklistedTags: true,
+				},
+			},
+		},
+		where: {
+			id: userId,
+		},
+	});
+
+	return user;
+};

@@ -3,9 +3,9 @@
 	import { Indicator } from 'flowbite-svelte';
 	import { BellSolid } from 'flowbite-svelte-icons';
 
-	interface Props {
+	type Props = {
 		notificationCount: number;
-	}
+	};
 
 	let { notificationCount }: Props = $props();
 </script>

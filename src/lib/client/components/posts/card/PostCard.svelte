@@ -17,10 +17,10 @@
 	import { ExclamationCircleSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 
-	interface Props {
+	type Props = {
 		post: TPost;
 		onCollectionViewPage?: boolean;
-	}
+	};
 
 	let { post, onCollectionViewPage = false }: Props = $props();
 

@@ -43,6 +43,7 @@ import {
 	findUserById,
 	findUserByName,
 	findUserByNameOrEmail,
+	getUserSelf,
 	getUserStatistics,
 	updateUserRole,
 } from '../db/actions/user';
@@ -260,7 +261,7 @@ const UpdateUserPersonalPreferencesSchema = {
 			.optional(),
 		blacklistedArtists: z
 			.string()
-			.transform((val) => val.toLowerCase().trim().split('\n'))
+			.transform((val) => val.toLocaleLowerCase().trim().split('\n'))
 			.refine(
 				(val) =>
 					val.length <= MAXIMUM_BLACKLISTED_ARTISTS &&
@@ -278,6 +279,35 @@ const UpdateUserUserInterfacePreferencesSchema = {
 		hideCollectionMetadataOnPreview: boolStrSchema.optional(),
 	}),
 } satisfies TRequestSchema;
+
+export const handleGetSelfData = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'api-route',
+		{},
+		async (_) => {
+			try {
+				const user = await getUserSelf(event.locals.user.id);
+				if (!user) {
+					return createErrorResponse(
+						'api-route',
+						404,
+						`A user with the id: ${event.locals.user.id} does not exist`,
+					);
+				}
+
+				return createSuccessResponse('api-route', 'Successfully fetched the user data', { user });
+			} catch {
+				return createErrorResponse(
+					'api-route',
+					500,
+					'An unexpected error occured while trying to fetch the user data',
+				);
+			}
+		},
+		true,
+	);
+};
 
 export const handleUpdateUserRole = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(

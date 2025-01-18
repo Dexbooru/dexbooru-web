@@ -12,7 +12,7 @@
 	import type { Writable } from 'svelte/store';
 	import FieldRequirements from '../reusable/FieldRequirements.svelte';
 
-	interface Props {
+	type Props = {
 		input: string;
 		inputName: string;
 		comparisonInput?: string | null;
@@ -21,7 +21,7 @@
 		inputFieldType: 'username' | 'email' | 'password' | 'password-confirm' | 'otp-code';
 		showRequirements?: boolean;
 		formStore?: Writable<TAuthFormRequirementData> | null;
-	}
+	};
 
 	let {
 		input = $bindable(),

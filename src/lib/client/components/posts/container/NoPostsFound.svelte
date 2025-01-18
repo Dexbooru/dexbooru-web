@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Heading } from 'flowbite-svelte';
-	interface Props {
+	type Props = {
 		pageNumber?: number;
-	}
+	};
 
 	let { pageNumber = 0 }: Props = $props();
 </script>

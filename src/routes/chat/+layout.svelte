@@ -7,10 +7,10 @@
 	import { get } from 'svelte/store';
 	import type { LayoutData } from './$types';
 
-	interface Props {
+	type Props = {
 		data: LayoutData;
 		children?: import('svelte').Snippet;
-	}
+	};
 
 	let { data, children }: Props = $props();
 
@@ -19,7 +19,7 @@
 		friends,
 		rooms: chatRooms,
 		manager: new ChatManager(),
-		messages: new Map<string, TChatMessage[]>()
+		messages: new Map<string, TChatMessage[]>(),
 	});
 
 	const recomputeChatContainerSize = () => {

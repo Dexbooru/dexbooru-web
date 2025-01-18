@@ -7,9 +7,9 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Avatar, Button, Listgroup, ListgroupItem, Popover } from 'flowbite-svelte';
 
-	interface Props {
+	type Props = {
 		friends?: TChatFriend[];
-	}
+	};
 
 	let { friends = $bindable([]) }: Props = $props();
 

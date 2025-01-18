@@ -5,11 +5,11 @@
 	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/login/totp/[challengeId]/$types';
 
-	interface Props {
+	type Props = {
 		form: ActionData;
 		username: string;
 		rememberMe: boolean;
-	}
+	};
 
 	let { form, username, rememberMe }: Props = $props();
 
