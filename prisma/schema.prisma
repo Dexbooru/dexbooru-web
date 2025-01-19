@@ -205,10 +205,10 @@ model PostReport {
 }
 
 model PasswordRecoveryAttempt {
-  id              String   @id
+  id              String   @id @default(uuid())
   createdAt       DateTime @default(now())
   senderIpAddress String   @db.VarChar(15)
-  user            User?    @relation(fields: [userId], references: [id])
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId          String?
 
   @@index([id])

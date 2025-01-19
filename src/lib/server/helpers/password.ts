@@ -13,3 +13,15 @@ export const doPasswordsMatch = async (
 ): Promise<boolean> => {
 	return await bcrypt.compare(password, hashedPassword);
 };
+
+
+export const generateRandomPassword = (passwordSize: number): string => {
+	let generatedPassword: string = '';
+
+	for (let i = 0; i < passwordSize; i++) {
+		const randomCharacter = Math.floor(Math.random() * 94) + 33;
+		generatedPassword += String.fromCharCode(randomCharacter);
+	}
+
+	return generatedPassword;
+}

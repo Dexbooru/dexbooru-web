@@ -18,3 +18,33 @@ export const groupBy = <T>(
 export const capitalize = (target: string): string => {
 	return target.charAt(0).toLocaleUpperCase() + target.slice(1).toLocaleLowerCase();
 };
+
+export const interleaveStrings = (a: string, b: string): string => {
+	let interleavedResult = '';
+	let [i, j, k] = [0, 0, 0];
+	const resultLength = a.length + b.length;
+
+	while (k < resultLength && i < a.length && j < b.length) {
+		if (k % 2 === 0) {
+			interleavedResult += a.charAt(i);
+			i++;
+		} else {
+			interleavedResult += a.charAt(j);
+			j++;
+		}
+
+		k++;
+	}
+
+	while (i < a.length) {
+		interleavedResult += a.charAt(i);
+		i++;
+	}
+
+	while (j < b.length) {
+		interleavedResult += b.charAt(j);
+		j++;
+	}
+
+	return interleavedResult;
+};

@@ -12,6 +12,7 @@ import {
 	MAXIMUM_BLACKLISTED_TAGS,
 	MAXIMUM_TAG_LENGTH,
 } from '$lib/shared/constants/labels';
+import { MAXIMUM_SITE_WIDE_CSS_LENGTH } from '$lib/shared/constants/preferences';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
 import { getEmailRequirements } from '$lib/shared/helpers/auth/email';
@@ -20,13 +21,22 @@ import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
 import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import type { TFriendStatus } from '$lib/shared/types/friends';
 import type { TUser } from '$lib/shared/types/users';
-import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
+import { isHttpError, isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { deleteFromBucket, uploadToBucket } from '../aws/actions/s3';
 import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { SESSION_ID_COOKIE_OPTIONS } from '../constants/cookies';
+import {
+	ACCOUNT_RECOVERY_EMAIL_SUBJECT,
+	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
+} from '../constants/email';
 import { boolStrSchema } from '../constants/reusableSchemas';
 import { checkIfUserIsFriended } from '../db/actions/friends';
+import {
+	createPasswordRecoveryAttempt,
+	deletePasswordRecoveryAttempt,
+	getPasswordRecoveryAttempt,
+} from '../db/actions/passwordRecoveryAttempt';
 import {
 	createUserPreferences,
 	getUserPreferences,
@@ -53,6 +63,7 @@ import {
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import { buildCookieOptions } from '../helpers/cookies';
+import { buildPasswordRecoveryEmailTemplate, sendEmail } from '../helpers/email';
 import {
 	runDefaultProfilePictureTransformationPipeline,
 	runProfileImageTransformationPipeline,
@@ -274,11 +285,222 @@ const UpdateUserPersonalPreferencesSchema = {
 
 const UpdateUserUserInterfacePreferencesSchema = {
 	form: z.object({
-		customSiteWideCss: z.string().optional(),
+		customSiteWideCss: z
+			.string()
+			.max(MAXIMUM_SITE_WIDE_CSS_LENGTH, {
+				message: `The maximum site wide CSS length is ${MAXIMUM_SITE_WIDE_CSS_LENGTH} characters`,
+			})
+			.optional(),
 		hidePostMetadataOnPreview: boolStrSchema.optional(),
 		hideCollectionMetadataOnPreview: boolStrSchema.optional(),
 	}),
 } satisfies TRequestSchema;
+
+const UserForgotPasswordSchema = {
+	form: z.object({
+		email: z
+			.string()
+			.email()
+			.transform((val) => val.toLocaleLowerCase().trim()),
+	}),
+} satisfies TRequestSchema;
+
+const UserGetPasswordRecoverySessionSchema = {
+	pathParams: z.object({
+		recoveryId: z.string(),
+	}),
+} satisfies TRequestSchema;
+
+const UserUpdatePasswordAccountRecoverySchema = {
+	form: z.object({
+		newPassword: passwordRequirementSchema,
+		confirmedNewPassword: z.string().min(1, 'The confirmed new password cannot be empty'),
+		passwordRecoveryAttemptId: z.string().uuid(),
+		userId: z.string().uuid(),
+	}),
+} satisfies TRequestSchema;
+
+export const handlePasswordUpdateAccountRecovery = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'form-action',
+		UserUpdatePasswordAccountRecoverySchema,
+		async (data) => {
+			const { newPassword, confirmedNewPassword, userId, passwordRecoveryAttemptId } = data.form;
+
+			try {
+				if (newPassword !== confirmedNewPassword) {
+					return createErrorResponse(
+						'form-action',
+						400,
+						'The new password does not match the confirmed new password',
+						{
+							type: 'password',
+							reason: 'The new password does not match the confirmed new password!',
+						},
+					);
+				}
+
+				const recoveryAttempt = await getPasswordRecoveryAttempt(passwordRecoveryAttemptId, {
+					userId: true,
+					senderIpAddress: true,
+				});
+
+				if (!recoveryAttempt) {
+					return createErrorResponse(
+						'form-action',
+						404,
+						'The password recovery session could not be found',
+					);
+				}
+
+				if (recoveryAttempt.userId !== userId) {
+					return createErrorResponse(
+						'form-action',
+						403,
+						'The password recovery session is unauthorized',
+					);
+				}
+
+				const clientIpAddress = event.getClientAddress();
+				if (clientIpAddress !== recoveryAttempt.senderIpAddress) {
+					return createErrorResponse(
+						'form-action',
+						403,
+						'The password recovery session is unauthorized',
+					);
+				}
+
+				const hashedNewPassword = await hashPassword(newPassword);
+				const updatedPassword = await editPasswordByUserId(userId, hashedNewPassword);
+
+				if (!updatedPassword) {
+					return createErrorResponse(
+						'form-action',
+						404,
+						`A user with the id: ${userId} does not exist!`,
+						{
+							type: 'password',
+							reason: `A user with the id: ${userId} does not exist!`,
+						},
+					);
+				}
+
+				deletePasswordRecoveryAttempt(passwordRecoveryAttemptId);
+
+				return createSuccessResponse('form-action', 'The password was updated successfully', {
+					message: 'The password was updated successfully',
+				});
+			} catch {
+				return createErrorResponse(
+					'form-action',
+					500,
+					'An unexpected error occured while updating the password',
+				);
+			}
+		},
+	);
+};
+
+export const handleGetPasswordRecoverySession = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'page-server-load',
+		UserGetPasswordRecoverySessionSchema,
+		async (data) => {
+			const { recoveryId } = data.pathParams;
+
+			try {
+				const recoveryAttempt = await getPasswordRecoveryAttempt(recoveryId, {
+					createdAt: true,
+					user: {
+						select: {
+							email: true,
+							username: true,
+						},
+					},
+					senderIpAddress: true,
+					id: true,
+					userId: true,
+				});
+				if (!recoveryAttempt) {
+					return createErrorResponse(
+						'page-server-load',
+						404,
+						'The password recovery session could not be found',
+					);
+				}
+
+				const clientIpAddress = event.getClientAddress();
+				if (clientIpAddress !== recoveryAttempt.senderIpAddress) {
+					return createErrorResponse(
+						'page-server-load',
+						403,
+						'The password recovery session is unauthorized',
+					);
+				}
+
+				return createSuccessResponse(
+					'page-server-load',
+					'Successfully fetched the password recovery session',
+					{ recoveryAttempt },
+				);
+			} catch (error) {
+				if (isHttpError(error)) throw error;
+
+				return createErrorResponse(
+					'page-server-load',
+					500,
+					'An unexpected error occured while trying to fetch the password recovery session',
+				);
+			}
+		},
+	);
+};
+
+export const handleSendForgotPasswordEmail = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'form-action',
+		UserForgotPasswordSchema,
+		async (data) => {
+			const { email } = data.form;
+
+			try {
+				const user = await findUserByEmail(email, { id: true, username: true, email: true });
+				if (!user) {
+					return createErrorResponse(
+						'form-action',
+						404,
+						`A user with the email: ${email} does not exist!`,
+					);
+				}
+
+				const ipAddress = event.getClientAddress();
+				const newPasswordRecoveryAttempt = await createPasswordRecoveryAttempt(user.id, ipAddress);
+
+				await sendEmail({
+					sender: `Dexbooru <${DEXBOORU_NO_REPLY_EMAIL_ADDRESS}>`,
+					to: user.email,
+					subject: ACCOUNT_RECOVERY_EMAIL_SUBJECT,
+					html: buildPasswordRecoveryEmailTemplate(user.username, newPasswordRecoveryAttempt.id),
+				});
+
+				return createSuccessResponse(
+					'form-action',
+					'The password recovery email was sent successfully',
+				);
+			} catch (error) {
+				console.log(error);
+				return createErrorResponse(
+					'form-action',
+					500,
+					'An unexpected error occured while sending the password recovery email',
+				);
+			}
+		},
+	);
+};
 
 export const handleGetSelfData = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(

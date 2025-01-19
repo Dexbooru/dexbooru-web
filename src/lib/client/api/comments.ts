@@ -7,6 +7,25 @@ import { toast } from '@zerodevx/svelte-toast';
 import type { Writable } from 'svelte/store';
 import { FAILURE_TOAST_OPTIONS } from '../constants/toasts';
 
+export const editComment = async (postId: string, commentId: string, updatedContnet: string) => {
+	return await fetch(`/api/post/${postId}/comments`, {
+		method: 'PUT',
+		body: JSON.stringify({
+			commentId,
+			content: updatedContnet,
+		}),
+	});
+};
+
+export const deleteComment = async (postId: string, commentId: string) => {
+	const params = { commentId };
+	const url = buildUrl(`/api/post/${postId}/comments`, params);
+
+	return await fetch(url, {
+		method: 'DELETE',
+	});
+};
+
 export const getComments = async (
 	postId: string,
 	parentCommentId: string | null,

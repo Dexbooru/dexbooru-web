@@ -6,6 +6,7 @@
 		getAuthenticatedUserPreferences,
 	} from '$lib/client/helpers/context';
 	import { applyCustomSiteWideCss } from '$lib/client/helpers/dom';
+	import { MAXIMUM_SITE_WIDE_CSS_LENGTH } from '$lib/shared/constants/preferences';
 	import type { TUser } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
@@ -66,8 +67,9 @@
 		class="flex flex-col space-y-4"
 	>
 		<Label class="space-y-2 mb-3">
-			<span>Custom Site-wide CSS</span>
+			<span>Custom Site-wide CSS (max of {MAXIMUM_SITE_WIDE_CSS_LENGTH} characters)</span>
 			<Textarea
+				maxlength={MAXIMUM_SITE_WIDE_CSS_LENGTH}
 				bind:value={customSiteCss}
 				rows="8"
 				name="customSiteWideCss"

@@ -3,18 +3,24 @@ import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import type { UserAuthenticationSource } from '@prisma/client';
 import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
+import {
+	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
+	OAUTH_TEMPORARY_PASSWORD_EMAIL_SUBJECT,
+} from '../constants/email';
 import { PUBLIC_USER_SELECTORS } from '../constants/users';
 import { createAccountLink } from '../db/actions/linkedAccount';
 import { createUserPreferences, getUserPreferences } from '../db/actions/preferences';
 import { createUser, findUserByEmail } from '../db/actions/user';
 import { createErrorResponse, validateAndHandleRequest } from '../helpers/controllers';
 import { buildCookieOptions } from '../helpers/cookies';
+import { buildOauthPasswordEmailTemplate, sendEmail } from '../helpers/email';
 import {
 	DiscordOauthProvider,
 	GithubOauthProvider,
 	GoogleOauthProvider,
 	SkeletonOauthProvider,
 } from '../helpers/oauth';
+import { generateRandomPassword, hashPassword } from '../helpers/password';
 import { generateEncodedUserTokenFromRecord } from '../helpers/sessions';
 import { createTotpChallenge } from '../helpers/totp';
 import type { TRequestSchema } from '../types/controllers';
@@ -130,15 +136,25 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 
 						redirect(302, `/posts`);
 					} else {
+						const temporaryPassword = generateRandomPassword(15);
+						const hashedTemporaryPassword = await hashPassword(temporaryPassword);
+
 						const newUser = await createUser(
 							SkeletonOauthProvider.constructPrimaryApplicationUsername(oauthUserData.username),
 							oauthUserData.email,
-							'not-defined',
+							hashedTemporaryPassword,
 							oauthUserData.profilePictureUrl,
 						);
 
 						await createUserPreferences(newUser.id);
 						await handleAccountLink(newUser.id, platformName, oauthUserData, matchingApplication);
+
+						sendEmail({
+							sender: `Dexbooru <${DEXBOORU_NO_REPLY_EMAIL_ADDRESS}>`,
+							to: newUser.email,
+							subject: OAUTH_TEMPORARY_PASSWORD_EMAIL_SUBJECT,
+							html: buildOauthPasswordEmailTemplate(newUser.username, temporaryPassword),
+						});
 
 						const encodedAuthToken = generateEncodedUserTokenFromRecord(newUser, true);
 						event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(true));

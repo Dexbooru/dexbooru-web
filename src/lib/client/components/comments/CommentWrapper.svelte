@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 	import { generateCommentWrapperMetatags } from '$lib/client/helpers/comments';
 	import { getCommentPaginationData } from '$lib/client/helpers/context';
 	import { groupBy } from '$lib/shared/helpers/util';
@@ -72,7 +73,7 @@
 			<h1 class="text-4xl m-4 dark:text-white">{titleData.title}</h1>
 			{#each Object.entries(commentDateGroups) as [date, comments]}
 				<Group
-					divClass="p-4 mb-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+					divClass="p-4 mb-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 comment-date-group"
 					date={`Comments made on: ${date}`}
 				>
 					<GroupItem
@@ -82,8 +83,8 @@
 							return {
 								title: parsedTitle,
 								comment: parsedContent,
-								src: comment.author.profilePictureUrl,
-								alt: `comment by: ${comment.author.username} with the id: ${comment.id} and parent comment id of: ${comment.parentCommentId}`,
+								src: comment.author.profilePictureUrl ?? DefaultProfilePicture,
+								alt: `profile of ${comment.author.username}`,
 								href: `/profile/${comment.author.username}`,
 								isPrivate: false,
 							};

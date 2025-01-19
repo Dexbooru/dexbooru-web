@@ -1,16 +1,15 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
+	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { EMAIL_REGEX } from '$lib/shared/constants/auth';
+	import { toast } from '@zerodevx/svelte-toast';
 	import { Button, Card, Input, Label } from 'flowbite-svelte';
 
-	type Props = {
-		error?: string | null;
-	};
-
-	let { error = null }: Props = $props();
-
 	let email: string = $state('');
+	let forgotPasswordEmailSending = $state(false);
 </script>
 
-<Card class="w-full max-w-md mt-20">
+<Card class="mt-20">
 	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
 		Account Recovery
 	</h3>
@@ -23,12 +22,44 @@
 		</p>
 	</div>
 
-	<form method="POST" class="flex flex-col space-y-6">
+	<form
+		use:enhance={() => {
+			forgotPasswordEmailSending = true;
+
+			return async ({ result }) => {
+				forgotPasswordEmailSending = false;
+				if (result.type === 'success') {
+					toast.push(
+						'A password recovery email has been sent to your inbox!',
+						SUCCESS_TOAST_OPTIONS,
+					);
+				} else {
+					toast.push(
+						'An unexpected error occured while sending the account recovery email!',
+						FAILURE_TOAST_OPTIONS,
+					);
+				}
+			};
+		}}
+		method="POST"
+		class="flex flex-col space-y-6"
+	>
 		<Label class="space-y-2">
 			<span>Email</span>
-			<Input bind:value={email} type="email" name="email" placeholder="Your email" required />
+			<Input
+				autofocus
+				bind:value={email}
+				type="email"
+				name="email"
+				placeholder="Your email"
+				required
+			/>
 		</Label>
 
-		<Button disabled={email.length === 0} type="submit" class="w-full">Reset password</Button>
+		<Button
+			disabled={!EMAIL_REGEX.test(email) || forgotPasswordEmailSending}
+			type="submit"
+			class="w-full">Send Recovery Email</Button
+		>
 	</form>
 </Card>

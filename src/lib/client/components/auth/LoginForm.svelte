@@ -1,6 +1,10 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	import { SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { toast } from '@zerodevx/svelte-toast';
 	import { Alert, Button, Card, Checkbox, Input, Label } from 'flowbite-svelte';
 	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/login/$types';
 	import OauthLinks from './OauthLinks.svelte';
 
@@ -23,6 +27,16 @@
 	let rememberMe: boolean = $state(false);
 	let loginFormButtonDisabled = $derived.by(() => {
 		return !(username.length > 0 && password.length > 0);
+	});
+
+	onMount(() => {
+		const passwordReset = page.url.searchParams.get('passwordReset');
+		if (passwordReset === 'true') {
+			toast.push(
+				'Your password was updated successfully! Try logging in now',
+				SUCCESS_TOAST_OPTIONS,
+			);
+		}
 	});
 </script>
 
