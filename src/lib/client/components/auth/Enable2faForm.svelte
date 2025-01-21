@@ -7,7 +7,8 @@
 	import { TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Card } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
 	import AuthInput from './AuthInput.svelte';
 
 	let currentPassword: string = $state('');

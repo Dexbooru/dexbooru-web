@@ -7,7 +7,7 @@
 		getHiddenPostsPage,
 		getNsfwPostPage,
 	} from '$lib/client/helpers/context';
-	import { Button } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
 
 	let titleParts: string[] = $state([]);

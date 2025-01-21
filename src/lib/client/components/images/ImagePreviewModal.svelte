@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IMAGE_PREVIEW_MODAL_NAME } from '$lib/client/constants/layout';
 	import { getActiveModal } from '$lib/client/helpers/context';
-	import { Modal } from 'flowbite-svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
 	import { onMount } from 'svelte';
 
 	let imageBase64: string = $state('');

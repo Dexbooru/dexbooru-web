@@ -10,7 +10,11 @@
 	} from '$lib/shared/constants/images';
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Fileupload, Label, P, Spinner } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Fileupload from 'flowbite-svelte/Fileupload.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import P from 'flowbite-svelte/P.svelte';
+	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import { onMount } from 'svelte';
 
 	type Props = {

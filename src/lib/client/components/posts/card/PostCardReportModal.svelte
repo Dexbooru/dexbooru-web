@@ -10,7 +10,11 @@
 	import { capitalize } from '$lib/shared/helpers/util';
 	import type { PostReportCategory } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Label, Modal, Select, Textarea } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
+	import Select from 'flowbite-svelte/Select.svelte';
+	import Textarea from 'flowbite-svelte/Textarea.svelte';
 	import { onMount } from 'svelte';
 
 	let postId: string = $state('');

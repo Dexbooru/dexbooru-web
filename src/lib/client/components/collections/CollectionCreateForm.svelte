@@ -18,16 +18,14 @@
 	import { isLabelAppropriate } from '$lib/shared/helpers/labels';
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import { toast } from '@zerodevx/svelte-toast';
-	import {
-		Button,
-		Checkbox,
-		Fileupload,
-		ImagePlaceholder,
-		Input,
-		Label,
-		Textarea,
-	} from 'flowbite-svelte';
-	import { CalendarEditSolid } from 'flowbite-svelte-icons';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
+	import Fileupload from 'flowbite-svelte/Fileupload.svelte';
+	import ImagePlaceholder from 'flowbite-svelte/ImagePlaceholder.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import Textarea from 'flowbite-svelte/Textarea.svelte';
+	import CalendarEditSolid from 'flowbite-svelte-icons/CalendarEditSolid.svelte'
 
 	type Props = {
 		isHidden: boolean;

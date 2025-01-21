@@ -1,6 +1,10 @@
 <script lang="ts">
-	import { Button, Dropdown, DropdownHeader, Search, Spinner } from 'flowbite-svelte';
-	import { FaceGrinSolid } from 'flowbite-svelte-icons';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
+	import DropdownHeader from 'flowbite-svelte/DropdownHeader.svelte';
+	import Search from 'flowbite-svelte/Search.svelte';
+	import Spinner from 'flowbite-svelte/Spinner.svelte';
+	import FaceGrinSolid from 'flowbite-svelte-icons/FaceGrinSolid.svelte';
 	import VirtualizedList from './VirtualizedList.svelte';
 
 	type Props = {

@@ -6,7 +6,12 @@
 	import { isFileImage } from '$lib/shared/helpers/images';
 	import type { TPostImageSimilarityResult } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Alert, Button, Fileupload, ImagePlaceholder, Input, Label } from 'flowbite-svelte';
+	import Alert from 'flowbite-svelte/Alert.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import ImagePlaceholder from 'flowbite-svelte/ImagePlaceholder.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Fileupload from 'flowbite-svelte/Fileupload.svelte'
+	import Label from 'flowbite-svelte/Label.svelte';
 
 	let postId = $state('');
 	let imageUrl = $state('');

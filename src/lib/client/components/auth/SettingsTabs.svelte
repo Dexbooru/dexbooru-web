@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { TabItem, Tabs } from 'flowbite-svelte';
-	import { GridSolid, LockSolid, UserCircleSolid } from 'flowbite-svelte-icons';
+	import TabItem from 'flowbite-svelte/TabItem.svelte';
+	import Tabs from 'flowbite-svelte/Tabs.svelte';
+	import GridSolid from 'flowbite-svelte-icons/GridSolid.svelte';
+	import LockSolid from 'flowbite-svelte-icons/LockSolid.svelte';
+	import UserCircleSolid from 'flowbite-svelte-icons/UserCircleSolid.svelte';
 	import ChangePasswordForm from './ChangePasswordForm.svelte';
 	import ChangeProfilePicture from './ChangeProfilePicture.svelte';
 	import ChangeUsernameForm from './ChangeUsernameForm.svelte';

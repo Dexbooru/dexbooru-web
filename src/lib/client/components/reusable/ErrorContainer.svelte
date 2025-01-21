@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Image404 from '$lib/client/assets/404graphic.png';
+	import Image404 from '$lib/client/assets/404graphic.webp';
 	import { ERROR_PAGE_TITLE_MAP } from '$lib/client/constants/pages';
 	import type { TErrorPageType } from '$lib/client/types/page';
-	import { Button } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 
 	type Props = {
 		errorPageType: TErrorPageType;

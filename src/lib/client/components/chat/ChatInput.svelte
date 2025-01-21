@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { chatStore } from '$lib/client/stores/chat';
 	import type { TChatFriend } from '$lib/shared/types/friends';
-	import { Button, Input } from 'flowbite-svelte';
-	import { PapperPlaneSolid } from 'flowbite-svelte-icons';
+	import PaperPlaneSolid from 'flowbite-svelte-icons/PapperPlaneOutline.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
 	import { get } from 'svelte/store';
 
 	type Props = {
@@ -53,7 +54,7 @@
 			placeholder="Send a message to {friend.username}"
 		/>
 		<Button on:click={onSendMessageClick} color="primary">
-			<PapperPlaneSolid class="rotate-90" />
+			<PaperPlaneSolid class="rotate-90" />
 		</Button>
 	</div>
 </div>

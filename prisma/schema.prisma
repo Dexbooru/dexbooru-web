@@ -65,7 +65,7 @@ model UserPreference {
   blacklistedTags                 String[] @default([]) @db.Text
   blacklistedArtists              String[] @default([]) @db.Text
   customSideWideCss               String   @default("") @db.Text
-  hidePostMetadataOnPreview       Boolean  @default(false)
+  hidePostMetadataOnPreview       Boolean  @default(true)
   hideCollectionMetadataOnPreview Boolean  @default(false)
   user                            User?    @relation(name: "user profile preferences", fields: [userId], references: [id], onDelete: Cascade)
   userId                          String   @unique

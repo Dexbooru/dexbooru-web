@@ -7,8 +7,8 @@
 		getOriginalCollectionPage,
 	} from '$lib/client/helpers/context';
 
-	import { Button } from 'flowbite-svelte';
-	import { PlusSolid } from 'flowbite-svelte-icons';
+	import PlusSolid from 'flowbite-svelte-icons/PlusSolid.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import Searchbar from '../../reusable/Searchbar.svelte';

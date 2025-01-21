@@ -2,8 +2,14 @@
 	import { page } from '$app/state';
 	import { SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Alert, Button, Card, Checkbox, Input, Label } from 'flowbite-svelte';
-	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
+	import Alert from 'flowbite-svelte/Alert.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import EyeOutline from 'flowbite-svelte-icons/EyeOutline.svelte';
+	import EyeSlashOutline from 'flowbite-svelte-icons/EyeSlashOutline.svelte';
 	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/login/$types';
 	import OauthLinks from './OauthLinks.svelte';

@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { fileToBase64String } from '$lib/client/helpers/images';
 	import { MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB } from '$lib/shared/constants/images';
-	import { Avatar, Fileupload, ImagePlaceholder, Label } from 'flowbite-svelte';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
+	import Fileupload from 'flowbite-svelte/Fileupload.svelte';
+	import ImagePlaceholder from 'flowbite-svelte/ImagePlaceholder.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
 
 	type Props = {
 		isChangingProfilePicture?: boolean;

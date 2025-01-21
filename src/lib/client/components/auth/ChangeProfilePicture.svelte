@@ -4,7 +4,11 @@
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Card, Checkbox, Input } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+
 	import ProfilePictureUpload from '../files/ProfilePictureUpload.svelte';
 
 	const user = getAuthenticatedUser();

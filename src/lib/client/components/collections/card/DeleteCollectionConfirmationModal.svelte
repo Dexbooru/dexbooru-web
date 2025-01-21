@@ -14,8 +14,9 @@
 	} from '$lib/client/helpers/context';
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Modal } from 'flowbite-svelte';
-	import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
+	import ExclamationCircleOutline from 'flowbite-svelte-icons/ExclamationCircleOutline.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
 	import { onMount } from 'svelte';
 
 	let targetDeletionCollection: TPostCollection | null = $state(null);

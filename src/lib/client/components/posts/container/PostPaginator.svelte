@@ -3,8 +3,10 @@
 	import { getPostPaginationData } from '$lib/client/helpers/context';
 	import { buildUrl } from '$lib/client/helpers/urls';
 	import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
-	import { Button, PaginationItem } from 'flowbite-svelte';
-	import { ArrowLeftSolid, ArrowRightSolid } from 'flowbite-svelte-icons';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import PaginationItem from 'flowbite-svelte/PaginationItem.svelte';
+	import ArrowLeftSolid from 'flowbite-svelte-icons/ArrowLeftSolid.svelte';
+	import ArrowRightSolid from 'flowbite-svelte-icons/ArrowRightSolid.svelte';
 	import { onMount } from 'svelte';
 
 	let previousPageUrl: URL = $state(new URL('http://mock.com'));

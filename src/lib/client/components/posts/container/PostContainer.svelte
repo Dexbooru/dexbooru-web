@@ -7,8 +7,9 @@
 	import { CLEAR_INPUT_INTERVAL_MS } from '$lib/client/constants/search';
 	import { getActiveModal, getOriginalPostsPage, getPostsPage } from '$lib/client/helpers/context';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
-	import { Button } from 'flowbite-svelte';
-	import { PalleteSolid, TagSolid } from 'flowbite-svelte-icons';
+	import PalleteSolid from 'flowbite-svelte-icons/PalleteSolid.svelte';
+	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import Searchbar from '../../reusable/Searchbar.svelte';

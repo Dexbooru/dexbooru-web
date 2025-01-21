@@ -93,10 +93,10 @@
 	</p>
 </section>
 
-{#if $originalPostPage.length > 0}
+{#if collection.posts.length > 0}
 	<h2 class="text-2xl font-semibold dark:text-white mt-6 mb-4">Posts in this Collection:</h2>
 	<div class="grid grid-cols-3 gap-4">
-		{#each $originalPostPage as post (post.id)}
+		{#each collection.posts as post (post.id)}
 			<div animate:flip={{ duration: POSTS_GRID_ANIMATION_DURATION_MS }}>
 				<PostCard onCollectionViewPage {post} />
 			</div>

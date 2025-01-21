@@ -7,8 +7,10 @@
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Spinner } from 'flowbite-svelte';
-	import { PalleteSolid, TagSolid } from 'flowbite-svelte-icons';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Spinner from 'flowbite-svelte/Spinner.svelte';
+	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
+	import PalleteSolid from 'flowbite-svelte-icons/PalleteSolid.svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 
 	type Props = {

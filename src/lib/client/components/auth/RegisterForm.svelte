@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { getRegisterFormAuthRequirements } from '$lib/client/helpers/context';
-	import { Alert, Button, Card } from 'flowbite-svelte';
+	import Alert from 'flowbite-svelte/Alert.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
 	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/register/$types';
 	import ProfilePictureUpload from '../files/ProfilePictureUpload.svelte';

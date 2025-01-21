@@ -7,7 +7,10 @@
 		getBlacklistedPostPage,
 		getNsfwPostPage,
 	} from '$lib/client/helpers/context';
-	import { Button, Modal, TabItem, Tabs } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
+	import TabItem from 'flowbite-svelte/TabItem.svelte';
+	import Tabs from 'flowbite-svelte/Tabs.svelte';
 	import { onMount } from 'svelte';
 	import PostGrid from './PostGrid.svelte';
 

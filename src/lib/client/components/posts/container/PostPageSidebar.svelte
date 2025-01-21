@@ -2,24 +2,20 @@
 	import { page } from '$app/state';
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/posts';
-	import {
-		Sidebar,
-		SidebarDropdownItem,
-		SidebarDropdownWrapper,
-		SidebarGroup,
-		SidebarWrapper,
-	} from 'flowbite-svelte';
-	import {
-		ListOrdoredSolid as OrderedListSolid,
-		PalleteSolid,
-		TagSolid,
-	} from 'flowbite-svelte-icons';
+	import OrderedListSolid from 'flowbite-svelte-icons/ListOrdoredSolid.svelte';
+	import PalleteSolid from 'flowbite-svelte-icons/PalleteSolid.svelte';
+	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
+	import Sidebar from 'flowbite-svelte/Sidebar.svelte';
+	import SidebarDropdownItem from 'flowbite-svelte/SidebarDropdownItem.svelte';
+	import SidebarDropdownWrapper from 'flowbite-svelte/SidebarDropdownWrapper.svelte';
+	import SidebarGroup from 'flowbite-svelte/SidebarGroup.svelte';
+	import SidebarWrapper from 'flowbite-svelte/SidebarWrapper.svelte';
 	import HiddenPostAlert from './HiddenPostAlert.svelte';
 
-	type Props =  {
+	type Props = {
 		uniqueTags?: string[];
 		uniqueArtists?: string[];
-	}
+	};
 
 	let { uniqueTags = [], uniqueArtists = [] }: Props = $props();
 

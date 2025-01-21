@@ -1,8 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import ApplicationLogo from '$lib/client/assets/app_logo.webp';
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { getPathFromUrl } from '$lib/shared/helpers/urls';
-	import { Button, DarkMode, NavBrand, NavHamburger, NavLi, NavUl, Navbar } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import DarkMode from 'flowbite-svelte/DarkMode.svelte';
+	import NavBrand from 'flowbite-svelte/NavBrand.svelte';
+	import NavHamburger from 'flowbite-svelte/NavHamburger.svelte';
+	import NavLi from 'flowbite-svelte/NavLi.svelte';
+	import NavUl from 'flowbite-svelte/NavUl.svelte';
+	import Navbar from 'flowbite-svelte/Navbar.svelte';
 	import GlobalSearchbar from '../search/GlobalSearchbar.svelte';
 	import ProfileDropdown from './ProfileDropdown.svelte';
 
@@ -14,7 +21,7 @@
 <Navbar id="app-navbar" class="sticky top-0 z-50 bg-white dark:bg-gray-900 rounded-none">
 	<div class="flex space-x-4">
 		<NavBrand href="/">
-			<img src="/favicon.png" class="mr-3 h-6 sm:h-9 rounded-md" alt="Dexbooru Logo" />
+			<img src={ApplicationLogo} class="mr-3 h-6 sm:h-9 rounded-md" alt="Dexbooru Logo" />
 			<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
 				>Dexbooru</span
 			>

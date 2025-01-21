@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { CloseButton, Drawer } from 'flowbite-svelte';
-	import { InfoCircleSolid } from 'flowbite-svelte-icons';
+	import CloseButton from 'flowbite-svelte/CloseButton.svelte';
+	import Drawer from 'flowbite-svelte/Drawer.svelte';
+	import InfoCircleSolid from 'flowbite-svelte-icons/InfoCircleSolid.svelte';
 	import { onMount } from 'svelte';
 	import { sineIn } from 'svelte/easing';
 	import CollectionCreateForm from './CollectionCreateForm.svelte';

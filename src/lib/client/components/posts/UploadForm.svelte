@@ -16,18 +16,16 @@
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate, transformLabel } from '$lib/shared/helpers/labels';
 	import { toast } from '@zerodevx/svelte-toast';
-	import {
-		Button,
-		Card,
-		Checkbox,
-		Heading,
-		Input,
-		Label,
-		Li,
-		List,
-		Spinner,
-		Textarea,
-	} from 'flowbite-svelte';
+	import Heading from 'flowbite-svelte/Heading.svelte';
+	import Button  from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import Li from 'flowbite-svelte/Li.svelte';
+	import List from 'flowbite-svelte/List.svelte';
+	import Spinner from 'flowbite-svelte/Spinner.svelte';
+	import Textarea from 'flowbite-svelte/Textarea.svelte';
 	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/posts/upload/$types';
 	import PostPictureUpload from '../files/PostPictureUpload.svelte';

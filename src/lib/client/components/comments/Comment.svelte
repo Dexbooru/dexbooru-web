@@ -6,8 +6,9 @@
 	import { formatDate, getFormalDateTitle, ymdFormat } from '$lib/shared/helpers/dates';
 	import type { TComment } from '$lib/shared/types/comments';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Avatar, Button } from 'flowbite-svelte';
-	import { MessagesSolid } from 'flowbite-svelte-icons';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import MessagesSolid from 'flowbite-svelte-icons/MessagesSolid.svelte';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import Comment from './Comment.svelte';

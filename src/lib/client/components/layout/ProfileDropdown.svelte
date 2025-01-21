@@ -3,8 +3,12 @@
 		getAuthenticatedUser,
 		getAuthenticatedUserNotifications,
 	} from '$lib/client/helpers/context';
-	import { Avatar, Button, Dropdown, DropdownItem, Spinner } from 'flowbite-svelte';
-	import { AngleDownSolid } from 'flowbite-svelte-icons';
+	import AngleDownSolid from 'flowbite-svelte-icons/AngleDownSolid.svelte';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
+	import DropdownItem from 'flowbite-svelte/DropdownItem.svelte';
+	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import { onMount } from 'svelte';
 	import NotificationBell from '../notifications/NotificationBell.svelte';
 	import NotificationList from '../notifications/NotificationList.svelte';

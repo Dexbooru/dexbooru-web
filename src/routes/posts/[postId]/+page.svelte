@@ -5,7 +5,8 @@
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPost } from '$lib/shared/types/posts';
-	import { Button, Modal } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 

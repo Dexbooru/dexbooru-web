@@ -670,22 +670,9 @@ export const handleGetPosts = async (
 		const category = overrideCategory ?? data.urlSearchParams.category;
 		const { ascending, orderBy, pageNumber, userId } = data.urlSearchParams;
 		const user = event.locals.user;
-		const selectors =
-			handlerType === 'page-server-load' ? PAGE_SERVER_LOAD_POST_SELECTORS : PUBLIC_POST_SELECTORS;
 
 		if (user.id === NULLABLE_USER.id && ['uploaded', 'liked'].includes(category)) {
 			redirect(302, '/');
-		}
-
-		if (user.id === NULLABLE_USER.id && category === 'liked') {
-			const errorResponse = createErrorResponse(
-				handlerType,
-				401,
-				'Cannot fetch liked posts of unauthenticated user',
-			);
-			if (handlerType === 'page-server-load') {
-				throw errorResponse;
-			}
 		}
 
 		const cacheKey = getCacheKeyWithCategory(
@@ -702,6 +689,11 @@ export const handleGetPosts = async (
 			if (cachedData) {
 				responseData = cachedData;
 			} else {
+				const selectors =
+					handlerType === 'page-server-load'
+						? PAGE_SERVER_LOAD_POST_SELECTORS
+						: PUBLIC_POST_SELECTORS;
+
 				let posts: TPost[] = [];
 				switch (category) {
 					case 'general':
@@ -714,26 +706,24 @@ export const handleGetPosts = async (
 						);
 						break;
 					case 'liked':
-						posts =
-							(await findLikedPostsByAuthorId(
-								pageNumber,
-								MAXIMUM_POSTS_PER_PAGE,
-								user.id,
-								orderBy as TPostOrderByColumn,
-								ascending,
-								selectors,
-							)) ?? [];
+						posts = await findLikedPostsByAuthorId(
+							pageNumber,
+							MAXIMUM_POSTS_PER_PAGE,
+							user.id,
+							orderBy as TPostOrderByColumn,
+							ascending,
+							selectors,
+						);
 						break;
 					case 'uploaded':
-						posts =
-							(await findPostsByAuthorId(
-								pageNumber,
-								MAXIMUM_POSTS_PER_PAGE,
-								userId ?? user.id,
-								orderBy as TPostOrderByColumn,
-								ascending,
-								selectors,
-							)) ?? [];
+						posts = await findPostsByAuthorId(
+							pageNumber,
+							MAXIMUM_POSTS_PER_PAGE,
+							userId ?? user.id,
+							orderBy as TPostOrderByColumn,
+							ascending,
+							selectors,
+						);
 						break;
 				}
 

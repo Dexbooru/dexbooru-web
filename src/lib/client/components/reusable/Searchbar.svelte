@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Input } from 'flowbite-svelte';
-	import { SearchOutline } from 'flowbite-svelte-icons';
+	import SearchOutline from 'flowbite-svelte-icons/SearchOutline.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
 
 	type Props = {
 		inputElementId?: string | null;

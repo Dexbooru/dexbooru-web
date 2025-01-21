@@ -12,8 +12,12 @@
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Input, Label, Textarea } from 'flowbite-svelte';
-	import { PlusSolid, TrashBinSolid } from 'flowbite-svelte-icons';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import Textarea from 'flowbite-svelte/Textarea.svelte';
+	import PlusSolid from 'flowbite-svelte-icons/PlusSolid.svelte';
+	import TrashBinSolid from 'flowbite-svelte-icons/TrashBinSolid.svelte';
 
 	type Props = {
 		labelType: 'tag' | 'artist' | undefined;

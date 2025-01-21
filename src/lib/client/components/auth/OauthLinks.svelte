@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { Button } from 'flowbite-svelte';
-	import { DiscordSolid, GithubSolid, GoogleSolid } from 'flowbite-svelte-icons';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import DiscordSolid from 'flowbite-svelte-icons/DiscordSolid.svelte';
+	import GithubSolid from 'flowbite-svelte-icons/GithubSolid.svelte';
+	import GoogleSolid from 'flowbite-svelte-icons/GoogleSolid.svelte';
 
 	type Props = {
 		discordAuthorizationUrl?: string;

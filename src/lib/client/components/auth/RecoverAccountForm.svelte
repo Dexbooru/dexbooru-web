@@ -6,7 +6,9 @@
 	import type { TUser } from '$lib/shared/types/users';
 	import type { PasswordRecoveryAttempt } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Card, Input } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
 	import { onMount } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 

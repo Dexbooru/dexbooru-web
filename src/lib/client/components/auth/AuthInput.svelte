@@ -8,7 +8,10 @@
 	import { getEmailRequirements } from '$lib/shared/helpers/auth/email';
 	import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
 	import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
-	import { Input, Label, Toggle } from 'flowbite-svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import Toggle from 'flowbite-svelte/Toggle.svelte';
+
 	import type { Writable } from 'svelte/store';
 	import FieldRequirements from '../reusable/FieldRequirements.svelte';
 

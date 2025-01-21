@@ -4,7 +4,8 @@
 		MAXIMUM_RENDERABLE_TAGS,
 	} from '$lib/client/constants/labels';
 	import { MAXIMUM_ARTIST_LENGTH, MAXIMUM_TAG_LENGTH } from '$lib/shared/constants/labels';
-	import { Badge, Button } from 'flowbite-svelte';
+	import Badge from 'flowbite-svelte/Badge.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import type { ComponentProps } from 'svelte';
 
 	type Props = {

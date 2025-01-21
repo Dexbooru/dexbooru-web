@@ -41,6 +41,7 @@ export const NULLABLE_USER: TUser = {
 	profilePictureUrl: '',
 	username: '',
 	email: '',
+	linkedAccounts: [],
 };
 export const NULLABLE_USER_USER_PREFERENCES: UserPreference = {
 	userId: NONEXISTENT_USER_ID,
@@ -48,7 +49,7 @@ export const NULLABLE_USER_USER_PREFERENCES: UserPreference = {
 	autoBlurNsfw: true,
 	browseInSafeMode: false,
 	customSideWideCss: '',
-	hidePostMetadataOnPreview: false,
+	hidePostMetadataOnPreview: true,
 	hideCollectionMetadataOnPreview: false,
 	blacklistedArtists: [],
 	blacklistedTags: [],

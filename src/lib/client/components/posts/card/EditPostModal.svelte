@@ -6,7 +6,10 @@
 	import { MAXIMUM_POST_DESCRIPTION_LENGTH } from '$lib/shared/constants/posts';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Label, Modal, Textarea } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
+	import Textarea from 'flowbite-svelte/Textarea.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
 	import { onMount } from 'svelte';
 
 	let post: TPost;

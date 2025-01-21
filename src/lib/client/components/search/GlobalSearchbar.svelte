@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { GLOBAL_SEARCH_MODAL_NAME } from '$lib/client/constants/layout';
 	import { getActiveModal } from '$lib/client/helpers/context';
-	import { Button, Input, Kbd } from 'flowbite-svelte';
-	import { SearchOutline } from 'flowbite-svelte-icons';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Kbd from 'flowbite-svelte/Kbd.svelte';
+	import SearchOutline from 'flowbite-svelte-icons/SearchOutline.svelte';
 
 	const activeModal = getActiveModal();
 </script>

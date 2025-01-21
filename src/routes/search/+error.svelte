@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Button } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 
 	const errorMessage = page.error?.message ?? 'An unexpected error occurred.';
 	const attemptedQuery = page.url.searchParams.get('query') ?? '';

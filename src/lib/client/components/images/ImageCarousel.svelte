@@ -1,4 +1,5 @@
 <script lang="ts">
+	import DefaultCollectionPicture from '$lib/client/assets/default_post_collection_picture.webp';
 	import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
 	import type { TCarouselTransitionFunction } from '$lib/client/types/images';
 	import {
@@ -9,7 +10,7 @@
 		POST_PICTURE_PREVIEW_HEIGHT,
 		POST_PICTURE_PREVIEW_WIDTH,
 	} from '$lib/shared/constants/images';
-	import { Carousel } from 'flowbite-svelte';
+	import Carousel from 'flowbite-svelte/Carousel.svelte';	
 	import { type Component } from 'svelte';
 	import type { HTMLImgAttributes } from 'svelte/elements';
 
@@ -59,7 +60,7 @@
 				},
 				onerror: (event) => {
 					const image = event.target as HTMLImageElement;
-					image.src = DefaultPostPicture;
+					image.src = resourceType === 'posts' ? DefaultPostPicture : DefaultCollectionPicture;
 				},
 			};
 		}),

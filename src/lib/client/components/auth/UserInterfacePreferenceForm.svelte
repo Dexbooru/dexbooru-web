@@ -9,7 +9,11 @@
 	import { MAXIMUM_SITE_WIDE_CSS_LENGTH } from '$lib/shared/constants/preferences';
 	import type { TUser } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Card, Checkbox, Label, Textarea } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import Textarea from 'flowbite-svelte/Textarea.svelte';
 	import { onMount } from 'svelte';
 
 	let interfacePreferenceChanging: boolean = $state(false);

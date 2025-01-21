@@ -6,8 +6,12 @@
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Avatar, Button, Card, Dropdown, DropdownItem } from 'flowbite-svelte';
-	import { DotsHorizontalOutline } from 'flowbite-svelte-icons';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
+	import DropdownItem from 'flowbite-svelte/DropdownItem.svelte';
+	import DotsHorizontalOutline from 'flowbite-svelte-icons/DotsHorizontalOutline.svelte';
 
 	type Props = {
 		targetUser: TUser;

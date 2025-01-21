@@ -3,14 +3,13 @@
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/collections';
 	import { getCollectionPage } from '$lib/client/helpers/context';
 	import type { TCollectionOrderByColumn } from '$lib/shared/types/collections';
-	import {
-		Sidebar,
-		SidebarDropdownItem,
-		SidebarDropdownWrapper,
-		SidebarGroup,
-		SidebarWrapper,
-	} from 'flowbite-svelte';
-	import { ListOrdoredSolid as OrderedListSolid, UserSolid } from 'flowbite-svelte-icons';
+	import OrderedListSolid  from 'flowbite-svelte-icons/ListOrdoredSolid.svelte';
+	import UserSolid  from 'flowbite-svelte-icons/UserSolid.svelte';
+	import Sidebar from 'flowbite-svelte/Sidebar.svelte';
+	import SidebarDropdownItem from 'flowbite-svelte/SidebarDropdownItem.svelte';
+	import SidebarDropdownWrapper from 'flowbite-svelte/SidebarDropdownWrapper.svelte';
+	import SidebarGroup from 'flowbite-svelte/SidebarGroup.svelte';
+	import SidebarWrapper from 'flowbite-svelte/SidebarWrapper.svelte';
 
 	type Props = {
 		uniqueAuthors: { id: string; username: string; profilePictureUrl: string }[];

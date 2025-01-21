@@ -3,7 +3,10 @@
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { EMAIL_REGEX } from '$lib/shared/constants/auth';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Card, Input, Label } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
 
 	let email: string = $state('');
 	let forgotPasswordEmailSending = $state(false);

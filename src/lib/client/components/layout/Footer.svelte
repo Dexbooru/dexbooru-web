@@ -1,6 +1,9 @@
 <script lang="ts">
-	import { Footer, FooterCopyright, FooterLink, FooterLinkGroup } from 'flowbite-svelte';
-	import { GithubSolid } from 'flowbite-svelte-icons';
+	import Footer from 'flowbite-svelte/Footer.svelte';
+	import FooterLink from 'flowbite-svelte/FooterLink.svelte';
+	import FooterLinkGroup from 'flowbite-svelte/FooterLinkGroup.svelte';
+	import FooterCopyright from 'flowbite-svelte/FooterCopyright.svelte';
+	import GithubSolid from 'flowbite-svelte-icons/GithubSolid.svelte';	
 
 	const currentDate = new Date(Date.now());
 	const currentYear = currentDate.getFullYear();

@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import ApplicationLogo from '$lib/client/assets/app_logo.webp';
 	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 	import { generateCommentWrapperMetatags } from '$lib/client/helpers/comments';
 	import { getCommentPaginationData } from '$lib/client/helpers/context';
 	import { groupBy } from '$lib/shared/helpers/util';
 	import type { TComment, TCommentOrderByColumn } from '$lib/shared/types/comments';
-	import { Group, GroupItem, ListPlaceholder } from 'flowbite-svelte';
+	import Group from 'flowbite-svelte/Group.svelte';
+	import GroupItem from 'flowbite-svelte/GroupItem.svelte';
+	import ListPlaceholder from 'flowbite-svelte/ListPlaceholder.svelte';
 	import { convert as parseHtmlString } from 'html-to-text';
 	import CommentPaginator from './CommentPaginator.svelte';
 
@@ -60,7 +63,7 @@
 	<title>{titleData.title}</title>
 	<meta property="og:title" content={titleData.title} />
 	<meta property="og:description" content={titleData.description} />
-	<meta property="og:image" content={`${page.url.href}/favicon.png`} />
+	<meta property="og:image" content={`${page.url.href}/${ApplicationLogo}`} />
 </svelte:head>
 
 <main>

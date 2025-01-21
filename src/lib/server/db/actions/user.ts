@@ -163,7 +163,7 @@ export async function findLikedPostsByAuthorId(
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
 	selectors?: TPostSelector,
-): Promise<TPost[] | null> {
+): Promise<TPost[]> {
 	const data = await prisma.user.findFirst({
 		where: {
 			id: authorId,
@@ -180,7 +180,7 @@ export async function findLikedPostsByAuthorId(
 		},
 	});
 
-	if (!data) return null;
+	if (!data) return [];
 
 	return data.likedPosts as TPost[];
 }

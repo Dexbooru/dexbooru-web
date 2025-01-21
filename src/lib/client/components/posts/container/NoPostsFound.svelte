@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Heading } from 'flowbite-svelte';
+	import Heading from 'flowbite-svelte/Heading.svelte';
+
 	type Props = {
 		pageNumber?: number;
 	};

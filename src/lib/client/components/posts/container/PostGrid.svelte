@@ -7,7 +7,7 @@
 		getPostPaginationData,
 		getPostsPage,
 	} from '$lib/client/helpers/context';
-	import { CardPlaceholder } from 'flowbite-svelte';
+	import CardPlaceholder from 'flowbite-svelte/CardPlaceholder.svelte';
 	import PostPaginator from './PostPaginator.svelte';
 
 	type Props = {

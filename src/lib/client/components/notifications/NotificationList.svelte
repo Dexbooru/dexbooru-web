@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getAuthenticatedUserNotifications } from '$lib/client/helpers/context';
-	import { Dropdown } from 'flowbite-svelte';
-	import { BullhornSolid } from 'flowbite-svelte-icons';
+	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
+	import BullhornSolid from 'flowbite-svelte-icons/BullhornSolid.svelte';
 	import { onMount } from 'svelte';
 
 	type Props = {

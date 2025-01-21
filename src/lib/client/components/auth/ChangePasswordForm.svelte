@@ -6,7 +6,8 @@
 		getChangePasswordAuthRequirements,
 	} from '$lib/client/helpers/context';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Card } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
 	import { onMount } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 

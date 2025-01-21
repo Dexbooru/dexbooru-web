@@ -117,7 +117,7 @@ export async function findPostsByAuthorId(
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
 	selectors?: TPostSelector,
-): Promise<TPost[] | null> {
+): Promise<TPost[]> {
 	const posts = await prisma.post.findMany({
 		where: {
 			OR: [
@@ -139,7 +139,9 @@ export async function findPostsByAuthorId(
 		select: selectors,
 	});
 
-	return posts as TPost[] | null;
+	if (!posts) return [];
+
+	return posts as TPost[];
 }
 
 export async function likePostById(

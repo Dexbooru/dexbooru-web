@@ -4,7 +4,8 @@
 		transformImageDimensions,
 	} from '$lib/client/helpers/images';
 	import { IMAGE_FILTER_EXCLUSION_BASE_URLS } from '$lib/shared/constants/images';
-	import { Alert, Button } from 'flowbite-svelte';
+	import Alert from 'flowbite-svelte/Alert.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
 
 	type Props = {

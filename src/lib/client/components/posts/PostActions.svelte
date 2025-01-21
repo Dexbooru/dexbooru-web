@@ -11,13 +11,11 @@
 	import { normalizeCount } from '$lib/client/helpers/posts';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button } from 'flowbite-svelte';
-	import {
-		ExclamationCircleSolid,
-		HeartSolid,
-		PenSolid,
-		TrashBinSolid,
-	} from 'flowbite-svelte-icons';
+	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
+	import HeartSolid from 'flowbite-svelte-icons/HeartSolid.svelte';
+	import PenSolid from 'flowbite-svelte-icons/PenSolid.svelte';
+	import TrashBinSolid from 'flowbite-svelte-icons/TrashBinSolid.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 
 	type Props = {
 		post: TPost;

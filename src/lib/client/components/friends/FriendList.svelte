@@ -6,7 +6,8 @@
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TChatFriend, TFriendRequestAction } from '$lib/shared/types/friends';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Avatar, Button } from 'flowbite-svelte';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 
 	type Props = {
 		listType: 'friend' | 'sent-request' | 'received-request';

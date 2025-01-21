@@ -6,14 +6,12 @@
 		PREVIEW_IMAGE_SUFFIX,
 	} from '$lib/shared/constants/images';
 	import type { TPost } from '$lib/shared/types/posts';
-	import {
-		Table,
-		TableBody,
-		TableBodyCell,
-		TableBodyRow,
-		TableHead,
-		TableHeadCell,
-	} from 'flowbite-svelte';
+	import Table from 'flowbite-svelte/Table.svelte';
+	import TableBody from 'flowbite-svelte/TableBody.svelte';
+	import TableBodyCell from 'flowbite-svelte/TableBodyCell.svelte';	
+	import TableBodyRow from 'flowbite-svelte/TableBodyRow.svelte';
+	import TableHead from 'flowbite-svelte/TableHead.svelte';
+	import TableHeadCell from 'flowbite-svelte/TableHeadCell.svelte';
 	import ImageCollection from '../../images/ImageCollection.svelte';
 	import PostActions from '../PostActions.svelte';
 
