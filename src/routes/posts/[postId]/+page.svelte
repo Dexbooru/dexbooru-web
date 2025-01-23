@@ -1,6 +1,10 @@
 <script lang="ts">
 	import PostPresentation from '$lib/client/components/posts/container/PostPresentation.svelte';
-	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
+	import {
+		getAuthenticatedUser,
+		getCommentTree,
+		getUpdatedPost,
+	} from '$lib/client/helpers/context';
 	import { normalizeCount } from '$lib/client/helpers/posts';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate } from '$lib/shared/helpers/dates';
@@ -26,6 +30,7 @@
 
 	const user = getAuthenticatedUser();
 	const commentTree = getCommentTree();
+	const updatedPost = getUpdatedPost();
 
 	const commentTreeUnsubscribe = commentTree.subscribe((tree) => {
 		totalPostCommentCount = normalizeCount(tree.getCount());
@@ -40,6 +45,7 @@
 
 	onMount(() => {
 		return () => {
+			updatedPost.set({});
 			commentTreeUnsubscribe();
 		};
 	});

@@ -7,7 +7,7 @@ import {
 import type { Artist } from '@prisma/client';
 import type { RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
-import { getArtistMetadata, updateArtistMetadata } from '../db/actions/artist';
+import { findArtistMetadata, updateArtistMetadata } from '../db/actions/artist';
 import { getTagMetadata, updateTagMetadata } from '../db/actions/tag';
 import {
 	createErrorResponse,
@@ -66,7 +66,7 @@ export const handleUpdateLabelMetadata = async (
 
 			try {
 				const labelResource =
-					labelType === 'tag' ? await getTagMetadata(name) : await getArtistMetadata(name);
+					labelType === 'tag' ? await getTagMetadata(name) : await findArtistMetadata(name);
 				if (!labelResource) {
 					return createErrorResponse(
 						'api-route',
@@ -125,7 +125,7 @@ export const handleGetLabelMetadata = async (event: RequestEvent, labelType: 'ta
 
 			try {
 				const labelResource =
-					labelType === 'tag' ? await getTagMetadata(name) : await getArtistMetadata(name);
+					labelType === 'tag' ? await getTagMetadata(name) : await findArtistMetadata(name);
 				if (!labelResource) {
 					return createErrorResponse(
 						'api-route',

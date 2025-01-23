@@ -4,7 +4,7 @@ import { hashPassword } from '../src/lib/server/helpers/password';
 import {
 	MAXIMUM_EMAIL_LENGTH,
 	MAXIMUM_USERNAME_LENGTH,
-	MINIMUM_USERNAME_LENGTH
+	MINIMUM_USERNAME_LENGTH,
 } from '../src/lib/shared/constants/auth';
 import { MAXIMUM_CONTENT_LENGTH } from '../src/lib/shared/constants/comments';
 import { MAXIMUM_IMAGES_PER_POST } from '../src/lib/shared/constants/images';
@@ -91,11 +91,11 @@ class FakerMockGenerator {
 				username: this.enFaker.string.alpha({
 					length: faker.helpers.rangeToNumber({
 						min: MINIMUM_USERNAME_LENGTH,
-						max: MAXIMUM_USERNAME_LENGTH
-					})
+						max: MAXIMUM_USERNAME_LENGTH,
+					}),
 				}),
 				password: await this.buildDevPassword(),
-				profilePictureUrl: this.enFaker.image.avatar()
+				profilePictureUrl: this.enFaker.image.avatar(),
 			};
 
 			mockUsers.push(mockUser);
@@ -108,7 +108,7 @@ class FakerMockGenerator {
 		n: number,
 		mockUsers: Partial<User>[],
 		mockTags: Tag[],
-		mockArtists: Artist[]
+		mockArtists: Artist[],
 	): IMockPost[] {
 		const mockPosts: IMockPost[] = [];
 
@@ -118,21 +118,23 @@ class FakerMockGenerator {
 				authorId: this.randomUserId(mockUsers),
 				tags: this.randomLabelSample(
 					mockTags,
-					this.enFaker.helpers.rangeToNumber({ min: 1, max: 10 })
+					this.enFaker.helpers.rangeToNumber({ min: 1, max: 10 }),
 				),
+				tagString: '',
+				artistString: '',
 				artists: this.randomLabelSample(
 					mockArtists,
-					this.enFaker.helpers.rangeToNumber({ min: 1, max: 3 })
+					this.enFaker.helpers.rangeToNumber({ min: 1, max: 3 }),
 				),
 				createdAt: this.enFaker.date.past({ years: 5 }),
 				likes: this.enFaker.helpers.rangeToNumber({ min: 0, max: 100_000 }),
 				views: this.enFaker.helpers.rangeToNumber({ min: 0, max: 500_000 }),
 				description: this.enFaker.lorem.paragraph(),
 				imageUrls: Array(
-					this.enFaker.helpers.rangeToNumber({ min: 1, max: MAXIMUM_IMAGES_PER_POST })
+					this.enFaker.helpers.rangeToNumber({ min: 1, max: MAXIMUM_IMAGES_PER_POST }),
 				)
 					.fill(-1)
-					.map((_) => this.enFaker.image.urlLoremFlickr({ width: 400, height: 400 }))
+					.map((_) => this.enFaker.image.urlLoremFlickr({ width: 400, height: 400 })),
 			};
 
 			mockPosts.push(mockPost);
@@ -148,13 +150,13 @@ class FakerMockGenerator {
 		for (let i = 0; i < n; i++) {
 			let mockTag: Tag = {
 				id: faker.string.uuid(),
-				name: faker.word.noun()
+				name: faker.word.noun(),
 			};
 
 			while (previouslyGeneratedTagNames.has(mockTag.name)) {
 				mockTag = {
 					id: faker.string.uuid(),
-					name: faker.word.noun()
+					name: faker.word.noun(),
 				};
 			}
 
@@ -172,13 +174,13 @@ class FakerMockGenerator {
 		for (let i = 0; i < n; i++) {
 			let mockArtist: Artist = {
 				id: this.enFaker.string.uuid(),
-				name: this.enFaker.person.fullName()
+				name: this.enFaker.person.fullName(),
 			};
 
 			while (previouslyGeneratedArtistNames.has(mockArtist.name)) {
 				mockArtist = {
 					id: faker.string.uuid(),
-					name: faker.word.noun()
+					name: faker.word.noun(),
 				};
 			}
 
@@ -199,7 +201,7 @@ class FakerMockGenerator {
 				content: this.enFaker.lorem.paragraph({ min: 1, max: 5 }).slice(0, MAXIMUM_CONTENT_LENGTH),
 				postId: this.randomPostId(mockPosts),
 				authorId: this.randomUserId(mockUsers),
-				parentCommentId: null
+				parentCommentId: null,
 			};
 
 			mockComments.push(mockComment as IComment);
@@ -223,12 +225,12 @@ class FakerMockGenerator {
 			this.modelSettings.numberOfPosts || 0,
 			mockUsers,
 			mockTags,
-			mockArtists
+			mockArtists,
 		);
 		const mockComments = this.generateMockComments(
 			this.modelSettings.numberOfComments || 0,
 			mockUsers,
-			mockPosts
+			mockPosts,
 		);
 
 		return {
@@ -236,7 +238,7 @@ class FakerMockGenerator {
 			mockPosts,
 			mockTags,
 			mockArtists,
-			mockComments
+			mockComments,
 		};
 	}
 }

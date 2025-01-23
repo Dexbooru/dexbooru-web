@@ -11,9 +11,9 @@
 	import CollectionPaginator from './CollectionPaginator.svelte';
 
 	type Props = {
-		useNsfwPosts?: boolean;
+		useNsfwCollections?: boolean;
 	};
-	let { useNsfwPosts }: Props = $props();
+	let { useNsfwCollections: useNsfwPosts }: Props = $props();
 
 	const collectionPaginationData = getCollectionPaginationData();
 	const collectionPage = getCollectionPage();
@@ -28,7 +28,7 @@
 	>
 		{#if $collectionPaginationData}
 			{#if (useNsfwPosts ? $nsfwCollectionPage : $collectionPage).length > 0}
-				{#each useNsfwPosts ? $nsfwCollectionPage : $collectionPage as collection (collection)}
+				{#each useNsfwPosts ? $nsfwCollectionPage : $collectionPage as collection (collection.id)}
 					<CollectionCard {collection} />
 				{/each}
 			{/if}

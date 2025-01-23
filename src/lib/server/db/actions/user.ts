@@ -226,10 +226,13 @@ export async function findUserByNameOrEmail(
 		where: {
 			OR: [{ email }, { username }],
 		},
-	})) as TUser;
+	})) as TUser | null;
 }
 
-export async function editPasswordByUserId(userId: string, newPassword: string): Promise<boolean> {
+export async function updatePasswordByUserId(
+	userId: string,
+	newPassword: string,
+): Promise<boolean> {
 	const updateUserPasswordBatchResult = await prisma.user.updateMany({
 		where: {
 			id: userId,
@@ -243,7 +246,10 @@ export async function editPasswordByUserId(userId: string, newPassword: string):
 	return updateUserPasswordBatchResult.count > 0;
 }
 
-export async function editUsernameByUserId(userId: string, newUsername: string): Promise<boolean> {
+export async function updateUsernameByUserId(
+	userId: string,
+	newUsername: string,
+): Promise<boolean> {
 	const updateUsernameBatchResult = await prisma.user.updateMany({
 		where: {
 			id: userId,
@@ -257,7 +263,7 @@ export async function editUsernameByUserId(userId: string, newUsername: string):
 	return updateUsernameBatchResult.count > 0;
 }
 
-export async function editProfilePictureByUserId(
+export async function updateProfilePictureByUserId(
 	userId: string,
 	newProfilePictureUrl: string,
 ): Promise<boolean> {
@@ -304,7 +310,7 @@ export async function createUser(
 	return newUser as TUser;
 }
 
-export const getUserSelf = async (userId: string) => {
+export async function findUserSelf(userId: string) {
 	const user = await prisma.user.findUnique({
 		select: {
 			id: true,
@@ -332,4 +338,4 @@ export const getUserSelf = async (userId: string) => {
 	});
 
 	return user;
-};
+}

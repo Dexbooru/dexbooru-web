@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { page } from '$app/state';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { getOriginalCollectionPage, getUserCollections } from '$lib/client/helpers/context';
+	import {
+		getCollectionPage,
+		getCollectionPaginationData,
+		getOriginalCollectionPage,
+		getUserCollections,
+	} from '$lib/client/helpers/context';
 	import { filesToBase64Strings } from '$lib/client/helpers/images';
 	import {
 		MAXIMUM_COLLECTION_DESCRIPTION_LENGTH,
@@ -18,6 +22,7 @@
 	import { isLabelAppropriate } from '$lib/shared/helpers/labels';
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import { toast } from '@zerodevx/svelte-toast';
+	import CalendarEditSolid from 'flowbite-svelte-icons/CalendarEditSolid.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
 	import Fileupload from 'flowbite-svelte/Fileupload.svelte';
@@ -25,7 +30,6 @@
 	import Input from 'flowbite-svelte/Input.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
 	import Textarea from 'flowbite-svelte/Textarea.svelte';
-	import CalendarEditSolid from 'flowbite-svelte-icons/CalendarEditSolid.svelte'
 
 	type Props = {
 		isHidden: boolean;
@@ -52,7 +56,9 @@
 	});
 	let isNsfw: boolean = $state(false);
 
+	const collectionPaginationData = getCollectionPaginationData();
 	const originalCollectionPage = getOriginalCollectionPage();
+	const collectionPage = getCollectionPage();
 	const userCollections = getUserCollections();
 
 	const resetFileUploadState = () => {
@@ -122,16 +128,33 @@
 				resetFileUploadState();
 				isHidden = true;
 
-				const pathname = page.url.pathname;
-				if (pathname.includes('/collections')) {
-					const newCollection = result.data?.newCollection as TPostCollection;
-					originalCollectionPage.update((collections) => {
-						if (collections.find((collection) => collection.id === newCollection.id))
-							return collections;
-						return [...collections, newCollection];
+				const newCollection = result.data?.newCollection as TPostCollection;
+				originalCollectionPage.update((collections) => {
+					if (collections.find((collection) => collection.id === newCollection.id))
+						return collections;
+
+					const updatedCollections = [...collections, newCollection];
+					const orderBy = $collectionPaginationData?.orderBy ?? 'createdAt';
+					const ascending = $collectionPaginationData?.ascending ?? false;
+
+					updatedCollections.sort((a, b) => {
+						const aTime = a[orderBy].getTime();
+						const bTime = b[orderBy].getTime();
+
+						if (orderBy === 'createdAt') {
+							return ascending ? aTime - bTime : bTime - aTime;
+						}
+						if (orderBy === 'updatedAt') {
+							return ascending ? aTime - bTime : bTime - aTime;
+						}
+
+						return 0;
 					});
-					userCollections.update((collections) => [newCollection, ...collections]);
-				}
+
+					return updatedCollections;
+				});
+				collectionPage.set($originalCollectionPage);
+				userCollections.update((collections) => [newCollection, ...collections]);
 			} else if (result.type === 'failure') {
 				toast.push(
 					'An unexpected error occured while creating the collection',

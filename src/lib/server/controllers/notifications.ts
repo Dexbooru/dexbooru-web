@@ -1,5 +1,5 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { getUserNotificationsFromId } from '../db/actions/notifications';
+import { getUserNotificationsFromId } from '../db/actions/notification';
 import {
 	createErrorResponse,
 	createSuccessResponse,

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 	import { getGlobalQuery } from '$lib/client/helpers/context';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TAppSearchResult } from '$lib/shared/types/search';
@@ -18,6 +19,13 @@
 	let { users }: Props = $props();
 
 	const globalQuery = getGlobalQuery();
+
+	const onImageError = (event: Event) => {
+		const target = event.target as HTMLImageElement;
+		if (target.src) return;
+
+		target.src = DefaultProfilePicture;
+	};
 </script>
 
 <Table hoverable>
@@ -39,6 +47,7 @@
 					<Avatar
 						class="ml-auto mr-auto"
 						src={user.profilePictureUrl}
+						onerror={onImageError}
 						alt="profile picture of {user.username}"
 					/>
 					<a

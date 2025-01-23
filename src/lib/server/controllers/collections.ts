@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { AWS_COLLECTION_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { PUBLIC_POST_COLLECTION_SELECTORS } from '../constants/collections';
-import { PUBLIC_POST_SELECTORS } from '../constants/posts';
+import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../constants/posts';
 import { boolStrSchema, pageNumberSchema } from '../constants/reusableSchemas';
 import {
 	addPostToCollection,
@@ -257,11 +257,15 @@ export const handleGetCollection = async (
 ) => {
 	return await validateAndHandleRequest(event, handlerType, GetCollectionSchema, async (data) => {
 		const { collectionId } = data.pathParams;
+
 		try {
 			const collection = await findCollectionById(collectionId, {
 				...PUBLIC_POST_COLLECTION_SELECTORS,
 				posts: {
-					select: PUBLIC_POST_SELECTORS,
+					select:
+						handlerType === 'page-server-load'
+							? PAGE_SERVER_LOAD_POST_SELECTORS
+							: PUBLIC_POST_SELECTORS,
 				},
 			});
 			if (!collection) {
@@ -271,6 +275,11 @@ export const handleGetCollection = async (
 					`A collection with the id: ${collectionId} does not exist`,
 				);
 			}
+
+			collection.posts.forEach((post) => {
+				post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
+				post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
+			});
 
 			return createSuccessResponse(handlerType, 'Successfully fetched the collection', collection);
 		} catch (error) {

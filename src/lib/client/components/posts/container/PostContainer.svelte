@@ -4,14 +4,12 @@
 	import PostPageSidebar from '$lib/client/components/posts/container/PostPageSidebar.svelte';
 	import PostPaginator from '$lib/client/components/posts/container/PostPaginator.svelte';
 	import { LABEL_METADATA_MODAL_NAME } from '$lib/client/constants/layout';
-	import { CLEAR_INPUT_INTERVAL_MS } from '$lib/client/constants/search';
 	import { getActiveModal, getOriginalPostsPage, getPostsPage } from '$lib/client/helpers/context';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
 	import PalleteSolid from 'flowbite-svelte-icons/PalleteSolid.svelte';
 	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
-	import { get } from 'svelte/store';
 	import Searchbar from '../../reusable/Searchbar.svelte';
 
 	type Props = {
@@ -57,18 +55,7 @@
 	});
 
 	onMount(() => {
-		const searchInput = document.querySelector('#post-page-searchbar') as HTMLInputElement;
-
-		const postSearchResetTimeoutId = setInterval(() => {
-			if (get(postsPage) === get(originalPostPage)) return;
-			if (searchInput && !searchInput.value) {
-				currentPageQuery = '';
-				postsPage.set(get(originalPostPage));
-			}
-		}, CLEAR_INPUT_INTERVAL_MS);
-
 		return () => {
-			clearInterval(postSearchResetTimeoutId);
 			postPageStoreUnsubscribe();
 		};
 	});
@@ -83,12 +70,17 @@
 			<h1 class="lg:text-4xl md:text-3xl sm:text-3xl text-lg dark:text-white">
 				{postContainerTitle}
 			</h1>
-			<div class="flex flex-row space-x-2">
+			<div class="flex flex-col space-y-2">
 				{#if $originalPostPage.length > 0}
 					<Searchbar
 						inputElementId="post-page-searchbar"
+						customClass="sm:mr-auto sm:ml-auto md:ml-0 md:mr-auto"
 						width="30rem"
 						queryInputHandler={onPostSearch}
+						queryInputClear={() => {
+							postsPage.set($originalPostPage);
+							currentPageQuery = '';
+						}}
 						placeholder="Search by tag/artist keyword(s) on this page"
 					/>
 				{/if}
@@ -101,6 +93,7 @@
 								isOpen: true,
 							})}
 						color="blue"
+						class="w-[20rem] sm:mr-auto sm:ml-auto md:ml-0 md:mr-auto"
 					>
 						{#if getPageLabelType() === 'tag'}
 							<TagSolid class="mr-2" />
@@ -113,7 +106,7 @@
 			</div>
 		</div>
 		<PostGrid />
-		{#if $postsPage.length > 0 && $originalPostPage.length > 0 && currentPageQuery.length === 0}
+		{#if $originalPostPage.length > 0 && currentPageQuery.length === 0}
 			<PostPaginator />
 		{/if}
 	</div>

@@ -1,4 +1,9 @@
 <script lang="ts">
+	import DefaultPostCollectionPicture from '$lib/client/assets/default_post_collection_picture.webp';
+	import {
+		POST_COLLECTION_IMAGE_FALLBACK_HEIGHT,
+		POST_COLLECTION_IMAGE_FALLBACK_WIDTH,
+	} from '$lib/client/constants/images';
 	import { POSTS_GRID_ANIMATION_DURATION_MS } from '$lib/client/constants/posts';
 	import { getOriginalPostsPage } from '$lib/client/helpers/context';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
@@ -26,13 +31,27 @@
 			collection.thumbnailImageUrls.find((imageUrl) => imageUrl.includes(ORIGINAL_IMAGE_SUFFIX)) ??
 			'';
 	});
+
+	const onImageError = (event: Event) => {
+		const target = event.target as HTMLImageElement;
+		if (target.src) return;
+
+		target.src = DefaultPostCollectionPicture;
+		target.width = POST_COLLECTION_IMAGE_FALLBACK_WIDTH;
+		target.height = POST_COLLECTION_IMAGE_FALLBACK_HEIGHT;
+	};
 </script>
 
 <svelte:head>
 	<title>{collection.description} - {collection.id}</title>
 </svelte:head>
 
-<img class="whole-collection-image" src={originalThumbnail} alt={collection.description} />
+<img
+	class="whole-collection-image"
+	onerror={onImageError}
+	src={originalThumbnail}
+	alt={collection.description}
+/>
 <div class="flex">
 	<CollectionCardActions onCollectionViewPage {collection} />
 </div>

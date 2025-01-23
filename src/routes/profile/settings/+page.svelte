@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>Profile Settings - {capitalize(page.url.searchParams.get('tab') ?? '')}</title>
+	<title>Profile Settings - {capitalize(page.url.searchParams.get('tab') ?? 'Personal')}</title>
 </svelte:head>
 
 <main>

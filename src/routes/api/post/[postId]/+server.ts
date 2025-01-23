@@ -12,7 +12,7 @@ export const POST: RequestHandler = async (request) => {
 };
 
 export const PUT: RequestHandler = async (request) => {
-	return (await handleUpdatePost(request, 'api-route')) as ReturnType<RequestHandler>;
+	return (await handleUpdatePost(request)) as ReturnType<RequestHandler>;
 };
 
 export const GET: RequestHandler = async (request) => {

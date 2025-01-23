@@ -14,6 +14,7 @@
 		collection: TPostCollection;
 		onCollectionViewPage?: boolean;
 	};
+
 	let { collection, onCollectionViewPage = false }: Props = $props();
 
 	const authenticatedUser = getAuthenticatedUser();

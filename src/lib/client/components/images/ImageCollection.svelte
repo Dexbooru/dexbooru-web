@@ -1,4 +1,9 @@
 <script lang="ts">
+	import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
+	import {
+		POST_IMAGE_FALLBACK_HEIGHT,
+		POST_IMAGE_FALLBACK_WIDTH,
+	} from '$lib/client/constants/images';
 	import {
 		computeDownScaledImageRatios,
 		transformImageDimensions,
@@ -49,6 +54,15 @@
 		}
 	};
 
+	const onImageError = (event: Event) => {
+		const target = event.target as HTMLImageElement;
+		if (target.src) return;
+
+		target.src = DefaultPostPicture;
+		target.width = POST_IMAGE_FALLBACK_WIDTH;
+		target.height = POST_IMAGE_FALLBACK_HEIGHT;
+	};
+
 	onMount(() => {
 		screenWidth = window.innerWidth;
 		screenHeight = window.innerHeight;
@@ -77,7 +91,12 @@
 <div class="flex flex-col gap-3">
 	{#each Object.entries(imageUrls) as [index, imageUrl]}
 		{#if IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))}
-			<img class="whole-post-image resizable-img" src={imageUrl} alt={imagesAlt} />
+			<img
+				class="whole-post-image resizable-img"
+				src={imageUrl}
+				alt={imagesAlt}
+				onerror={onImageError}
+			/>
 		{:else}
 			<img
 				width={transformedImageDimensions[Number(index)].imageWidth}
@@ -85,6 +104,7 @@
 				class="whole-post-image {imagesScaledDown ? 'visible' : 'invisible'} block"
 				src={imageUrl}
 				alt={imagesAlt}
+				onerror={onImageError}
 			/>
 		{/if}
 	{/each}

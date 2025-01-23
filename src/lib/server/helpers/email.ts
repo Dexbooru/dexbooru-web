@@ -1,5 +1,6 @@
 import { dev } from '$app/environment';
 import { APP_URL, SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_USERNAME } from '$env/static/private';
+import { capitalize } from '$lib/shared/helpers/util';
 import nodemailer from 'nodemailer';
 import type { MailOptions } from 'nodemailer/lib/json-transport';
 import { ACCOUNT_RECOVERY_EMAIL_TEMPLATE, OAUTH_PASSWORD_EMAIL_TEMPLATE } from '../constants/email';
@@ -17,11 +18,11 @@ const transporter = nodemailer.createTransport({
 export const buildOauthPasswordEmailTemplate = (
 	username: string,
 	currentPassword: string,
+	applicationName: string,
 ): string => {
-	return OAUTH_PASSWORD_EMAIL_TEMPLATE.replaceAll('{{username}}', username).replaceAll(
-		'{{password}}',
-		currentPassword,
-	);
+	return OAUTH_PASSWORD_EMAIL_TEMPLATE.replaceAll('{{username}}', username)
+		.replaceAll('{{password}}', currentPassword)
+		.replaceAll('{{applicationName}}', capitalize(applicationName));
 };
 
 export const buildPasswordRecoveryEmailTemplate = (

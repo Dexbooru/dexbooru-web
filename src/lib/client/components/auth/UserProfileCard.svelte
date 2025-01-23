@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { addFriend, deleteFriend } from '$lib/client/api/friends';
+	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
+	import DotsHorizontalOutline from 'flowbite-svelte-icons/DotsHorizontalOutline.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
 	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
 	import DropdownItem from 'flowbite-svelte/DropdownItem.svelte';
-	import DotsHorizontalOutline from 'flowbite-svelte-icons/DotsHorizontalOutline.svelte';
 
 	type Props = {
 		targetUser: TUser;
@@ -58,6 +59,13 @@
 			toast.push('An error occured while trying to unfriend this user!', FAILURE_TOAST_OPTIONS);
 		}
 	};
+
+	const onImageError = (event: Event) => {
+		const target = event.target as HTMLImageElement;
+		if (target.src) return;
+
+		target.src = DefaultProfilePicture;
+	};
 </script>
 
 <Card style="min-width: 300px; max-width: 550px;">
@@ -71,7 +79,7 @@
 		</Dropdown>
 	</div>
 	<div class="flex flex-col items-center pb-4">
-		<Avatar size="lg" src={targetUser.profilePictureUrl} />
+		<Avatar size="lg" src={targetUser.profilePictureUrl} onerror={onImageError} />
 		<h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">
 			{targetUser.username}
 		</h5>

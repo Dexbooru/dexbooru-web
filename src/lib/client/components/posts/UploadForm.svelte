@@ -16,10 +16,10 @@
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate, transformLabel } from '$lib/shared/helpers/labels';
 	import { toast } from '@zerodevx/svelte-toast';
-	import Heading from 'flowbite-svelte/Heading.svelte';
-	import Button  from 'flowbite-svelte/Button.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
 	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
+	import Heading from 'flowbite-svelte/Heading.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
 	import Li from 'flowbite-svelte/Li.svelte';
@@ -34,6 +34,8 @@
 	type Props = {
 		form: ActionData;
 	};
+
+	type TEstimatedPostRating = 's' | 'q' | 'e';
 
 	let { form }: Props = $props();
 
@@ -65,7 +67,7 @@
 			);
 		return !isValidForm;
 	});
-	let estimatedPostRating: Promise<'s' | 'q' | 'e' | null> = $derived.by(async () => {
+	let estimatedPostRating: Promise<TEstimatedPostRating | null> = $derived.by(async () => {
 		if (tags.length === 0) {
 			return null;
 		}
@@ -73,7 +75,7 @@
 		const response = await getEstimatedPostRating(tags);
 		if (response.ok) {
 			const data = await response.json();
-			return data.predicted_rating as 's' | 'q' | 'e';
+			return data.predicted_rating as TEstimatedPostRating;
 		}
 
 		return null;

@@ -1,7 +1,7 @@
 import type { Prisma, UserAuthenticationSource } from '@prisma/client';
 import prisma from '../prisma';
 
-export const getLinkedAccountsForUser = async (userId: string, isSelf: boolean = false) => {
+export const findLinkedAccountsForUser = async (userId: string, isSelf: boolean = false) => {
 	const whereClause: Prisma.LinkedUserAccountWhereInput = {
 		userId,
 		...(!isSelf && { isPublic: true }),

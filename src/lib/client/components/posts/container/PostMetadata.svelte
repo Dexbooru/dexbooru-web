@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getCommentTree } from '$lib/client/helpers/context';
+	import { getCommentTree, getUpdatedPost } from '$lib/client/helpers/context';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate } from '$lib/shared/helpers/dates';
@@ -12,6 +12,7 @@
 
 	let { post }: Props = $props();
 
+	const updatedPost = getUpdatedPost();
 	const commentTree = getCommentTree();
 </script>
 
@@ -24,7 +25,9 @@
 </p>
 
 <p class="text-lg dark:text-white">
-	Last updated at: <span class=" dark:text-gray-400">{formatDate(post.updatedAt)}</span>
+	Last updated at: <span class=" dark:text-gray-400"
+		>{formatDate($updatedPost.updatedAt ?? post.updatedAt)}</span
+	>
 </p>
 
 <p class="text-lg dark:text-white">
@@ -37,22 +40,28 @@
 	</span>
 </p>
 
-<p class="text-lg dark:text-white">
-	Author ID: <span class=" dark:text-gray-400">
-		{#if post.author}
-			<a class="underline" href="/profile/{post.author.username}">{post.author.id}</a>
-		{:else}
-			{DELETED_ACCOUNT_HEADING}
-		{/if}
-	</span>
+{#if post.author}
+	<p class="text-lg dark:text-white">
+		Author ID: <span class=" dark:text-gray-400">
+			{post.author.id}
+		</span>
+	</p>
+{/if}
+
+<p class="text-lg dark:text-white whitespace-pre-wrap">
+	Source link: <a
+		target="_blank"
+		referrerpolicy="no-referrer"
+		class="underline"
+		href={$updatedPost.sourceLink ?? post.sourceLink}
+		>{$updatedPost.sourceLink ?? post.sourceLink}</a
+	>
 </p>
 
 <p class="text-lg dark:text-white whitespace-pre-wrap">
-	Source link: <a target="_blank" class="underline" href={post.sourceLink}>{post.sourceLink}</a>
-</p>
-
-<p class="text-lg dark:text-white whitespace-pre-wrap">
-	Description: <br /><span class="dark:text-gray-400">{post.description}</span>
+	Description: <br /><span class="dark:text-gray-400"
+		>{$updatedPost.description ?? post.description}</span
+	>
 </p>
 
 <p class="text-lg dark:text-white">

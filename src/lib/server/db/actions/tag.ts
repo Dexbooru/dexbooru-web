@@ -65,25 +65,21 @@ export async function findPostsByTagName(
 	ascending: boolean,
 	selectors?: TPostSelector,
 ): Promise<TPost[]> {
-	const data = await prisma.tag.findUnique({
+	const posts = await prisma.post.findMany({
 		where: {
-			name: tagName,
-		},
-		select: {
-			posts: {
-				select: selectors,
-				skip: pageNumber * pageLimit,
-				take: pageLimit,
-				orderBy: {
-					[orderBy]: ascending ? 'asc' : 'desc',
-				},
+			tagString: {
+				contains: tagName,
 			},
+		},
+		select: selectors,
+		skip: pageNumber * pageLimit,
+		take: pageLimit,
+		orderBy: {
+			[orderBy]: ascending ? 'asc' : 'desc',
 		},
 	});
 
-	if (!data) return [];
-
-	return data.posts as TPost[];
+	return posts as TPost[];
 }
 
 export async function getTagsWithStartingLetter(letter: string, pageNumber: number) {

@@ -9,6 +9,9 @@ export type TLikePutBody = {
 
 export type TUpdatePostBody = {
 	description: string;
+	sourceLink: string;
+	deletionPostImageUrls: string[];
+	newPostImagesContent: string[];
 };
 
 export type THiddenPagePostData = {
@@ -29,6 +32,7 @@ export type TPost = Post & {
 	isNsfw: boolean;
 	description: string;
 	createdAt: Date;
+	updatedAt: Date;
 	imageUrls: string[];
 	imageWidths: number[];
 	imageHeights: number[];
@@ -38,16 +42,18 @@ export type TPost = Post & {
 		username: string;
 		profilePictureUrl: string;
 	};
+	tagString: string;
 	tags: {
-		id: string;
+		id?: string;
 		name: string;
-		postCount: number;
+		postCount?: number;
 	}[];
 	artists: {
-		id: string;
+		id?: string;
 		name: string;
-		postCount: number;
+		postCount?: number;
 	}[];
+	artistString: string;
 	commentCount: number;
 };
 

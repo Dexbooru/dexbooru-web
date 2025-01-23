@@ -36,6 +36,7 @@ import {
 	POST_PAGINATION_DATA_CONTEXT_KEY,
 	QUERY_CONTEXT_KEY,
 	REGISTER_FORM_AUTH_REQUIREMENTS_CONTEXT_KEY,
+	UPDATED_POST_CONTEXT_KEY,
 	USER_COLLECTIONS_CONTEXT_KEY,
 	USER_CONTEXT_KEY,
 	USER_NOTIFICATIONS_CONTEXT_KEY,
@@ -85,6 +86,12 @@ export const initLayoutContexts = (data: LayoutData) => {
 	updateCommentsPage([]);
 	updateCommentPaginationData(null);
 	updateFriendsData(null);
+	updateUpdatedPost({});
+};
+
+export const updateUpdatedPost = (updatedPost: Partial<TPost>) => {
+	const updatedPostStore = writable(updatedPost);
+	setContext(UPDATED_POST_CONTEXT_KEY, updatedPostStore);
 };
 
 export const updateFriendsData = (friendsData: TFriendData | null) => {
@@ -210,6 +217,10 @@ export const updateAuthenticatedUserNotifications = (notifications: TUserNotific
 export const updateAuthenticatedUserPreferences = (userPreferences: UserPreference) => {
 	const updatedUserPreferences = writable(userPreferences);
 	setContext(USER_PREFERENCE_CONTEXT_KEY, updatedUserPreferences);
+};
+
+export const getUpdatedPost = () => {
+	return getContext<Writable<Partial<TPost>>>(UPDATED_POST_CONTEXT_KEY);
 };
 
 export const getFriendData = () => {

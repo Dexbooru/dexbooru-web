@@ -1,7 +1,7 @@
 import type { PostReportCategory } from '@prisma/client';
 import prisma from '../prisma';
 
-export const getPostReportsFromPostId = async (postId: string) => {
+export const findPostReportsFromPostId = async (postId: string) => {
 	const reports = await prisma.postReport.findMany({
 		where: {
 			id: postId,

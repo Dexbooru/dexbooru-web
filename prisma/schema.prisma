@@ -1,7 +1,8 @@
 generator client {
-  provider      = "prisma-client-js"
-  engineType    = "binary"
-  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  provider        = "prisma-client-js"
+  engineType      = "binary"
+  binaryTargets   = ["native", "rhel-openssl-1.0.x"]
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
@@ -94,10 +95,12 @@ model Post {
   imageUrls        String[]
   imageWidths      Int[]
   imageHeights     Int[]
-  artists          Artist[]
   commentCount     Int                  @default(0)
   comments         Comment[]
   tags             Tag[]
+  tagString        String               @db.VarChar(1520)
+  artists          Artist[]
+  artistString     String               @db.VarChar(380)
   author           User?                @relation(name: "created posts", fields: [authorId], references: [id], onDelete: SetNull)
   authorId         String?
   likedBy          User[]               @relation(name: "liked posts")

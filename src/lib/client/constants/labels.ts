@@ -6,7 +6,8 @@ export const ESTIMATED_TAG_RATING_LABEL_MAP: Record<'q' | 'e' | 's', string> = {
 	e: 'Explicit',
 	s: 'Safe',
 };
-export const CHAR_OPTIONS = [
+
+export const CHAR_OPTIONS_UPPERCASE = [
 	'0',
 	'1',
 	'2',
@@ -44,3 +45,6 @@ export const CHAR_OPTIONS = [
 	'Y',
 	'Z',
 ];
+export const CHAR_OPTIONS_LOWERCASE = CHAR_OPTIONS_UPPERCASE.map((char) =>
+	char.toLocaleLowerCase(),
+);

@@ -9,9 +9,13 @@ import {
 } from '../constants/email';
 import { PUBLIC_USER_SELECTORS } from '../constants/users';
 import { createAccountLink } from '../db/actions/linkedAccount';
-import { createUserPreferences, getUserPreferences } from '../db/actions/preferences';
+import { createUserPreferences, findUserPreferences } from '../db/actions/preference';
 import { createUser, findUserByEmail } from '../db/actions/user';
-import { createErrorResponse, validateAndHandleRequest } from '../helpers/controllers';
+import {
+	createErrorResponse,
+	createSuccessResponse,
+	validateAndHandleRequest,
+} from '../helpers/controllers';
 import { buildCookieOptions } from '../helpers/cookies';
 import { buildOauthPasswordEmailTemplate, sendEmail } from '../helpers/email';
 import {
@@ -21,10 +25,19 @@ import {
 	SkeletonOauthProvider,
 } from '../helpers/oauth';
 import { generateRandomPassword, hashPassword } from '../helpers/password';
-import { generateEncodedUserTokenFromRecord } from '../helpers/sessions';
+import {
+	generateEncodedUserTokenFromRecord,
+	getUserClaimsFromEncodedJWTToken,
+} from '../helpers/sessions';
 import { createTotpChallenge } from '../helpers/totp';
 import type { TRequestSchema } from '../types/controllers';
 import type { IOauthProvider, TOauthApplication, TSimplifiedUserResponse } from '../types/oauth';
+
+const OauthStoreSchema = {
+	body: z.object({
+		token: z.string().min(1, { message: 'Token is required' }),
+	}),
+} satisfies TRequestSchema;
 
 const OauthCallbackSchema = {
 	urlSearchParams: z.object({
@@ -53,6 +66,23 @@ const handleAccountLink = async (
 			`An error occurred while linking your ${matchingApplication} account`,
 		);
 	}
+};
+
+export const handleOauthStorage = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(event, 'api-route', OauthStoreSchema, async (data) => {
+		const token = data.body.token;
+		const validatedUser = getUserClaimsFromEncodedJWTToken(token);
+		if (!validatedUser) {
+			return createErrorResponse('api-route', 401, 'Invalid token');
+		}
+
+		event.cookies.set(SESSION_ID_KEY, token, buildCookieOptions(true));
+
+		return createSuccessResponse(
+			'api-route',
+			`Successfully stored token for user with the id: ${validatedUser.id}`,
+		);
+	});
 };
 
 export const handleOauthChallenge = async (event: RequestEvent) => {
@@ -120,8 +150,8 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 							);
 						}
 
-						const preferences = await getUserPreferences(matchingDbUser.id);
-						if (preferences && preferences.twoFactorAuthenticationEnabled) {
+						const preferences = await findUserPreferences(matchingDbUser.id);
+						if (preferences.twoFactorAuthenticationEnabled) {
 							const ipAddress = event.getClientAddress();
 							const newTotpChallengeId = await createTotpChallenge(
 								matchingDbUser.username,
@@ -132,9 +162,10 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 						}
 
 						const encodedAuthToken = generateEncodedUserTokenFromRecord(matchingDbUser, true);
-						event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(true));
-
-						redirect(302, `/posts`);
+						redirect(
+							302,
+							`/oauth/process?token=${encodedAuthToken}&application=${matchingApplication}`,
+						);
 					} else {
 						const temporaryPassword = generateRandomPassword(15);
 						const hashedTemporaryPassword = await hashPassword(temporaryPassword);
@@ -153,13 +184,18 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 							sender: `Dexbooru <${DEXBOORU_NO_REPLY_EMAIL_ADDRESS}>`,
 							to: newUser.email,
 							subject: OAUTH_TEMPORARY_PASSWORD_EMAIL_SUBJECT,
-							html: buildOauthPasswordEmailTemplate(newUser.username, temporaryPassword),
+							html: buildOauthPasswordEmailTemplate(
+								newUser.username,
+								temporaryPassword,
+								matchingApplication,
+							),
 						});
 
 						const encodedAuthToken = generateEncodedUserTokenFromRecord(newUser, true);
-						event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(true));
-
-						redirect(302, `/posts`);
+						redirect(
+							302,
+							`/oauth/process?token=${encodedAuthToken}&application=${matchingApplication}`,
+						);
 					}
 				}
 			} catch (error) {

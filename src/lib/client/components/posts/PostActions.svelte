@@ -74,10 +74,20 @@
 	};
 </script>
 
-<div class="flex flex-row space-x-3">
-	<Button disabled={postLikeLoading} on:click={handleLikePost} color="green" class="flex space-x-3">
+<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0">
+	<Button
+		disabled={postLikeLoading}
+		on:click={handleLikePost}
+		color="green"
+		class="flex items-center justify-center w-full sm:w-auto space-x-3"
+	>
 		<HeartSolid color={hasLikedPost ? 'red' : 'inherit'} role="icon" style="bg-red" />
-		<span>{normalizeCount(likes)} - Like post</span>
+		<span>
+			{normalizeCount(likes)}
+			{#if $user}
+				- Like post
+			{/if}
+		</span>
 	</Button>
 
 	{#if $user}
@@ -87,14 +97,17 @@
 					isOpen: true,
 					focusedModalName: COLLECTIONS_MODAL_NAME,
 					modalData: { post },
-				})}>Add to collection</Button
+				})}
+			class="w-full sm:w-auto"
 		>
+			Add to collection
+		</Button>
 	{/if}
 
-	<div class="flex justify-center gap-2">
+	<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
 		<Button
 			on:click={() => handleModalOpen(REPORT_MODAL_NAME, { postId })}
-			class="space-x-2"
+			class="w-full sm:w-auto space-x-2"
 			color="yellow"
 		>
 			<span>Report post</span>
@@ -103,17 +116,23 @@
 	</div>
 
 	{#if $user && $user.id === author.id}
-		<div class="flex justify-center gap-2">
+		<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
 			<Button
 				color="green"
-				class="space-x-2"
-				on:click={() => handleModalOpen(EDIT_POST_MODAL_NAME, { post })}
+				class="w-full sm:w-auto space-x-2"
+				on:click={() =>
+					handleModalOpen(EDIT_POST_MODAL_NAME, {
+						post,
+						handleUpdatePost: (updatedPost: TPost) => {
+							post = updatedPost;
+						},
+					})}
 			>
 				<span>Edit post</span>
 				<PenSolid />
 			</Button>
 			<Button
-				class="space-x-2"
+				class="w-full sm:w-auto space-x-2"
 				on:click={() => handleModalOpen(DELETE_POST_MODAL_NAME, { post })}
 				color="red"
 			>

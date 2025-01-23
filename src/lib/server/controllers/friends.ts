@@ -5,7 +5,7 @@ import {
 	deleteFriendRequest,
 	findAllUserFriendRequests,
 	findFriendsForUser,
-} from '../db/actions/friends';
+} from '../db/actions/friend';
 import { createFriend, deleteFriend, findUserByName } from '../db/actions/user';
 import {
 	createErrorResponse,
@@ -76,9 +76,10 @@ export const handleDeleteFriend = async (event: RequestEvent) => {
 		DeleteFriendSchema,
 		async (data) => {
 			const friendUsername = data.pathParams.username;
+			const user = event.locals.user;
 
 			try {
-				const friendUser = await findUserByName(friendUsername);
+				const friendUser = await findUserByName(friendUsername, { id: true });
 				if (!friendUser) {
 					return createErrorResponse(
 						'api-route',
@@ -87,12 +88,12 @@ export const handleDeleteFriend = async (event: RequestEvent) => {
 					);
 				}
 
-				const deletedFriend = await deleteFriend(event.locals.user.id, friendUser.id);
+				const deletedFriend = await deleteFriend(user.id, friendUser.id);
 				if (!deletedFriend) {
 					return createErrorResponse(
 						'api-route',
 						409,
-						`There was no relationship between ${event.locals.user.username} and ${friendUser.username} found`,
+						`There was no relationship between ${user.id} and ${friendUser.id} found`,
 					);
 				}
 
@@ -120,9 +121,10 @@ export const handleFriendRequest = async (event: RequestEvent) => {
 		async (data) => {
 			const senderUsername = data.pathParams.username;
 			const requestAction = data.urlSearchParams.action;
+			const user = event.locals.user;
 
 			try {
-				const senderUser = await findUserByName(senderUsername);
+				const senderUser = await findUserByName(senderUsername, { id: true });
 				if (!senderUser) {
 					return createErrorResponse(
 						'api-route',
@@ -131,24 +133,24 @@ export const handleFriendRequest = async (event: RequestEvent) => {
 					);
 				}
 
-				const deletedFriendRequest = await deleteFriendRequest(event.locals.user.id, senderUser.id);
+				const deletedFriendRequest = await deleteFriendRequest(user.id, senderUser.id);
 				if (!deletedFriendRequest) {
 					return createErrorResponse(
 						'api-route',
 						409,
-						`There exists no friend request connection between ${event.locals.user.id} and ${senderUser.id}`,
+						`There exists no friend request connection between ${user.id} and ${senderUser.id}`,
 					);
 				}
 
 				if (requestAction === 'accept') {
-					await createFriend(event.locals.user.id, senderUser.id);
+					await createFriend(user.id, senderUser.id);
 				}
 
 				return createSuccessResponse(
 					'api-route',
 					`Successfully ${
 						requestAction === 'accept' ? 'accepted' : 'declined'
-					} friendship request from ${senderUser.username}`,
+					} friendship request from ${senderUsername}`,
 				);
 			} catch {
 				return createErrorResponse(
@@ -169,17 +171,9 @@ export const handleSendFriendRequest = async (event: RequestEvent) => {
 		CreateFriendRequestSchema,
 		async (data) => {
 			const receiverUsername = data.pathParams.username;
+			const user = event.locals.user;
 
 			try {
-				const authenticatedUsername = event.locals.user.username;
-				if (authenticatedUsername === receiverUsername) {
-					return createErrorResponse(
-						'api-route',
-						409,
-						'You cannot send a friend request to yourself',
-					);
-				}
-
 				const receiverUser = await findUserByName(receiverUsername, { username: true, id: true });
 				if (!receiverUser) {
 					return createErrorResponse(
@@ -189,7 +183,15 @@ export const handleSendFriendRequest = async (event: RequestEvent) => {
 					);
 				}
 
-				const newFriendRequest = await createFriendRequest(event.locals.user.id, receiverUser.id);
+				if (user.id === receiverUser.id) {
+					return createErrorResponse(
+						'api-route',
+						409,
+						'You cannot send a friend request to yourself',
+					);
+				}
+
+				const newFriendRequest = await createFriendRequest(user.id, receiverUser.id);
 				return createSuccessResponse(
 					'api-route',
 					`Successfully sent the friend request to ${receiverUsername}`,

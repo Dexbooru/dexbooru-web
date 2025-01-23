@@ -4,7 +4,7 @@ import { MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH } from '../../shared/constants
 import {
 	createPostReport,
 	deletePostReportByIds,
-	getPostReportsFromPostId,
+	findPostReportsFromPostId,
 } from '../db/actions/postReport';
 import {
 	createErrorResponse,
@@ -93,7 +93,7 @@ export const handleGetPostReports = async (
 			const postId = data.pathParams.postId;
 
 			try {
-				const postReports = await getPostReportsFromPostId(postId);
+				const postReports = await findPostReportsFromPostId(postId);
 				return createSuccessResponse(handlerType, 'Successfully fetched the post reports.', {
 					postReports,
 				});

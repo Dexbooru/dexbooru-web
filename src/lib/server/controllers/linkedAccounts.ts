@@ -1,7 +1,7 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
-import { deleteAccountLink, getLinkedAccountsForUser } from '../db/actions/linkedAccount';
-import { findUserByName } from '../db/actions/user';
+import { deleteAccountLink, findLinkedAccountsForUser } from '../db/actions/linkedAccount';
+import { findUserById, findUserByName } from '../db/actions/user';
 import {
 	createErrorResponse,
 	createSuccessResponse,
@@ -32,9 +32,14 @@ export const handleDeleteUserLinkedAccount = async (event: RequestEvent) => {
 		async (data) => {
 			const { username } = data.pathParams;
 			const platform = data.urlSearchParams.platform;
-			const user = event.locals.user;
+			const userId = event.locals.user.id;
 
 			try {
+				const user = await findUserById(userId, { id: true, username: true });
+				if (!user) {
+					return createErrorResponse('api-route', 404, 'User not found');
+				}
+
 				if (user.username !== username) {
 					return createErrorResponse(
 						'api-route',
@@ -44,7 +49,7 @@ export const handleDeleteUserLinkedAccount = async (event: RequestEvent) => {
 				}
 
 				await deleteAccountLink(user.id, platform);
-				
+
 				return createSuccessResponse(
 					'api-route',
 					`Account unlinked successfully from the platform: ${platform} for the user with the id: ${user.id}`,
@@ -72,7 +77,7 @@ export const handleGetUserLinkedAccounts = async (event: RequestEvent) => {
 				}
 
 				const isSelf = user.id === event.locals.user.id;
-				const linkedAccounts = await getLinkedAccountsForUser(user.id, isSelf);
+				const linkedAccounts = await findLinkedAccountsForUser(user.id, isSelf);
 
 				return createSuccessResponse('api-route', 'Linked accounts fetched successfully', {
 					linkedAccounts,

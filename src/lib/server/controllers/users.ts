@@ -25,13 +25,12 @@ import { isHttpError, isRedirect, redirect, type RequestEvent } from '@sveltejs/
 import { z } from 'zod';
 import { deleteFromBucket, uploadToBucket } from '../aws/actions/s3';
 import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '../constants/aws';
-import { SESSION_ID_COOKIE_OPTIONS } from '../constants/cookies';
 import {
 	ACCOUNT_RECOVERY_EMAIL_SUBJECT,
 	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
 } from '../constants/email';
 import { boolStrSchema } from '../constants/reusableSchemas';
-import { checkIfUserIsFriended } from '../db/actions/friends';
+import { checkIfUserIsFriended } from '../db/actions/friend';
 import {
 	createPasswordRecoveryAttempt,
 	deletePasswordRecoveryAttempt,
@@ -39,23 +38,23 @@ import {
 } from '../db/actions/passwordRecoveryAttempt';
 import {
 	createUserPreferences,
-	getUserPreferences,
+	findUserPreferences,
 	updateUserPreferences,
-} from '../db/actions/preferences';
+} from '../db/actions/preference';
 import {
 	checkIfUsersAreFriends,
 	createUser,
 	deleteUserById,
-	editPasswordByUserId,
-	editProfilePictureByUserId,
-	editUsernameByUserId,
 	findUserByEmail,
 	findUserById,
 	findUserByName,
 	findUserByNameOrEmail,
-	getUserSelf,
+	findUserSelf,
 	getUserStatistics,
+	updatePasswordByUserId,
+	updateProfilePictureByUserId,
 	updateUserRole,
+	updateUsernameByUserId,
 } from '../db/actions/user';
 import {
 	createErrorResponse,
@@ -69,11 +68,7 @@ import {
 	runProfileImageTransformationPipeline,
 } from '../helpers/images';
 import { doPasswordsMatch, hashPassword } from '../helpers/password';
-import {
-	cacheResponse,
-	generateEncodedUserTokenFromRecord,
-	generateUpdatedUserTokenFromClaims,
-} from '../helpers/sessions';
+import { cacheResponse, generateEncodedUserTokenFromRecord } from '../helpers/sessions';
 import {
 	createTotpChallenge,
 	deleteTotpChallenge,
@@ -372,7 +367,7 @@ export const handlePasswordUpdateAccountRecovery = async (event: RequestEvent) =
 				}
 
 				const hashedNewPassword = await hashPassword(newPassword);
-				const updatedPassword = await editPasswordByUserId(userId, hashedNewPassword);
+				const updatedPassword = await updatePasswordByUserId(userId, hashedNewPassword);
 
 				if (!updatedPassword) {
 					return createErrorResponse(
@@ -491,7 +486,6 @@ export const handleSendForgotPasswordEmail = async (event: RequestEvent) => {
 					'The password recovery email was sent successfully',
 				);
 			} catch (error) {
-				console.log(error);
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -509,7 +503,7 @@ export const handleGetSelfData = async (event: RequestEvent) => {
 		{},
 		async (_) => {
 			try {
-				const user = await getUserSelf(event.locals.user.id);
+				const user = await findUserSelf(event.locals.user.id);
 				if (!user) {
 					return createErrorResponse(
 						'api-route',
@@ -699,53 +693,72 @@ export const handleGetUser = async (
 	return await validateAndHandleRequest(event, handlerType, GetUserSchema, async (data) => {
 		const user = event.locals.user;
 		const targetUsername = data.pathParams.username;
-		let friendStatus: TFriendStatus = 'not-friends';
 
-		const targetUser = await findUserByName(targetUsername, {
-			id: true,
-			username: true,
-			profilePictureUrl: true,
-			createdAt: true,
-			...(user.id !== NULLABLE_USER.id &&
-				targetUsername === user.username && {
-					updatedAt: true,
-					email: true,
-				}),
-		});
-		if (!targetUser) {
-			const errorResponse = createErrorResponse(
-				handlerType,
-				404,
-				`A user named ${targetUsername} does not exist!`,
-			);
-			if (handlerType === 'page-server-load') throw errorResponse;
+		try {
+			let friendStatus: TFriendStatus = 'not-friends';
 
-			return errorResponse;
-		}
+			const targetUser = (await findUserByName(targetUsername, {
+				id: true,
+				email: true,
+				username: true,
+				profilePictureUrl: true,
+				createdAt: true,
+				updatedAt: true,
+			})) as Partial<TUser>;
+			if (!targetUser) {
+				const errorResponse = createErrorResponse(
+					handlerType,
+					404,
+					`A user named ${targetUsername} does not exist!`,
+				);
+				if (handlerType === 'page-server-load') throw errorResponse;
 
-		const friendRequestPending =
-			user.id !== NULLABLE_USER.id ? await checkIfUserIsFriended(user.id, targetUser.id) : false;
-		if (friendRequestPending) {
-			friendStatus = 'request-pending';
-		} else {
-			const areFriends =
-				user.id !== NULLABLE_USER.id ? await checkIfUsersAreFriends(user.id, targetUser.id) : false;
-			if (areFriends) {
-				friendStatus = 'are-friends';
+				return errorResponse;
 			}
+
+			if (targetUser.id !== user.id) {
+				delete targetUser.email;
+				delete targetUser.updatedAt;
+			}
+
+			const friendRequestPending =
+				user.id !== NULLABLE_USER.id
+					? await checkIfUserIsFriended(user.id, targetUser.id ?? '')
+					: false;
+			if (friendRequestPending) {
+				friendStatus = 'request-pending';
+			} else {
+				const areFriends =
+					user.id !== NULLABLE_USER.id
+						? await checkIfUsersAreFriends(user.id, targetUser.id ?? '')
+						: false;
+				if (areFriends) {
+					friendStatus = 'are-friends';
+				}
+			}
+
+			const userStatistics = await getUserStatistics(targetUser.id ?? '');
+
+			return createSuccessResponse(
+				handlerType,
+				`Successfully fetched user profile details for ${targetUsername}`,
+				{
+					targetUser,
+					friendStatus: (user.id !== NULLABLE_USER.id
+						? friendStatus
+						: 'irrelevant') as TFriendStatus,
+					userStatistics,
+				},
+			);
+		} catch (error) {
+			console.log(error);
+
+			return createErrorResponse(
+				handlerType,
+				500,
+				'An unexpected error occured while trying to fetch the user profile details',
+			);
 		}
-
-		const userStatistics = await getUserStatistics(targetUser.id);
-
-		return createSuccessResponse(
-			handlerType,
-			`Successfully fetched user profile details for ${targetUsername}`,
-			{
-				targetUser,
-				friendStatus: (user.id !== NULLABLE_USER.id ? friendStatus : 'irrelevant') as TFriendStatus,
-				userStatistics,
-			},
-		);
 	});
 };
 
@@ -756,6 +769,7 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 		UserChangeProfilePictureSchema,
 		async (data) => {
 			const { newProfilePicture, removeProfilePicture } = data.form;
+			const userId = event.locals.user.id;
 
 			if (!removeProfilePicture && newProfilePicture.size === 0) {
 				return createErrorResponse(
@@ -766,28 +780,32 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 			}
 
 			try {
-				if (
-					typeof event.locals.user.profilePictureUrl === 'string' &&
-					event.locals.user.profilePictureUrl.length > 0
-				) {
-					deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, event.locals.user.profilePictureUrl);
+				const user = await findUserById(userId, { profilePictureUrl: true, username: true });
+				if (!user) {
+					return createErrorResponse(
+						'form-action',
+						404,
+						`A user with the id: ${userId} does not exist!`,
+						{
+							type: 'profilePicture',
+							reason: `A user with the id: ${userId} does not exist!`,
+						},
+					);
+				}
+
+				if (typeof user.profilePictureUrl === 'string' && user.profilePictureUrl.length > 0) {
+					deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, user.profilePictureUrl);
 				}
 
 				const newProfilePictureFileBuffer = removeProfilePicture
-					? await runDefaultProfilePictureTransformationPipeline(event.locals.user.username)
+					? await runDefaultProfilePictureTransformationPipeline(user.username)
 					: await runProfileImageTransformationPipeline(newProfilePicture);
 				const updatedProfilePictureObjectUrl = await uploadToBucket(
 					AWS_PROFILE_PICTURE_BUCKET_NAME,
 					'profile_pictures',
 					newProfilePictureFileBuffer,
 				);
-				await editProfilePictureByUserId(event.locals.user.id, updatedProfilePictureObjectUrl);
-
-				const updatedUserJwtToken = generateUpdatedUserTokenFromClaims({
-					...event.locals.user,
-					profilePictureUrl: updatedProfilePictureObjectUrl,
-				});
-				event.cookies.set(SESSION_ID_KEY, updatedUserJwtToken, SESSION_ID_COOKIE_OPTIONS);
+				await updateProfilePictureByUserId(userId, updatedProfilePictureObjectUrl);
 
 				return createSuccessResponse(
 					'form-action',
@@ -858,7 +876,10 @@ export const handleChangePassword = async (event: RequestEvent) => {
 				}
 
 				const hashedNewPassword = await hashPassword(newPassword);
-				const updatedPassword = await editPasswordByUserId(event.locals.user.id, hashedNewPassword);
+				const updatedPassword = await updatePasswordByUserId(
+					event.locals.user.id,
+					hashedNewPassword,
+				);
 
 				if (!updatedPassword) {
 					return createErrorResponse(
@@ -910,7 +931,7 @@ export const handleChangeUsername = async (event: RequestEvent) => {
 					);
 				}
 
-				const updatedUsername = await editUsernameByUserId(event.locals.user.id, newUsername);
+				const updatedUsername = await updateUsernameByUserId(event.locals.user.id, newUsername);
 				if (!updatedUsername) {
 					return createErrorResponse(
 						'form-action',
@@ -923,12 +944,6 @@ export const handleChangeUsername = async (event: RequestEvent) => {
 						},
 					);
 				}
-
-				const updatedUserJwtToken = generateUpdatedUserTokenFromClaims({
-					...event.locals.user,
-					username: newUsername,
-				});
-				event.cookies.set(SESSION_ID_KEY, updatedUserJwtToken, SESSION_ID_COOKIE_OPTIONS);
 
 				return createSuccessResponse('form-action', 'The username was changed successfully', {
 					message: 'The username was changed successfully!',
@@ -1154,7 +1169,7 @@ export const handleUserAuthFlowForm = async (event: RequestEvent) => {
 				return createErrorResponse('form-action', 401, 'The authentication failed', errorData);
 			}
 
-			const preferences = await getUserPreferences(user.id);
+			const preferences = await findUserPreferences(user.id);
 			if (preferences && preferences.twoFactorAuthenticationEnabled) {
 				const ipAddress = event.getClientAddress();
 				const newTotpChallengeId = await createTotpChallenge(user.username, ipAddress, rememberMe);
