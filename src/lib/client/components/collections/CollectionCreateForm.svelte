@@ -27,6 +27,7 @@
 	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
 	import Fileupload from 'flowbite-svelte/Fileupload.svelte';
 	import ImagePlaceholder from 'flowbite-svelte/ImagePlaceholder.svelte';
+	import Img from 'flowbite-svelte/Img.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
 	import Textarea from 'flowbite-svelte/Textarea.svelte';
@@ -213,7 +214,7 @@
 	{#if thumbnailLoading}
 		<ImagePlaceholder imgOnly class="mt-8 mb-8" />
 	{:else if thumbnailBase64.length > 0 && thumbnailFile !== undefined}
-		<img
+		<Img
 			src={thumbnailBase64}
 			class="mt-3 mb-3 block object-cover m-auto !w-[{COLLECTION_THUMBNAIL_WIDTH}px] !h-[{COLLECTION_THUMBNAIL_HEIGHT}px]"
 			alt="collection thumbnial preview of {thumbnailFile?.name}"

@@ -30,7 +30,9 @@ import {
 	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
 } from '../constants/email';
 import { boolStrSchema } from '../constants/reusableSchemas';
+import { PUBLIC_USER_SELECTORS } from '../constants/users';
 import { checkIfUserIsFriended } from '../db/actions/friend';
+import { findLinkedAccountsFromUserId } from '../db/actions/linkedAccount';
 import {
 	createPasswordRecoveryAttempt,
 	deletePasswordRecoveryAttempt,
@@ -67,6 +69,7 @@ import {
 	runDefaultProfilePictureTransformationPipeline,
 	runProfileImageTransformationPipeline,
 } from '../helpers/images';
+import { DiscordOauthProvider, GithubOauthProvider, GoogleOauthProvider } from '../helpers/oauth';
 import { doPasswordsMatch, hashPassword } from '../helpers/password';
 import { cacheResponse, generateEncodedUserTokenFromRecord } from '../helpers/sessions';
 import {
@@ -314,6 +317,34 @@ const UserUpdatePasswordAccountRecoverySchema = {
 		userId: z.string().uuid(),
 	}),
 } satisfies TRequestSchema;
+
+export const handleGetUserSettings = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(event, 'page-server-load', {}, async (_) => {
+		if (event.locals.user.id === NULLABLE_USER.id) {
+			redirect(302, '/');
+		}
+
+		const linkedAccounts = await findLinkedAccountsFromUserId(event.locals.user.id, true);
+
+		const googleAuthProvider = new GoogleOauthProvider(event);
+		const discordAuthProvider = new DiscordOauthProvider(event);
+		const githubAuthProvider = new GithubOauthProvider(event);
+
+		const [googleAuthorizationUrl, discordAuthorizationUrl, githubAuthorizationUrl] =
+			await Promise.all([
+				googleAuthProvider.getAuthorizationUrl(),
+				discordAuthProvider.getAuthorizationUrl(),
+				githubAuthProvider.getAuthorizationUrl(),
+			]);
+
+		return createSuccessResponse('page-server-load', 'Successfully fetched the user settings', {
+			discordAuthorizationUrl,
+			githubAuthorizationUrl,
+			googleAuthorizationUrl,
+			linkedAccounts,
+		});
+	});
+};
 
 export const handlePasswordUpdateAccountRecovery = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -698,13 +729,17 @@ export const handleGetUser = async (
 			let friendStatus: TFriendStatus = 'not-friends';
 
 			const targetUser = (await findUserByName(targetUsername, {
-				id: true,
-				email: true,
-				username: true,
-				profilePictureUrl: true,
-				createdAt: true,
+				...PUBLIC_USER_SELECTORS,
 				updatedAt: true,
+				linkedAccounts: {
+					select: {
+						platform: true,
+						platformUsername: true,
+						isPublic: true,
+					},
+				},
 			})) as Partial<TUser>;
+
 			if (!targetUser) {
 				const errorResponse = createErrorResponse(
 					handlerType,
@@ -720,6 +755,11 @@ export const handleGetUser = async (
 				delete targetUser.email;
 				delete targetUser.updatedAt;
 			}
+
+			const isSelf = event.locals.user.id === targetUser.id;
+			const linkedAccounts = (targetUser.linkedAccounts ?? []).filter(
+				(account) => isSelf || account.isPublic,
+			);
 
 			const friendRequestPending =
 				user.id !== NULLABLE_USER.id
@@ -748,11 +788,10 @@ export const handleGetUser = async (
 						? friendStatus
 						: 'irrelevant') as TFriendStatus,
 					userStatistics,
+					linkedAccounts,
 				},
 			);
 		} catch (error) {
-			console.log(error);
-
 			return createErrorResponse(
 				handlerType,
 				500,

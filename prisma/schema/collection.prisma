@@ -1,0 +1,15 @@
+model PostCollection {
+  id                 String   @id @default(uuid())
+  title              String   @db.VarChar(150)
+  description        String   @db.VarChar(250)
+  isNsfw             Boolean  @default(false)
+  thumbnailImageUrls String[] @default([])
+  posts              Post[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now())
+  author             User?    @relation(name: "post collection author", fields: [authorId], references: [id])
+  authorId           String?
+
+  @@index([id])
+  @@index([authorId])
+}

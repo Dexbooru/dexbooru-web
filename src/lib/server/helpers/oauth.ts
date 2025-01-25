@@ -6,7 +6,7 @@ import {
 	OAUTH_GOOGLE_CLIENT_ID,
 	OAUTH_GOOGLE_CLIENT_SECRET,
 } from '$env/static/private';
-import { MAXIMUM_USERNAME_LENGTH } from '$lib/shared/constants/auth';
+import { MAXIMUM_USERNAME_LENGTH, NULLABLE_USER } from '$lib/shared/constants/auth';
 import type { RequestEvent } from '@sveltejs/kit';
 import { CALLBACK_ENDPOINT } from '../constants/oauth';
 import redis from '../db/redis';
@@ -26,18 +26,25 @@ import type {
 export class SkeletonOauthProvider {
 	protected readonly event: RequestEvent;
 	protected readonly applicationSource: TOauthApplication;
+	protected readonly userId: string | undefined;
 
 	public static readonly applicationSources: TOauthApplication[] = ['discord', 'google', 'github'];
 	public static readonly oauthStateKeyPrefix: string = 'OAUTH_STATE';
+	public static readonly oauthStateKeyUserIdLength: number = 5;
 
 	constructor(event: RequestEvent, applicationSource: TOauthApplication) {
 		this.event = event;
+		this.userId = event.locals.user.id !== NULLABLE_USER.id ? event.locals.user.id : undefined;
 		this.applicationSource = applicationSource;
 	}
 
 	private constructKey(): string {
-		const ipAddress = this.event.getClientAddress();
-		return `${SkeletonOauthProvider.oauthStateKeyPrefix}_${this.applicationSource.toUpperCase()}_${ipAddress}`;
+		let stateKey = `${SkeletonOauthProvider.oauthStateKeyPrefix}_${this.applicationSource.toUpperCase()}_${crypto.randomUUID()}`;
+		if (this.userId) {
+			stateKey += `_${this.userId}`;
+		}
+
+		return stateKey;
 	}
 
 	public static constructPrimaryApplicationUsername(oauthUsername: string): string {
@@ -53,6 +60,16 @@ export class SkeletonOauthProvider {
 			state.includes(source.toUpperCase()),
 		);
 		return matchingApplication;
+	}
+
+	public static extractUserIdFromState(state: string): string | undefined {
+		const stateParts = state.split('_');
+
+		return stateParts.length === SkeletonOauthProvider.oauthStateKeyUserIdLength
+			? stateParts[4] !== NULLABLE_USER.id
+				? stateParts[4]
+				: undefined
+			: undefined;
 	}
 
 	async validateAuthState(stateKey: string) {

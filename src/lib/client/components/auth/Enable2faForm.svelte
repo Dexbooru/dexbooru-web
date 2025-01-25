@@ -9,6 +9,7 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
+	import Img from 'flowbite-svelte/Img.svelte';
 	import AuthInput from './AuthInput.svelte';
 
 	let currentPassword: string = $state('');
@@ -99,7 +100,7 @@
 					Scan the QR code below with your authenticator app (e.g., Google Authenticator, Authy, or
 					Microsoft Authenticator) to set up 2FA.
 				</p>
-				<img class="m-auto" width="256" height="256" src={totpUri} alt="Generated TOTP to scan" />
+				<Img class="m-auto" width="256" height="256" src={totpUri} alt="Generated TOTP to scan" />
 				<p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
 					Need an authenticator app? Try one of these:
 					<a

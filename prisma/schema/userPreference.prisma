@@ -1,0 +1,16 @@
+model UserPreference {
+  twoFactorAuthenticationEnabled  Boolean  @default(false)
+  browseInSafeMode                Boolean  @default(false)
+  autoBlurNsfw                    Boolean  @default(true)
+  blacklistedTags                 String[] @default([]) @db.Text
+  blacklistedArtists              String[] @default([]) @db.Text
+  customSideWideCss               String   @default("") @db.Text
+  hidePostMetadataOnPreview       Boolean  @default(true)
+  hideCollectionMetadataOnPreview Boolean  @default(false)
+  user                            User?    @relation(name: "user profile preferences", fields: [userId], references: [id], onDelete: Cascade)
+  userId                          String   @unique
+  createdAt                       DateTime @default(now())
+  updatedAt                       DateTime @default(now())
+
+  @@id([userId])
+}

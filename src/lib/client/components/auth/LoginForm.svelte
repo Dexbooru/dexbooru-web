@@ -2,14 +2,14 @@
 	import { page } from '$app/state';
 	import { SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { toast } from '@zerodevx/svelte-toast';
+	import EyeOutline from 'flowbite-svelte-icons/EyeOutline.svelte';
+	import EyeSlashOutline from 'flowbite-svelte-icons/EyeSlashOutline.svelte';
 	import Alert from 'flowbite-svelte/Alert.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
 	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
-	import EyeOutline from 'flowbite-svelte-icons/EyeOutline.svelte';
-	import EyeSlashOutline from 'flowbite-svelte-icons/EyeSlashOutline.svelte';
 	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/login/$types';
 	import OauthLinks from './OauthLinks.svelte';
@@ -46,7 +46,7 @@
 	});
 </script>
 
-<Card class="mt-20">
+<Card class="mt-6">
 	<form class="flex flex-col space-y-6" method="POST">
 		<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">
 			Login to Dexbooru!
@@ -90,7 +90,12 @@
 		</div>
 		<Button disabled={loginFormButtonDisabled} type="submit" class="w-full">Log in</Button>
 
-		<OauthLinks {discordAuthorizationUrl} {googleAuthorizationUrl} {githubAuthorizationUrl} />
+		<OauthLinks
+			{discordAuthorizationUrl}
+			{googleAuthorizationUrl}
+			{githubAuthorizationUrl}
+			location="login"
+		/>
 
 		{#if loginErrorReason}
 			<Alert color="red">

@@ -11,6 +11,7 @@
 	import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPostCollection } from '$lib/shared/types/collections';
+	import Img from 'flowbite-svelte/Img.svelte';
 	import { flip } from 'svelte/animate';
 	import PostCard from '../posts/card/PostCard.svelte';
 	import CollectionCardActions from './card/CollectionCardActions.svelte';
@@ -34,7 +35,6 @@
 
 	const onImageError = (event: Event) => {
 		const target = event.target as HTMLImageElement;
-		if (target.src) return;
 
 		target.src = DefaultPostCollectionPicture;
 		target.width = POST_COLLECTION_IMAGE_FALLBACK_WIDTH;
@@ -46,7 +46,7 @@
 	<title>{collection.description} - {collection.id}</title>
 </svelte:head>
 
-<img
+<Img
 	class="whole-collection-image"
 	onerror={onImageError}
 	src={originalThumbnail}

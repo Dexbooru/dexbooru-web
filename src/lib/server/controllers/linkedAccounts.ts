@@ -1,13 +1,18 @@
+import type { UserAuthenticationSource } from '@prisma/client';
 import type { RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
-import { deleteAccountLink, findLinkedAccountsForUser } from '../db/actions/linkedAccount';
-import { findUserById, findUserByName } from '../db/actions/user';
+import { boolStrSchema } from '../constants/reusableSchemas';
+import {
+	findLinkedAccountsFromUserId,
+	updateLinkedAccountsForUserFromId,
+} from '../db/actions/linkedAccount';
+import { findUserByName } from '../db/actions/user';
 import {
 	createErrorResponse,
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
-import type { TRequestSchema } from '../types/controllers';
+import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
 const GetUserLinkedAccountsSchema = {
 	pathParams: z.object({
@@ -15,47 +20,70 @@ const GetUserLinkedAccountsSchema = {
 	}),
 } satisfies TRequestSchema;
 
-const DeleteUserLinkedAccountSchema = {
-	pathParams: z.object({
-		username: z.string().min(1, { message: 'Username is required' }),
-	}),
-	urlSearchParams: z.object({
-		platform: z.enum(['DISCORD', 'GOOGLE', 'GITHUB']),
+const UpdateUserLinkedAccountsSchema = {
+	form: z.object({
+		disconnectedLinkedAccounts: z
+			.string()
+			.transform(
+				(value) =>
+					value
+						.split(',')
+						.filter((platform) =>
+							['GOOGLE', 'GITHUB', 'DISCORD'].includes(platform),
+						) as UserAuthenticationSource[],
+			),
+		isGooglePublic: boolStrSchema,
+		isGithubPublic: boolStrSchema,
+		isDiscordPublic: boolStrSchema,
 	}),
 } satisfies TRequestSchema;
 
-export const handleDeleteUserLinkedAccount = async (event: RequestEvent) => {
+export const handleUpdateLinkedAccounts = async (
+	event: RequestEvent,
+	handlerType: TControllerHandlerVariant,
+) => {
 	return await validateAndHandleRequest(
 		event,
-		'api-route',
-		DeleteUserLinkedAccountSchema,
+		handlerType,
+		UpdateUserLinkedAccountsSchema,
 		async (data) => {
-			const { username } = data.pathParams;
-			const platform = data.urlSearchParams.platform;
-			const userId = event.locals.user.id;
+			const user = event.locals.user;
+			const { disconnectedLinkedAccounts, isDiscordPublic, isGooglePublic, isGithubPublic } =
+				data.form;
 
 			try {
-				const user = await findUserById(userId, { id: true, username: true });
-				if (!user) {
-					return createErrorResponse('api-route', 404, 'User not found');
-				}
+				const currentLinkedAccounts = await findLinkedAccountsFromUserId(user.id, true);
+				const accountPublicities = {} as Record<UserAuthenticationSource, boolean>;
+				currentLinkedAccounts.forEach((linkedAccount) => {
+					switch (linkedAccount.platform) {
+						case 'DISCORD':
+							accountPublicities.DISCORD = isDiscordPublic;
+							break;
+						case 'GITHUB':
+							accountPublicities.GITHUB = isGithubPublic;
+							break;
+						case 'GOOGLE':
+							accountPublicities.GOOGLE = isGooglePublic;
+							break;
+					}
+				});
 
-				if (user.username !== username) {
-					return createErrorResponse(
-						'api-route',
-						403,
-						'You are not authorized to unlink this account',
-					);
-				}
-
-				await deleteAccountLink(user.id, platform);
-
-				return createSuccessResponse(
-					'api-route',
-					`Account unlinked successfully from the platform: ${platform} for the user with the id: ${user.id}`,
+				const updatedLinkedAccounts = await updateLinkedAccountsForUserFromId(
+					user.id,
+					disconnectedLinkedAccounts,
+					accountPublicities,
 				);
-			} catch {
-				return createErrorResponse('api-route', 500, 'An error occurred while unlinking account');
+
+				return createSuccessResponse(handlerType, 'Linked accounts updated successfully', {
+					updatedLinkedAccounts,
+				});
+			} catch (error) {
+				console.error(error);
+				return createErrorResponse(
+					handlerType,
+					500,
+					'An unexpected error occurred while updating linked accounts',
+				);
 			}
 		},
 		true,
@@ -77,7 +105,7 @@ export const handleGetUserLinkedAccounts = async (event: RequestEvent) => {
 				}
 
 				const isSelf = user.id === event.locals.user.id;
-				const linkedAccounts = await findLinkedAccountsForUser(user.id, isSelf);
+				const linkedAccounts = await findLinkedAccountsFromUserId(user.id, isSelf);
 
 				return createSuccessResponse('api-route', 'Linked accounts fetched successfully', {
 					linkedAccounts,
@@ -86,7 +114,7 @@ export const handleGetUserLinkedAccounts = async (event: RequestEvent) => {
 				return createErrorResponse(
 					'api-route',
 					500,
-					'An error occurred while fetching linked account',
+					'An unexpected error occurred while fetching linked account',
 				);
 			}
 		},

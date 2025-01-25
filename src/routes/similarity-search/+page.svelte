@@ -8,9 +8,10 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import Alert from 'flowbite-svelte/Alert.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
+	import Fileupload from 'flowbite-svelte/Fileupload.svelte';
 	import ImagePlaceholder from 'flowbite-svelte/ImagePlaceholder.svelte';
+	import Img from 'flowbite-svelte/Img.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
-	import Fileupload from 'flowbite-svelte/Fileupload.svelte'
 	import Label from 'flowbite-svelte/Label.svelte';
 
 	let postId = $state('');
@@ -178,7 +179,7 @@
 		{#if similarityResults.length > 0}
 			{#each similarityResults as similarityResult}
 				<div class="bg-white dark:bg-gray-800 rounded-lg p-4">
-					<img
+					<Img
 						src={similarityResult.image_url}
 						alt="similarity post result for {similarityResult.post_id}"
 						class="w-full object-contain"

@@ -4,6 +4,7 @@
 	import { ERROR_PAGE_TITLE_MAP } from '$lib/client/constants/pages';
 	import type { TErrorPageType } from '$lib/client/types/page';
 	import Button from 'flowbite-svelte/Button.svelte';
+	import Img from 'flowbite-svelte/Img.svelte';
 
 	type Props = {
 		errorPageType: TErrorPageType;
@@ -24,7 +25,7 @@
 	class="flex flex-col mt-20 items-center justify-center text-gray-900 dark:text-gray-100 px-4 sm:px-6 lg:px-8"
 >
 	{#if page.status === 404}
-		<img
+		<Img
 			src={Image404}
 			alt="Error 404 Dexbooru Post"
 			class="w-40 h-40 md:w-64 md:h-64"
@@ -56,7 +57,7 @@
 
 		<Button color="blue" href="/">Go Home</Button>
 	{:else if page.status === 400}
-		<img
+		<Img
 			src={Image404}
 			alt="Error 404 Dexbooru Post"
 			class="w-40 h-40 md:w-64 md:h-64"

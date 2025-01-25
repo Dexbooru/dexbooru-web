@@ -1,4 +1,4 @@
-import { NULLABLE_USER } from '$lib/shared/constants/auth';
+import { DEFAULT_PASSWORD_LENGTH } from '$lib/shared/constants/auth';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import type { UserAuthenticationSource } from '@prisma/client';
 import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
@@ -7,10 +7,9 @@ import {
 	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
 	OAUTH_TEMPORARY_PASSWORD_EMAIL_SUBJECT,
 } from '../constants/email';
-import { PUBLIC_USER_SELECTORS } from '../constants/users';
-import { createAccountLink } from '../db/actions/linkedAccount';
+import { findUserFromPlatformNameAndId, upsertAccountLink } from '../db/actions/linkedAccount';
 import { createUserPreferences, findUserPreferences } from '../db/actions/preference';
-import { createUser, findUserByEmail } from '../db/actions/user';
+import { createUser } from '../db/actions/user';
 import {
 	createErrorResponse,
 	createSuccessResponse,
@@ -33,6 +32,12 @@ import { createTotpChallenge } from '../helpers/totp';
 import type { TRequestSchema } from '../types/controllers';
 import type { IOauthProvider, TOauthApplication, TSimplifiedUserResponse } from '../types/oauth';
 
+type TOauthProcessingUrlParams = {
+	redirectTo?: string;
+	token: string;
+	applicationName: TOauthApplication;
+};
+
 const OauthStoreSchema = {
 	body: z.object({
 		token: z.string().min(1, { message: 'Token is required' }),
@@ -46,13 +51,23 @@ const OauthCallbackSchema = {
 	}),
 } satisfies TRequestSchema;
 
+const buildOauthProcessingUrl = (data: TOauthProcessingUrlParams): string => {
+	const { redirectTo = '/', token, applicationName } = data;
+	const searchParams = new URLSearchParams();
+	searchParams.set('token', token);
+	searchParams.set('application', applicationName);
+	searchParams.set('redirectTo', redirectTo);
+
+	return `/oauth/process?${searchParams.toString()}`;
+};
+
 const handleAccountLink = async (
 	userId: string,
 	platformName: UserAuthenticationSource,
 	oauthUserData: TSimplifiedUserResponse,
 	matchingApplication: TOauthApplication,
 ) => {
-	const newAccountLink = await createAccountLink(
+	const newAccountLink = await upsertAccountLink(
 		userId,
 		platformName,
 		oauthUserData.id,
@@ -92,7 +107,6 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 		OauthCallbackSchema,
 		async (data) => {
 			const { state, code } = data.urlSearchParams;
-			const authenticatedUser = event.locals.user;
 
 			try {
 				const matchingApplication = SkeletonOauthProvider.getApplicationFromState(state);
@@ -123,32 +137,40 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 
 				const accessToken = await authProvider.getToken(code, state);
 				const oauthUserData = await authProvider.getUserData(accessToken);
+				const userIdFromState = SkeletonOauthProvider.extractUserIdFromState(state);
 
-				if (authenticatedUser.id !== NULLABLE_USER.id) {
+				if (userIdFromState) {
 					await handleAccountLink(
-						authenticatedUser.id,
+						userIdFromState,
 						platformName,
 						oauthUserData,
 						matchingApplication,
 					);
 
-					redirect(302, '/profile/settings');
+					const encodedAuthToken = generateEncodedUserTokenFromRecord(
+						{ id: userIdFromState },
+						true,
+					);
+					const oauthProcessingUrl = buildOauthProcessingUrl({
+						token: encodedAuthToken,
+						applicationName: matchingApplication,
+						redirectTo: '/profile/settings?tab=security',
+					});
+
+					redirect(302, oauthProcessingUrl);
 				} else {
-					const matchingDbUser = await findUserByEmail(oauthUserData.email, PUBLIC_USER_SELECTORS);
+					const matchingDbUser = await findUserFromPlatformNameAndId(
+						platformName,
+						oauthUserData.id,
+					);
 
 					if (matchingDbUser) {
-						const hasPreviouslyLinkedOauthApplication = matchingDbUser.linkedAccounts.some(
-							(linkedAccount) => linkedAccount.platform === platformName,
+						await handleAccountLink(
+							matchingDbUser.id,
+							platformName,
+							oauthUserData,
+							matchingApplication,
 						);
-
-						if (!hasPreviouslyLinkedOauthApplication) {
-							await handleAccountLink(
-								matchingDbUser.id,
-								platformName,
-								oauthUserData,
-								matchingApplication,
-							);
-						}
 
 						const preferences = await findUserPreferences(matchingDbUser.id);
 						if (preferences.twoFactorAuthenticationEnabled) {
@@ -162,12 +184,15 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 						}
 
 						const encodedAuthToken = generateEncodedUserTokenFromRecord(matchingDbUser, true);
-						redirect(
-							302,
-							`/oauth/process?token=${encodedAuthToken}&application=${matchingApplication}`,
-						);
+						const oauthProcessingUrl = buildOauthProcessingUrl({
+							token: encodedAuthToken,
+							applicationName: matchingApplication,
+							redirectTo: '/posts',
+						});
+
+						redirect(302, oauthProcessingUrl);
 					} else {
-						const temporaryPassword = generateRandomPassword(15);
+						const temporaryPassword = generateRandomPassword(DEFAULT_PASSWORD_LENGTH);
 						const hashedTemporaryPassword = await hashPassword(temporaryPassword);
 
 						const newUser = await createUser(
@@ -192,10 +217,13 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 						});
 
 						const encodedAuthToken = generateEncodedUserTokenFromRecord(newUser, true);
-						redirect(
-							302,
-							`/oauth/process?token=${encodedAuthToken}&application=${matchingApplication}`,
-						);
+						const oauthProcessingUrl = buildOauthProcessingUrl({
+							token: encodedAuthToken,
+							applicationName: matchingApplication,
+							redirectTo: '/posts',
+						});
+
+						redirect(302, oauthProcessingUrl);
 					}
 				}
 			} catch (error) {

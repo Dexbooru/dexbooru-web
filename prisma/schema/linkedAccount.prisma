@@ -1,0 +1,17 @@
+enum UserAuthenticationSource {
+    GOOGLE
+    GITHUB
+    DISCORD
+}
+
+model LinkedUserAccount {
+    id               String                   @id @default(uuid())
+    platform         UserAuthenticationSource
+    platformUserId   String
+    platformUsername String
+    isPublic         Boolean                  @default(false)
+    user             User?                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId           String
+
+    @@unique([platform, userId])
+}

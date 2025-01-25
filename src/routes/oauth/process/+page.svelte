@@ -8,12 +8,13 @@
 	import { onMount } from 'svelte';
 
 	let oauthProcessing = $state(true);
+	let hasOauthError = $state(false);
 
 	const applicationName = page.url.searchParams.get('application') ?? '';
+	const redirectTo = page.url.searchParams.get('redirectTo') ?? '/';
+	const oauthToken = page.url.searchParams.get(SESSION_ID_KEY) ?? '';
 
 	onMount(() => {
-		const oauthToken = page.url.searchParams.get(SESSION_ID_KEY);
-
 		if (
 			!oauthToken ||
 			oauthToken.length === 0 ||
@@ -28,8 +29,9 @@
 		processOauthToken(oauthToken).then((response) => {
 			oauthProcessing = false;
 			if (response.ok) {
-				window.location.href = '/posts';
+				window.location.href = redirectTo;
 			} else {
+				hasOauthError = true;
 				goto('/login');
 			}
 		});
@@ -42,11 +44,9 @@
 			{#if oauthProcessing}
 				Processing your third-party sign in from your {capitalize(applicationName)} account...
 				<Spinner />
-			{:else}
-				Something went wrong
 			{/if}
 		</h1>
-		{#if !oauthProcessing}
+		{#if hasOauthError}
 			<p class="text-sm text-center text-gray-600 dark:text-gray-400">
 				Please try again. Redirecting you to the login page...
 			</p>

@@ -6,6 +6,7 @@
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
+	import type { LinkedUserAccount } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import DotsHorizontalOutline from 'flowbite-svelte-icons/DotsHorizontalOutline.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
@@ -13,14 +14,16 @@
 	import Card from 'flowbite-svelte/Card.svelte';
 	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
 	import DropdownItem from 'flowbite-svelte/DropdownItem.svelte';
+	import OauthIcon from './OauthIcon.svelte';
 
 	type Props = {
 		targetUser: TUser;
 		friendStatus: TFriendStatus;
 		userStatistics: TUserStatistics;
+		linkedAccounts: LinkedUserAccount[];
 	};
 
-	let { targetUser, friendStatus = $bindable(), userStatistics }: Props = $props();
+	let { targetUser, friendStatus = $bindable(), userStatistics, linkedAccounts }: Props = $props();
 
 	let addFriendLoading = $state(false);
 	let deleteFriendLoading = $state(false);
@@ -62,7 +65,6 @@
 
 	const onImageError = (event: Event) => {
 		const target = event.target as HTMLImageElement;
-		if (target.src) return;
 
 		target.src = DefaultProfilePicture;
 	};
@@ -151,6 +153,15 @@
 					<Button href="/collections/created" color="blue">Created collections</Button>
 				{/if}
 			{/if}
+		</div>
+
+		<div class="flex flex-col mt-3 space-y-3">
+			<p>Connected social media platforms:</p>
+			<div class="flex flex-col space-y-4">
+				{#each linkedAccounts as linkedAccount}
+					<OauthIcon {linkedAccount} />
+				{/each}
+			</div>
 		</div>
 	</div>
 </Card>

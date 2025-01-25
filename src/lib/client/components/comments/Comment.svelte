@@ -60,7 +60,6 @@
 
 	const onImageError = (event: Event) => {
 		const target = event.target as HTMLImageElement;
-		if (target.src) return;
 
 		target.src = DefaultProfilePicture;
 	};

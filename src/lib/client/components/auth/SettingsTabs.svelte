@@ -1,20 +1,32 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import TabItem from 'flowbite-svelte/TabItem.svelte';
-	import Tabs from 'flowbite-svelte/Tabs.svelte';
+	import { page } from '$app/state';
+	import { VALID_TAB_NAMES } from '$lib/client/constants/settings';
+	import type { LinkedUserAccount } from '@prisma/client';
 	import GridSolid from 'flowbite-svelte-icons/GridSolid.svelte';
 	import LockSolid from 'flowbite-svelte-icons/LockSolid.svelte';
 	import UserCircleSolid from 'flowbite-svelte-icons/UserCircleSolid.svelte';
+	import TabItem from 'flowbite-svelte/TabItem.svelte';
+	import Tabs from 'flowbite-svelte/Tabs.svelte';
 	import ChangePasswordForm from './ChangePasswordForm.svelte';
 	import ChangeProfilePicture from './ChangeProfilePicture.svelte';
 	import ChangeUsernameForm from './ChangeUsernameForm.svelte';
 	import DeleteAccountForm from './DeleteAccountForm.svelte';
 	import Enable2faForm from './Enable2faForm.svelte';
+	import OauthConnectForm from './OauthConnectForm.svelte';
 	import PostPreferencesForm from './PostPreferencesForm.svelte';
 	import UserInterfacePreferenceForm from './UserInterfacePreferenceForm.svelte';
-	import { page } from '$app/state';
 
-	const validTabNames = ['personal', 'preferences', 'security'] as const;
+	type Props = {
+		linkedAccounts: LinkedUserAccount[];
+		oauthAuthorizationLinks: {
+			discordAuthorizationUrl: string;
+			githubAuthorizationUrl: string;
+			googleAuthorizationUrl: string;
+		};
+	};
+
+	let { oauthAuthorizationLinks, linkedAccounts }: Props = $props();
 
 	let currentTab: string = $state('personal');
 
@@ -28,7 +40,7 @@
 	const searchParams = page.url.searchParams;
 	const tabName = searchParams.get('tab') as 'personal' | 'preferences' | 'security';
 	if (tabName) {
-		currentTab = validTabNames.includes(tabName) ? tabName : 'personal';
+		currentTab = VALID_TAB_NAMES.includes(tabName) ? tabName : 'personal';
 	}
 </script>
 
@@ -70,6 +82,7 @@
 
 		<section class="flex flex-wrap gap-4 items-start">
 			<Enable2faForm />
+			<OauthConnectForm {linkedAccounts} {...oauthAuthorizationLinks} />
 		</section>
 	</TabItem>
 </Tabs>

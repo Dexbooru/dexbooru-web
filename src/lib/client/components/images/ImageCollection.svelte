@@ -11,6 +11,7 @@
 	import { IMAGE_FILTER_EXCLUSION_BASE_URLS } from '$lib/shared/constants/images';
 	import Alert from 'flowbite-svelte/Alert.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
+	import Img from 'flowbite-svelte/Img.svelte';
 	import { onMount } from 'svelte';
 
 	type Props = {
@@ -56,7 +57,6 @@
 
 	const onImageError = (event: Event) => {
 		const target = event.target as HTMLImageElement;
-		if (target.src) return;
 
 		target.src = DefaultPostPicture;
 		target.width = POST_IMAGE_FALLBACK_WIDTH;
@@ -91,14 +91,14 @@
 <div class="flex flex-col gap-3">
 	{#each Object.entries(imageUrls) as [index, imageUrl]}
 		{#if IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))}
-			<img
-				class="whole-post-image resizable-img"
+			<Img
+				class="whole-post-image max-w-3/4 block"
 				src={imageUrl}
 				alt={imagesAlt}
 				onerror={onImageError}
 			/>
 		{:else}
-			<img
+			<Img
 				width={transformedImageDimensions[Number(index)].imageWidth}
 				height={transformedImageDimensions[Number(index)].imageHeight}
 				class="whole-post-image {imagesScaledDown ? 'visible' : 'invisible'} block"
@@ -109,10 +109,3 @@
 		{/if}
 	{/each}
 </div>
-
-<style>
-	.resizable-img {
-		max-width: 75%;
-		display: block;
-	}
-</style>
