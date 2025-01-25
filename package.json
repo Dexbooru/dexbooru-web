@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "dotenv -e .env -o -- vite dev",
-		"build": "prisma generate && vite build",
+		"build": "prisma generate --schema ./prisma/schema && vite build",
 		"preview": "dotenv -e .env -o -- vite preview",
 		"run-build": "dotenv -e .env -o -- node build/index.js",
 		"preinstall": "npx only-allow pnpm",
