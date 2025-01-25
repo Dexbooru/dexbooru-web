@@ -138,6 +138,8 @@ PORT=5173
 ORIGIN=http://localhost:5173
 ```
 
+For other values, please refer to `.env.example` located in the root of the project and fill in the variables as needed from your selected providers.
+
 ### Local database configuration:
 
 Now let us configure your database (Postgres and Redis) containers and seed your database with mock model data, coming from the script running at `prisma/seed.ts`:
