@@ -82,6 +82,7 @@ export async function findPostByIdWithUpdatedViewCount(
 ): Promise<TPost | null> {
 	try {
 		const updatedPost = await prisma.post.update({
+			relationLoadStrategy: 'join',
 			where: {
 				id: postId,
 			},
@@ -103,6 +104,7 @@ export async function findPostById(
 	selectors?: TPostSelector,
 ): Promise<TPost | null> {
 	return (await prisma.post.findUnique({
+		relationLoadStrategy: 'join',
 		where: {
 			id: postId,
 		},
@@ -117,7 +119,7 @@ export async function findPostsByAuthorId(
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
 	selectors?: TPostSelector,
-): Promise<TPost[] | null> {
+): Promise<TPost[]> {
 	const posts = await prisma.post.findMany({
 		where: {
 			OR: [
@@ -139,7 +141,9 @@ export async function findPostsByAuthorId(
 		select: selectors,
 	});
 
-	return posts as TPost[] | null;
+	if (!posts) return [];
+
+	return posts as TPost[];
 }
 
 export async function likePostById(
@@ -200,6 +204,7 @@ export async function createPost(
 					};
 				}),
 			},
+			artistString: artists.toSorted().join(','),
 			tags: {
 				connectOrCreate: tags.map((tag) => {
 					return {
@@ -208,6 +213,7 @@ export async function createPost(
 					};
 				}),
 			},
+			tagString: tags.toSorted().join(','),
 		},
 	});
 
@@ -217,6 +223,6 @@ export async function createPost(
 	return newPost as TPost;
 }
 
-export const getTotalPostCount = async () => {
+export async function findTotalPostCount() {
 	return await prisma.post.count();
-};
+}

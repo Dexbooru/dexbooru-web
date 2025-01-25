@@ -4,14 +4,14 @@
 	import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
 	import CommentTree from '$lib/shared/helpers/comments';
 	import type { TComment } from '$lib/shared/types/comments';
-	import { Button } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
 	import Comment from './Comment.svelte';
 
-	interface Props {
+	type Props = {
 		postId: string;
 		postCommentCount: number;
-	}
+	};
 
 	let { postId, postCommentCount = $bindable() }: Props = $props();
 

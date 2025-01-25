@@ -4,9 +4,9 @@
 	import { updateCollectionStores } from '$lib/client/helpers/collections';
 	import type { PageData } from './$types';
 
-	interface Props {
+	type Props = {
 		data: PageData;
-	}
+	};
 
 	let { data }: Props = $props();
 

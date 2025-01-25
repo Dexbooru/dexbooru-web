@@ -1,0 +1,59 @@
+enum PostModerationStatus {
+    PENDING
+    APPROVED
+    REJECTED
+}
+
+enum PostReportCategory {
+    OFF_TOPIC
+    SPAM
+    INAPPROPRIATE
+    IMPROPER_TAGGING
+    ILLEGAL
+    OTHER
+}
+
+enum PostReportReviewStatus {
+  NOT_REVIEWED
+  IN_REVIEW
+  REJECTED
+  ACCEPTED
+}
+
+model Post {
+    id               String               @id @default(uuid())
+    createdAt        DateTime             @default(now())
+    updatedAt        DateTime             @default(now())
+    description      String               @db.VarChar(500)
+    sourceLink       String               @db.VarChar(450)
+    isNsfw           Boolean              @default(false)
+    likes            Int                  @default(0)
+    views            Int                  @default(0)
+    moderationStatus PostModerationStatus @default(PENDING)
+    imageUrls        String[]
+    imageWidths      Int[]
+    imageHeights     Int[]
+    commentCount     Int                  @default(0)
+    comments         Comment[]
+    tags             Tag[]
+    tagString        String               @db.VarChar(1520)
+    artists          Artist[]
+    artistString     String               @db.VarChar(380)
+    author           User?                @relation(name: "created posts", fields: [authorId], references: [id], onDelete: SetNull)
+    authorId         String?
+    likedBy          User[]               @relation(name: "liked posts")
+    reports          PostReport[]
+    collections      PostCollection[]
+
+    @@index([id])
+    @@index([authorId])
+}
+
+model PostReport {
+    id           String                 @id @default(uuid())
+    category     PostReportCategory
+    description  String?                @db.VarChar(250)
+    reviewStatus PostReportReviewStatus @default(NOT_REVIEWED)
+    post         Post?                  @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId       String?
+}

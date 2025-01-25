@@ -3,6 +3,7 @@
 	import { getFaviconFromUrl } from '$lib/client/helpers/urls';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { Artist, Tag } from '@prisma/client';
+	import Img from 'flowbite-svelte/Img.svelte';
 
 	type Props = {
 		metadata: (Tag & Artist) | undefined;
@@ -48,7 +49,7 @@
 				<ul class="list-none mb-4">
 					{#each displayedSocialMediaLinks as link}
 						<li class="flex items-center gap-4 mb-2">
-							<img src={getFaviconFromUrl(link)} alt="social-icon" class="w-4 h-4" />
+							<Img src={getFaviconFromUrl(link)} alt="social-icon" class="w-4 h-4" />
 							<a
 								href={link}
 								target="_blank"

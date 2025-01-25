@@ -1,15 +1,19 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { TOTP_CHALLENGE_EXPIRY_SECONDS, TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
-	import { Alert, Button, Card, Input, Label } from 'flowbite-svelte';
+	import Alert from 'flowbite-svelte/Alert.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
 	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/login/totp/[challengeId]/$types';
 
-	interface Props {
+	type Props = {
 		form: ActionData;
 		username: string;
 		rememberMe: boolean;
-	}
+	};
 
 	let { form, username, rememberMe }: Props = $props();
 

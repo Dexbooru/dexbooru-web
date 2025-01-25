@@ -14,7 +14,11 @@
 	} from '$lib/shared/constants/collections';
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Input, Label, Modal, Textarea } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
+	import Textarea from 'flowbite-svelte/Textarea.svelte';
 	import { onMount } from 'svelte';
 
 	let collection: TPostCollection;

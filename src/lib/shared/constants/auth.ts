@@ -12,6 +12,7 @@ export const USERNAME_REQUIREMENTS: TUsernameRequirements = {
 	length: `The username must be between ${MINIMUM_USERNAME_LENGTH} and ${MAXIMUM_USERNAME_LENGTH} characters long`,
 	spaces: 'The username must not contain any leading, trailing or inline spaces',
 };
+
 export const MINIMUM_EMAIL_LENGTH = 1;
 export const MAXIMUM_EMAIL_LENGTH = 254;
 export const EMAIL_REQUIREMENTS: TEmailRequirements = {
@@ -19,6 +20,8 @@ export const EMAIL_REQUIREMENTS: TEmailRequirements = {
 	'valid-email': 'The email must have a @ sign and a valid domain after it',
 };
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+export const DEFAULT_PASSWORD_LENGTH = 15;
 export const MINIMUM_PASSWORD_LENGTH = 8;
 export const MAXIMUM_PASSWORD_LENGTH = 50;
 export const PASSWORD_REQUIREMENTS: TPasswordRequirements = {
@@ -28,18 +31,23 @@ export const PASSWORD_REQUIREMENTS: TPasswordRequirements = {
 	number: 'The password must contain at least one number',
 	'special-character': 'The password must contain at least one special charcter',
 };
+
 export const SPECIAL_CHARACTER_REGEX = /[\W_]/g;
+
 export const ACCOUNT_DELETION_CONFIRMATION_TEXT = 'delete my account';
 export const DELETED_ACCOUNT_HEADING = '[deleted-user]';
+
 export const NONEXISTENT_USER_ID = 'non-existent-id';
 export const NULLABLE_USER: TUser = {
 	id: NONEXISTENT_USER_ID,
 	createdAt: new Date(0),
 	updatedAt: new Date(0),
+	role: 'USER',
 	password: '',
 	profilePictureUrl: '',
 	username: '',
 	email: '',
+	linkedAccounts: [],
 };
 export const NULLABLE_USER_USER_PREFERENCES: UserPreference = {
 	userId: NONEXISTENT_USER_ID,
@@ -47,7 +55,7 @@ export const NULLABLE_USER_USER_PREFERENCES: UserPreference = {
 	autoBlurNsfw: true,
 	browseInSafeMode: false,
 	customSideWideCss: '',
-	hidePostMetadataOnPreview: false,
+	hidePostMetadataOnPreview: true,
 	hideCollectionMetadataOnPreview: false,
 	blacklistedArtists: [],
 	blacklistedTags: [],

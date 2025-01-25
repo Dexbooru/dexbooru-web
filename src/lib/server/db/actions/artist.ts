@@ -24,7 +24,7 @@ export async function updateArtistMetadata(
 	return updatedArtist;
 }
 
-export async function getArtistMetadata(artistName: string): Promise<Artist | null> {
+export async function findArtistMetadata(artistName: string): Promise<Artist | null> {
 	const artist = await prisma.artist.findUnique({
 		where: {
 			name: artistName,
@@ -72,31 +72,24 @@ export async function findPostsByArtistName(
 	ascending: boolean,
 	selectors?: TPostSelector,
 ): Promise<TPost[]> {
-	const data = await prisma.artist.findUnique({
+	const posts = await prisma.post.findMany({
 		where: {
-			name: artistName,
-		},
-		select: {
-			posts: {
-				select: selectors,
-				skip: pageNumber * pageLimit,
-				take: pageLimit,
-				orderBy: {
-					[orderBy]: ascending ? 'asc' : 'desc',
-				},
+			artistString: {
+				contains: artistName,
 			},
 		},
+		orderBy: {
+			[orderBy]: ascending ? 'asc' : 'desc',
+		},
+		skip: pageNumber * pageLimit,
+		take: pageLimit,
+		select: selectors,
 	});
 
-	if (!data) return [];
-
-	return (data.posts ?? []) as TPost[];
+	return posts as TPost[];
 }
 
-export async function getArtistsWithStartingLetter(
-	letter: string,
-	pageNumber: number,
-) {
+export async function getArtistsWithStartingLetter(letter: string, pageNumber: number) {
 	const artists = await prisma.artist.findMany({
 		where: {
 			OR: [

@@ -130,9 +130,11 @@ export function flattenImageBuffers(bufferMaps: TImageData[]) {
 
 	for (let i = 0; i < bufferMaps.length; i++) {
 		const bufferMap = bufferMaps[i];
+		const bufferMapObjectId = crypto.randomUUID();
+
 		for (const [imageTypeKey, imageBuffer] of Object.entries(bufferMap.buffers)) {
 			const imageType = imageTypeKey as keyof TImageData['buffers'];
-			let fileObjectId = crypto.randomUUID();
+			let fileObjectId = bufferMapObjectId;
 
 			switch (imageType) {
 				case 'nsfwPreview':
@@ -165,6 +167,12 @@ export function flattenImageBuffers(bufferMaps: TImageData[]) {
 		imageWidths,
 		imageHeights,
 	};
+}
+
+export function base64ToFile(base64: string, fileName: string) {
+	const base64String = base64.replace(/^data:image\/\w+;base64,/, '');
+	const buffer = Buffer.from(base64String, 'base64');
+	return new File([buffer], fileName, { type: 'image/png' });
 }
 
 export async function runPostImageTransformationPipelineInBatch(

@@ -1,4 +1,9 @@
 <script lang="ts">
+	import DefaultPostCollectionPicture from '$lib/client/assets/default_post_collection_picture.webp';
+	import {
+		POST_COLLECTION_IMAGE_FALLBACK_HEIGHT,
+		POST_COLLECTION_IMAGE_FALLBACK_WIDTH,
+	} from '$lib/client/constants/images';
 	import { POSTS_GRID_ANIMATION_DURATION_MS } from '$lib/client/constants/posts';
 	import { getOriginalPostsPage } from '$lib/client/helpers/context';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
@@ -6,6 +11,7 @@
 	import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPostCollection } from '$lib/shared/types/collections';
+	import Img from 'flowbite-svelte/Img.svelte';
 	import { flip } from 'svelte/animate';
 	import PostCard from '../posts/card/PostCard.svelte';
 	import CollectionCardActions from './card/CollectionCardActions.svelte';
@@ -26,13 +32,26 @@
 			collection.thumbnailImageUrls.find((imageUrl) => imageUrl.includes(ORIGINAL_IMAGE_SUFFIX)) ??
 			'';
 	});
+
+	const onImageError = (event: Event) => {
+		const target = event.target as HTMLImageElement;
+
+		target.src = DefaultPostCollectionPicture;
+		target.width = POST_COLLECTION_IMAGE_FALLBACK_WIDTH;
+		target.height = POST_COLLECTION_IMAGE_FALLBACK_HEIGHT;
+	};
 </script>
 
 <svelte:head>
 	<title>{collection.description} - {collection.id}</title>
 </svelte:head>
 
-<img class="whole-collection-image" src={originalThumbnail} alt={collection.description} />
+<Img
+	class="whole-collection-image"
+	onerror={onImageError}
+	src={originalThumbnail}
+	alt={collection.description}
+/>
 <div class="flex">
 	<CollectionCardActions onCollectionViewPage {collection} />
 </div>
@@ -93,10 +112,10 @@
 	</p>
 </section>
 
-{#if $originalPostPage.length > 0}
+{#if collection.posts.length > 0}
 	<h2 class="text-2xl font-semibold dark:text-white mt-6 mb-4">Posts in this Collection:</h2>
 	<div class="grid grid-cols-3 gap-4">
-		{#each $originalPostPage as post (post.id)}
+		{#each collection.posts as post (post.id)}
 			<div animate:flip={{ duration: POSTS_GRID_ANIMATION_DURATION_MS }}>
 				<PostCard onCollectionViewPage {post} />
 			</div>

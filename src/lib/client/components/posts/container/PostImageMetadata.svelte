@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getUpdatedPost } from '$lib/client/helpers/context';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
 		NSFW_PREVIEW_IMAGE_SUFFIX,
@@ -6,35 +7,46 @@
 		PREVIEW_IMAGE_SUFFIX,
 	} from '$lib/shared/constants/images';
 	import type { TPost } from '$lib/shared/types/posts';
-	import {
-		Table,
-		TableBody,
-		TableBodyCell,
-		TableBodyRow,
-		TableHead,
-		TableHeadCell,
-	} from 'flowbite-svelte';
+	import Table from 'flowbite-svelte/Table.svelte';
+	import TableBody from 'flowbite-svelte/TableBody.svelte';
+	import TableBodyCell from 'flowbite-svelte/TableBodyCell.svelte';
+	import TableBodyRow from 'flowbite-svelte/TableBodyRow.svelte';
+	import TableHead from 'flowbite-svelte/TableHead.svelte';
+	import TableHeadCell from 'flowbite-svelte/TableHeadCell.svelte';
 	import ImageCollection from '../../images/ImageCollection.svelte';
 	import PostActions from '../PostActions.svelte';
 
-	interface Props {
+	type Props = {
 		post: TPost;
 		hasLikedPost?: boolean;
-	}
+	};
 
-	let { post, hasLikedPost = false }: Props = $props();
-	let originalSizedImageUrls = $derived(
-		post.imageUrls.filter((imageUrl) => {
+	const getOriginalSizedImageUrls = (post: Partial<TPost>) => {
+		return (post.imageUrls ?? []).filter((imageUrl) => {
 			if (
 				IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))
 			) {
 				return true;
 			}
 			return imageUrl.includes(ORIGINAL_IMAGE_SUFFIX);
-		}),
-	);
-	let imagesMetadata = $derived(
-		post.imageUrls
+		});
+	};
+
+	const getOriginalImageDimensions = (
+		imagesMetadata: {
+			imageWidth: number;
+			imageHeight: number;
+			imageFileName: string;
+			imageUrl: string;
+		}[],
+	) => {
+		return imagesMetadata.filter((metadata) =>
+			metadata.imageFileName.includes(ORIGINAL_IMAGE_SUFFIX),
+		);
+	};
+
+	const getPostImageMetadata = (post: Partial<TPost>) => {
+		return (post.imageUrls ?? [])
 			.map((imageUrl, index) => {
 				if (
 					IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))
@@ -44,8 +56,8 @@
 
 				const imageUrlParts = imageUrl.split('/');
 				const imageFileName = `${imageUrlParts[imageUrlParts.length - 1]}.webp`;
-				const imageWidth = post.imageWidths[index];
-				const imageHeight = post.imageHeights[index];
+				const imageWidth = (post.imageWidths ?? [])[index];
+				const imageHeight = (post.imageHeights ?? [])[index];
 
 				return {
 					imageFileName,
@@ -54,22 +66,37 @@
 					imageWidth,
 				};
 			})
-			.filter((metadata) => metadata !== null),
-	);
-	let originalImageDimensions = $derived(
-		imagesMetadata
-			.filter((metadata) => metadata.imageFileName.includes(ORIGINAL_IMAGE_SUFFIX))
-			.map((metadata) => ({ imageWidth: metadata.imageWidth, imageHeight: metadata.imageHeight })),
-	);
+			.filter((metadata) => metadata !== null);
+	};
+
+	let { post, hasLikedPost = false }: Props = $props();
+	let originalSizedImageUrls = $derived(getOriginalSizedImageUrls(post));
+	let imagesMetadata = $derived(getPostImageMetadata(post));
+	let originalImageDimensions = $derived(getOriginalImageDimensions(imagesMetadata));
+
+	const updatedPost = getUpdatedPost();
 </script>
 
-<ImageCollection
-	imageUrls={originalSizedImageUrls}
-	imageDimensions={originalImageDimensions}
-	imagesAlt={post.description}
-/>
+{#if Object.keys($updatedPost).length > 0}
+	<ImageCollection
+		imageUrls={getOriginalSizedImageUrls($updatedPost)}
+		imageDimensions={getOriginalImageDimensions(getPostImageMetadata($updatedPost))}
+		imagesAlt={$updatedPost.description ?? post.description}
+	/>
+{:else}
+	<ImageCollection
+		imageUrls={originalSizedImageUrls}
+		imageDimensions={originalImageDimensions}
+		imagesAlt={post.description}
+	/>
+{/if}
+
 <p class="text-lg dark:text-white">
-	Total images in post: <span class=" dark:text-gray-400">{originalSizedImageUrls.length}</span>
+	Total images in post: <span class=" dark:text-gray-400"
+		>{Object.keys($updatedPost).length > 0
+			? getOriginalSizedImageUrls($updatedPost).length
+			: originalSizedImageUrls.length}</span
+	>
 </p>
 
 <PostActions
@@ -92,7 +119,7 @@
 			</TableHeadCell>
 		</TableHead>
 		<TableBody tableBodyClass="divide-y !w-1/2">
-			{#each imagesMetadata as { imageFileName, imageWidth, imageHeight, imageUrl }}
+			{#each Object.keys($updatedPost).length > 0 ? getPostImageMetadata($updatedPost) : imagesMetadata as { imageFileName, imageWidth, imageHeight, imageUrl }}
 				{#if imageFileName.includes(ORIGINAL_IMAGE_SUFFIX) || (!imageFileName.includes(NSFW_PREVIEW_IMAGE_SUFFIX) && imageFileName.includes(PREVIEW_IMAGE_SUFFIX))}
 					<TableBodyRow>
 						<TableBodyCell>{imageFileName}</TableBodyCell>

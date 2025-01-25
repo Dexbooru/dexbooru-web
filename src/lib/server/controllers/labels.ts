@@ -7,7 +7,7 @@ import {
 import type { Artist } from '@prisma/client';
 import type { RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
-import { getArtistMetadata, updateArtistMetadata } from '../db/actions/artist';
+import { findArtistMetadata, updateArtistMetadata } from '../db/actions/artist';
 import { getTagMetadata, updateTagMetadata } from '../db/actions/tag';
 import {
 	createErrorResponse,
@@ -50,7 +50,10 @@ const UpdateArtistMetadataSchema = {
 	}),
 } satisfies TRequestSchema;
 
-export const updateLabelMetadata = async (event: RequestEvent, labelType: 'tag' | 'artist') => {
+export const handleUpdateLabelMetadata = async (
+	event: RequestEvent,
+	labelType: 'tag' | 'artist',
+) => {
 	return await validateAndHandleRequest(
 		event,
 		'api-route',
@@ -63,7 +66,7 @@ export const updateLabelMetadata = async (event: RequestEvent, labelType: 'tag' 
 
 			try {
 				const labelResource =
-					labelType === 'tag' ? await getTagMetadata(name) : await getArtistMetadata(name);
+					labelType === 'tag' ? await getTagMetadata(name) : await findArtistMetadata(name);
 				if (!labelResource) {
 					return createErrorResponse(
 						'api-route',
@@ -112,7 +115,7 @@ export const updateLabelMetadata = async (event: RequestEvent, labelType: 'tag' 
 	);
 };
 
-export const getLabelMetadata = async (event: RequestEvent, labelType: 'tag' | 'artist') => {
+export const handleGetLabelMetadata = async (event: RequestEvent, labelType: 'tag' | 'artist') => {
 	return await validateAndHandleRequest(
 		event,
 		'api-route',
@@ -122,7 +125,7 @@ export const getLabelMetadata = async (event: RequestEvent, labelType: 'tag' | '
 
 			try {
 				const labelResource =
-					labelType === 'tag' ? await getTagMetadata(name) : await getArtistMetadata(name);
+					labelType === 'tag' ? await getTagMetadata(name) : await findArtistMetadata(name);
 				if (!labelResource) {
 					return createErrorResponse(
 						'api-route',

@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { ACCOUNT_DELETION_CONFIRMATION_TEXT } from '$lib/shared/constants/auth';
-	import { Button, Card, Input, Label } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
 	import { slide } from 'svelte/transition';
 	import AuthInput from './AuthInput.svelte';
 

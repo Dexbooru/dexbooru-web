@@ -1,13 +1,18 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
-import { createFriendRequest, deleteFriendRequest } from '../db/actions/friends';
+import {
+	createFriendRequest,
+	deleteFriendRequest,
+	findAllUserFriendRequests,
+	findFriendsForUser,
+} from '../db/actions/friend';
 import { createFriend, deleteFriend, findUserByName } from '../db/actions/user';
 import {
 	createErrorResponse,
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
-import type { TRequestSchema } from '../types/controllers';
+import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
 const CreateFriendRequestSchema = {
 	pathParams: z.object({
@@ -30,6 +35,40 @@ const DeleteFriendSchema = {
 	}),
 } satisfies TRequestSchema;
 
+export const handleGetFriendData = async (
+	event: RequestEvent,
+	handlerType: TControllerHandlerVariant,
+) => {
+	return await validateAndHandleRequest(
+		event,
+		handlerType,
+		{} as TRequestSchema,
+		async (_) => {
+			const user = event.locals.user;
+
+			try {
+				const friends = await findFriendsForUser(user.id);
+				const { sentFriendRequests, receivedFriendRequests } = await findAllUserFriendRequests(
+					user.id,
+				);
+
+				return createSuccessResponse(handlerType, 'Fetched the friend data successfully', {
+					friends,
+					sentFriendRequests,
+					receivedFriendRequests,
+				});
+			} catch {
+				return createErrorResponse(
+					handlerType,
+					500,
+					'An unexpected error occured while trying to get the friend data',
+				);
+			}
+		},
+		true,
+	);
+};
+
 export const handleDeleteFriend = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
 		event,
@@ -37,9 +76,10 @@ export const handleDeleteFriend = async (event: RequestEvent) => {
 		DeleteFriendSchema,
 		async (data) => {
 			const friendUsername = data.pathParams.username;
+			const user = event.locals.user;
 
 			try {
-				const friendUser = await findUserByName(friendUsername);
+				const friendUser = await findUserByName(friendUsername, { id: true });
 				if (!friendUser) {
 					return createErrorResponse(
 						'api-route',
@@ -48,12 +88,12 @@ export const handleDeleteFriend = async (event: RequestEvent) => {
 					);
 				}
 
-				const deletedFriend = await deleteFriend(event.locals.user.id, friendUser.id);
+				const deletedFriend = await deleteFriend(user.id, friendUser.id);
 				if (!deletedFriend) {
 					return createErrorResponse(
 						'api-route',
 						409,
-						`There was no relationship between ${event.locals.user.username} and ${friendUser.username} found`,
+						`There was no relationship between ${user.id} and ${friendUser.id} found`,
 					);
 				}
 
@@ -81,9 +121,10 @@ export const handleFriendRequest = async (event: RequestEvent) => {
 		async (data) => {
 			const senderUsername = data.pathParams.username;
 			const requestAction = data.urlSearchParams.action;
+			const user = event.locals.user;
 
 			try {
-				const senderUser = await findUserByName(senderUsername);
+				const senderUser = await findUserByName(senderUsername, { id: true });
 				if (!senderUser) {
 					return createErrorResponse(
 						'api-route',
@@ -92,24 +133,24 @@ export const handleFriendRequest = async (event: RequestEvent) => {
 					);
 				}
 
-				const deletedFriendRequest = await deleteFriendRequest(event.locals.user.id, senderUser.id);
+				const deletedFriendRequest = await deleteFriendRequest(user.id, senderUser.id);
 				if (!deletedFriendRequest) {
 					return createErrorResponse(
 						'api-route',
 						409,
-						`There exists no friend request connection between ${event.locals.user.id} and ${senderUser.id}`,
+						`There exists no friend request connection between ${user.id} and ${senderUser.id}`,
 					);
 				}
 
 				if (requestAction === 'accept') {
-					await createFriend(event.locals.user.id, senderUser.id);
+					await createFriend(user.id, senderUser.id);
 				}
 
 				return createSuccessResponse(
 					'api-route',
 					`Successfully ${
 						requestAction === 'accept' ? 'accepted' : 'declined'
-					} friendship request from ${senderUser.username}`,
+					} friendship request from ${senderUsername}`,
 				);
 			} catch {
 				return createErrorResponse(
@@ -130,17 +171,9 @@ export const handleSendFriendRequest = async (event: RequestEvent) => {
 		CreateFriendRequestSchema,
 		async (data) => {
 			const receiverUsername = data.pathParams.username;
+			const user = event.locals.user;
 
 			try {
-				const authenticatedUsername = event.locals.user.username;
-				if (authenticatedUsername === receiverUsername) {
-					return createErrorResponse(
-						'api-route',
-						409,
-						'You cannot send a friend request to yourself',
-					);
-				}
-				
 				const receiverUser = await findUserByName(receiverUsername, { username: true, id: true });
 				if (!receiverUser) {
 					return createErrorResponse(
@@ -150,7 +183,15 @@ export const handleSendFriendRequest = async (event: RequestEvent) => {
 					);
 				}
 
-				const newFriendRequest = await createFriendRequest(event.locals.user.id, receiverUser.id);
+				if (user.id === receiverUser.id) {
+					return createErrorResponse(
+						'api-route',
+						409,
+						'You cannot send a friend request to yourself',
+					);
+				}
+
+				const newFriendRequest = await createFriendRequest(user.id, receiverUser.id);
 				return createSuccessResponse(
 					'api-route',
 					`Successfully sent the friend request to ${receiverUsername}`,

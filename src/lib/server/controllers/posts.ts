@@ -42,7 +42,11 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
-import { flattenImageBuffers, runPostImageTransformationPipelineInBatch } from '../helpers/images';
+import {
+	base64ToFile,
+	flattenImageBuffers,
+	runPostImageTransformationPipelineInBatch,
+} from '../helpers/images';
 import { getSimilarPostsBySimilaritySearch, indexPostImages } from '../helpers/mlApi';
 import {
 	cacheResponseRemotely,
@@ -76,6 +80,31 @@ const getCacheKeyWithCategory = (
 ) => {
 	return `${category}-${pageNumber}-${orderBy}-${ascending}`;
 };
+
+const uploadPostImages = async (postPictures: File[], isNsfw: boolean) => {
+	const postImageBufferMaps = await runPostImageTransformationPipelineInBatch(postPictures, isNsfw);
+	const {
+		fileObjectIds,
+		fileBuffers: postImageFileBuffers,
+		imageHeights: postImageHeights,
+		imageWidths: postImageWidths,
+	} = flattenImageBuffers(postImageBufferMaps);
+
+	const postImageUrls = await uploadBatchToBucket(
+		AWS_POST_PICTURE_BUCKET_NAME,
+		'posts',
+		postImageFileBuffers,
+		'webp',
+		fileObjectIds,
+	);
+
+	return {
+		postImageUrls,
+		postImageHeights,
+		postImageWidths,
+	};
+};
+
 const CACHE_TIME_GENERAL_POSTS = 60;
 const CACHE_TIME_TAG_POSTS = 60;
 const CACHE_TIME_ARTIST_POSTS = 120;
@@ -223,6 +252,9 @@ const PostUpdateSchema = {
 	}),
 	body: z.object({
 		description: descriptionSchema.optional(),
+		deletionPostImageUrls: z.array(z.string().url()).optional(),
+		newPostImagesContent: z.array(z.string()).optional(),
+		sourceLink: z.string().url().optional(),
 	}),
 } satisfies TRequestSchema;
 
@@ -297,46 +329,118 @@ export const handleGetSimilarPosts = async (
 	);
 };
 
-export const handleUpdatePost = async (
-	event: RequestEvent,
-	handlerType: TControllerHandlerVariant,
-) => {
+export const handleUpdatePost = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
 		event,
-		handlerType,
+		'api-route',
 		PostUpdateSchema,
 		async (data) => {
 			const { postId } = data.pathParams;
+			const { description, newPostImagesContent = [], deletionPostImageUrls = [] } = data.body;
+			const user = event.locals.user;
 
 			try {
-				const currentPost = await findPostById(postId, { authorId: true });
+				const currentPost = await findPostById(postId, {
+					authorId: true,
+					isNsfw: true,
+					imageUrls: true,
+					imageWidths: true,
+					imageHeights: true,
+				});
 				if (!currentPost) {
 					return createErrorResponse(
-						handlerType,
+						'api-route',
 						404,
 						`A post with the id: ${postId} does not exist`,
 					);
 				}
 
-				if (event.locals.user.id !== currentPost.authorId) {
+				if (user.id !== currentPost.authorId) {
 					return createErrorResponse(
-						handlerType,
+						'api-route',
 						403,
 						`The currently authenticated user id does not match the post's author id: ${currentPost.authorId}`,
 					);
 				}
 
-				const updatedPost = await updatePost(postId, data.body);
+				let totalImagesInPost = currentPost.imageUrls.length;
+				let {
+					imageUrls: finalPostImageUrls,
+					imageHeights: finalPostImageHeights,
+					imageWidths: finalPostImageWidths,
+				} = currentPost;
+
+				if (deletionPostImageUrls.length > 0) {
+					const deletionResponses = await deleteBatchFromBucket(
+						AWS_POST_PICTURE_BUCKET_NAME,
+						deletionPostImageUrls,
+					);
+					const successfullyDeleted = deletionPostImageUrls.filter(
+						(_, index) => deletionResponses[index]?.$metadata.httpStatusCode === 204,
+					);
+
+					const deletionSet = new Set(successfullyDeleted);
+					finalPostImageUrls = finalPostImageUrls.filter((url) => !deletionSet.has(url));
+					finalPostImageHeights = finalPostImageHeights.filter(
+						(_, index) => index < finalPostImageUrls.length,
+					);
+					finalPostImageWidths = finalPostImageWidths.filter(
+						(_, index) => index < finalPostImageUrls.length,
+					);
+
+					totalImagesInPost = finalPostImageUrls.length;
+				}
+
+				if (newPostImagesContent.length > 0) {
+					if (totalImagesInPost + newPostImagesContent.length > MAXIMUM_IMAGES_PER_POST) {
+						return createErrorResponse(
+							'api-route',
+							400,
+							`The total number of images in the post exceeds the maximum allowed size of ${MAXIMUM_IMAGES_PER_POST}`,
+						);
+					}
+
+					const postImageFiles = newPostImagesContent.map((base64String, index) =>
+						base64ToFile(base64String, `${currentPost.id}-${index}.webp`),
+					);
+					const { postImageUrls, postImageHeights, postImageWidths } = await uploadPostImages(
+						postImageFiles,
+						currentPost.isNsfw,
+					);
+
+					finalPostImageUrls = [...finalPostImageUrls, ...postImageUrls];
+					finalPostImageHeights = [...finalPostImageHeights, ...postImageHeights];
+					finalPostImageWidths = [...finalPostImageWidths, ...postImageWidths];
+				}
+
+				if (
+					description !== currentPost.description ||
+					finalPostImageUrls !== currentPost.imageUrls
+				) {
+					const updatedPost = await updatePost(postId, {
+						description,
+						imageUrls: finalPostImageUrls,
+						imageHeights: finalPostImageHeights,
+						imageWidths: finalPostImageWidths,
+					});
+					return createSuccessResponse(
+						'api-route',
+						`Successfully updated the post with id: ${postId}`,
+						updatedPost,
+					);
+				}
+
 				return createSuccessResponse(
-					handlerType,
-					`Successfully updated the post with id: ${postId}`,
-					updatedPost,
+					'api-route',
+					`No changes were made to the post with id: ${postId}`,
+					currentPost,
 				);
-			} catch {
+			} catch (error) {
+				console.error(error);
 				return createErrorResponse(
-					handlerType,
+					'api-route',
 					500,
-					'An unexpected error occured while trying to update the post',
+					'An unexpected error occurred while trying to update the post',
 				);
 			}
 		},
@@ -355,21 +459,25 @@ export const handleGetPostsByAuthor = async (
 		async (data) => {
 			const { pageNumber, orderBy, ascending } = data.urlSearchParams;
 			const { username } = data.pathParams;
-			const selectors =
-				handlerType === 'page-server-load'
-					? PAGE_SERVER_LOAD_POST_SELECTORS
-					: PUBLIC_POST_SELECTORS;
 
 			try {
-				const posts =
-					(await findPostsByAuthorId(
-						pageNumber,
-						MAXIMUM_POSTS_PER_PAGE,
-						username,
-						orderBy as TPostOrderByColumn,
-						ascending,
-						selectors,
-					)) ?? [];
+				const selectors =
+					handlerType === 'page-server-load'
+						? PAGE_SERVER_LOAD_POST_SELECTORS
+						: PUBLIC_POST_SELECTORS;
+				const posts = await findPostsByAuthorId(
+					pageNumber,
+					MAXIMUM_POSTS_PER_PAGE,
+					username,
+					orderBy as TPostOrderByColumn,
+					ascending,
+					selectors,
+				);
+
+				posts.forEach((post) => {
+					post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
+					post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
+				});
 
 				const responseData = {
 					posts,
@@ -413,27 +521,15 @@ export const handleCreatePost = async (
 				artists,
 				isNsfw,
 			};
+			const user = event.locals.user;
+
 			let newPostId: string | null = null;
 			let newPostImageUrls: string[] = [];
 
 			try {
-				const postImageBufferMaps = await runPostImageTransformationPipelineInBatch(
+				const { postImageUrls, postImageWidths, postImageHeights } = await uploadPostImages(
 					postPictures,
 					isNsfw,
-				);
-				const {
-					fileObjectIds,
-					fileBuffers: postImageFileBuffers,
-					imageHeights: postImageHeights,
-					imageWidths: postImageWidths,
-				} = flattenImageBuffers(postImageBufferMaps);
-
-				const postImageUrls = await uploadBatchToBucket(
-					AWS_POST_PICTURE_BUCKET_NAME,
-					'posts',
-					postImageFileBuffers,
-					'webp',
-					fileObjectIds,
 				);
 				newPostImageUrls = postImageUrls;
 
@@ -446,7 +542,7 @@ export const handleCreatePost = async (
 					postImageUrls,
 					postImageWidths,
 					postImageHeights,
-					event.locals.user.id,
+					user.id,
 				);
 				newPostId = newPost.id;
 
@@ -488,14 +584,15 @@ export const handleGetPost = async (
 ) => {
 	return await validateAndHandleRequest(event, handlerType, GetPostSchema, async (data) => {
 		const postId = data.pathParams.postId;
-		const user = event.locals.user;
 		const uploadedSuccessfully = data.urlSearchParams.uploadedSuccessfully === 'true';
+		const user = event.locals.user;
 
 		try {
 			const post =
 				handlerType === 'api-route'
 					? await findPostById(postId, PUBLIC_POST_SELECTORS)
 					: await findPostByIdWithUpdatedViewCount(postId, PUBLIC_POST_SELECTORS);
+
 			if (!post) {
 				const error = createErrorResponse(handlerType, 404, `Post with id ${postId} not found`);
 				if (handlerType === 'page-server-load') {
@@ -503,6 +600,9 @@ export const handleGetPost = async (
 				}
 				return error;
 			}
+
+			post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
+			post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
 
 			const hasLikedPost =
 				user.id !== NULLABLE_USER.id ? await hasUserLikedPost(user.id, post.id) : false;
@@ -568,6 +668,11 @@ export const handleGetPostsWithArtistName = async (
 						selectors,
 					);
 
+					posts.forEach((post) => {
+						post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
+						post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
+					});
+
 					responseData = {
 						posts,
 						pageNumber,
@@ -631,6 +736,11 @@ export const handleGetPostsWithTagName = async (
 						selectors,
 					);
 
+					posts.forEach((post) => {
+						post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
+						post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
+					});
+
 					responseData = {
 						posts,
 						pageNumber,
@@ -670,22 +780,9 @@ export const handleGetPosts = async (
 		const category = overrideCategory ?? data.urlSearchParams.category;
 		const { ascending, orderBy, pageNumber, userId } = data.urlSearchParams;
 		const user = event.locals.user;
-		const selectors =
-			handlerType === 'page-server-load' ? PAGE_SERVER_LOAD_POST_SELECTORS : PUBLIC_POST_SELECTORS;
 
 		if (user.id === NULLABLE_USER.id && ['uploaded', 'liked'].includes(category)) {
 			redirect(302, '/');
-		}
-
-		if (user.id === NULLABLE_USER.id && category === 'liked') {
-			const errorResponse = createErrorResponse(
-				handlerType,
-				401,
-				'Cannot fetch liked posts of unauthenticated user',
-			);
-			if (handlerType === 'page-server-load') {
-				throw errorResponse;
-			}
 		}
 
 		const cacheKey = getCacheKeyWithCategory(
@@ -702,6 +799,11 @@ export const handleGetPosts = async (
 			if (cachedData) {
 				responseData = cachedData;
 			} else {
+				const selectors =
+					handlerType === 'page-server-load'
+						? PAGE_SERVER_LOAD_POST_SELECTORS
+						: PUBLIC_POST_SELECTORS;
+
 				let posts: TPost[] = [];
 				switch (category) {
 					case 'general':
@@ -714,28 +816,31 @@ export const handleGetPosts = async (
 						);
 						break;
 					case 'liked':
-						posts =
-							(await findLikedPostsByAuthorId(
-								pageNumber,
-								MAXIMUM_POSTS_PER_PAGE,
-								user.id,
-								orderBy as TPostOrderByColumn,
-								ascending,
-								selectors,
-							)) ?? [];
+						posts = await findLikedPostsByAuthorId(
+							pageNumber,
+							MAXIMUM_POSTS_PER_PAGE,
+							user.id,
+							orderBy as TPostOrderByColumn,
+							ascending,
+							selectors,
+						);
 						break;
 					case 'uploaded':
-						posts =
-							(await findPostsByAuthorId(
-								pageNumber,
-								MAXIMUM_POSTS_PER_PAGE,
-								userId ?? user.id,
-								orderBy as TPostOrderByColumn,
-								ascending,
-								selectors,
-							)) ?? [];
+						posts = await findPostsByAuthorId(
+							pageNumber,
+							MAXIMUM_POSTS_PER_PAGE,
+							userId ?? user.id,
+							orderBy as TPostOrderByColumn,
+							ascending,
+							selectors,
+						);
 						break;
 				}
+
+				posts.forEach((post) => {
+					post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
+					post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
+				});
 
 				responseData = {
 					posts,

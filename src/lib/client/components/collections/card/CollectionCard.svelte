@@ -8,12 +8,13 @@
 	} from '$lib/shared/constants/collections';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPostCollection } from '$lib/shared/types/collections';
-	import { Avatar, Card } from 'flowbite-svelte';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
 	import ImageCarousel from '../../images/ImageCarousel.svelte';
 
-	interface Props {
+	type Props = {
 		collection: TPostCollection;
-	}
+	};
 
 	let { collection }: Props = $props();
 	let title = $derived.by(() => {

@@ -1,0 +1,12 @@
+model Artist {
+    id               String   @id @default(uuid())
+    name             String   @unique @db.VarChar(75)
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @default(now())
+    socialMediaLinks String[] @default([])
+    description      String?  @db.VarChar(200)
+    postCount        Int      @default(0)
+    posts            Post[]
+
+    @@index([name])
+}

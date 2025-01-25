@@ -1,16 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { CLEAR_INPUT_INTERVAL_MS } from '$lib/client/constants/search';
 	import {
 		getAuthenticatedUser,
 		getCollectionPage,
 		getOriginalCollectionPage,
 	} from '$lib/client/helpers/context';
 
-	import { Button } from 'flowbite-svelte';
-	import { PlusSolid } from 'flowbite-svelte-icons';
+	import PlusSolid from 'flowbite-svelte-icons/PlusSolid.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
-	import { get } from 'svelte/store';
 	import Searchbar from '../../reusable/Searchbar.svelte';
 	import CollectionCreateDrawer from '../CollectionCreateDrawer.svelte';
 	import CollectionPageSidebar from './CollectionPageSidebar.svelte';
@@ -24,6 +22,7 @@
 	let { collectionContainerTitle }: Props = $props();
 	let collectionCreateDrawerHidden: boolean = $state(true);
 	let uniqueAuthors: { id: string; username: string; profilePictureUrl: string }[] = $state([]);
+	let currentPageQuery = $state('');
 
 	const user = getAuthenticatedUser();
 	const collectionPage = getCollectionPage();
@@ -33,6 +32,7 @@
 
 	const onCollectionSearch = (query: string) => {
 		const cleanedQuery = query.toLocaleLowerCase().trim();
+		currentPageQuery = cleanedQuery;
 
 		const filteredCollections = $originalCollectionPage.filter((collection) => {
 			const titleHasQuery = collection.title.toLocaleLowerCase().includes(cleanedQuery);
@@ -60,17 +60,7 @@
 	});
 
 	onMount(() => {
-		const searchInput = document.querySelector('#collection-page-searchbar') as HTMLInputElement;
-
-		const collectionSearchResetTimeoutId = setInterval(() => {
-			if (get(collectionPage) === get(originalCollectionPage)) return;
-			if (searchInput && !searchInput.value) {
-				collectionPage.set(get(originalCollectionPage));
-			}
-		}, CLEAR_INPUT_INTERVAL_MS);
-
 		return () => {
-			clearInterval(collectionSearchResetTimeoutId);
 			collectionPageUnsubscribe();
 		};
 	});
@@ -84,12 +74,19 @@
 		<div id="collection-container-title" class="block space-y-3">
 			<h1 class="text-4xl dark:text-white">{collectionContainerTitle}</h1>
 			<div class="flex">
-				<Searchbar
-					inputElementId="collection-page-searchbar"
-					width="25rem"
-					queryInputHandler={onCollectionSearch}
-					placeholder="Search by keyword(s) on this page"
-				/>
+				{#if $originalCollectionPage.length > 0}
+					<Searchbar
+						inputElementId="collection-page-searchbar"
+						width="25rem"
+						queryInputHandler={onCollectionSearch}
+						queryInputClear={() => {
+							collectionPage.set($originalCollectionPage);
+							currentPageQuery = '';
+						}}
+						placeholder="Search by keyword(s) on this page"
+					/>
+				{/if}
+
 				{#if $user && (pathname === '/collections' || pathname === '/collections/created' || (pathname.includes('collections/users') && collectionsUsername === $user.username))}
 					<Button on:click={() => (collectionCreateDrawerHidden = false)}>
 						Create collection
@@ -99,7 +96,7 @@
 			</div>
 		</div>
 		<CollectionsGrid />
-		{#if $collectionPage.length > 0}
+		{#if $originalCollectionPage.length > 0 && currentPageQuery.length === 0}
 			<CollectionPaginator />
 		{/if}
 	</div>

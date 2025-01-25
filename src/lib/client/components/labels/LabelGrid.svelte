@@ -1,19 +1,21 @@
 <script lang="ts">
 	import { getArtists } from '$lib/client/api/artists';
 	import { getTags } from '$lib/client/api/tags';
-	import { CHAR_OPTIONS } from '$lib/client/constants/labels';
+	import { CHAR_OPTIONS_LOWERCASE } from '$lib/client/constants/labels';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Spinner } from 'flowbite-svelte';
-	import { PalleteSolid, TagSolid } from 'flowbite-svelte-icons';
+	import PalleteSolid from 'flowbite-svelte-icons/PalleteSolid.svelte';
+	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 
-	interface Props {
+	type Props = {
 		labelType: 'tag' | 'artist';
-	}
+	};
 
 	let { labelType }: Props = $props();
 
@@ -73,7 +75,7 @@
 		{labelType === 'tag' ? 'Tags' : 'Artists'} Index
 	</h1>
 	<div class="flex flex-wrap">
-		{#each CHAR_OPTIONS as option}
+		{#each CHAR_OPTIONS_LOWERCASE as option}
 			<Button
 				disabled={loadingLabels}
 				on:click={(event) => getLabelsOnCurrentPage(event, false)}
@@ -91,7 +93,9 @@
 						class="text-center inline-flex justify-center space-x-2 border rounded p-2 leading-none dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
 						href="/posts/{labelType}/{encodeURIComponent(label)}"
 					>
-						<span># {label} - {formatNumberWithCommas(labelCounts.get(label) ?? 0)}</span>
+						<span class="mt-0.5"
+							># {label} - {formatNumberWithCommas(labelCounts.get(label) ?? 0)}</span
+						>
 						{#if labelType === 'tag'}
 							<TagSolid />
 						{:else}

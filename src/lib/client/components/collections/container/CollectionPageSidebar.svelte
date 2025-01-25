@@ -3,14 +3,13 @@
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/collections';
 	import { getCollectionPage } from '$lib/client/helpers/context';
 	import type { TCollectionOrderByColumn } from '$lib/shared/types/collections';
-	import {
-		Sidebar,
-		SidebarDropdownItem,
-		SidebarDropdownWrapper,
-		SidebarGroup,
-		SidebarWrapper,
-	} from 'flowbite-svelte';
-	import { ListOrdoredSolid as OrderedListSolid, UserSolid } from 'flowbite-svelte-icons';
+	import OrderedListSolid from 'flowbite-svelte-icons/ListOrdoredSolid.svelte';
+	import UserSolid from 'flowbite-svelte-icons/UserSolid.svelte';
+	import Sidebar from 'flowbite-svelte/Sidebar.svelte';
+	import SidebarDropdownItem from 'flowbite-svelte/SidebarDropdownItem.svelte';
+	import SidebarDropdownWrapper from 'flowbite-svelte/SidebarDropdownWrapper.svelte';
+	import SidebarGroup from 'flowbite-svelte/SidebarGroup.svelte';
+	import SidebarWrapper from 'flowbite-svelte/SidebarWrapper.svelte';
 
 	type Props = {
 		uniqueAuthors: { id: string; username: string; profilePictureUrl: string }[];
@@ -45,20 +44,22 @@
 					{/each}
 				</SidebarDropdownWrapper>
 
-				<SidebarDropdownWrapper label="All Authors">
-					{#snippet icon()}
-						<UserSolid
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-						/>
-					{/snippet}
+				{#if uniqueAuthors.length > 0}
+					<SidebarDropdownWrapper label="All Authors">
+						{#snippet icon()}
+							<UserSolid
+								class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+							/>
+						{/snippet}
 
-					{#each uniqueAuthors as uniqueAuthor}
-						<SidebarDropdownItem
-							href="/profile/{uniqueAuthor.username}"
-							label={uniqueAuthor.username}
-						/>
-					{/each}
-				</SidebarDropdownWrapper>
+						{#each uniqueAuthors as uniqueAuthor}
+							<SidebarDropdownItem
+								href="/profile/{uniqueAuthor.username}"
+								label={uniqueAuthor.username}
+							/>
+						{/each}
+					</SidebarDropdownWrapper>
+				{/if}
 			</SidebarGroup>
 		</SidebarWrapper>
 	</Sidebar>

@@ -129,6 +129,12 @@ export const handleGetAdvancedPostSearchResults = async (
 					});
 					const ormQuery = builder.buildOrmQuery();
 					const searchResults = (await prisma.post.findMany(ormQuery)) as TPost[];
+
+					searchResults.forEach((post) => {
+						post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
+						post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
+					});
+
 					searchResponse = {
 						posts: searchResults,
 						limit: finalLimit,

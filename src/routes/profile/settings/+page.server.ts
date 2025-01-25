@@ -1,14 +1,15 @@
+import { handleUpdateLinkedAccounts } from '$lib/server/controllers/linkedAccounts';
 import {
 	handleChangePassword,
 	handleChangeProfilePicture,
 	handleChangeUsername,
 	handleDeleteUser,
+	handleGetUserSettings,
 	handleToggleUserTwoFactorAuthentication,
 	handleUpdatePostPreferences,
 	handleUpdateUserInterfacePreferences,
 } from '$lib/server/controllers/users';
-import { NULLABLE_USER } from '$lib/shared/constants/auth';
-import { redirect } from '@sveltejs/kit';
+import type { LinkedUserAccount } from '@prisma/client';
 import type { Action, Actions, PageServerLoad } from './$types';
 
 const handleAccountDeletion: Action = async (event) => {
@@ -39,6 +40,10 @@ const handleChange2fa: Action = async (event) => {
 	return await handleToggleUserTwoFactorAuthentication(event);
 };
 
+const handleChangeLinkedAccounts: Action = async (event) => {
+	return await handleUpdateLinkedAccounts(event, 'form-action');
+};
+
 export const actions: Actions = {
 	deleteAccount: handleAccountDeletion,
 	username: handleAccountChangeUsername,
@@ -47,10 +52,16 @@ export const actions: Actions = {
 	postPreferences: handleChangePostPreferences,
 	userInterfacePreferences: handleChangeUserInterfacePreferences,
 	twoFactorAuthentication: handleChange2fa,
+	linkedAccounts: handleChangeLinkedAccounts,
 };
 
-export const load: PageServerLoad = async ({ locals }) => {
-	if (locals.user.id === NULLABLE_USER.id) {
-		redirect(302, '/');
-	}
+type TSettingsLoadData = {
+	linkedAccounts: LinkedUserAccount[];
+	googleAuthorizationUrl: string;
+	discordAuthorizationUrl: string;
+	githubAuthorizationUrl: string;
+};
+
+export const load: PageServerLoad = async (event) => {
+	return (await handleGetUserSettings(event)) as TSettingsLoadData;
 };

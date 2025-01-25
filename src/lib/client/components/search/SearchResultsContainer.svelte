@@ -1,15 +1,16 @@
 <script lang="ts">
 	import type { TAppSearchResult } from '$lib/shared/types/search';
-	import { TabItem, Tabs } from 'flowbite-svelte';
+	import TabItem from 'flowbite-svelte/TabItem.svelte';
+	import Tabs from 'flowbite-svelte/Tabs.svelte';
 	import { slide } from 'svelte/transition';
 	import CollectionTable from '../tables/CollectionTable.svelte';
 	import LabelTable from '../tables/LabelTable.svelte';
 	import PostTable from '../tables/PostTable.svelte';
 	import UserTable from '../tables/UserTable.svelte';
 
-	interface Props {
+	type Props = {
 		results: TAppSearchResult;
-	}
+	};
 
 	let { results }: Props = $props();
 	let { posts, artists, tags, users, collections } = $state(results);

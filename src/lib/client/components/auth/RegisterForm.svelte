@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { getRegisterFormAuthRequirements } from '$lib/client/helpers/context';
-	import { Alert, Button, Card } from 'flowbite-svelte';
+	import Alert from 'flowbite-svelte/Alert.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
 	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/register/$types';
 	import ProfilePictureUpload from '../files/ProfilePictureUpload.svelte';
 	import AuthInput from './AuthInput.svelte';
 
-	interface Props {
+	type Props = {
 		form: ActionData;
-	}
+	};
 
 	let { form }: Props = $props();
 
@@ -40,7 +42,7 @@
 	});
 </script>
 
-<Card class="w-full max-w-md mt-5 mb-5">
+<Card class="mt-5 mb-5">
 	<form class="flex flex-col space-y-6" method="POST" enctype="multipart/form-data">
 		<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">
 			Register an account on Dexbooru!

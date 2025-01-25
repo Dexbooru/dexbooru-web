@@ -1,0 +1,11 @@
+model Tag {
+  id          String   @id @default(uuid())
+  name        String   @unique @db.VarChar(75)
+  description String?  @db.VarChar(200)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  postCount   Int      @default(0)
+  posts       Post[]
+
+  @@index([name])
+}

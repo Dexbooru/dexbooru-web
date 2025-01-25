@@ -5,13 +5,16 @@
 	} from '$lib/client/constants/layout';
 	import { getActiveModal, getAuthenticatedUser } from '$lib/client/helpers/context';
 	import type { TPostCollection } from '$lib/shared/types/collections';
-	import { Button } from 'flowbite-svelte';
-	import { ArrowRightToBracketSolid, PenSolid, TrashBinSolid } from 'flowbite-svelte-icons';
+	import ArrowRightToBracketSolid from 'flowbite-svelte-icons/ArrowRightToBracketSolid.svelte';
+	import PenSolid from 'flowbite-svelte-icons/PenSolid.svelte';
+	import TrashBinSolid from 'flowbite-svelte-icons/TrashBinSolid.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 
 	type Props = {
 		collection: TPostCollection;
 		onCollectionViewPage?: boolean;
 	};
+
 	let { collection, onCollectionViewPage = false }: Props = $props();
 
 	const authenticatedUser = getAuthenticatedUser();

@@ -1,25 +1,30 @@
 <script lang="ts">
+	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 	import { getGlobalQuery } from '$lib/client/helpers/context';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TAppSearchResult } from '$lib/shared/types/search';
-	import {
-		Avatar,
-		Table,
-		TableBody,
-		TableBodyCell,
-		TableBodyRow,
-		TableHead,
-		TableHeadCell,
-	} from 'flowbite-svelte';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
+	import Table from 'flowbite-svelte/Table.svelte';
+	import TableBody from 'flowbite-svelte/TableBody.svelte';
+	import TableBodyCell from 'flowbite-svelte/TableBodyCell.svelte';
+	import TableBodyRow from 'flowbite-svelte/TableBodyRow.svelte';
+	import TableHead from 'flowbite-svelte/TableHead.svelte';
+	import TableHeadCell from 'flowbite-svelte/TableHeadCell.svelte';
 	import HighlightedText from '../reusable/HighlightedText.svelte';
 
-	interface Props {
+	type Props = {
 		users: TAppSearchResult['users'];
-	}
+	};
 
 	let { users }: Props = $props();
 
 	const globalQuery = getGlobalQuery();
+
+	const onImageError = (event: Event) => {
+		const target = event.target as HTMLImageElement;
+
+		target.src = DefaultProfilePicture;
+	};
 </script>
 
 <Table hoverable>
@@ -41,6 +46,7 @@
 					<Avatar
 						class="ml-auto mr-auto"
 						src={user.profilePictureUrl}
+						onerror={onImageError}
 						alt="profile picture of {user.username}"
 					/>
 					<a

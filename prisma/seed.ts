@@ -32,11 +32,19 @@ async function main() {
 		},
 		seed,
 	});
-	const { mockUsers, mockPosts, mockArtists, mockTags, mockComments } =
-		await mockGenerator.generateAllModels();
+	const { mockUsers, mockPosts, mockArtists, mockTags } = await mockGenerator.generateAllModels();
 
 	await client.user.createMany({
 		data: mockUsers,
+	});
+	await client.user.create({
+		data: {
+			username: 'dexbooru',
+			password: mockUsers[0].password ?? '',
+			email: 'dexbooruowner@email.com',
+			role: 'OWNER',
+			profilePictureUrl: '',
+		},
 	});
 
 	await client.tag.createMany({
@@ -81,10 +89,6 @@ async function main() {
 	});
 
 	await client.$transaction(postCreationPromises);
-
-	await client.comment.createMany({
-		data: mockComments,
-	});
 }
 
 main()

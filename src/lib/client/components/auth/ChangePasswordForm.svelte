@@ -5,8 +5,10 @@
 		getAuthenticatedUser,
 		getChangePasswordAuthRequirements,
 	} from '$lib/client/helpers/context';
+	import type { TUser } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Card } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
 	import { onMount } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 
@@ -49,10 +51,11 @@
 				passwordChanging = false;
 				if (result.type === 'success') {
 					toast.push('The password was updated successfully!', SUCCESS_TOAST_OPTIONS);
-					// @ts-ignore
 					user.update((currentUser) => {
-						// @ts-ignore
-						const updatedUser = { ...currentUser, ...result.data.data };
+						if (!result.data) return currentUser;
+
+						const newUserData = result.data.data as TUser;
+						const updatedUser = { ...currentUser, ...newUserData };
 						return updatedUser;
 					});
 				} else {

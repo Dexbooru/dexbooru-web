@@ -18,12 +18,13 @@ export async function findCollectionById(
 	collectionId: string,
 	selectors?: Prisma.PostCollectionSelect<DefaultArgs>,
 ) {
-	return await prisma.postCollection.findFirst({
+	return (await prisma.postCollection.findFirst({
+		relationLoadStrategy: 'join',
 		where: {
 			id: collectionId,
 		},
 		select: selectors,
-	});
+	})) as TPostCollection;
 }
 
 export async function findCollectionsByAuthorId(

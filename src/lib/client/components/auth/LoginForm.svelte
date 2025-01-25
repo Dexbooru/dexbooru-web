@@ -1,13 +1,28 @@
 <script lang="ts">
-	import { Alert, Button, Card, Checkbox, Input, Label } from 'flowbite-svelte';
-	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
+	import { page } from '$app/state';
+	import { SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { toast } from '@zerodevx/svelte-toast';
+	import EyeOutline from 'flowbite-svelte-icons/EyeOutline.svelte';
+	import EyeSlashOutline from 'flowbite-svelte-icons/EyeSlashOutline.svelte';
+	import Alert from 'flowbite-svelte/Alert.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/login/$types';
+	import OauthLinks from './OauthLinks.svelte';
 
-	interface Props {
+	type Props = {
 		form: ActionData;
-	}
+		googleAuthorizationUrl: string;
+		discordAuthorizationUrl: string;
+		githubAuthorizationUrl: string;
+	};
 
-	let { form }: Props = $props();
+	let { form, googleAuthorizationUrl, discordAuthorizationUrl, githubAuthorizationUrl }: Props =
+		$props();
 
 	let showPassword = $state(false);
 
@@ -19,9 +34,19 @@
 	let loginFormButtonDisabled = $derived.by(() => {
 		return !(username.length > 0 && password.length > 0);
 	});
+
+	onMount(() => {
+		const passwordReset = page.url.searchParams.get('passwordReset');
+		if (passwordReset === 'true') {
+			toast.push(
+				'Your password was updated successfully! Try logging in now',
+				SUCCESS_TOAST_OPTIONS,
+			);
+		}
+	});
 </script>
 
-<Card class="w-full max-w-md mt-20">
+<Card class="mt-6">
 	<form class="flex flex-col space-y-6" method="POST">
 		<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">
 			Login to Dexbooru!
@@ -64,6 +89,14 @@
 			<Input type="hidden" name="rememberMe" value={rememberMe} />
 		</div>
 		<Button disabled={loginFormButtonDisabled} type="submit" class="w-full">Log in</Button>
+
+		<OauthLinks
+			{discordAuthorizationUrl}
+			{googleAuthorizationUrl}
+			{githubAuthorizationUrl}
+			location="login"
+		/>
+
 		{#if loginErrorReason}
 			<Alert color="red">
 				<span class="font-medium">Login error!</span>

@@ -2,14 +2,14 @@ import { NULLABLE_USER_USER_PREFERENCES } from '$lib/shared/constants/auth';
 import type { Prisma } from '@prisma/client';
 import prisma from '../prisma';
 
-export const getUserPreferences = async (userId: string) => {
+export const findUserPreferences = async (userId: string) => {
 	const preferences = await prisma.userPreference.findFirst({
 		where: {
 			userId,
 		},
 	});
 
-	return preferences;
+	return preferences ?? NULLABLE_USER_USER_PREFERENCES;
 };
 
 export const createUserPreferences = async (userId: string) => {

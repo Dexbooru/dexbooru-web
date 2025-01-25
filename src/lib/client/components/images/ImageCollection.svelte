@@ -1,17 +1,24 @@
 <script lang="ts">
+	import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
+	import {
+		POST_IMAGE_FALLBACK_HEIGHT,
+		POST_IMAGE_FALLBACK_WIDTH,
+	} from '$lib/client/constants/images';
 	import {
 		computeDownScaledImageRatios,
 		transformImageDimensions,
 	} from '$lib/client/helpers/images';
 	import { IMAGE_FILTER_EXCLUSION_BASE_URLS } from '$lib/shared/constants/images';
-	import { Alert, Button } from 'flowbite-svelte';
+	import Alert from 'flowbite-svelte/Alert.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Img from 'flowbite-svelte/Img.svelte';
 	import { onMount } from 'svelte';
 
-	interface Props {
+	type Props = {
 		imageUrls: string[];
 		imageDimensions: { imageWidth: number; imageHeight: number }[];
 		imagesAlt: string;
-	}
+	};
 
 	let { imageUrls, imageDimensions, imagesAlt }: Props = $props();
 
@@ -48,6 +55,14 @@
 		}
 	};
 
+	const onImageError = (event: Event) => {
+		const target = event.target as HTMLImageElement;
+
+		target.src = DefaultPostPicture;
+		target.width = POST_IMAGE_FALLBACK_WIDTH;
+		target.height = POST_IMAGE_FALLBACK_HEIGHT;
+	};
+
 	onMount(() => {
 		screenWidth = window.innerWidth;
 		screenHeight = window.innerHeight;
@@ -76,22 +91,21 @@
 <div class="flex flex-col gap-3">
 	{#each Object.entries(imageUrls) as [index, imageUrl]}
 		{#if IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))}
-			<img class="whole-post-image resizable-img" src={imageUrl} alt={imagesAlt} />
+			<Img
+				class="whole-post-image max-w-3/4 block"
+				src={imageUrl}
+				alt={imagesAlt}
+				onerror={onImageError}
+			/>
 		{:else}
-			<img
+			<Img
 				width={transformedImageDimensions[Number(index)].imageWidth}
 				height={transformedImageDimensions[Number(index)].imageHeight}
 				class="whole-post-image {imagesScaledDown ? 'visible' : 'invisible'} block"
 				src={imageUrl}
 				alt={imagesAlt}
+				onerror={onImageError}
 			/>
 		{/if}
 	{/each}
 </div>
-
-<style>
-	.resizable-img {
-		max-width: 75%;
-		display: block;
-	}
-</style>

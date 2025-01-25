@@ -6,9 +6,9 @@
 	import type { TChatMessage } from '$lib/client/types/core';
 	import { onMount } from 'svelte';
 
-	interface Props {
+	type Props = {
 		roomId?: string | null;
-	}
+	};
 
 	let { roomId = null }: Props = $props();
 

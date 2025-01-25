@@ -11,7 +11,9 @@
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { TAppSearchResult } from '$lib/shared/types/search';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { GradientButton, Modal, Spinner } from 'flowbite-svelte';
+	import GradientButton from 'flowbite-svelte/GradientButton.svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
+	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import { onMount } from 'svelte';
 	import Searchbar from '../reusable/Searchbar.svelte';
 	import SearchResultsContainer from './SearchResultsContainer.svelte';

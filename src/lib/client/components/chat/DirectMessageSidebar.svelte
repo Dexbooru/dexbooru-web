@@ -7,8 +7,9 @@
 	import type { TChatRoom } from '$lib/client/types/core';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TChatFriend } from '$lib/shared/types/friends';
-	import { Avatar, Button } from 'flowbite-svelte';
-	import { PlusSolid } from 'flowbite-svelte-icons';
+	import PlusSolid from 'flowbite-svelte-icons/PlusSolid.svelte';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
 	import CreateChatRoomContainer from './CreateChatRoomContainer.svelte';
 

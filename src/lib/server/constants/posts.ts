@@ -23,18 +23,10 @@ export const PUBLIC_POST_SELECTORS: TPostSelector = {
 			profilePictureUrl: true,
 		},
 	},
-	tags: {
-		select: {
-			id: true,
-			name: true,
-		},
-	},
-	artists: {
-		select: {
-			id: true,
-			name: true,
-		},
-	},
+	artistString: true,
+	tagString: true,
+	tags: false,
+	artists: false,
 };
 
 export const PAGE_SERVER_LOAD_POST_SELECTORS: TPostSelector = {
@@ -49,14 +41,8 @@ export const PAGE_SERVER_LOAD_POST_SELECTORS: TPostSelector = {
 	authorId: false,
 	imageHeights: false,
 	imageWidths: false,
-	tags: {
-		select: {
-			name: true,
-		},
-	},
-	artists: {
-		select: {
-			name: true,
-		},
-	},
+	tagString: true,
+	artistString: true,
+	tags: false,
+	artists: false,
 };

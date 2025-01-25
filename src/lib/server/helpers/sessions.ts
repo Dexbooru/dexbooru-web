@@ -6,17 +6,17 @@ import {
 	SESSION_JWT_EXPIRES_IN_STANDARD_AGE,
 	SESSION_JWT_EXPIRES_IN_SUPER_AGE,
 } from '../constants/cookies';
-import { PUBLIC_USER_SELECTORS } from '../constants/users';
+import { JWT_USER_SELECTORS } from '../constants/users';
 import redis from '../db/redis';
 import type { TSetHeadersFunction } from '../types/sessions';
 
-const generateUserClaims = (userRecord: Partial<TUser>): Partial<TUser> => {
-	const userClaims: Partial<TUser> = {};
+const generateUserClaims = (userRecord: Partial<TUser>): Record<keyof TUser, unknown> => {
+	const userClaims = {} as Record<keyof TUser, unknown>;
 
-	Object.keys(PUBLIC_USER_SELECTORS).forEach((key) => {
+	Object.keys(JWT_USER_SELECTORS).forEach((key) => {
 		const claimKey = key as keyof TUser;
 		if (userRecord[claimKey]) {
-			userClaims[claimKey] = userRecord[claimKey] as (string & Date) | undefined;
+			userClaims[claimKey] = userRecord[claimKey];
 		}
 	});
 

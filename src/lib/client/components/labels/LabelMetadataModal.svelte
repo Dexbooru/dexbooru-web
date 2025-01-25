@@ -7,7 +7,10 @@
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Modal, Spinner, TabItem, Tabs } from 'flowbite-svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
+	import Spinner from 'flowbite-svelte/Spinner.svelte';
+	import TabItem from 'flowbite-svelte/TabItem.svelte';
+	import Tabs from 'flowbite-svelte/Tabs.svelte';
 	import { onMount } from 'svelte';
 	import LabelEditForm from './LabelEditForm.svelte';
 	import LabelPresentation from './LabelPresentation.svelte';

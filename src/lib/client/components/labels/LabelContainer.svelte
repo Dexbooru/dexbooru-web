@@ -4,10 +4,11 @@
 		MAXIMUM_RENDERABLE_TAGS,
 	} from '$lib/client/constants/labels';
 	import { MAXIMUM_ARTIST_LENGTH, MAXIMUM_TAG_LENGTH } from '$lib/shared/constants/labels';
-	import { Badge, Button } from 'flowbite-svelte';
+	import Badge from 'flowbite-svelte/Badge.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import type { ComponentProps } from 'svelte';
 
-	interface Props {
+	type Props = {
 		sliceLabels?: boolean;
 		labels?: string[] | { name: string }[];
 		labelType: 'tag' | 'artist';
@@ -19,7 +20,7 @@
 		handleLabelClose?:
 			| ((event: CustomEvent<any> & { explicitOriginalTarget: Element }) => void)
 			| null;
-	}
+	};
 
 	let {
 		sliceLabels = false,
@@ -59,7 +60,7 @@
 	{#each processedLabels as label (label)}
 		<Badge
 			dismissable={labelIsDismissable}
-			on:close={handleLabelClose}
+			on:close={handleLabelClose as (_event: CustomEvent<any>) => void}
 			href={labelIsLink ? `/posts/${labelType}/${label}` : undefined}
 			large={labelsAreLarge}
 			class="ml-1 mr-1 mb-1"

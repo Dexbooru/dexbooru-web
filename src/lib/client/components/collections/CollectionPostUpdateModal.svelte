@@ -20,8 +20,10 @@
 	import { EMPTY_POST } from '$lib/shared/constants/posts';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Checkbox, Modal } from 'flowbite-svelte';
-	import { UndoOutline } from 'flowbite-svelte-icons';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
+	import UndoOutline from 'flowbite-svelte-icons/UndoOutline.svelte';
 	import { onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 

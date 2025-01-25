@@ -10,15 +10,24 @@
 	} from '$lib/shared/constants/images';
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Fileupload, Label, P, Spinner } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Fileupload from 'flowbite-svelte/Fileupload.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import P from 'flowbite-svelte/P.svelte';
+	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import { onMount } from 'svelte';
 
-	interface Props {
+	type Props = {
+		maximumImagesAllowed?: number;
 		images?: { imageBase64: string; file: File }[];
 		loadingPictures?: boolean;
-	}
+	};
 
-	let { images = $bindable([]), loadingPictures = $bindable(false) }: Props = $props();
+	let {
+		images = $bindable([]),
+		loadingPictures = $bindable(false),
+		maximumImagesAllowed = MAXIMUM_IMAGES_PER_POST,
+	}: Props = $props();
 
 	const activeModal = getActiveModal();
 
@@ -53,7 +62,7 @@
 			return;
 		}
 
-		if (files.length > MAXIMUM_IMAGES_PER_POST) {
+		if (files.length > maximumImagesAllowed) {
 			toast.push(
 				`Cannot upload more than ${MAXIMUM_IMAGES_PER_POST} files per post`,
 				FAILURE_TOAST_OPTIONS,
@@ -110,7 +119,7 @@
 
 <Label class="space-y-2 ">
 	<span
-		>Upload up to {MAXIMUM_IMAGES_PER_POST} images, each of which should not exceed {MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB}
+		>Upload up to {maximumImagesAllowed} images, each of which should not exceed {MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB}
 		MB:</span
 	>
 	<Fileupload
@@ -131,7 +140,8 @@
 		{#each images as { imageBase64, file }}
 			<Button
 				color="alternative"
-				style="width: 200px; height: 200px; background-image: url({imageBase64}); background-repeat: no-repeat; background-size: cover; background-position: center;"
+				class="w-[200px] h-[200px] bg-no-repeat bg-cover bg-center"
+				style="background-image: url({imageBase64});"
 				on:click={() =>
 					activeModal.set({
 						isOpen: true,

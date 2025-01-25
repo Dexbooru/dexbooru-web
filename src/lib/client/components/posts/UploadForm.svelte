@@ -16,25 +16,26 @@
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate, transformLabel } from '$lib/shared/helpers/labels';
 	import { toast } from '@zerodevx/svelte-toast';
-	import {
-		Button,
-		Checkbox,
-		Heading,
-		Input,
-		Label,
-		Li,
-		List,
-		Spinner,
-		Textarea,
-	} from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
+	import Heading from 'flowbite-svelte/Heading.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
+	import Label from 'flowbite-svelte/Label.svelte';
+	import Li from 'flowbite-svelte/Li.svelte';
+	import List from 'flowbite-svelte/List.svelte';
+	import Spinner from 'flowbite-svelte/Spinner.svelte';
+	import Textarea from 'flowbite-svelte/Textarea.svelte';
 	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/posts/upload/$types';
 	import PostPictureUpload from '../files/PostPictureUpload.svelte';
 	import LabelContainer from '../labels/LabelContainer.svelte';
 
-	interface Props {
+	type Props = {
 		form: ActionData;
-	}
+	};
+
+	type TEstimatedPostRating = 's' | 'q' | 'e';
 
 	let { form }: Props = $props();
 
@@ -66,7 +67,7 @@
 			);
 		return !isValidForm;
 	});
-	let estimatedPostRating: Promise<'s' | 'q' | 'e' | null> = $derived.by(async () => {
+	let estimatedPostRating: Promise<TEstimatedPostRating | null> = $derived.by(async () => {
 		if (tags.length === 0) {
 			return null;
 		}
@@ -74,7 +75,7 @@
 		const response = await getEstimatedPostRating(tags);
 		if (response.ok) {
 			const data = await response.json();
-			return data.predicted_rating as 's' | 'q' | 'e';
+			return data.predicted_rating as TEstimatedPostRating;
 		}
 
 		return null;
@@ -167,154 +168,156 @@
 	});
 </script>
 
-<main class="flex flex-col justify-center items-center m-5">
-	<Heading class="mb-5 px-2.5 text-center ">Upload a post!</Heading>
-	<form
-		id="upload-form"
-		method="POST"
-		class="flex flex-col space-y-2 max-w-2xl"
-		enctype="multipart/form-data"
-	>
-		<section class="space-y-2">
-			<Label class="mb-1 " for="description-textarea">
-				Please enter a description for your post (max {MAXIMUM_POST_DESCRIPTION_LENGTH} characters):
-			</Label>
-			<Textarea
-				id="description-textarea"
-				maxlength={MAXIMUM_POST_DESCRIPTION_LENGTH}
-				rows="5"
-				bind:value={description}
-				name="description"
-				placeholder="Enter a description"
-				required
-			/>
-			<p class="leading-none dark:text-gray-400 text-right mt-2">
-				{description.length}/{MAXIMUM_POST_DESCRIPTION_LENGTH}
-			</p>
-
-			<List class="dark:text-gray-400 " list="disc">
-				{#each SEPERATOR_CHARACTER_UI as message}
-					<Li>{message}</Li>
-				{/each}
-			</List>
-
-			<Label class="" for="tag-input"
-				>Please specify one or more tags (max of {MAXIMUM_TAGS_PER_POST}):</Label
-			>
-			<div class="flex gap-2 mt-2 justify-around">
-				<Input
-					id="tag-input"
-					on:keypress={(event) => handleLabelKeypress(event, 'tag')}
-					bind:value={tag}
-					pattern="[a-z]*"
-					maxlength={MAXIMUM_TAG_LENGTH}
-					type="text"
-					placeholder="Enter a tag name"
-					class="flex-grow"
-				/>
-				<p class="leading-none dark:text-gray-400 text-right mt-2">
-					{tag.length}/{MAXIMUM_TAG_LENGTH}
-				</p>
-				<Button
-					disabled={tags.length === MAXIMUM_TAGS_PER_POST || tag.length === 0}
-					type="button"
-					on:click={() => addLabel('tag')}>Add</Button
-				>
-			</div>
-			<div class="mt-2 max-h-32 overflow-y-auto">
-				<LabelContainer
-					handleLabelClose={(event) => removeLabel(event, 'tag')}
-					labelIsDismissable
-					labelIsLink={false}
-					labelColor="red"
-					labelType="tag"
-					labels={tags}
-				/>
-			</div>
-			<Input type="hidden" name="tags" value={tags.join(',')} />
-
-			<Label class="" for="artist-input"
-				>Please specify one or more artists (max of {MAXIMUM_ARTISTS_PER_POST}):</Label
-			>
-			<div class="flex gap-2 mt-2">
-				<Input
-					id="artist-input"
-					on:keypress={(event) => handleLabelKeypress(event, 'artist')}
-					bind:value={artist}
-					pattern="[a-z]*"
-					maxlength={MAXIMUM_ARTIST_LENGTH}
-					type="text"
-					placeholder="Enter an artist name"
-					class="flex-grow"
-				/>
-				<p class="leading-none dark:text-gray-400 text-right mt-2">
-					{artist.length}/{MAXIMUM_ARTIST_LENGTH}
-				</p>
-				<Button
-					disabled={artists.length === MAXIMUM_ARTISTS_PER_POST || artist.length === 0}
-					type="button"
-					on:click={() => addLabel('artist')}>Add</Button
-				>
-			</div>
-			<div class="mt-2 max-h-32 overflow-y-auto">
-				<LabelContainer
-					handleLabelClose={(event) => removeLabel(event, 'artist')}
-					labelIsDismissable
-					labelIsLink={false}
-					labelColor="green"
-					labelType="artist"
-					labels={artists}
-				/>
-			</div>
-			<Input type="hidden" name="artists" value={artists.join(',')} />
-
-			<Label for="sourceLink">Specify the source url of the post:</Label>
-			<Input
-				placeholder="Enter the source url"
-				type="url"
-				required
-				name="sourceLink"
-				maxlength={MAXIMUM_SOURCE_LINK_LENGTH}
-				bind:value={sourceLink}
-			/>
-
-			<PostPictureUpload bind:loadingPictures={loadingPostPictures} bind:images={postImages} />
-
-			<Checkbox class="" bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
-			<Input type="hidden" name="isNsfw" value={isNsfw} />
-			{#await estimatedPostRating}
-				<div class="flex items-center space-x-2">
-					<Spinner />
-				</div>
-			{:then rating}
-				<div class="flex items-center space-x-2 !mt-5">
-					<span class="font-semibold text-gray-800 dark:text-gray-300">Estimated Rating:</span>
-					{#if rating}
-						<span class="text-sm text-gray-900 dark:text-gray-100"
-							>{ESTIMATED_TAG_RATING_LABEL_MAP[rating]}</span
-						>
-					{:else}
-						<span class="text-sm text-gray-500 dark:text-gray-400"
-							>Will show here once tags are added</span
-						>
-					{/if}
-				</div>
-
-				{#if rating === 'q' || rating === 'e'}
-					<div class="mt-2 p-3 bg-yellow-100 text-yellow-800 rounded-md">
-						<strong>Recommendation:</strong> The provided tags are potentially rated as
-						{#if rating === 'q'}
-							{ESTIMATED_TAG_RATING_LABEL_MAP['q']}
-						{:else}
-							{ESTIMATED_TAG_RATING_LABEL_MAP['e']}
-						{/if}. It is recommended to mark this post as NSFW.
-					</div>
-				{/if}
-			{/await}
-		</section>
-
-		<Button disabled={uploadButtonDisabled} color="green" type="submit" class="!mt-5"
-			>Upload post</Button
+<main>
+	<Card size="lg" class="mt-3 mb-3 ml-auto mr-auto w-full space-y-2">
+		<Heading class="mb-5 mt-2 text-center ">Upload a post!</Heading>
+		<form
+			id="upload-form"
+			method="POST"
+			class="flex flex-col justify-center"
+			enctype="multipart/form-data"
 		>
-	</form>
+			<section class="space-y-2">
+				<Label class="mb-1 " for="description-textarea">
+					Please enter a description for your post (max {MAXIMUM_POST_DESCRIPTION_LENGTH} characters):
+				</Label>
+				<Textarea
+					id="description-textarea"
+					maxlength={MAXIMUM_POST_DESCRIPTION_LENGTH}
+					rows="5"
+					bind:value={description}
+					name="description"
+					placeholder="Enter a description"
+					required
+				/>
+				<p class="leading-none dark:text-gray-400 text-right mt-2">
+					{description.length}/{MAXIMUM_POST_DESCRIPTION_LENGTH}
+				</p>
+
+				<List class="dark:text-gray-400 " list="disc">
+					{#each SEPERATOR_CHARACTER_UI as message}
+						<Li>{message}</Li>
+					{/each}
+				</List>
+
+				<Label for="tag-input"
+					>Please specify one or more tags (max of {MAXIMUM_TAGS_PER_POST}):</Label
+				>
+				<div class="flex gap-2 mt-2 justify-around">
+					<Input
+						id="tag-input"
+						on:keypress={(event) => handleLabelKeypress(event, 'tag')}
+						bind:value={tag}
+						pattern="[a-z]*"
+						maxlength={MAXIMUM_TAG_LENGTH}
+						type="text"
+						placeholder="Enter a tag name"
+						class="flex-grow"
+					/>
+					<p class="leading-none dark:text-gray-400 text-right mt-2">
+						{tag.length}/{MAXIMUM_TAG_LENGTH}
+					</p>
+					<Button
+						disabled={tags.length === MAXIMUM_TAGS_PER_POST || tag.length === 0}
+						type="button"
+						on:click={() => addLabel('tag')}>Add</Button
+					>
+				</div>
+				<div class="mt-2 max-h-32 overflow-y-auto w-1/2">
+					<LabelContainer
+						handleLabelClose={(event) => removeLabel(event, 'tag')}
+						labelIsDismissable
+						labelIsLink={false}
+						labelColor="red"
+						labelType="tag"
+						labels={tags}
+					/>
+				</div>
+				<Input type="hidden" name="tags" value={tags.join(',')} />
+
+				<Label for="artist-input"
+					>Please specify one or more artists (max of {MAXIMUM_ARTISTS_PER_POST}):</Label
+				>
+				<div class="flex gap-2 mt-2">
+					<Input
+						id="artist-input"
+						on:keypress={(event) => handleLabelKeypress(event, 'artist')}
+						bind:value={artist}
+						pattern="[a-z]*"
+						maxlength={MAXIMUM_ARTIST_LENGTH}
+						type="text"
+						placeholder="Enter an artist name"
+						class="flex-grow"
+					/>
+					<p class="leading-none dark:text-gray-400 text-right mt-2">
+						{artist.length}/{MAXIMUM_ARTIST_LENGTH}
+					</p>
+					<Button
+						disabled={artists.length === MAXIMUM_ARTISTS_PER_POST || artist.length === 0}
+						type="button"
+						on:click={() => addLabel('artist')}>Add</Button
+					>
+				</div>
+				<div class="mt-2 max-h-32 overflow-y-auto">
+					<LabelContainer
+						handleLabelClose={(event) => removeLabel(event, 'artist')}
+						labelIsDismissable
+						labelIsLink={false}
+						labelColor="green"
+						labelType="artist"
+						labels={artists}
+					/>
+				</div>
+				<Input type="hidden" name="artists" value={artists.join(',')} />
+
+				<Label for="sourceLink">Specify the source url of the post:</Label>
+				<Input
+					placeholder="Enter the source url"
+					type="url"
+					required
+					name="sourceLink"
+					maxlength={MAXIMUM_SOURCE_LINK_LENGTH}
+					bind:value={sourceLink}
+				/>
+
+				<PostPictureUpload bind:loadingPictures={loadingPostPictures} bind:images={postImages} />
+
+				<Checkbox class="" bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
+				<Input type="hidden" name="isNsfw" value={isNsfw} />
+				{#await estimatedPostRating}
+					<div class="flex items-center space-x-2">
+						<Spinner />
+					</div>
+				{:then rating}
+					<div class="flex items-center space-x-2 !mt-5">
+						<span class="font-semibold text-gray-800 dark:text-gray-300">Estimated Rating:</span>
+						{#if rating}
+							<span class="text-sm text-gray-900 dark:text-gray-100"
+								>{ESTIMATED_TAG_RATING_LABEL_MAP[rating]}</span
+							>
+						{:else}
+							<span class="text-sm text-gray-500 dark:text-gray-400"
+								>Will show here once tags are added</span
+							>
+						{/if}
+					</div>
+
+					{#if rating === 'q' || rating === 'e'}
+						<div class="mt-2 p-3 bg-yellow-100 text-yellow-800 rounded-md">
+							<strong>Recommendation:</strong> The provided tags are potentially rated as
+							{#if rating === 'q'}
+								{ESTIMATED_TAG_RATING_LABEL_MAP['q']}
+							{:else}
+								{ESTIMATED_TAG_RATING_LABEL_MAP['e']}
+							{/if}. It is recommended to mark this post as NSFW.
+						</div>
+					{/if}
+				{/await}
+			</section>
+
+			<Button disabled={uploadButtonDisabled} color="green" type="submit" class="!mt-5"
+				>Upload post</Button
+			>
+		</form>
+	</Card>
 </main>

@@ -25,5 +25,6 @@ export const EMPTY_POST: TPost = {
 	isNsfw: false,
 	createdAt: new Date(),
 	updatedAt: new Date(),
+	sourceLink: '',
 	moderationStatus: 'PENDING',
 };

@@ -5,11 +5,15 @@
 	import type { ICoreApiResponse, TChatRoom } from '$lib/client/types/core';
 	import type { TChatFriend } from '$lib/shared/types/friends';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Avatar, Button, Listgroup, ListgroupItem, Popover } from 'flowbite-svelte';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Listgroup from 'flowbite-svelte/Listgroup.svelte';
+	import ListgroupItem from 'flowbite-svelte/ListgroupItem.svelte';
+	import Popover from 'flowbite-svelte/Popover.svelte';
 
-	interface Props {
+	type Props = {
 		friends?: TChatFriend[];
-	}
+	};
 
 	let { friends = $bindable([]) }: Props = $props();
 

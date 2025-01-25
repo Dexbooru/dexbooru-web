@@ -1,22 +1,24 @@
 <script lang="ts">
 	import { createPostCommentsPaginator } from '$lib/client/api/comments';
+	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate, getFormalDateTitle, ymdFormat } from '$lib/shared/helpers/dates';
 	import type { TComment } from '$lib/shared/types/comments';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Avatar, Button } from 'flowbite-svelte';
-	import { MessagesSolid } from 'flowbite-svelte-icons';
+	import MessagesSolid from 'flowbite-svelte-icons/MessagesSolid.svelte';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import Comment from './Comment.svelte';
 	import CommentTextbox from './CommentTextbox.svelte';
 
-	interface Props {
+	type Props = {
 		comment: TComment;
 		currentDepth?: number;
-	}
+	};
 
 	let { comment, currentDepth = 1 }: Props = $props();
 
@@ -56,6 +58,12 @@
 		replies = commentTree.getReplies(comment.id);
 	});
 
+	const onImageError = (event: Event) => {
+		const target = event.target as HTMLImageElement;
+
+		target.src = DefaultProfilePicture;
+	};
+
 	onMount(() => {
 		return () => {
 			commentTreeUnsubscribe();
@@ -74,6 +82,7 @@
 					alt={comment.authorId
 						? `profile picture of ${comment.author.username}`
 						: 'default user account'}
+					onerror={onImageError}
 				/>
 				{#if comment.author}
 					<a href="/profile/{comment.author.username}">{comment.author.username}</a>

@@ -73,7 +73,7 @@ const onResizeDocument = () => {
 };
 
 const onKeyDownDocument = (event: KeyboardEvent, activeModal: Writable<TModalStoreData>) => {
-	if (event.ctrlKey && event.key.toLowerCase() === 'k') {
+	if (event.ctrlKey && event.key.toLocaleLowerCase() === 'k') {
 		event.preventDefault();
 
 		activeModal.update((data) => {
@@ -84,7 +84,6 @@ const onKeyDownDocument = (event: KeyboardEvent, activeModal: Writable<TModalSto
 		});
 	}
 };
-
 
 const updateFooterData = () => {
 	const footerElement = document.querySelector('#app-footer') as HTMLElement;

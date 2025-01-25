@@ -1,8 +1,7 @@
-import { APP_URL } from '$env/static/private';
 import { SALT_ROUNDS } from '$lib/server/constants/auth';
 import { MAXIMUM_ARTIST_LENGTH } from '$lib/shared/constants/labels';
+import { interleaveStrings } from '$lib/shared/helpers/util';
 import bcrypt from 'bcryptjs';
-import { ACCOUNT_RECOVERY_EMAIL_TEMPLATE } from '../constants/email';
 import { MAXIMUM_SHIFTING_POSITIONS } from '../constants/passwordRecovery';
 
 const caesarCipher = (target: string, shiftingPositions: number): string => {
@@ -15,36 +14,6 @@ const caesarCipher = (target: string, shiftingPositions: number): string => {
 	}
 
 	return cipheredResult;
-};
-
-const interleaveStrings = (a: string, b: string): string => {
-	let interleavedResult = '';
-	let [i, j, k] = [0, 0, 0];
-	const resultLength = a.length + b.length;
-
-	while (k < resultLength && i < a.length && j < b.length) {
-		if (k % 2 === 0) {
-			interleavedResult += a.charAt(i);
-			i++;
-		} else {
-			interleavedResult += a.charAt(j);
-			j++;
-		}
-
-		k++;
-	}
-
-	while (i < a.length) {
-		interleavedResult += a.charCodeAt(i);
-		i++;
-	}
-
-	while (j < b.length) {
-		interleavedResult += b.charCodeAt(j);
-		j++;
-	}
-
-	return interleavedResult;
 };
 
 export const generateRecoveryId = async (
@@ -63,17 +32,4 @@ export const generateRecoveryId = async (
 		original: cipheredRawRecoveryId,
 		hashed: hashedCipheredRecoveryId,
 	};
-};
-
-export const buildPasswordRecoveryEmailTemplate = (
-	username: string,
-	publicAccountRecoveryId: string,
-): string => {
-	const accountRecoveryLink = new URL(`${APP_URL}/recover-account`);
-	accountRecoveryLink.searchParams.append('id', publicAccountRecoveryId);
-
-	return ACCOUNT_RECOVERY_EMAIL_TEMPLATE.replaceAll('{{username}}', username).replaceAll(
-		'{{accountRecoveryLink}}',
-		accountRecoveryLink.href,
-	);
 };

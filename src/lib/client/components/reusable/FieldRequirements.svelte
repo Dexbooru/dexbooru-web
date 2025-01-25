@@ -4,17 +4,22 @@
 		PASSWORD_REQUIREMENTS,
 		USERNAME_REQUIREMENTS,
 	} from '$lib/shared/constants/auth';
-	import { Li, List, P, Popover } from 'flowbite-svelte';
-	import { CheckCircleSolid, CloseCircleSolid, QuestionCircleSolid } from 'flowbite-svelte-icons';
+	import Li from 'flowbite-svelte/Li.svelte';
+	import List from 'flowbite-svelte/List.svelte';
+	import P from 'flowbite-svelte/P.svelte';
+	import Popover from 'flowbite-svelte/Popover.svelte';
+	import CheckCircleSolid from 'flowbite-svelte-icons/CheckCircleSolid.svelte';
+	import CloseCircleSolid from 'flowbite-svelte-icons/CloseCircleSolid.svelte';	
+	import QuestionCircleSolid from 'flowbite-svelte-icons/QuestionCircleSolid.svelte';
 	import type { ComponentProps } from 'svelte';
 
-	interface Props {
+	type Props = {
 		requirementsPlacement?: ComponentProps<Popover>['placement'];
 		requirementsType: 'email' | 'username' | 'password';
 		popoverButtonId: string;
 		satisifedRequirements?: string[];
 		unsatisfiedRequirements?: string[];
-	}
+	};
 
 	let {
 		requirementsPlacement = 'bottom-start',

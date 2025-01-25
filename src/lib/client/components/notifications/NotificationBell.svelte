@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { normalizeCount } from '$lib/client/helpers/posts';
-	import { Indicator } from 'flowbite-svelte';
-	import { BellSolid } from 'flowbite-svelte-icons';
+	import Indicator from 'flowbite-svelte/Indicator.svelte';
+	import BellSolid from 'flowbite-svelte-icons/BellSolid.svelte';
 
-	interface Props {
+	type Props = {
 		notificationCount: number;
-	}
+	};
 
 	let { notificationCount }: Props = $props();
 </script>

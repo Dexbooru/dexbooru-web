@@ -13,14 +13,15 @@
 		PREVIEW_IMAGE_SUFFIX,
 	} from '$lib/shared/constants/images';
 	import type { TPost } from '$lib/shared/types/posts';
-	import { Card, Toast } from 'flowbite-svelte';
-	import { ExclamationCircleSolid } from 'flowbite-svelte-icons';
+	import Card from 'flowbite-svelte/Card.svelte';
+	import Toast from 'flowbite-svelte/Toast.svelte';
+	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import { onMount } from 'svelte';
 
-	interface Props {
+	type Props = {
 		post: TPost;
 		onCollectionViewPage?: boolean;
-	}
+	};
 
 	let { post, onCollectionViewPage = false }: Props = $props();
 

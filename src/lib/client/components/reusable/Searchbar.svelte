@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Input } from 'flowbite-svelte';
-	import { SearchOutline } from 'flowbite-svelte-icons';
+	import SearchOutline from 'flowbite-svelte-icons/SearchOutline.svelte';
+	import Input from 'flowbite-svelte/Input.svelte';
 
-	interface Props {
+	type Props = {
 		inputElementId?: string | null;
 		required?: boolean;
 		width?: string;
@@ -10,9 +10,12 @@
 		placeholder: string;
 		autofocus?: boolean;
 		name?: string | null;
+		customClass?: string | null;
 		queryInputHandler?: ((query: string) => void) | null;
 		queryChangeHandler?: ((query: string) => void) | null;
-	}
+		queryInputClear?: (() => void) | null;
+		queryChangeClear?: (() => void) | null;
+	};
 
 	let {
 		required = false,
@@ -21,9 +24,12 @@
 		autofocus = false,
 		width = '300px',
 		isGlobal = false,
+		customClass = '',
 		placeholder,
 		queryInputHandler = null,
 		queryChangeHandler = null,
+		queryInputClear = null,
+		queryChangeClear = null,
 	}: Props = $props();
 
 	const optionalProps: Record<string, string> = $state({});
@@ -40,6 +46,10 @@
 			if (queryInputHandler) {
 				queryInputHandler(inputTarget.value);
 			}
+		} else {
+			if (queryInputClear) {
+				queryInputClear();
+			}
 		}
 	};
 
@@ -47,13 +57,17 @@
 		const inputTarget = event.target as HTMLInputElement;
 		if (queryChangeHandler) {
 			queryChangeHandler(inputTarget.value);
+		} else {
+			if (queryChangeClear) {
+				queryChangeClear();
+			}
 		}
 	};
 </script>
 
-<div class="relative {!isGlobal && 'mr-4'}" style="width: {width}">
+<div class="relative {!isGlobal && 'mr-4'} {customClass} " style="width: {width}">
 	<div class="flex absolute inset-y-0 start-0 items-center ps-3 pointer-events-none">
-		<SearchOutline class="w-4 h-4" />
+		<SearchOutline class="w-4 h-4 " />
 	</div>
 	<Input
 		{autofocus}

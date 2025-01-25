@@ -1,4 +1,3 @@
-import { DEFAULT_PROFILE_PICTURE_URL } from '$env/static/private';
 import {
 	ACCOUNT_DELETION_CONFIRMATION_TEXT,
 	EMAIL_REQUIREMENTS,
@@ -13,6 +12,7 @@ import {
 	MAXIMUM_BLACKLISTED_TAGS,
 	MAXIMUM_TAG_LENGTH,
 } from '$lib/shared/constants/labels';
+import { MAXIMUM_SITE_WIDE_CSS_LENGTH } from '$lib/shared/constants/preferences';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
 import { getEmailRequirements } from '$lib/shared/helpers/auth/email';
@@ -21,30 +21,42 @@ import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
 import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import type { TFriendStatus } from '$lib/shared/types/friends';
 import type { TUser } from '$lib/shared/types/users';
-import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
+import { isHttpError, isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { deleteFromBucket, uploadToBucket } from '../aws/actions/s3';
 import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '../constants/aws';
-import { SESSION_ID_COOKIE_OPTIONS } from '../constants/cookies';
+import {
+	ACCOUNT_RECOVERY_EMAIL_SUBJECT,
+	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
+} from '../constants/email';
 import { boolStrSchema } from '../constants/reusableSchemas';
-import { checkIfUserIsFriended } from '../db/actions/friends';
+import { PUBLIC_USER_SELECTORS } from '../constants/users';
+import { checkIfUserIsFriended } from '../db/actions/friend';
+import { findLinkedAccountsFromUserId } from '../db/actions/linkedAccount';
+import {
+	createPasswordRecoveryAttempt,
+	deletePasswordRecoveryAttempt,
+	getPasswordRecoveryAttempt,
+} from '../db/actions/passwordRecoveryAttempt';
 import {
 	createUserPreferences,
-	getUserPreferences,
+	findUserPreferences,
 	updateUserPreferences,
-} from '../db/actions/preferences';
+} from '../db/actions/preference';
 import {
 	checkIfUsersAreFriends,
 	createUser,
 	deleteUserById,
-	editPasswordByUserId,
-	editProfilePictureByUserId,
-	editUsernameByUserId,
 	findUserByEmail,
 	findUserById,
 	findUserByName,
 	findUserByNameOrEmail,
+	findUserSelf,
 	getUserStatistics,
+	updatePasswordByUserId,
+	updateProfilePictureByUserId,
+	updateUserRole,
+	updateUsernameByUserId,
 } from '../db/actions/user';
 import {
 	createErrorResponse,
@@ -52,16 +64,14 @@ import {
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import { buildCookieOptions } from '../helpers/cookies';
+import { buildPasswordRecoveryEmailTemplate, sendEmail } from '../helpers/email';
 import {
 	runDefaultProfilePictureTransformationPipeline,
 	runProfileImageTransformationPipeline,
 } from '../helpers/images';
+import { DiscordOauthProvider, GithubOauthProvider, GoogleOauthProvider } from '../helpers/oauth';
 import { doPasswordsMatch, hashPassword } from '../helpers/password';
-import {
-	cacheResponse,
-	generateEncodedUserTokenFromRecord,
-	generateUpdatedUserTokenFromClaims,
-} from '../helpers/sessions';
+import { cacheResponse, generateEncodedUserTokenFromRecord } from '../helpers/sessions';
 import {
 	createTotpChallenge,
 	deleteTotpChallenge,
@@ -132,6 +142,15 @@ const emailRequirementSchema = z
 		},
 	);
 
+const UserRoleUpdateSchema = {
+	pathParams: z.object({
+		username: z.string().min(1, 'The username cannot be empty'),
+	}),
+	body: z.object({
+		newRole: z.enum(['OWNER', 'MODERATOR', 'USER']),
+	}),
+} satisfies TRequestSchema;
+
 const UserGetTotpSchema = {
 	pathParams: z.object({
 		challengeId: z.string().uuid(),
@@ -189,7 +208,7 @@ const UserCreateSchema = {
 		confirmedPassword: z.string().min(1, 'The confirmed password cannot be empty'),
 		profilePicture: z
 			.instanceof(globalThis.File)
-			.transform((val) => (val.size > 0 ? val : DEFAULT_PROFILE_PICTURE_URL))
+			.transform((val) => (val.size > 0 ? val : ''))
 			.refine((val) => {
 				if (typeof val === 'string') return true;
 
@@ -251,7 +270,7 @@ const UpdateUserPersonalPreferencesSchema = {
 			.optional(),
 		blacklistedArtists: z
 			.string()
-			.transform((val) => val.toLowerCase().trim().split('\n'))
+			.transform((val) => val.toLocaleLowerCase().trim().split('\n'))
 			.refine(
 				(val) =>
 					val.length <= MAXIMUM_BLACKLISTED_ARTISTS &&
@@ -264,11 +283,322 @@ const UpdateUserPersonalPreferencesSchema = {
 
 const UpdateUserUserInterfacePreferencesSchema = {
 	form: z.object({
-		customSiteWideCss: z.string().optional(),
+		customSiteWideCss: z
+			.string()
+			.max(MAXIMUM_SITE_WIDE_CSS_LENGTH, {
+				message: `The maximum site wide CSS length is ${MAXIMUM_SITE_WIDE_CSS_LENGTH} characters`,
+			})
+			.optional(),
 		hidePostMetadataOnPreview: boolStrSchema.optional(),
 		hideCollectionMetadataOnPreview: boolStrSchema.optional(),
 	}),
 } satisfies TRequestSchema;
+
+const UserForgotPasswordSchema = {
+	form: z.object({
+		email: z
+			.string()
+			.email()
+			.transform((val) => val.toLocaleLowerCase().trim()),
+	}),
+} satisfies TRequestSchema;
+
+const UserGetPasswordRecoverySessionSchema = {
+	pathParams: z.object({
+		recoveryId: z.string(),
+	}),
+} satisfies TRequestSchema;
+
+const UserUpdatePasswordAccountRecoverySchema = {
+	form: z.object({
+		newPassword: passwordRequirementSchema,
+		confirmedNewPassword: z.string().min(1, 'The confirmed new password cannot be empty'),
+		passwordRecoveryAttemptId: z.string().uuid(),
+		userId: z.string().uuid(),
+	}),
+} satisfies TRequestSchema;
+
+export const handleGetUserSettings = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(event, 'page-server-load', {}, async (_) => {
+		if (event.locals.user.id === NULLABLE_USER.id) {
+			redirect(302, '/');
+		}
+
+		const linkedAccounts = await findLinkedAccountsFromUserId(event.locals.user.id, true);
+
+		const googleAuthProvider = new GoogleOauthProvider(event);
+		const discordAuthProvider = new DiscordOauthProvider(event);
+		const githubAuthProvider = new GithubOauthProvider(event);
+
+		const [googleAuthorizationUrl, discordAuthorizationUrl, githubAuthorizationUrl] =
+			await Promise.all([
+				googleAuthProvider.getAuthorizationUrl(),
+				discordAuthProvider.getAuthorizationUrl(),
+				githubAuthProvider.getAuthorizationUrl(),
+			]);
+
+		return createSuccessResponse('page-server-load', 'Successfully fetched the user settings', {
+			discordAuthorizationUrl,
+			githubAuthorizationUrl,
+			googleAuthorizationUrl,
+			linkedAccounts,
+		});
+	});
+};
+
+export const handlePasswordUpdateAccountRecovery = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'form-action',
+		UserUpdatePasswordAccountRecoverySchema,
+		async (data) => {
+			const { newPassword, confirmedNewPassword, userId, passwordRecoveryAttemptId } = data.form;
+
+			try {
+				if (newPassword !== confirmedNewPassword) {
+					return createErrorResponse(
+						'form-action',
+						400,
+						'The new password does not match the confirmed new password',
+						{
+							type: 'password',
+							reason: 'The new password does not match the confirmed new password!',
+						},
+					);
+				}
+
+				const recoveryAttempt = await getPasswordRecoveryAttempt(passwordRecoveryAttemptId, {
+					userId: true,
+					senderIpAddress: true,
+				});
+
+				if (!recoveryAttempt) {
+					return createErrorResponse(
+						'form-action',
+						404,
+						'The password recovery session could not be found',
+					);
+				}
+
+				if (recoveryAttempt.userId !== userId) {
+					return createErrorResponse(
+						'form-action',
+						403,
+						'The password recovery session is unauthorized',
+					);
+				}
+
+				const clientIpAddress = event.getClientAddress();
+				if (clientIpAddress !== recoveryAttempt.senderIpAddress) {
+					return createErrorResponse(
+						'form-action',
+						403,
+						'The password recovery session is unauthorized',
+					);
+				}
+
+				const hashedNewPassword = await hashPassword(newPassword);
+				const updatedPassword = await updatePasswordByUserId(userId, hashedNewPassword);
+
+				if (!updatedPassword) {
+					return createErrorResponse(
+						'form-action',
+						404,
+						`A user with the id: ${userId} does not exist!`,
+						{
+							type: 'password',
+							reason: `A user with the id: ${userId} does not exist!`,
+						},
+					);
+				}
+
+				deletePasswordRecoveryAttempt(passwordRecoveryAttemptId);
+
+				return createSuccessResponse('form-action', 'The password was updated successfully', {
+					message: 'The password was updated successfully',
+				});
+			} catch {
+				return createErrorResponse(
+					'form-action',
+					500,
+					'An unexpected error occured while updating the password',
+				);
+			}
+		},
+	);
+};
+
+export const handleGetPasswordRecoverySession = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'page-server-load',
+		UserGetPasswordRecoverySessionSchema,
+		async (data) => {
+			const { recoveryId } = data.pathParams;
+
+			try {
+				const recoveryAttempt = await getPasswordRecoveryAttempt(recoveryId, {
+					createdAt: true,
+					user: {
+						select: {
+							email: true,
+							username: true,
+						},
+					},
+					senderIpAddress: true,
+					id: true,
+					userId: true,
+				});
+				if (!recoveryAttempt) {
+					return createErrorResponse(
+						'page-server-load',
+						404,
+						'The password recovery session could not be found',
+					);
+				}
+
+				const clientIpAddress = event.getClientAddress();
+				if (clientIpAddress !== recoveryAttempt.senderIpAddress) {
+					return createErrorResponse(
+						'page-server-load',
+						403,
+						'The password recovery session is unauthorized',
+					);
+				}
+
+				return createSuccessResponse(
+					'page-server-load',
+					'Successfully fetched the password recovery session',
+					{ recoveryAttempt },
+				);
+			} catch (error) {
+				if (isHttpError(error)) throw error;
+
+				return createErrorResponse(
+					'page-server-load',
+					500,
+					'An unexpected error occured while trying to fetch the password recovery session',
+				);
+			}
+		},
+	);
+};
+
+export const handleSendForgotPasswordEmail = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'form-action',
+		UserForgotPasswordSchema,
+		async (data) => {
+			const { email } = data.form;
+
+			try {
+				const user = await findUserByEmail(email, { id: true, username: true, email: true });
+				if (!user) {
+					return createErrorResponse(
+						'form-action',
+						404,
+						`A user with the email: ${email} does not exist!`,
+					);
+				}
+
+				const ipAddress = event.getClientAddress();
+				const newPasswordRecoveryAttempt = await createPasswordRecoveryAttempt(user.id, ipAddress);
+
+				await sendEmail({
+					sender: `Dexbooru <${DEXBOORU_NO_REPLY_EMAIL_ADDRESS}>`,
+					to: user.email,
+					subject: ACCOUNT_RECOVERY_EMAIL_SUBJECT,
+					html: buildPasswordRecoveryEmailTemplate(user.username, newPasswordRecoveryAttempt.id),
+				});
+
+				return createSuccessResponse(
+					'form-action',
+					'The password recovery email was sent successfully',
+				);
+			} catch (error) {
+				return createErrorResponse(
+					'form-action',
+					500,
+					'An unexpected error occured while sending the password recovery email',
+				);
+			}
+		},
+	);
+};
+
+export const handleGetSelfData = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'api-route',
+		{},
+		async (_) => {
+			try {
+				const user = await findUserSelf(event.locals.user.id);
+				if (!user) {
+					return createErrorResponse(
+						'api-route',
+						404,
+						`A user with the id: ${event.locals.user.id} does not exist`,
+					);
+				}
+
+				return createSuccessResponse('api-route', 'Successfully fetched the user data', { user });
+			} catch {
+				return createErrorResponse(
+					'api-route',
+					500,
+					'An unexpected error occured while trying to fetch the user data',
+				);
+			}
+		},
+		true,
+	);
+};
+
+export const handleUpdateUserRole = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'api-route',
+		UserRoleUpdateSchema,
+		async (data) => {
+			const user = event.locals.user;
+			const targetUsername = data.pathParams.username;
+			const newRole = data.body.newRole;
+
+			try {
+				if (user.role !== 'OWNER') {
+					return createErrorResponse(
+						'api-route',
+						403,
+						'Only imageboard owners are authorized to promote/demote user roles',
+					);
+				}
+
+				const updatedUser = await updateUserRole(targetUsername, newRole);
+				if (!updatedUser) {
+					return createErrorResponse(
+						'api-route',
+						404,
+						`A user with the name: ${targetUsername} does not exist`,
+					);
+				}
+
+				return createSuccessResponse(
+					'api-route',
+					`Successfully updated the user role of the user: ${targetUsername} to ${newRole}`,
+				);
+			} catch {
+				return createErrorResponse(
+					'api-route',
+					500,
+					'An unexpected error occured while trying to update the user role',
+				);
+			}
+		},
+		true,
+	);
+};
 
 export const handleUpdateUserInterfacePreferences = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -394,53 +724,80 @@ export const handleGetUser = async (
 	return await validateAndHandleRequest(event, handlerType, GetUserSchema, async (data) => {
 		const user = event.locals.user;
 		const targetUsername = data.pathParams.username;
-		let friendStatus: TFriendStatus = 'not-friends';
 
-		const targetUser = await findUserByName(targetUsername, {
-			id: true,
-			username: true,
-			profilePictureUrl: true,
-			createdAt: true,
-			...(user.id !== NULLABLE_USER.id &&
-				targetUsername === user.username && {
-					updatedAt: true,
-					email: true,
-				}),
-		});
-		if (!targetUser) {
-			const errorResponse = createErrorResponse(
-				handlerType,
-				404,
-				`A user named ${targetUsername} does not exist!`,
-			);
-			if (handlerType === 'page-server-load') throw errorResponse;
+		try {
+			let friendStatus: TFriendStatus = 'not-friends';
 
-			return errorResponse;
-		}
+			const targetUser = (await findUserByName(targetUsername, {
+				...PUBLIC_USER_SELECTORS,
+				updatedAt: true,
+				linkedAccounts: {
+					select: {
+						platform: true,
+						platformUsername: true,
+						isPublic: true,
+					},
+				},
+			})) as Partial<TUser>;
 
-		const friendRequestPending =
-			user.id !== NULLABLE_USER.id ? await checkIfUserIsFriended(user.id, targetUser.id) : false;
-		if (friendRequestPending) {
-			friendStatus = 'request-pending';
-		} else {
-			const areFriends =
-				user.id !== NULLABLE_USER.id ? await checkIfUsersAreFriends(user.id, targetUser.id) : false;
-			if (areFriends) {
-				friendStatus = 'are-friends';
+			if (!targetUser) {
+				const errorResponse = createErrorResponse(
+					handlerType,
+					404,
+					`A user named ${targetUsername} does not exist!`,
+				);
+				if (handlerType === 'page-server-load') throw errorResponse;
+
+				return errorResponse;
 			}
+
+			if (targetUser.id !== user.id) {
+				delete targetUser.email;
+				delete targetUser.updatedAt;
+			}
+
+			const isSelf = event.locals.user.id === targetUser.id;
+			const linkedAccounts = (targetUser.linkedAccounts ?? []).filter(
+				(account) => isSelf || account.isPublic,
+			);
+
+			const friendRequestPending =
+				user.id !== NULLABLE_USER.id
+					? await checkIfUserIsFriended(user.id, targetUser.id ?? '')
+					: false;
+			if (friendRequestPending) {
+				friendStatus = 'request-pending';
+			} else {
+				const areFriends =
+					user.id !== NULLABLE_USER.id
+						? await checkIfUsersAreFriends(user.id, targetUser.id ?? '')
+						: false;
+				if (areFriends) {
+					friendStatus = 'are-friends';
+				}
+			}
+
+			const userStatistics = await getUserStatistics(targetUser.id ?? '');
+
+			return createSuccessResponse(
+				handlerType,
+				`Successfully fetched user profile details for ${targetUsername}`,
+				{
+					targetUser,
+					friendStatus: (user.id !== NULLABLE_USER.id
+						? friendStatus
+						: 'irrelevant') as TFriendStatus,
+					userStatistics,
+					linkedAccounts,
+				},
+			);
+		} catch (error) {
+			return createErrorResponse(
+				handlerType,
+				500,
+				'An unexpected error occured while trying to fetch the user profile details',
+			);
 		}
-
-		const userStatistics = await getUserStatistics(targetUser.id);
-
-		return createSuccessResponse(
-			handlerType,
-			`Successfully fetched user profile details for ${targetUsername}`,
-			{
-				targetUser,
-				friendStatus: (user.id !== NULLABLE_USER.id ? friendStatus : 'irrelevant') as TFriendStatus,
-				userStatistics,
-			},
-		);
 	});
 };
 
@@ -451,6 +808,7 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 		UserChangeProfilePictureSchema,
 		async (data) => {
 			const { newProfilePicture, removeProfilePicture } = data.form;
+			const userId = event.locals.user.id;
 
 			if (!removeProfilePicture && newProfilePicture.size === 0) {
 				return createErrorResponse(
@@ -461,23 +819,32 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 			}
 
 			try {
-				deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, event.locals.user.profilePictureUrl);
+				const user = await findUserById(userId, { profilePictureUrl: true, username: true });
+				if (!user) {
+					return createErrorResponse(
+						'form-action',
+						404,
+						`A user with the id: ${userId} does not exist!`,
+						{
+							type: 'profilePicture',
+							reason: `A user with the id: ${userId} does not exist!`,
+						},
+					);
+				}
+
+				if (typeof user.profilePictureUrl === 'string' && user.profilePictureUrl.length > 0) {
+					deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, user.profilePictureUrl);
+				}
 
 				const newProfilePictureFileBuffer = removeProfilePicture
-					? await runDefaultProfilePictureTransformationPipeline(event.locals.user.username)
+					? await runDefaultProfilePictureTransformationPipeline(user.username)
 					: await runProfileImageTransformationPipeline(newProfilePicture);
 				const updatedProfilePictureObjectUrl = await uploadToBucket(
 					AWS_PROFILE_PICTURE_BUCKET_NAME,
 					'profile_pictures',
 					newProfilePictureFileBuffer,
 				);
-				await editProfilePictureByUserId(event.locals.user.id, updatedProfilePictureObjectUrl);
-
-				const updatedUserJwtToken = generateUpdatedUserTokenFromClaims({
-					...event.locals.user,
-					profilePictureUrl: updatedProfilePictureObjectUrl,
-				});
-				event.cookies.set(SESSION_ID_KEY, updatedUserJwtToken, SESSION_ID_COOKIE_OPTIONS);
+				await updateProfilePictureByUserId(userId, updatedProfilePictureObjectUrl);
 
 				return createSuccessResponse(
 					'form-action',
@@ -489,7 +856,7 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 						},
 					},
 				);
-			} catch {
+			} catch (error) {
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -548,7 +915,10 @@ export const handleChangePassword = async (event: RequestEvent) => {
 				}
 
 				const hashedNewPassword = await hashPassword(newPassword);
-				const updatedPassword = await editPasswordByUserId(event.locals.user.id, hashedNewPassword);
+				const updatedPassword = await updatePasswordByUserId(
+					event.locals.user.id,
+					hashedNewPassword,
+				);
 
 				if (!updatedPassword) {
 					return createErrorResponse(
@@ -600,7 +970,7 @@ export const handleChangeUsername = async (event: RequestEvent) => {
 					);
 				}
 
-				const updatedUsername = await editUsernameByUserId(event.locals.user.id, newUsername);
+				const updatedUsername = await updateUsernameByUserId(event.locals.user.id, newUsername);
 				if (!updatedUsername) {
 					return createErrorResponse(
 						'form-action',
@@ -613,12 +983,6 @@ export const handleChangeUsername = async (event: RequestEvent) => {
 						},
 					);
 				}
-
-				const updatedUserJwtToken = generateUpdatedUserTokenFromClaims({
-					...event.locals.user,
-					username: newUsername,
-				});
-				event.cookies.set(SESSION_ID_KEY, updatedUserJwtToken, SESSION_ID_COOKIE_OPTIONS);
 
 				return createSuccessResponse('form-action', 'The username was changed successfully', {
 					message: 'The username was changed successfully!',
@@ -825,7 +1189,7 @@ export const handleGetUserTotp = async (event: RequestEvent) => {
 	);
 };
 
-export const handleUserOauth2AuthFlowForm = async (event: RequestEvent) => {
+export const handleUserAuthFlowForm = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(event, 'form-action', UserAuthFormSchema, async (data) => {
 		const { username, password, rememberMe } = data.form;
 		const errorData = {
@@ -844,7 +1208,7 @@ export const handleUserOauth2AuthFlowForm = async (event: RequestEvent) => {
 				return createErrorResponse('form-action', 401, 'The authentication failed', errorData);
 			}
 
-			const preferences = await getUserPreferences(user.id);
+			const preferences = await findUserPreferences(user.id);
 			if (preferences && preferences.twoFactorAuthenticationEnabled) {
 				const ipAddress = event.getClientAddress();
 				const newTotpChallengeId = await createTotpChallenge(user.username, ipAddress, rememberMe);

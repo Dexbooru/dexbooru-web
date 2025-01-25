@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import ApplicationLogo from '$lib/client/assets/app_logo.webp';
 	import PostContainer from '$lib/client/components/posts/container/PostContainer.svelte';
 	import {
 		getBlacklistedPostPage,
@@ -11,9 +12,9 @@
 	import { generatePostWrapperMetaTags } from '$lib/client/helpers/posts';
 	import { onMount } from 'svelte';
 
-	interface Props {
+	type Props = {
 		postsSection: string;
-	}
+	};
 
 	let { postsSection }: Props = $props();
 
@@ -48,7 +49,7 @@
 	<title>{titleData.title}</title>
 	<meta property="og:title" content={titleData.title} />
 	<meta property="og:description" content={titleData.description} />
-	<meta property="og:image" content={`${page.url.href}/favicon.png`} />
+	<meta property="og:image" content={`${page.url.href}/${ApplicationLogo}`} />
 </svelte:head>
 
 <PostContainer postContainerTitle={titleData.title} />

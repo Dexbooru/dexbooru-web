@@ -3,13 +3,18 @@
 		getAuthenticatedUser,
 		getAuthenticatedUserNotifications,
 	} from '$lib/client/helpers/context';
-	import { Avatar, Button, Dropdown, DropdownItem, Spinner } from 'flowbite-svelte';
-	import { AngleDownSolid } from 'flowbite-svelte-icons';
+	import AngleDownSolid from 'flowbite-svelte-icons/AngleDownSolid.svelte';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
+	import DropdownItem from 'flowbite-svelte/DropdownItem.svelte';
+	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import { onMount } from 'svelte';
 	import NotificationBell from '../notifications/NotificationBell.svelte';
 	import NotificationList from '../notifications/NotificationList.svelte';
 
 	let notificationCount: number = $state(0);
+	let dropdownOpen: boolean = $state(false);
 
 	const user = getAuthenticatedUser();
 	const notifications = getAuthenticatedUserNotifications();
@@ -47,10 +52,13 @@
 	{$user?.username}
 	<AngleDownSolid size="sm" class="!mr-2" />
 </Button>
-<Dropdown triggeredBy="#navbar-profile-picture">
+
+<Dropdown bind:open={dropdownOpen}>
 	<DropdownItem href="/profile/{$user?.username}">Your Profile</DropdownItem>
 	<DropdownItem href="/posts/uploaded">Your Posts</DropdownItem>
 	<DropdownItem href="/collections/created">Your Collections</DropdownItem>
+	<DropdownItem href="/comments/created">Your Comments</DropdownItem>
+	<DropdownItem href="/friends">Your Friends</DropdownItem>
 	<DropdownItem href="/posts/liked">Liked Posts</DropdownItem>
 	<DropdownItem href="/profile/settings">Settings</DropdownItem>
 	{#snippet footer()}

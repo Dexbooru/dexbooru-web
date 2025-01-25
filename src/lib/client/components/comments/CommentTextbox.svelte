@@ -7,14 +7,17 @@
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { TComment } from '$lib/shared/types/comments';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, TabItem, Tabs, Textarea } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import TabItem from 'flowbite-svelte/TabItem.svelte';
+	import Tabs from 'flowbite-svelte/Tabs.svelte';
+	import Textarea from 'flowbite-svelte/Textarea.svelte';
 	import EmojiSearch from '../reusable/EmojiSearch.svelte';
 
-	interface Props {
+	type Props = {
 		onCommentCreate?: (() => void) | null;
 		postId: string;
 		parentCommentId?: string | null;
-	}
+	};
 
 	let { onCommentCreate = null, postId, parentCommentId = null }: Props = $props();
 

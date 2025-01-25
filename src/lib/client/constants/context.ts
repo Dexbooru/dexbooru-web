@@ -20,3 +20,7 @@ export const NSFW_COLLECTIONS_PAGE_CONTEXT_KEY = 'nsfwCollectionPage';
 export const COLLECTION_PAGINATION_DATA_CONTEXT_KEY = 'collectionPaginationData';
 export const USER_COLLECTIONS_CONTEXT_KEY = 'userCollections';
 export const QUERY_CONTEXT_KEY = 'globalQuery';
+export const COMMENTS_PAGE_CONTEXT_KEY = 'commentsPage';
+export const COMMENT_PAGINATION_DATA_CONTEXT_KEY = 'commentPaginationData';
+export const FRIEND_DATA_CONTEXT_KEY = 'userFriendsData';
+export const UPDATED_POST_CONTEXT_KEY = 'updatedPost';

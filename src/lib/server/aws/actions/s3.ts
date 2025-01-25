@@ -10,7 +10,11 @@ import {
 	AWS_LOCAL_PROFILE_PICTURE_BASE_URL,
 } from '$lib/server/constants/aws';
 import type { TS3ObjectSource } from '$lib/server/types/aws';
-import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import {
+	DeleteObjectCommand,
+	PutObjectCommand,
+	type DeleteObjectCommandOutput,
+} from '@aws-sdk/client-s3';
 import awsS3 from '../s3';
 
 const getObjectBaseUrl = (objectSource: TS3ObjectSource): string => {
@@ -58,21 +62,25 @@ export async function uploadToBucket(
 	return objectUrl;
 }
 
-export async function deleteFromBucket(bucketName: string, objectUrl: string): Promise<void> {
+export async function deleteFromBucket(
+	bucketName: string,
+	objectUrl: string,
+): Promise<DeleteObjectCommandOutput> {
 	const objectId = extractOjbectIdFromUrl(objectUrl);
 	const deleteParams = {
 		Bucket: bucketName,
 		Key: objectId,
 	};
 
-	await awsS3.send(new DeleteObjectCommand(deleteParams));
+	const bucketResponse = await awsS3.send(new DeleteObjectCommand(deleteParams));
+	return bucketResponse;
 }
 
 export async function deleteBatchFromBucket(
 	bucketName: string,
 	objectUrls: string[],
-): Promise<void> {
-	await Promise.all(objectUrls.map((objectUrl) => deleteFromBucket(bucketName, objectUrl)));
+): Promise<DeleteObjectCommandOutput[]> {
+	return await Promise.all(objectUrls.map((objectUrl) => deleteFromBucket(bucketName, objectUrl)));
 }
 
 export async function uploadBatchToBucket(
