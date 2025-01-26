@@ -8,7 +8,11 @@ if (dev) {
 	endpointConfig.endpoint = AWS_S3_LOCAL_ENDPOINT;
 	endpointConfig.forcePathStyle = true;
 } else {
-	if (typeof AWS_CLOUDFRONT_ENDPOINT === 'string' && AWS_CLOUDFRONT_ENDPOINT.length > 0) {
+	if (
+		typeof AWS_CLOUDFRONT_ENDPOINT === 'string' &&
+		AWS_CLOUDFRONT_ENDPOINT.length > 0 &&
+		!AWS_CLOUDFRONT_ENDPOINT.includes('localhost')
+	) {
 		endpointConfig.endpoint = AWS_CLOUDFRONT_ENDPOINT;
 		endpointConfig.forcePathStyle = true;
 	}
