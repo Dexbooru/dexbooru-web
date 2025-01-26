@@ -23,11 +23,10 @@
 		"test": "vitest run",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
 		"format": "prettier --plugin-search-dir . --write .",
-		"prepare": "husky install"
+		"prepare": "husky install && svelte-kit sync"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^8.4.1",
-		"@sveltejs/adapter-auto": "^3.3.1",
 		"@sveltejs/adapter-node": "^5.2.12",
 		"@sveltejs/kit": "^2.16.1",
 		"@sveltejs/vite-plugin-svelte": "^4.0.4",
