@@ -11,6 +11,7 @@
 		"run-build": "dotenv -e .env -o -- node build/index.js",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "prisma generate --schema ./prisma/schema",
+		"dbpredeploy": "dotenv -e .env -o -- prisma migrate deploy",
 		"dbseed": "dotenv -e .env -o -- prisma db push --force-reset && prisma db seed",
 		"dbmigrate": "dotenv -e .env -o -- prisma migrate dev",
 		"dbreset": "dotenv -e .env -o -- prisma migrate reset",
