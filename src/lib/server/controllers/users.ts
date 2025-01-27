@@ -79,6 +79,7 @@ import {
 	getTotpChallenge,
 	isValidOtpCode,
 } from '../helpers/totp';
+import logger from '../logging/logger';
 import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
 const usernamePasswordFormSchema = z.object({
@@ -417,7 +418,9 @@ export const handlePasswordUpdateAccountRecovery = async (event: RequestEvent) =
 				return createSuccessResponse('form-action', 'The password was updated successfully', {
 					message: 'The password was updated successfully',
 				});
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -544,7 +547,9 @@ export const handleGetSelfData = async (event: RequestEvent) => {
 				}
 
 				return createSuccessResponse('api-route', 'Successfully fetched the user data', { user });
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -588,7 +593,9 @@ export const handleUpdateUserRole = async (event: RequestEvent) => {
 					'api-route',
 					`Successfully updated the user role of the user: ${targetUsername} to ${newRole}`,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -662,7 +669,9 @@ export const handleUpdatePostPreferences = async (event: RequestEvent) => {
 					'Successfully updated the post preferences of the user',
 					{ data },
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -935,7 +944,9 @@ export const handleChangePassword = async (event: RequestEvent) => {
 				return createSuccessResponse('form-action', 'The password was updated successfully', {
 					message: 'The password was updated successfully',
 				});
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -990,7 +1001,9 @@ export const handleChangeUsername = async (event: RequestEvent) => {
 						username: newUsername,
 					},
 				});
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -1262,7 +1275,9 @@ export const handleUserAuthFlowEndpoint = async (event: RequestEvent) => {
 						accessToken: encodedAuthToken,
 					},
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -1367,11 +1382,17 @@ export const handleToggleUserTwoFactorAuthentication = async (event: RequestEven
 					twoFactorAuthenticationEnabled: twoFactorEnabled,
 				});
 
+				logger.info(
+					`User ${event.locals.user.username} has ${twoFactorEnabled ? 'enabled' : 'disabled'} two factor authentication`,
+				);
+
 				return createSuccessResponse(
 					'form-action',
 					'Successfully updated thw two factor authentication settings for this user',
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				const errorMessage = 'An unexpected error occured while trying to update the OTP settings';
 				return createErrorResponse('form-action', 500, errorMessage, { message: errorMessage });
 			}

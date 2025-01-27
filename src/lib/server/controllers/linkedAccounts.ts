@@ -12,6 +12,7 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
+import logger from '../logging/logger';
 import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
 const GetUserLinkedAccountsSchema = {
@@ -78,7 +79,8 @@ export const handleUpdateLinkedAccounts = async (
 					updatedLinkedAccounts,
 				});
 			} catch (error) {
-				console.error(error);
+				logger.error(error);
+
 				return createErrorResponse(
 					handlerType,
 					500,
@@ -110,7 +112,9 @@ export const handleGetUserLinkedAccounts = async (event: RequestEvent) => {
 				return createSuccessResponse('api-route', 'Linked accounts fetched successfully', {
 					linkedAccounts,
 				});
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,

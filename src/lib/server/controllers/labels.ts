@@ -14,6 +14,7 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
+import logger from '../logging/logger';
 import type { TRequestSchema } from '../types/controllers';
 
 const GetLabelMetadataSchema = {
@@ -139,7 +140,9 @@ export const handleGetLabelMetadata = async (event: RequestEvent, labelType: 'ta
 					`Successfully fetched ${labelType} called ${name}`,
 					labelResource,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,

@@ -12,6 +12,7 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
+import logger from '../logging/logger';
 import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
 const CreateFriendRequestSchema = {
@@ -57,7 +58,9 @@ export const handleGetFriendData = async (
 					sentFriendRequests,
 					receivedFriendRequests,
 				});
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					handlerType,
 					500,
@@ -101,7 +104,9 @@ export const handleDeleteFriend = async (event: RequestEvent) => {
 					'api-route',
 					`Successfully unfriended the user with the id: ${friendUsername}`,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -152,7 +157,9 @@ export const handleFriendRequest = async (event: RequestEvent) => {
 						requestAction === 'accept' ? 'accepted' : 'declined'
 					} friendship request from ${senderUsername}`,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -198,7 +205,9 @@ export const handleSendFriendRequest = async (event: RequestEvent) => {
 					{ friendRequest: newFriendRequest },
 					201,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,

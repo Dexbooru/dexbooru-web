@@ -33,6 +33,7 @@ import {
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import { applyCollectionImageTransformationPipeline, flattenImageBuffers } from '../helpers/images';
+import logger from '../logging/logger';
 import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
 const createCollectionFormErrorData = (errorData: Record<string, unknown>, message: string) => {
@@ -379,7 +380,9 @@ export const handleGetUserCollections = async (
 					'Successfully fetched user collections',
 					responseData,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					handlerType,
 					500,
@@ -415,7 +418,9 @@ export const handleGetCollections = async (
 				'Successfully fetched paginated collections',
 				responseData,
 			);
-		} catch {
+		} catch (error) {
+			logger.error(error);
+
 			return createErrorResponse(
 				handlerType,
 				500,
@@ -463,7 +468,9 @@ export const handleDeleteCollection = async (event: RequestEvent) => {
 				}
 
 				return createSuccessResponse('api-route', 'Successfully deleted the collection');
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -508,7 +515,9 @@ export const handleUpdateCollection = async (event: RequestEvent) => {
 					'Successfully edited the collection',
 					updatedCollection,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,

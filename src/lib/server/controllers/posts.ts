@@ -53,6 +53,7 @@ import {
 	getRemoteResponseFromCache,
 	invalidateCacheRemotely,
 } from '../helpers/sessions';
+import logger from '../logging/logger';
 import type {
 	TControllerHandlerVariant,
 	TPostFetchCategory,
@@ -491,7 +492,9 @@ export const handleGetPostsByAuthor = async (
 					`Successfully fetched the posts with the author username of: ${username}`,
 					responseData,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				const errorResponse = createErrorResponse(
 					handlerType,
 					500,

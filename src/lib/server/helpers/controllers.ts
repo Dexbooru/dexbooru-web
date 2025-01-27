@@ -15,6 +15,17 @@ import { getUserClaimsFromEncodedJWTToken } from './sessions';
 const parts: (keyof TRequestSchema)[] = ['form', 'urlSearchParams', 'pathParams', 'body'];
 const formContentTypes = ['multipart/form-data', 'application/x-www-form-urlencoded'];
 
+const VALID_REQUEST_EVENT_KEYS = ['locals', 'params', 'getClientAddress', 'request', 'url'];
+
+export const isRequestEvent = (object: unknown) => {
+	if (object === null || object === undefined) return false;
+	if (typeof object !== 'object') return false;
+
+	const objectKeys = Object.keys(object);
+	const validKeyNotInObject = VALID_REQUEST_EVENT_KEYS.some(key => !objectKeys.includes(key));	
+	return !validKeyNotInObject;
+};
+
 export const populateAuthenticatedUser = (event: RequestEvent) => {
 	event.locals.user = NULLABLE_USER;
 	const userJwtTokenEncoded = event.cookies.get(SESSION_ID_KEY) ?? null;

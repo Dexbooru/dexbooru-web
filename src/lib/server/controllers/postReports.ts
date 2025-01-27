@@ -11,6 +11,7 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
+import logger from '../logging/logger';
 import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
 const DeletePostReportSchema = {
@@ -69,7 +70,9 @@ export const handleDeletePostReport = async (event: RequestEvent) => {
 					'Successfully deleted the post report.',
 					deletedPostReport,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -97,7 +100,9 @@ export const handleGetPostReports = async (
 				return createSuccessResponse(handlerType, 'Successfully fetched the post reports.', {
 					postReports,
 				});
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -131,7 +136,9 @@ export const handleCreatePostReport = async (event: RequestEvent) => {
 					{ newPostReport },
 					201,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,

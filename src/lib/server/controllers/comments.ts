@@ -18,6 +18,7 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
+import logger from '../logging/logger';
 import type { TCommentSelector } from '../types/comments';
 import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
 
@@ -137,7 +138,9 @@ export const handleGetAuthenticatedUserComments = async (
 				};
 
 				return createSuccessResponse(handlerType, 'Comments fetched successfully', responseData);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					handlerType,
 					500,
@@ -165,7 +168,9 @@ export const handleGetGeneralComments = async (
 			};
 
 			return createSuccessResponse(handlerType, 'Comments fetched successfully', responseData);
-		} catch {
+		} catch (error) {
+			logger.error(error);
+
 			return createErrorResponse(
 				handlerType,
 				500,
@@ -216,7 +221,9 @@ export const handleDeletePostComments = async (event: RequestEvent) => {
 					'api-route',
 					`A comment with the id: ${commentId} and its corresponding replies were deleted successfuly!`,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -269,7 +276,9 @@ export const handleEditPostComments = async (event: RequestEvent) => {
 					'api-route',
 					`Successfully edited the comment content for the id: ${commentId}`,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -307,6 +316,8 @@ export const handleGetPostComments = async (event: RequestEvent) => {
 
 			return createSuccessResponse('api-route', 'Comments fetched successfully', comments);
 		} catch (error) {
+			logger.error(error);
+
 			return createErrorResponse(
 				'api-route',
 				500,
@@ -340,7 +351,9 @@ export const handleCreatePostComment = async (event: RequestEvent) => {
 					newComment,
 					201,
 				);
-			} catch {
+			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,

@@ -9,6 +9,7 @@ import {
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import { cacheResponseRemotely, getRemoteResponseFromCache } from '../helpers/sessions';
+import logger from '../logging/logger';
 import type { TRequestSchema } from '../types/controllers';
 
 const GetArtistsSchema = {
@@ -41,6 +42,8 @@ export const handleGetArtists = async (event: RequestEvent) => {
 				artists,
 			);
 		} catch (error) {
+			logger.error(error);
+
 			return createErrorResponse(
 				'api-route',
 				500,
