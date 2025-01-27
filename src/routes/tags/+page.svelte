@@ -1,5 +1,7 @@
 <script lang="ts">
+	import ApplicationLogo from '$lib/client/assets/app_logo.webp';
 	import LabelGrid from '$lib/client/components/labels/LabelGrid.svelte';
+	import { CHAR_OPTIONS_DIGITS, CHAR_OPTIONS_LOWERCASE } from '$lib/client/constants/labels';
 </script>
 
 <svelte:head>
@@ -7,8 +9,13 @@
 	<meta property="og:title" content="Find Tags on Dexbooru" />
 	<meta
 		property="og:description"
-		content="Explore tags from A to Z and 0 to 9 on Dexbooru. Select the tags you're interested in or discover new ones."
+		content="Explore tags from {CHAR_OPTIONS_LOWERCASE[0]} to {CHAR_OPTIONS_LOWERCASE[
+			CHAR_OPTIONS_LOWERCASE.length - 1
+		]} and {CHAR_OPTIONS_DIGITS[0]} to {CHAR_OPTIONS_DIGITS[
+			CHAR_OPTIONS_DIGITS.length - 1
+		]} on Dexbooru. Select the tags you're interested in or discover new ones."
 	/>
+	<meta property="og:image" content={ApplicationLogo} />
 </svelte:head>
 
 <LabelGrid labelType="tag" />

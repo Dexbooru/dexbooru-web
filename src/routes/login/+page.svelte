@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import ApplicationLogo from '$lib/client/assets/app_logo.webp';
 	import LoginForm from '$lib/client/components/auth/LoginForm.svelte';
 	import type { ActionData, PageData } from './$types';
@@ -19,7 +18,7 @@
 		property="og:description"
 		content="Access your Dexbooru account to upload, comment, and like posts!"
 	/>
-	<meta property="og:image" content={`${page.url.href}/${ApplicationLogo}`} />
+	<meta property="og:image" content={ApplicationLogo} />
 </svelte:head>
 
 <main class="flex justify-center items-center">

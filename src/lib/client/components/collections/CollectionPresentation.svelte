@@ -44,6 +44,14 @@
 
 <svelte:head>
 	<title>{collection.description} - {collection.id}</title>
+	<meta name="description" content={collection.description} />
+	<meta property="og:title" content={collection.description} />
+	<meta property="og:description" content={collection.description} />
+	<meta property="og:image" content={originalThumbnail} />
+	<meta
+		property="og:aricle:author"
+		content={collection.author?.username ?? DELETED_ACCOUNT_HEADING}
+	/>
 </svelte:head>
 
 <Img

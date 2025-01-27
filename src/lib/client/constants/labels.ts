@@ -7,6 +7,8 @@ export const ESTIMATED_TAG_RATING_LABEL_MAP: Record<'q' | 'e' | 's', string> = {
 	s: 'Safe',
 };
 
+export const CHAR_OPTIONS_DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
 export const CHAR_OPTIONS_UPPERCASE = [
 	'0',
 	'1',

@@ -8,7 +8,7 @@ type UserResponse = {
 	targetUser: TUser;
 	friendStatus: TFriendStatus;
 	userStatistics: TUserStatistics;
-	linkedAccounts: LinkedUserAccount;
+	linkedAccounts: LinkedUserAccount[];
 };
 
 export const load: PageServerLoad = async (event) => {

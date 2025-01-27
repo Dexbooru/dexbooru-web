@@ -1,4 +1,5 @@
 <script lang="ts">
+	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 	import UserProfileCard from '$lib/client/components/auth/UserProfileCard.svelte';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
@@ -22,9 +23,9 @@
 	<meta property="og:title" content="Profile of {targetUser.username} on Dexbooru" />
 	<meta
 		property="og:description"
-		content="Check out {targetUser.username}'s profile on Dexbooru. Explore their posts, friends, and more!"
+		content="Check out {targetUser.username}'s profile on Dexbooru. Explore their posts, collections and linked accounts"
 	/>
-	<meta property="og:image" content={targetUser.profilePictureUrl} />
+	<meta property="og:image" content={targetUser.profilePictureUrl ?? DefaultProfilePicture} />
 	<meta property="profile:username" content={targetUser.username} />
 </svelte:head>
 

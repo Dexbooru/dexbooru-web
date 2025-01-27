@@ -7,6 +7,7 @@
 	} from '$lib/client/helpers/context';
 	import { normalizeCount } from '$lib/client/helpers/posts';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
+	import { NSFW_PREVIEW_IMAGE_SUFFIX, PREVIEW_IMAGE_SUFFIX } from '$lib/shared/constants/images';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPost } from '$lib/shared/types/posts';
 	import Button from 'flowbite-svelte/Button.svelte';
@@ -56,13 +57,22 @@
 	<meta property="og:title" content={post.description} />
 	<meta
 		property="og:description"
-		content="Tags: {tagNames.join(', ')} | Artists: {artistNames.join(', ')} | Author: {post.author
+		content="Tags: {tagNames.join(', ')}, Artists: {artistNames.join(', ')}, Author: {post.author
 			? post.author.username
-			: DELETED_ACCOUNT_HEADING} | Views: {normalizeCount(post.views)} | Likes: {normalizeCount(
+			: DELETED_ACCOUNT_HEADING}, Views: {normalizeCount(post.views)}, Likes: {normalizeCount(
 			post.likes,
 		)}"
 	/>
-	<meta property="og:image" content={post.imageUrls[0]} />
+	{#if post.imageUrls.length > 0}
+		<meta
+			property="og:image"
+			content={post.imageUrls.find((imageUrl) =>
+				post.isNsfw
+					? imageUrl.includes(NSFW_PREVIEW_IMAGE_SUFFIX)
+					: imageUrl.includes(PREVIEW_IMAGE_SUFFIX),
+			)}
+		/>
+	{/if}
 	<meta
 		property="og:author"
 		content={post.author ? post.author.username : DELETED_ACCOUNT_HEADING}

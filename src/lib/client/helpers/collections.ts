@@ -26,7 +26,7 @@ export const generateCollectionWrapperMetadata = (
 	);
 
 	if (matchingOrderTranslationOption) {
-		description = `${collections.length} post(s) sorted by the ${matchingOrderTranslationOption.label} criterion`;
+		description = `${collections.length} post collection(s) sorted by the ${matchingOrderTranslationOption.label} criterion`;
 	}
 
 	return { title, description };

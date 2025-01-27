@@ -63,7 +63,7 @@
 	<title>{titleData.title}</title>
 	<meta property="og:title" content={titleData.title} />
 	<meta property="og:description" content={titleData.description} />
-	<meta property="og:image" content={`${page.url.href}/${ApplicationLogo}`} />
+	<meta property="og:image" content={ApplicationLogo} />
 </svelte:head>
 
 <main>

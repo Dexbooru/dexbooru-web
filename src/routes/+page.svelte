@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ApplicationLogo from '$lib/client/assets/app_logo.webp';
 	import Searchbar from '$lib/client/components/reusable/Searchbar.svelte';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import type { PageData } from './$types';
@@ -13,6 +14,16 @@
 
 <svelte:head>
 	<title>Dexbooru - Anime/Manga Imageboard</title>
+	<meta property="og:title" content="Dexbooru - Anime/Manga Imageboard" />
+	<meta
+		property="og:description"
+		content="Dexbooru is an anime and manga imageboard. Search for your favorite anime and manga images across {formatNumberWithCommas(
+			postCount,
+		)} posts, {formatNumberWithCommas(tagCount)} unique tags and {formatNumberWithCommas(
+			artistCount,
+		)} unique artists."
+	/>
+	<meta property="og:image" content={ApplicationLogo} />
 </svelte:head>
 
 <main class="flex flex-col items-center justify-center text-center mt-40">
