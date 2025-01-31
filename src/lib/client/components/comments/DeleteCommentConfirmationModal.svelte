@@ -22,8 +22,12 @@
 		if (response.ok) {
 			toast.push('The comment was deleted successfully!', SUCCESS_TOAST_OPTIONS);
 			activeModal.set({ isOpen: false, focusedModalName: null });
+			commentTree.update((currentTree) => {
+				if (!targetDeletionComment) return currentTree;
 
-				
+				currentTree.deleteComment(targetDeletionComment.id);
+				return currentTree;
+			});
 		} else {
 			toast.push(
 				'An unexpected error occured while trying to delete the comment!',

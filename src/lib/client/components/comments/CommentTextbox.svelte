@@ -21,6 +21,7 @@
 		content?: string;
 		commentId?: string | null;
 		parentCommentId?: string | null;
+		editMode?: boolean;
 	};
 
 	let {
@@ -30,6 +31,7 @@
 		commentId = null,
 		parentCommentId = null,
 		content = '',
+		editMode = false,
 	}: Props = $props();
 
 	let commentCreating = $state(false);
@@ -143,7 +145,7 @@
 				{commentContent.length} / {MAXIMUM_CONTENT_LENGTH}
 			</p>
 		</div>
-		{#if onCommentCreate}
+		{#if !editMode}
 			<Button
 				disabled={commentCreating || commentContent.length === 0}
 				color="blue"

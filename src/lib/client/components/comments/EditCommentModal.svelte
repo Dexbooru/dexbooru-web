@@ -40,5 +40,6 @@
 		commentId={targetEditComment?.id ?? ''}
 		postId={targetEditComment?.postId ?? ''}
 		content={targetEditComment?.content ?? ''}
+		editMode
 	/>
 </Modal>

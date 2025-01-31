@@ -62,14 +62,23 @@ class CommentTree {
 	}
 
 	deleteComment(commentId: string) {
-		for (const comments of this.data.values()) {
-			const comment = comments.find((c) => c.id === commentId);
-			if (comment) {
-				comment.content = 'This comment was deleted by the original poster';
-				return true;
+		const queue: string[] = [commentId];
+		while (queue.length > 0) {
+			const currentId = queue.shift()!;
+			if (this.data.has(currentId)) {
+				queue.push(...this.data.get(currentId)!.map((c) => c.id));
+				this.data.delete(currentId);
 			}
 		}
-		return false;
+
+		for (const [parentId, comments] of this.data.entries()) {
+			this.data.set(
+				parentId,
+				comments.filter((c) => c.id !== commentId),
+			);
+		}
+
+		return true;
 	}
 
 	getReplies(commentId: string): TComment[] {
