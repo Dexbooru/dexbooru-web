@@ -47,7 +47,7 @@
 	<meta name="description" content={collection.description} />
 	<meta property="og:title" content={collection.description} />
 	<meta property="og:description" content={collection.description} />
-	<meta property="og:image" content={originalThumbnail} />
+	<meta property="og:image" content={collection.thumbnailImageUrls[0] ?? ''} />
 	<meta
 		property="og:aricle:author"
 		content={collection.author?.username ?? DELETED_ACCOUNT_HEADING}
