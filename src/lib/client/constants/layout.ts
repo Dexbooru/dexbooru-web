@@ -8,3 +8,5 @@ export const COLLECTIONS_MODAL_NAME = 'collections-modal';
 export const EDIT_COLLECTION_MODAL_NAME = 'edit-collection-modal';
 export const DELETE_COLLECTION_MODAL_NAME = 'delete-collection-modal';
 export const LABEL_METADATA_MODAL_NAME = 'label-metadata-modal';
+export const DELETE_COMMENT_MODAL_NAME = 'comment-delete-modal';
+export const EDIT_COMMENT_MODAL_NAME = 'comment-edit-modal';

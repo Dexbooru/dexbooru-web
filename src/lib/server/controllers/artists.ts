@@ -1,6 +1,4 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { z } from 'zod';
-import { pageNumberSchema } from '../constants/reusableSchemas';
 import { ARTISTS_PAGINATION_CACHE_TIME_SECONDS } from '../constants/sessions';
 import { getArtistsWithStartingLetter } from '../db/actions/artist';
 import {
@@ -10,25 +8,15 @@ import {
 } from '../helpers/controllers';
 import { cacheResponseRemotely, getRemoteResponseFromCache } from '../helpers/sessions';
 import logger from '../logging/logger';
-import type { TRequestSchema } from '../types/controllers';
-
-const GetArtistsSchema = {
-	pathParams: z.object({
-		letter: z.string().length(1, 'The letter needs to be a single non-empty character'),
-	}),
-	urlSearchParams: z.object({
-		pageNumber: pageNumberSchema,
-	}),
-} satisfies TRequestSchema;
-
-const getCacheKey = (pageNumber: number, letter: string) => `artists-${letter}-${pageNumber}`;
+import { getLabelLetterCacheKey } from './cache-strategies/labels';
+import { GetArtistsSchema } from './request-schemas/artists';
 
 export const handleGetArtists = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(event, 'api-route', GetArtistsSchema, async (data) => {
 		try {
 			const letter = data.pathParams.letter;
 			const pageNumber = data.urlSearchParams.pageNumber;
-			const cacheKey = getCacheKey(pageNumber, letter);
+			const cacheKey = getLabelLetterCacheKey('artists', pageNumber, letter);
 
 			const artists =
 				(await getRemoteResponseFromCache<{ name: string }[]>(cacheKey)) ??

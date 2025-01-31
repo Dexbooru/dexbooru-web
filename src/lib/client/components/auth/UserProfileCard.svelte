@@ -70,7 +70,7 @@
 	};
 </script>
 
-<Card style="min-width: 300px; max-width: 550px;">
+<Card class="mx-4 sm:mx-auto p-4 sm:p-6" style="min-width: 300px; max-width: 550px;">
 	<div class="flex justify-end">
 		<DotsHorizontalOutline class="hover:cursor-pointer" />
 		<Dropdown class="w-36">
@@ -155,13 +155,15 @@
 			{/if}
 		</div>
 
-		<div class="flex flex-col mt-3 space-y-3">
-			<p>Connected social media platforms:</p>
-			<div class="flex flex-col space-y-4">
-				{#each linkedAccounts as linkedAccount}
-					<OauthIcon {linkedAccount} />
-				{/each}
+		{#if linkedAccounts.length > 0}
+			<div class="flex flex-col mt-3 space-y-3">
+				<p>Connected social media platforms:</p>
+				<div class="flex flex-col space-y-4">
+					{#each linkedAccounts as linkedAccount}
+						<OauthIcon {linkedAccount} />
+					{/each}
+				</div>
 			</div>
-		</div>
+		{/if}
 	</div>
 </Card>

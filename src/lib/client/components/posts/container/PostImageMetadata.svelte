@@ -77,7 +77,7 @@
 	const updatedPost = getUpdatedPost();
 </script>
 
-{#if Object.keys($updatedPost).length > 0}
+{#if Object.keys($updatedPost).length > 0 && $updatedPost.imageUrls !== undefined}
 	<ImageCollection
 		imageUrls={getOriginalSizedImageUrls($updatedPost)}
 		imageDimensions={getOriginalImageDimensions(getPostImageMetadata($updatedPost))}
@@ -93,7 +93,7 @@
 
 <p class="text-lg dark:text-white">
 	Total images in post: <span class=" dark:text-gray-400"
-		>{Object.keys($updatedPost).length > 0
+		>{Object.keys($updatedPost).length > 0 && $updatedPost.imageUrls !== undefined
 			? getOriginalSizedImageUrls($updatedPost).length
 			: originalSizedImageUrls.length}</span
 	>
@@ -119,7 +119,7 @@
 			</TableHeadCell>
 		</TableHead>
 		<TableBody tableBodyClass="divide-y !w-1/2">
-			{#each Object.keys($updatedPost).length > 0 ? getPostImageMetadata($updatedPost) : imagesMetadata as { imageFileName, imageWidth, imageHeight, imageUrl }}
+			{#each Object.keys($updatedPost).length > 0 && $updatedPost.imageUrls ? getPostImageMetadata($updatedPost) : imagesMetadata as { imageFileName, imageWidth, imageHeight, imageUrl }}
 				{#if imageFileName.includes(ORIGINAL_IMAGE_SUFFIX) || (!imageFileName.includes(NSFW_PREVIEW_IMAGE_SUFFIX) && imageFileName.includes(PREVIEW_IMAGE_SUFFIX))}
 					<TableBodyRow>
 						<TableBodyCell>{imageFileName}</TableBodyCell>

@@ -7,7 +7,11 @@
 		REPORT_MODAL_NAME,
 	} from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { getActiveModal, getAuthenticatedUser } from '$lib/client/helpers/context';
+	import {
+		getActiveModal,
+		getAuthenticatedUser,
+		getUpdatedPost,
+	} from '$lib/client/helpers/context';
 	import { normalizeCount } from '$lib/client/helpers/posts';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -33,6 +37,7 @@
 
 	const user = getAuthenticatedUser();
 	const activeModal = getActiveModal();
+	const updatedPost = getUpdatedPost();
 
 	let postLikeLoading = $state(false);
 	let hasLikedPost = $state(likedPost);
@@ -65,6 +70,11 @@
 
 			likes = hasLikedPost ? likes - 1 : likes + 1;
 			hasLikedPost = !hasLikedPost;
+
+			updatedPost.update((post) => {
+				post.likes = likes;
+				return post;
+			});
 		} else {
 			toast.push(
 				`There was an error while ${hasLikedPost ? 'disliking' : 'liking'}  the post!`,
@@ -100,7 +110,7 @@
 				})}
 			class="w-full sm:w-auto"
 		>
-			Add to collection
+			Add/remove from collections
 		</Button>
 	{/if}
 

@@ -1,5 +1,4 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { z } from 'zod';
 import {
 	createFriendRequest,
 	deleteFriendRequest,
@@ -14,27 +13,11 @@ import {
 } from '../helpers/controllers';
 import logger from '../logging/logger';
 import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
-
-const CreateFriendRequestSchema = {
-	pathParams: z.object({
-		username: z.string(),
-	}),
-} satisfies TRequestSchema;
-
-const DeleteFriendRequestSchema = {
-	pathParams: z.object({
-		username: z.string(),
-	}),
-	urlSearchParams: z.object({
-		action: z.union([z.literal('accept'), z.literal('reject')]),
-	}),
-} satisfies TRequestSchema;
-
-const DeleteFriendSchema = {
-	pathParams: z.object({
-		username: z.string(),
-	}),
-} satisfies TRequestSchema;
+import {
+	CreateFriendRequestSchema,
+	DeleteFriendRequestSchema,
+	DeleteFriendSchema,
+} from './request-schemas/friends';
 
 export const handleGetFriendData = async (
 	event: RequestEvent,

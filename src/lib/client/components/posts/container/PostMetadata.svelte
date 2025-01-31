@@ -75,7 +75,9 @@
 </p>
 
 <p class="text-lg dark:text-white">
-	Likes: <span class=" dark:text-gray-400">{formatNumberWithCommas(post.likes)}</span>
+	Likes: <span class=" dark:text-gray-400"
+		>{formatNumberWithCommas($updatedPost.likes ?? post.likes)}</span
+	>
 </p>
 
 <p class="text-lg dark:text-white">

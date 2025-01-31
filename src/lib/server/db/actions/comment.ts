@@ -60,7 +60,7 @@ export async function deleteCommentById(
 	});
 
 	if (deletedComment.parentCommentId) {
-		await prisma.comment.update({
+		prisma.comment.update({
 			where: {
 				id: deletedComment.parentCommentId,
 			},
@@ -72,7 +72,7 @@ export async function deleteCommentById(
 		});
 	}
 
-	await prisma.post.update({
+	prisma.post.update({
 		where: {
 			id: postId,
 		},
@@ -108,7 +108,20 @@ export async function findCommentsByAuthorId(
 	return comments;
 }
 
-export async function findCommentsByPostId(
+export async function findCommentsByPostId(postId: string): Promise<Comment[] | null> {
+	const comments = await prisma.comment.findMany({
+		where: {
+			postId,
+		},
+		orderBy: {
+			createdAt: 'desc',
+		},
+	});
+
+	return comments;
+}
+
+export async function findPaginatedCommentsByPostId(
 	postId: string,
 	parentCommentId: string | null,
 	pageNumber: number,
@@ -147,7 +160,7 @@ export async function createComment(
 	});
 
 	if (parentCommentId) {
-		await prisma.comment.update({
+		prisma.comment.update({
 			where: {
 				id: parentCommentId,
 			},
@@ -159,7 +172,7 @@ export async function createComment(
 		});
 	}
 
-	await prisma.post.update({
+	prisma.post.update({
 		where: {
 			id: postId,
 		},

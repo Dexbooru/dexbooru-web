@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const boolStrSchema = z
+export const BoolStrSchema = z
 	.union([z.literal('true'), z.literal('false'), z.literal('on'), z.literal('off'), z.boolean()])
 	.optional()
 	.default('false')
@@ -14,7 +14,7 @@ export const boolStrSchema = z
 		return val;
 	});
 
-export const pageNumberSchema = z
+export const PageNumberSchema = z
 	.string()
 	.optional()
 	.default('0')

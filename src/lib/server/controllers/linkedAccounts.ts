@@ -1,7 +1,5 @@
 import type { UserAuthenticationSource } from '@prisma/client';
 import type { RequestEvent } from '@sveltejs/kit';
-import { z } from 'zod';
-import { boolStrSchema } from '../constants/reusableSchemas';
 import {
 	findLinkedAccountsFromUserId,
 	updateLinkedAccountsForUserFromId,
@@ -13,31 +11,11 @@ import {
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import logger from '../logging/logger';
-import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
-
-const GetUserLinkedAccountsSchema = {
-	pathParams: z.object({
-		username: z.string().min(1, { message: 'Username is required' }),
-	}),
-} satisfies TRequestSchema;
-
-const UpdateUserLinkedAccountsSchema = {
-	form: z.object({
-		disconnectedLinkedAccounts: z
-			.string()
-			.transform(
-				(value) =>
-					value
-						.split(',')
-						.filter((platform) =>
-							['GOOGLE', 'GITHUB', 'DISCORD'].includes(platform),
-						) as UserAuthenticationSource[],
-			),
-		isGooglePublic: boolStrSchema,
-		isGithubPublic: boolStrSchema,
-		isDiscordPublic: boolStrSchema,
-	}),
-} satisfies TRequestSchema;
+import type { TControllerHandlerVariant } from '../types/controllers';
+import {
+	GetUserLinkedAccountsSchema,
+	UpdateUserLinkedAccountsSchema,
+} from './request-schemas/linkedAccounts';
 
 export const handleUpdateLinkedAccounts = async (
 	event: RequestEvent,

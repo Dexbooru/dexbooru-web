@@ -1,3 +1,4 @@
+import { PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { Prisma } from '@prisma/client';
 import prisma from '../prisma';
@@ -186,7 +187,7 @@ export async function createPost(
 	imageWidths: number[],
 	imageHeights: number[],
 	authorId: string,
-): Promise<TPost> {
+) {
 	const newPost = await prisma.post.create({
 		data: {
 			sourceLink,
@@ -215,12 +216,13 @@ export async function createPost(
 			},
 			tagString: tags.toSorted().join(','),
 		},
+		select: PUBLIC_POST_SELECTORS,
 	});
 
 	incrementTagPostCount(tags);
 	incrementArtistPostCount(artists);
 
-	return newPost as TPost;
+	return newPost;
 }
 
 export async function findTotalPostCount() {

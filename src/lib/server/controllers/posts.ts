@@ -1,15 +1,6 @@
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
-import {
-	MAXIMUM_IMAGES_PER_POST,
-	MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB,
-} from '$lib/shared/constants/images';
-import {
-	MAXIMUM_ARTISTS_PER_POST,
-	MAXIMUM_POSTS_PER_PAGE,
-	MAXIMUM_TAGS_PER_POST,
-} from '$lib/shared/constants/posts';
-import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
-import { isLabelAppropriate, transformLabels } from '$lib/shared/helpers/labels';
+import { MAXIMUM_IMAGES_PER_POST } from '$lib/shared/constants/images';
+import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
 import type {
 	TPost,
 	TPostOrderByColumn,
@@ -18,11 +9,10 @@ import type {
 	TPostSimilarityResponse,
 } from '$lib/shared/types/posts';
 import { isHttpError, isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
-import { z } from 'zod';
 import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../constants/aws';
+import { PUBLIC_COMMENT_SELECTORS } from '../constants/comments';
 import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../constants/posts';
-import { boolStrSchema, pageNumberSchema } from '../constants/reusableSchemas';
 import { findPostsByArtistName } from '../db/actions/artist';
 import {
 	createPost,
@@ -49,37 +39,48 @@ import {
 } from '../helpers/images';
 import { getSimilarPostsBySimilaritySearch, indexPostImages } from '../helpers/mlApi';
 import {
+	cacheMultipleToCollectionRemotely,
 	cacheResponseRemotely,
+	getRemoteAssociatedKeys,
 	getRemoteResponseFromCache,
 	invalidateCacheRemotely,
+	invalidateMultipleCachesRemotely,
 } from '../helpers/sessions';
 import logger from '../logging/logger';
-import type {
-	TControllerHandlerVariant,
-	TPostFetchCategory,
-	TRequestSchema,
-} from '../types/controllers';
+import type { TControllerHandlerVariant, TPostFetchCategory } from '../types/controllers';
+import {
+	CACHE_TIME_ARTIST_POSTS,
+	CACHE_TIME_GENERAL_POSTS,
+	CACHE_TIME_INDIVIDUAL_POST_FOUND,
+	CACHE_TIME_INDIVIDUAL_POST_NOT_FOUND,
+	CACHE_TIME_TAG_POSTS,
+	getCacheKeyForIndividualPost,
+	getCacheKeyForIndividualPostKeys,
+	getCacheKeyForPostAuthor,
+	getCacheKeyWithPostCategory,
+	getCacheKeyWithPostCategoryWithLabel,
+} from './cache-strategies/posts';
+import {
+	CreatePostSchema,
+	DeletePostSchema,
+	GetPostSchema,
+	GetPostsByAuthorSchema,
+	GetPostsSchema,
+	GetPostsWithArtistNameSchema,
+	GetPostsWithTagNameSchema,
+	GetSimilarPostsSchema,
+	LikePostSchema,
+	PostUpdateSchema,
+} from './request-schemas/posts';
 
-const getCacheCategoryWithLabel = (
-	type: 'artist' | 'tag',
-	name: string,
-	pageNumber: number,
-	orderBy: TPostOrderByColumn,
-	ascending: boolean,
-) => {
-	if (type === 'artist') {
-		return `artist-${name}-${pageNumber}-${orderBy}-${ascending}`;
-	}
-	return `tag-${name}-${pageNumber}-${orderBy}-${ascending}`;
-};
-
-const getCacheKeyWithCategory = (
-	category: TPostFetchCategory,
-	pageNumber: number,
-	orderBy: TPostOrderByColumn,
-	ascending: boolean,
-) => {
-	return `${category}-${pageNumber}-${orderBy}-${ascending}`;
+const throwPostNotFoundError = (handlerType: TControllerHandlerVariant, postId: string) => {
+	const errorResponse = createErrorResponse(
+		handlerType,
+		404,
+		`A post with the following id: ${postId} does not exist`,
+	);
+	if (handlerType === 'page-server-load') throw errorResponse;
+	return errorResponse;
 };
 
 const uploadPostImages = async (postPictures: File[], isNsfw: boolean) => {
@@ -105,159 +106,6 @@ const uploadPostImages = async (postPictures: File[], isNsfw: boolean) => {
 		postImageWidths,
 	};
 };
-
-const CACHE_TIME_GENERAL_POSTS = 60;
-const CACHE_TIME_TAG_POSTS = 60;
-const CACHE_TIME_ARTIST_POSTS = 120;
-
-const postPaginationSchema = z.object({
-	category: z
-		.union([z.literal('general'), z.literal('liked'), z.literal('uploaded')])
-		.default('general'),
-	ascending: boolStrSchema,
-	orderBy: z
-		.union([
-			z.literal('views'),
-			z.literal('likes'),
-			z.literal('createdAt'),
-			z.literal('updatedAt'),
-			z.literal('commentCount'),
-		])
-		.default('createdAt'),
-	pageNumber: pageNumberSchema,
-});
-
-const descriptionSchema = z
-	.string()
-	.min(1, 'The description must be at least a single character long')
-	.refine((val) => isLabelAppropriate(val, 'postDescription'), {
-		message: 'The provided description was not appropriate',
-	});
-
-const GetPostsByAuthorSchema = {
-	pathParams: z.object({
-		username: z.string(),
-	}),
-	urlSearchParams: postPaginationSchema,
-} satisfies TRequestSchema;
-
-const GetPostSchema = {
-	urlSearchParams: z.object({
-		uploadedSuccessfully: z.string().optional(),
-	}),
-	pathParams: z.object({
-		postId: z.string().uuid(),
-	}),
-} satisfies TRequestSchema;
-
-const GetPostsSchema = {
-	urlSearchParams: z
-		.object({
-			userId: z.string().uuid().optional(),
-		})
-		.merge(postPaginationSchema),
-} satisfies TRequestSchema;
-
-const DeletePostSchema = {
-	pathParams: z.object({
-		postId: z.string().uuid(),
-	}),
-} satisfies TRequestSchema;
-
-const LikePostSchema = {
-	pathParams: z.object({
-		postId: z.string().uuid(),
-	}),
-	body: z.object({
-		action: z.union([z.literal('like'), z.literal('dislike')]),
-	}),
-} satisfies TRequestSchema;
-
-const GetPostsWithTagNameSchema = {
-	pathParams: z.object({
-		name: z.string().min(1, 'The tag name needs to be least one character long'),
-	}),
-	urlSearchParams: postPaginationSchema,
-} satisfies TRequestSchema;
-
-const GetPostsWithArtistNameSchema = {
-	pathParams: z.object({
-		name: z.string().min(1, 'The tag name needs to be least one character long'),
-	}),
-	urlSearchParams: postPaginationSchema,
-} satisfies TRequestSchema;
-
-const CreatePostSchema = {
-	form: z.object({
-		sourceLink: z.string().url(),
-		description: descriptionSchema,
-		postPictures: z
-			.union([z.instanceof(globalThis.File), z.array(z.instanceof(globalThis.File))])
-			.transform((val) => Array.from(val instanceof File ? [val] : val))
-			.refine(
-				(val) => {
-					if (val.length > MAXIMUM_IMAGES_PER_POST) return false;
-					return !val.some((file) => !isFileImage(file) || !isFileImageSmall(file, 'post'));
-				},
-				{
-					message: `At least one of the uploaded post picture was not an image format, exceeded the maximum size of ${MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB} or the total number of images exceeded the maximum allowed size per post of ${MAXIMUM_IMAGES_PER_POST}`,
-				},
-			),
-		isNsfw: boolStrSchema,
-		tags: z
-			.string()
-			.min(1, 'The comma-seperated tag string must be at least a single character long')
-			.transform((val) => {
-				return transformLabels(val.split(','));
-			})
-			.refine(
-				(val) => {
-					if (val.length > MAXIMUM_TAGS_PER_POST) return false;
-					return !val.some((tag) => !isLabelAppropriate(tag, 'tag'));
-				},
-				{
-					message:
-						'At least one of the providedd tags did not meet requirements and was not appropriate',
-				},
-			),
-		artists: z
-			.string()
-			.min(1, 'The comma-seperated artist string must be at least a single character long')
-			.transform((val) => {
-				return transformLabels(val.split(','));
-			})
-			.refine(
-				(val) => {
-					if (val.length > MAXIMUM_ARTISTS_PER_POST) return false;
-					return !val.some((artist) => !isLabelAppropriate(artist, 'artist'));
-				},
-				{
-					message:
-						'At least one of the providedd artists did not meet requirements and was not appropriate',
-				},
-			),
-	}),
-} satisfies TRequestSchema;
-
-const GetSimilarPostsSchema = {
-	form: z.object({
-		postId: z.string().uuid().optional(),
-		imageUrl: z.string().url().optional(),
-		imageFile: z.string().optional(),
-	}),
-} satisfies TRequestSchema;
-
-const PostUpdateSchema = {
-	pathParams: z.object({
-		postId: z.string().uuid(),
-	}),
-	body: z.object({
-		description: descriptionSchema.optional(),
-		deletionPostImageUrls: z.array(z.string().url()).optional(),
-		newPostImagesContent: z.array(z.string()).optional(),
-		sourceLink: z.string().url().optional(),
-	}),
-} satisfies TRequestSchema;
 
 const createPostFormErrorData = (errorData: Record<string, unknown>, message: string) => {
 	return {
@@ -339,6 +187,8 @@ export const handleUpdatePost = async (event: RequestEvent) => {
 			const { postId } = data.pathParams;
 			const { description, newPostImagesContent = [], deletionPostImageUrls = [] } = data.body;
 			const user = event.locals.user;
+
+			const cacheKey = getCacheKeyForIndividualPost(postId);
 
 			try {
 				const currentPost = await findPostById(postId, {
@@ -431,13 +281,16 @@ export const handleUpdatePost = async (event: RequestEvent) => {
 					);
 				}
 
+				invalidateCacheRemotely(cacheKey);
+
 				return createSuccessResponse(
 					'api-route',
 					`No changes were made to the post with id: ${postId}`,
 					currentPost,
 				);
 			} catch (error) {
-				console.error(error);
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -461,32 +314,56 @@ export const handleGetPostsByAuthor = async (
 			const { pageNumber, orderBy, ascending } = data.urlSearchParams;
 			const { username } = data.pathParams;
 
+			const cacheKey = getCacheKeyForPostAuthor(
+				username,
+				pageNumber,
+				orderBy as TPostOrderByColumn,
+				ascending,
+			);
+			let responseData: TPostPaginationData & { author: string };
+
 			try {
-				const selectors =
-					handlerType === 'page-server-load'
-						? PAGE_SERVER_LOAD_POST_SELECTORS
-						: PUBLIC_POST_SELECTORS;
-				const posts = await findPostsByAuthorId(
-					pageNumber,
-					MAXIMUM_POSTS_PER_PAGE,
-					username,
-					orderBy as TPostOrderByColumn,
-					ascending,
-					selectors,
-				);
+				const cachedData = await getRemoteResponseFromCache<
+					TPostPaginationData & { author: string }
+				>(cacheKey);
+				if (cachedData) {
+					responseData = cachedData;
+				} else {
+					const selectors =
+						handlerType === 'page-server-load'
+							? PAGE_SERVER_LOAD_POST_SELECTORS
+							: PUBLIC_POST_SELECTORS;
+					const posts = await findPostsByAuthorId(
+						pageNumber,
+						MAXIMUM_POSTS_PER_PAGE,
+						username,
+						orderBy as TPostOrderByColumn,
+						ascending,
+						selectors,
+					);
 
-				posts.forEach((post) => {
-					post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
-					post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
-				});
+					posts.forEach((post) => {
+						post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
+						post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
+					});
 
-				const responseData = {
-					posts,
-					pageNumber,
-					ascending,
-					orderBy: orderBy as TPostOrderByColumn,
-					author: username,
-				};
+					responseData = {
+						posts,
+						pageNumber,
+						ascending,
+						orderBy: orderBy as TPostOrderByColumn,
+						author: username,
+					};
+
+					if (handlerType === 'page-server-load') {
+						cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_ARTIST_POSTS);
+						cacheMultipleToCollectionRemotely(
+							posts.map((post) => getCacheKeyForIndividualPostKeys(post.id)),
+							cacheKey,
+						);
+					}
+				}
+
 				return createSuccessResponse(
 					handlerType,
 					`Successfully fetched the posts with the author username of: ${username}`,
@@ -549,17 +426,22 @@ export const handleCreatePost = async (
 				);
 				newPostId = newPost.id;
 
-				indexPostImages(newPost.id, postImageUrls);
-
-				invalidateCacheRemotely(getCacheKeyWithCategory('general', 0, 'createdAt', false));
-
 				if (handlerType === 'form-action') {
+					indexPostImages(newPost.id, postImageUrls);
+
+					invalidateCacheRemotely(getCacheKeyWithPostCategory('general', 0, 'createdAt', false));
+					invalidateCacheRemotely(
+						getCacheKeyForPostAuthor(newPost.author?.username ?? '', 0, 'createdAt', false),
+					);
+
 					redirect(302, `/posts/${newPost.id}?uploadedSuccessfully=true`);
 				}
 
 				return createSuccessResponse(handlerType, 'Post created successfully', { newPost }, 201);
 			} catch (error) {
 				if (isRedirect(error)) throw error;
+
+				logger.error(error);
 
 				if (newPostId) {
 					deletePostById(newPostId, event.locals.user.id);
@@ -590,28 +472,51 @@ export const handleGetPost = async (
 		const uploadedSuccessfully = data.urlSearchParams.uploadedSuccessfully === 'true';
 		const user = event.locals.user;
 
+		const cacheKey = getCacheKeyForIndividualPost(postId);
+		let finalData: TPost | { post: TPost; uploadedSuccessfully?: boolean; hasLikedPost?: boolean };
+
 		try {
-			const post =
-				handlerType === 'api-route'
-					? await findPostById(postId, PUBLIC_POST_SELECTORS)
-					: await findPostByIdWithUpdatedViewCount(postId, PUBLIC_POST_SELECTORS);
+			const cachedData = await getRemoteResponseFromCache<{
+				post: TPost;
+				uploadedSuccessfully?: boolean;
+				hasLikedPost?: boolean;
+			}>(cacheKey);
 
-			if (!post) {
-				const error = createErrorResponse(handlerType, 404, `Post with id ${postId} not found`);
-				if (handlerType === 'page-server-load') {
-					throw error;
+			if (cachedData) {
+				if (cachedData === null) {
+					return throwPostNotFoundError(handlerType, postId);
 				}
-				return error;
+
+				finalData = cachedData;
+				finalData.uploadedSuccessfully = uploadedSuccessfully;
+			} else {
+				const selectors = {
+					...PUBLIC_POST_SELECTORS,
+					comments: {
+						select: PUBLIC_COMMENT_SELECTORS,
+					},
+				};
+				const post =
+					handlerType === 'api-route'
+						? await findPostById(postId, selectors)
+						: await findPostByIdWithUpdatedViewCount(postId, selectors);
+
+				if (!post) {
+					cacheResponseRemotely(cacheKey, null, CACHE_TIME_INDIVIDUAL_POST_NOT_FOUND);
+					return throwPostNotFoundError(handlerType, postId);
+				}
+
+				post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
+				post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
+
+				const hasLikedPost =
+					user.id !== NULLABLE_USER.id ? await hasUserLikedPost(user.id, post.id) : false;
+
+				finalData =
+					handlerType === 'api-route' ? post : { post, uploadedSuccessfully, hasLikedPost };
+
+				cacheResponseRemotely(cacheKey, finalData, CACHE_TIME_INDIVIDUAL_POST_FOUND);
 			}
-
-			post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
-			post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
-
-			const hasLikedPost =
-				user.id !== NULLABLE_USER.id ? await hasUserLikedPost(user.id, post.id) : false;
-
-			const finalData =
-				handlerType === 'api-route' ? post : { post, uploadedSuccessfully, hasLikedPost };
 
 			return createSuccessResponse(
 				handlerType,
@@ -620,6 +525,9 @@ export const handleGetPost = async (
 			);
 		} catch (error) {
 			if (isHttpError(error)) throw error;
+
+			logger.error(error);
+
 			const errorResponse = createErrorResponse(
 				handlerType,
 				500,
@@ -649,7 +557,7 @@ export const handleGetPostsWithArtistName = async (
 					: PUBLIC_POST_SELECTORS;
 
 			let responseData: TPostPaginationData;
-			const cacheKey = getCacheCategoryWithLabel(
+			const cacheKey = getCacheKeyWithPostCategoryWithLabel(
 				'artist',
 				artistName,
 				pageNumber,
@@ -682,7 +590,12 @@ export const handleGetPostsWithArtistName = async (
 						ascending,
 						orderBy: orderBy as TPostOrderByColumn,
 					};
+
 					cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_ARTIST_POSTS);
+					cacheMultipleToCollectionRemotely(
+						posts.map((post) => getCacheKeyForIndividualPostKeys(post.id)),
+						cacheKey,
+					);
 				}
 
 				return createSuccessResponse(
@@ -691,11 +604,14 @@ export const handleGetPostsWithArtistName = async (
 					responseData,
 				);
 			} catch (error) {
+				logger.error(error);
+
 				const errorResponse = createErrorResponse(
 					handlerType,
 					500,
 					'An unexpected error occured while fetching the posts with artists with a certain name',
 				);
+
 				if (handlerType === 'page-server-load') {
 					throw errorResponse;
 				}
@@ -723,7 +639,13 @@ export const handleGetPostsWithTagName = async (
 					: PUBLIC_POST_SELECTORS;
 
 			let responseData: TPostPaginationData;
-			const cacheKey = getCacheCategoryWithLabel('tag', tagName, pageNumber, orderBy, ascending);
+			const cacheKey = getCacheKeyWithPostCategoryWithLabel(
+				'tag',
+				tagName,
+				pageNumber,
+				orderBy,
+				ascending,
+			);
 
 			try {
 				const cachedData = await getRemoteResponseFromCache<TPostPaginationData>(cacheKey);
@@ -750,7 +672,12 @@ export const handleGetPostsWithTagName = async (
 						ascending,
 						orderBy: orderBy as TPostOrderByColumn,
 					};
+
 					cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_TAG_POSTS);
+					cacheMultipleToCollectionRemotely(
+						posts.map((post) => getCacheKeyForIndividualPostKeys(post.id)),
+						cacheKey,
+					);
 				}
 
 				return createSuccessResponse(
@@ -759,6 +686,8 @@ export const handleGetPostsWithTagName = async (
 					responseData,
 				);
 			} catch (error) {
+				logger.error(error);
+
 				const errorResponse = createErrorResponse(
 					handlerType,
 					500,
@@ -788,7 +717,7 @@ export const handleGetPosts = async (
 			redirect(302, '/');
 		}
 
-		const cacheKey = getCacheKeyWithCategory(
+		const cacheKey = getCacheKeyWithPostCategory(
 			category,
 			pageNumber,
 			orderBy as TPostOrderByColumn,
@@ -851,10 +780,12 @@ export const handleGetPosts = async (
 					ascending,
 					orderBy,
 				};
-			}
 
-			if (category === 'general') {
 				cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_GENERAL_POSTS);
+				cacheMultipleToCollectionRemotely(
+					posts.map((post) => getCacheKeyForIndividualPostKeys(post.id)),
+					cacheKey,
+				);
 			}
 
 			return createSuccessResponse(
@@ -863,6 +794,8 @@ export const handleGetPosts = async (
 				responseData,
 			);
 		} catch (error) {
+			logger.error(error);
+
 			const errorResponse = createErrorResponse(
 				handlerType,
 				500,
@@ -884,9 +817,19 @@ export const handleDeletePost = async (event: RequestEvent) => {
 		DeletePostSchema,
 		async (data) => {
 			const postId = data.pathParams.postId;
+			const cacheKey = getCacheKeyForIndividualPost(postId);
+			const associatedCacheKey = getCacheKeyForIndividualPostKeys(postId);
 
 			try {
-				const post = await findPostById(postId, PUBLIC_POST_SELECTORS);
+				const post = await findPostById(postId, {
+					id: true,
+					imageUrls: true,
+					author: {
+						select: {
+							id: true,
+						},
+					},
+				});
 				if (!post) {
 					return createErrorResponse(
 						'api-route',
@@ -906,12 +849,24 @@ export const handleDeletePost = async (event: RequestEvent) => {
 				await deletePostById(postId, event.locals.user.id);
 
 				if (post.imageUrls.length > 0) {
-					await deleteBatchFromBucket(AWS_POST_PICTURE_BUCKET_NAME, post.imageUrls);
+					deleteBatchFromBucket(AWS_POST_PICTURE_BUCKET_NAME, post.imageUrls);
 				}
 
-				const successMessage = `A post with the id: ${postId} and its corresponding comments and images were deleted successfully!`;
-				return createSuccessResponse('api-route', successMessage, post);
+				invalidateCacheRemotely(cacheKey);
+
+				const associatedCacheKeys = await getRemoteAssociatedKeys(associatedCacheKey);
+				invalidateMultipleCachesRemotely(associatedCacheKeys);
+
+				invalidateCacheRemotely(associatedCacheKey);
+
+				return createSuccessResponse(
+					'api-route',
+					`A post with the id: ${postId} and its corresponding comments and images were deleted successfully!`,
+					post,
+				);
 			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse('api-route', 500, 'An error occurred while deleting the post');
 			}
 		},
@@ -927,6 +882,7 @@ export const handleLikePost = async (event: RequestEvent) => {
 		async (data) => {
 			const postId = data.pathParams.postId;
 			const action = data.body.action;
+			const cacheKey = getCacheKeyForIndividualPost(postId);
 
 			try {
 				const post = await findPostById(postId, { likes: true });
@@ -947,6 +903,8 @@ export const handleLikePost = async (event: RequestEvent) => {
 					);
 				}
 
+				invalidateCacheRemotely(cacheKey);
+
 				return createSuccessResponse(
 					'api-route',
 					`The post with the id: ${postId} was successfully ${
@@ -954,6 +912,8 @@ export const handleLikePost = async (event: RequestEvent) => {
 					}`,
 				);
 			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,

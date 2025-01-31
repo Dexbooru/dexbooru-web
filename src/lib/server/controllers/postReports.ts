@@ -1,6 +1,4 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { z } from 'zod';
-import { MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH } from '../../shared/constants/reports';
 import {
 	createPostReport,
 	deletePostReportByIds,
@@ -12,39 +10,12 @@ import {
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import logger from '../logging/logger';
-import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
-
-const DeletePostReportSchema = {
-	pathParams: z.object({
-		postId: z.string().uuid(),
-	}),
-	urlSearchParams: z.object({
-		reportId: z.string().uuid(),
-	}),
-} satisfies TRequestSchema;
-
-const GetPostReportsSchema = {
-	pathParams: z.object({
-		postId: z.string().uuid(),
-	}),
-} satisfies TRequestSchema;
-
-const CreatePostReportSchema = {
-	pathParams: z.object({
-		postId: z.string().uuid(),
-	}),
-	body: z.object({
-		description: z.string().max(MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH).optional(),
-		category: z.enum([
-			'ILLEGAL',
-			'IMPROPER_TAGGING',
-			'INAPPROPRIATE',
-			'OFF_TOPIC',
-			'OTHER',
-			'SPAM',
-		]),
-	}),
-} satisfies TRequestSchema;
+import type { TControllerHandlerVariant } from '../types/controllers';
+import {
+	CreatePostReportSchema,
+	DeletePostReportSchema,
+	GetPostReportsSchema,
+} from './request-schemas/postReports';
 
 export const handleDeletePostReport = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(

@@ -1,8 +1,8 @@
-import { MAXIMUM_COMMENTS_PER_PAGE, MAXIMUM_CONTENT_LENGTH } from '$lib/shared/constants/comments';
+import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
+import { MAXIMUM_COMMENTS_PER_POST } from '$lib/shared/constants/posts';
+import type { TComment, TCommentPaginationData } from '$lib/shared/types/comments';
 import type { RequestEvent } from '@sveltejs/kit';
-import { z } from 'zod';
-import { PUBLIC_COMMENT_SELECTORS } from '../constants/comments';
-import { boolStrSchema, pageNumberSchema } from '../constants/reusableSchemas';
+import { GENERAL_COMMENTS_SELECTORS, PUBLIC_COMMENT_SELECTORS } from '../constants/comments';
 import {
 	createComment,
 	deleteCommentById,
@@ -10,7 +10,7 @@ import {
 	findCommentById,
 	findComments,
 	findCommentsByAuthorId,
-	findCommentsByPostId,
+	findPaginatedCommentsByPostId,
 } from '../db/actions/comment';
 import { findPostById } from '../db/actions/post';
 import {
@@ -18,96 +18,22 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../helpers/controllers';
+import {
+	cacheResponseRemotely,
+	getRemoteResponseFromCache,
+	invalidateCacheRemotely,
+} from '../helpers/sessions';
 import logger from '../logging/logger';
-import type { TCommentSelector } from '../types/comments';
-import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
-
-const GeneralCommentsSchema = {
-	urlSearchParams: z.object({
-		pageNumber: pageNumberSchema,
-		ascending: boolStrSchema,
-		orderBy: z.enum(['createdAt', 'updatedAt']).default('createdAt'),
-	}),
-} satisfies TRequestSchema;
-
-const DeletePostCommentsSchema = {
-	pathParams: z.object({
-		postId: z.string().uuid(),
-	}),
-	urlSearchParams: z.object({
-		commentId: z.string().uuid(),
-	}),
-} satisfies TRequestSchema;
-
-const EditPostCommentsSchmea = {
-	pathParams: z.object({
-		postId: z.string().uuid(),
-	}),
-	body: z.object({
-		commentId: z.string().uuid(),
-		content: z
-			.string()
-			.trim()
-			.min(1, 'The comment content cannot be empty')
-			.refine((val) => val.length <= MAXIMUM_CONTENT_LENGTH, {
-				message: `The maximum content length for a comment is: ${MAXIMUM_CONTENT_LENGTH} characters`,
-			}),
-	}),
-} satisfies TRequestSchema;
-
-const GetPostCommentsSchema = {
-	urlSearchParams: z.object({
-		pageNumber: pageNumberSchema,
-		parentCommentId: z.string().optional().default('null'),
-	}),
-	pathParams: z.object({
-		postId: z.string().uuid(),
-	}),
-} satisfies TRequestSchema;
-
-const CreateCommentSchema = {
-	pathParams: z.object({
-		postId: z.string().uuid(),
-	}),
-	body: z.object({
-		parentCommentId: z.union([z.string(), z.null()]),
-		content: z
-			.string()
-			.trim()
-			.min(1, 'The comment content cannot be empty')
-			.refine((val) => val.length <= MAXIMUM_CONTENT_LENGTH, {
-				message: `The maximum content length for a comment is: ${MAXIMUM_CONTENT_LENGTH} characters`,
-			}),
-	}),
-} satisfies TRequestSchema;
-
-const generalCommentsSelectors: TCommentSelector = {
-	id: true,
-	content: true,
-	postId: true,
-	createdAt: true,
-	updatedAt: true,
-	parentComment: {
-		select: {
-			id: true,
-			createdAt: true,
-			updatedAt: true,
-			content: true,
-			author: {
-				select: {
-					username: true,
-					profilePictureUrl: true,
-				},
-			},
-		},
-	},
-	author: {
-		select: {
-			username: true,
-			profilePictureUrl: true,
-		},
-	},
-};
+import type { TControllerHandlerVariant } from '../types/controllers';
+import { CACHE_TIME_CATEGORY_COMMENTS, getCacheKeyWithCategory } from './cache-strategies/comments';
+import { getCacheKeyForIndividualPost } from './cache-strategies/posts';
+import {
+	CreateCommentSchema,
+	DeletePostCommentsSchema,
+	EditPostCommentsSchmea,
+	GeneralCommentsSchema,
+	GetPostCommentsSchema,
+} from './request-schemas/comments';
 
 export const handleGetAuthenticatedUserComments = async (
 	event: RequestEvent,
@@ -127,7 +53,7 @@ export const handleGetAuthenticatedUserComments = async (
 					pageNumber,
 					MAXIMUM_COMMENTS_PER_PAGE,
 					orderBy,
-					generalCommentsSelectors,
+					GENERAL_COMMENTS_SELECTORS,
 				);
 
 				const responseData = {
@@ -158,14 +84,30 @@ export const handleGetGeneralComments = async (
 ) => {
 	return await validateAndHandleRequest(event, handlerType, GeneralCommentsSchema, async (data) => {
 		const { orderBy, ascending, pageNumber } = data.urlSearchParams;
+		const cacheKey = getCacheKeyWithCategory(pageNumber, orderBy, ascending);
+		let responseData: TCommentPaginationData;
+
 		try {
-			const comments = await findComments(pageNumber, orderBy, ascending, generalCommentsSelectors);
-			const responseData = {
-				comments,
-				pageNumber,
-				orderBy,
-				ascending,
-			};
+			const cachedData = await getRemoteResponseFromCache<TCommentPaginationData>(cacheKey);
+			if (cachedData) {
+				responseData = cachedData;
+			} else {
+				const comments = (await findComments(
+					pageNumber,
+					orderBy,
+					ascending,
+					GENERAL_COMMENTS_SELECTORS,
+				)) as TComment[];
+
+				responseData = {
+					comments,
+					pageNumber,
+					orderBy,
+					ascending,
+				};
+
+				cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_CATEGORY_COMMENTS);
+			}
 
 			return createSuccessResponse(handlerType, 'Comments fetched successfully', responseData);
 		} catch (error) {
@@ -180,7 +122,7 @@ export const handleGetGeneralComments = async (
 	});
 };
 
-export const handleDeletePostComments = async (event: RequestEvent) => {
+export const handleDeletePostComment = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
 		event,
 		'api-route',
@@ -217,6 +159,9 @@ export const handleDeletePostComments = async (event: RequestEvent) => {
 
 				await deleteCommentById(commentId, event.locals.user.id, postId);
 
+				const postCacheKey = getCacheKeyForIndividualPost(postId);
+				invalidateCacheRemotely(postCacheKey);
+
 				return createSuccessResponse(
 					'api-route',
 					`A comment with the id: ${commentId} and its corresponding replies were deleted successfuly!`,
@@ -235,7 +180,7 @@ export const handleDeletePostComments = async (event: RequestEvent) => {
 	);
 };
 
-export const handleEditPostComments = async (event: RequestEvent) => {
+export const handleUpdatePostComment = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
 		event,
 		'api-route',
@@ -272,6 +217,9 @@ export const handleEditPostComments = async (event: RequestEvent) => {
 
 				await editCommentContentById(commentId, content);
 
+				const postCacheKey = getCacheKeyForIndividualPost(postId);
+				invalidateCacheRemotely(postCacheKey);
+
 				return createSuccessResponse(
 					'api-route',
 					`Successfully edited the comment content for the id: ${commentId}`,
@@ -306,7 +254,7 @@ export const handleGetPostComments = async (event: RequestEvent) => {
 				);
 			}
 
-			const comments = await findCommentsByPostId(
+			const comments = await findPaginatedCommentsByPostId(
 				postId,
 				parentCommentId === 'null' ? null : parentCommentId,
 				pageNumber,
@@ -337,6 +285,25 @@ export const handleCreatePostComment = async (event: RequestEvent) => {
 			const { parentCommentId, content } = data.body;
 
 			try {
+				const post = await findPostById(postId, {
+					commentCount: true,
+				});
+				if (!post) {
+					return createErrorResponse(
+						'api-route',
+						404,
+						`A post with the id: ${postId} does not exist`,
+					);
+				}
+
+				if (post.commentCount === MAXIMUM_COMMENTS_PER_POST) {
+					return createErrorResponse(
+						'api-route',
+						400,
+						`The maximum number of comments that are allowed per post is: ${MAXIMUM_COMMENTS_PER_POST}`,
+					);
+				}
+
 				const newComment = await createComment(
 					event.locals.user.id,
 					postId,
@@ -344,6 +311,9 @@ export const handleCreatePostComment = async (event: RequestEvent) => {
 					parentCommentId,
 				);
 				const { id: newCommentId } = newComment;
+
+				const postCacheKey = getCacheKeyForIndividualPost(postId);
+				invalidateCacheRemotely(postCacheKey);
 
 				return createSuccessResponse(
 					'api-route',

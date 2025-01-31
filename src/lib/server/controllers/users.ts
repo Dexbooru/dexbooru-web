@@ -29,7 +29,7 @@ import {
 	ACCOUNT_RECOVERY_EMAIL_SUBJECT,
 	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
 } from '../constants/email';
-import { boolStrSchema } from '../constants/reusableSchemas';
+import { BoolStrSchema } from '../constants/reusableSchemas';
 import { PUBLIC_USER_SELECTORS } from '../constants/users';
 import { checkIfUserIsFriended } from '../db/actions/friend';
 import { findLinkedAccountsFromUserId } from '../db/actions/linkedAccount';
@@ -85,7 +85,7 @@ import type { TControllerHandlerVariant, TRequestSchema } from '../types/control
 const usernamePasswordFormSchema = z.object({
 	username: z.string().trim().min(1, 'The username cannot be empty'),
 	password: z.string().min(1, 'The password cannot be empty'),
-	rememberMe: boolStrSchema,
+	rememberMe: BoolStrSchema,
 });
 const usernamePasswordEndpointSchmea = z.object({
 	username: z.string().trim().min(1, 'The username cannot be empty'),
@@ -164,7 +164,7 @@ const UserProcessTotpSchema = {
 			message: `The OTP code needs to be exactly ${TOTP_CODE_LENGTH} numeric digits long`,
 		}),
 		username: z.string().min(1, 'The username cannot be empty'),
-		rememberMe: boolStrSchema,
+		rememberMe: BoolStrSchema,
 	}),
 	pathParams: z.object({
 		challengeId: z.string().uuid(),
@@ -231,7 +231,7 @@ const UserChangeProfilePictureSchema = {
 			if (val.size === 0) return true;
 			return isFileImage(val) && isFileImageSmall(val, 'profilePicture');
 		}, profilePictureRefinementError),
-		removeProfilePicture: boolStrSchema,
+		removeProfilePicture: BoolStrSchema,
 	}),
 } satisfies TRequestSchema;
 
@@ -257,8 +257,8 @@ const GetUserSchema = {
 
 const UpdateUserPersonalPreferencesSchema = {
 	form: z.object({
-		autoBlurNsfw: boolStrSchema.optional(),
-		browseInSafeMode: boolStrSchema.optional(),
+		autoBlurNsfw: BoolStrSchema.optional(),
+		browseInSafeMode: BoolStrSchema.optional(),
 		blacklistedTags: z
 			.string()
 			.transform((val) => val.toLocaleLowerCase().trim().split('\n'))
@@ -290,8 +290,8 @@ const UpdateUserUserInterfacePreferencesSchema = {
 				message: `The maximum site wide CSS length is ${MAXIMUM_SITE_WIDE_CSS_LENGTH} characters`,
 			})
 			.optional(),
-		hidePostMetadataOnPreview: boolStrSchema.optional(),
-		hideCollectionMetadataOnPreview: boolStrSchema.optional(),
+		hidePostMetadataOnPreview: BoolStrSchema.optional(),
+		hideCollectionMetadataOnPreview: BoolStrSchema.optional(),
 	}),
 } satisfies TRequestSchema;
 

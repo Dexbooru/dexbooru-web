@@ -33,7 +33,7 @@ export function generateUpdatedUserTokenFromClaims(userClaims: TUser & JwtPayloa
 export function generateEncodedUserTokenFromRecord(
 	userRecord: Partial<TUser>,
 	rememberMe: boolean,
-	overrideExpiry?: string,
+	overrideExpiry?: number,
 ): string {
 	const userClaims = generateUserClaims(userRecord);
 	const tokenExpiry =
@@ -67,8 +67,24 @@ export const getRemoteResponseFromCache = async <T>(key: string): Promise<T | nu
 	return null;
 };
 
+export const getRemoteAssociatedKeys = async (key: string) => {
+	return await redis.sMembers(key);
+};
+
 export const invalidateCacheRemotely = async (key: string) => {
 	await redis.del(key);
+};
+
+export const invalidateMultipleCachesRemotely = async (keys: string[]) => {
+	await Promise.all(keys.map((key) => redis.del(key)));
+};
+
+export const cacheToCollectionRemotely = async (key: string, newValue: string) => {
+	await redis.sAdd(key, newValue);
+};
+
+export const cacheMultipleToCollectionRemotely = async (keys: string[], newValue: string) => {
+	await Promise.all(keys.map((key) => redis.sAdd(key, newValue)));
 };
 
 export const cacheResponseRemotely = async (

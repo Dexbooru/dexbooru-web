@@ -50,6 +50,28 @@ class CommentTree {
 		this.data.set(currentParentId, filteredAssociatedComments);
 	}
 
+	editComment(commentId: string, newContent: string) {
+		for (const comments of this.data.values()) {
+			const comment = comments.find((c) => c.id === commentId);
+			if (comment) {
+				comment.content = newContent;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	deleteComment(commentId: string) {
+		for (const comments of this.data.values()) {
+			const comment = comments.find((c) => c.id === commentId);
+			if (comment) {
+				comment.content = 'This comment was deleted by the original poster';
+				return true;
+			}
+		}
+		return false;
+	}
+
 	getReplies(commentId: string): TComment[] {
 		if (!this.data.has(commentId)) return [];
 		return this.data.get(commentId) || [];

@@ -1,20 +1,11 @@
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
-import {
-	MAXIMUM_COLLECTION_DESCRIPTION_LENGTH,
-	MAXIMUM_COLLECTION_TITLE_LENGTH,
-	MAXIMUM_POSTS_PER_COLLECTION,
-} from '$lib/shared/constants/collections';
-import { MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB } from '$lib/shared/constants/images';
-import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
-import { isLabelAppropriate } from '$lib/shared/helpers/labels';
-import type { TCollectionPaginationData } from '$lib/shared/types/collections';
+import { MAXIMUM_POSTS_PER_COLLECTION } from '$lib/shared/constants/collections';
+import type { TCollectionPaginationData, TPostCollection } from '$lib/shared/types/collections';
 import { isHttpError, isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
-import { z } from 'zod';
 import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { AWS_COLLECTION_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { PUBLIC_POST_COLLECTION_SELECTORS } from '../constants/collections';
 import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../constants/posts';
-import { boolStrSchema, pageNumberSchema } from '../constants/reusableSchemas';
 import {
 	addPostToCollection,
 	createCollection,
@@ -33,8 +24,35 @@ import {
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import { applyCollectionImageTransformationPipeline, flattenImageBuffers } from '../helpers/images';
+import {
+	cacheMultipleToCollectionRemotely,
+	cacheResponseRemotely,
+	getRemoteAssociatedKeys,
+	getRemoteResponseFromCache,
+	invalidateCacheRemotely,
+	invalidateMultipleCachesRemotely,
+} from '../helpers/sessions';
 import logger from '../logging/logger';
-import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
+import type { TControllerHandlerVariant } from '../types/controllers';
+import {
+	CACHE_TIME_AUTHOR_COLLECTIONS,
+	CACHE_TIME_COLLECTION_GENERAL,
+	CACHE_TIME_INDIVIDUAL_COLLECTION,
+	getCacheKeyForAuthorCollections,
+	getCacheKeyForGeneralCollectionPagination,
+	getCacheKeyForIndividualCollection,
+	getCacheKeyForIndividualCollectionKeys,
+} from './cache-strategies/collections';
+import {
+	CreateCollectionSchema,
+	DeleteCollectionSchema,
+	GetAuthenticatedUserCollectionsSchema,
+	GetCollectionSchema,
+	GetCollectionsSchema,
+	GetUserCollectionsSchema,
+	UpdateCollectionSchema,
+	UpdateCollectionsPostsSchema,
+} from './request-schemas/collections';
 
 const createCollectionFormErrorData = (errorData: Record<string, unknown>, message: string) => {
 	return {
@@ -42,91 +60,6 @@ const createCollectionFormErrorData = (errorData: Record<string, unknown>, messa
 		reason: message,
 	};
 };
-
-const collectionPaginationSchema = z.object({
-	pageNumber: pageNumberSchema,
-	ascending: boolStrSchema,
-	orderBy: z.union([z.literal('createdAt'), z.literal('updatedAt')]).default('createdAt'),
-});
-
-const collectionTitleSchema = z
-	.string()
-	.min(1, 'The title cannot be empty')
-	.max(MAXIMUM_COLLECTION_TITLE_LENGTH, {
-		message: `The maximum collection title length is ${MAXIMUM_COLLECTION_TITLE_LENGTH}`,
-	})
-	.refine((val) => isLabelAppropriate(val, 'collectionTitle'));
-const collectionDescriptionSchema = z
-	.string()
-	.min(1, 'The description cannot be empty')
-	.max(MAXIMUM_COLLECTION_DESCRIPTION_LENGTH, {
-		message: `The maximum collection description length is ${MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}`,
-	})
-	.refine((val) => isLabelAppropriate(val, 'collectionDescription'));
-
-const GetCollectionSchema = {
-	pathParams: z.object({
-		collectionId: z.string().uuid(),
-	}),
-} satisfies TRequestSchema;
-
-const GetCollectionsSchema = {
-	urlSearchParams: collectionPaginationSchema,
-} satisfies TRequestSchema;
-
-const CreateCollectionSchema = {
-	form: z.object({
-		title: collectionTitleSchema,
-		description: collectionDescriptionSchema,
-		isNsfw: boolStrSchema,
-		collectionThumbnail: z
-			.instanceof(globalThis.File)
-			.transform((val) => (val.size > 0 ? val : null))
-			.refine(
-				(val) => {
-					if (val === null) return true;
-					return isFileImageSmall(val, 'collection') && isFileImage(val);
-				},
-				{
-					message: `The provided collection thumbnail exceeded the maximum size of ${MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB} mb`,
-				},
-			),
-	}),
-} satisfies TRequestSchema;
-
-const UpdateCollectionSchema = {
-	pathParams: z.object({
-		collectionId: z.string().uuid(),
-	}),
-	body: z.object({
-		title: collectionTitleSchema,
-		description: collectionDescriptionSchema,
-	}),
-} satisfies TRequestSchema;
-
-const DeleteCollectionSchema = {
-	pathParams: z.object({
-		collectionId: z.string().uuid(),
-	}),
-} satisfies TRequestSchema;
-
-const GetUserCollectionsSchema = {
-	pathParams: z.object({
-		username: z.string().min(1, 'The username cannot be empty'),
-	}),
-	urlSearchParams: collectionPaginationSchema,
-} satisfies TRequestSchema;
-
-const GetAuthenticatedUserCollectionsSchema = {
-	urlSearchParams: collectionPaginationSchema,
-} satisfies TRequestSchema;
-
-const UpdateCollectionsPostsSchema = {
-	body: z.object({
-		postId: z.string().uuid(),
-		collectionActions: z.record(z.string().uuid(), z.enum(['add', 'delete'])),
-	}),
-} satisfies TRequestSchema;
 
 export const handleUpdateCollectionsPosts = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -235,12 +168,26 @@ export const handleUpdateCollectionsPosts = async (event: RequestEvent) => {
 				}
 
 				const responseData = Object.fromEntries(updateReport.entries());
+
+				invalidateMultipleCachesRemotely(
+					collectionIds.map((collectionId) => getCacheKeyForIndividualCollection(collectionId)),
+				);
+
+				collectionIds.forEach((collectionId) => {
+					const associatedKey = getCacheKeyForIndividualCollectionKeys(collectionId);
+					getRemoteAssociatedKeys(associatedKey).then((associatedCacheKeys) => {
+						invalidateMultipleCachesRemotely(associatedCacheKeys);
+					});
+				});
+
 				return createSuccessResponse(
 					'api-route',
 					'Successfully updated the collections posts',
 					responseData,
 				);
 			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,
@@ -259,32 +206,51 @@ export const handleGetCollection = async (
 	return await validateAndHandleRequest(event, handlerType, GetCollectionSchema, async (data) => {
 		const { collectionId } = data.pathParams;
 
+		const cacheKey = getCacheKeyForIndividualCollection(collectionId);
+		let finalCollection: TPostCollection;
+
 		try {
-			const collection = await findCollectionById(collectionId, {
-				...PUBLIC_POST_COLLECTION_SELECTORS,
-				posts: {
-					select:
-						handlerType === 'page-server-load'
-							? PAGE_SERVER_LOAD_POST_SELECTORS
-							: PUBLIC_POST_SELECTORS,
-				},
-			});
-			if (!collection) {
-				return createErrorResponse(
-					handlerType,
-					404,
-					`A collection with the id: ${collectionId} does not exist`,
-				);
+			const cachedCollection = await getRemoteResponseFromCache<TPostCollection>(cacheKey);
+			if (cachedCollection) {
+				finalCollection = cachedCollection;
+			} else {
+				const collection = await findCollectionById(collectionId, {
+					...PUBLIC_POST_COLLECTION_SELECTORS,
+					posts: {
+						select:
+							handlerType === 'page-server-load'
+								? PAGE_SERVER_LOAD_POST_SELECTORS
+								: PUBLIC_POST_SELECTORS,
+					},
+				});
+				if (!collection) {
+					return createErrorResponse(
+						handlerType,
+						404,
+						`A collection with the id: ${collectionId} does not exist`,
+					);
+				}
+
+				collection.posts.forEach((post) => {
+					post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
+					post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
+				});
+
+				finalCollection = collection;
+
+				cacheResponseRemotely(cacheKey, finalCollection, CACHE_TIME_INDIVIDUAL_COLLECTION);
 			}
 
-			collection.posts.forEach((post) => {
-				post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
-				post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
-			});
-
-			return createSuccessResponse(handlerType, 'Successfully fetched the collection', collection);
+			return createSuccessResponse(
+				handlerType,
+				'Successfully fetched the collection',
+				finalCollection,
+			);
 		} catch (error) {
 			if (isHttpError(error)) throw error;
+
+			logger.error(error);
+
 			return createErrorResponse(
 				handlerType,
 				500,
@@ -303,32 +269,53 @@ export const handleGetAuthenticatedUserCollections = async (event: RequestEvent)
 			const user = event.locals.user;
 			const { pageNumber, orderBy, ascending } = data.urlSearchParams;
 
+			const cacheKey = getCacheKeyForAuthorCollections(user.id, orderBy, ascending, pageNumber);
+			let finalResponseData: TCollectionPaginationData;
+
 			try {
 				if (user.id === NULLABLE_USER.id) {
 					redirect(302, '/');
 				}
 
-				const userCollections = await findCollectionsByAuthorId(
-					user.id,
-					pageNumber,
-					ascending,
-					orderBy,
-					PUBLIC_POST_COLLECTION_SELECTORS,
-				);
-				const responseData: TCollectionPaginationData = {
-					collections: userCollections,
-					pageNumber,
-					ascending,
-					orderBy,
-				};
+				const cachedResponseData =
+					await getRemoteResponseFromCache<TCollectionPaginationData>(cacheKey);
+				if (cachedResponseData) {
+					finalResponseData = cachedResponseData;
+				} else {
+					const userCollections = await findCollectionsByAuthorId(
+						user.id,
+						pageNumber,
+						ascending,
+						orderBy,
+						PUBLIC_POST_COLLECTION_SELECTORS,
+					);
+
+					finalResponseData = {
+						collections: userCollections,
+						pageNumber,
+						ascending,
+						orderBy,
+					};
+
+					cacheResponseRemotely(cacheKey, finalResponseData, CACHE_TIME_AUTHOR_COLLECTIONS);
+					cacheMultipleToCollectionRemotely(
+						finalResponseData.collections.map((collection) =>
+							getCacheKeyForIndividualCollectionKeys(collection.id),
+						),
+						cacheKey,
+					);
+				}
 
 				return createSuccessResponse(
 					'page-server-load',
 					'Successfully fetched user collections',
-					responseData,
+					finalResponseData,
 				);
 			} catch (error) {
 				if (isRedirect(error)) throw error;
+
+				logger.error(error);
+
 				return createErrorResponse(
 					'page-server-load',
 					500,
@@ -351,34 +338,52 @@ export const handleGetUserCollections = async (
 			const username = data.pathParams.username;
 			const { pageNumber, orderBy, ascending } = data.urlSearchParams;
 
+			const cacheKey = getCacheKeyForAuthorCollections(username, orderBy, ascending, pageNumber);
+			let finalResponseData: TCollectionPaginationData;
+
 			try {
-				const user = await findUserByName(username);
-				if (!user) {
-					return createErrorResponse(
-						handlerType,
-						404,
-						`A username called ${username} does not exist`,
+				const cachedResponseData =
+					await getRemoteResponseFromCache<TCollectionPaginationData>(cacheKey);
+				if (cachedResponseData) {
+					finalResponseData = cachedResponseData;
+				} else {
+					const user = await findUserByName(username);
+					if (!user) {
+						return createErrorResponse(
+							handlerType,
+							404,
+							`A username called ${username} does not exist`,
+						);
+					}
+
+					const userCollections = await findCollectionsByAuthorId(
+						user.id,
+						pageNumber,
+						ascending,
+						orderBy,
+						PUBLIC_POST_COLLECTION_SELECTORS,
+					);
+
+					finalResponseData = {
+						collections: userCollections,
+						pageNumber,
+						ascending,
+						orderBy,
+					};
+
+					cacheResponseRemotely(cacheKey, finalResponseData, CACHE_TIME_AUTHOR_COLLECTIONS);
+					cacheMultipleToCollectionRemotely(
+						finalResponseData.collections.map((collection) =>
+							getCacheKeyForIndividualCollectionKeys(collection.id),
+						),
+						cacheKey,
 					);
 				}
-
-				const userCollections = await findCollectionsByAuthorId(
-					user.id,
-					pageNumber,
-					ascending,
-					orderBy,
-					PUBLIC_POST_COLLECTION_SELECTORS,
-				);
-				const responseData: TCollectionPaginationData = {
-					collections: userCollections,
-					pageNumber,
-					ascending,
-					orderBy,
-				};
 
 				return createSuccessResponse(
 					handlerType,
 					'Successfully fetched user collections',
-					responseData,
+					finalResponseData,
 				);
 			} catch (error) {
 				logger.error(error);
@@ -400,19 +405,36 @@ export const handleGetCollections = async (
 	return await validateAndHandleRequest(event, handlerType, GetCollectionsSchema, async (data) => {
 		const { pageNumber, orderBy, ascending } = data.urlSearchParams;
 
+		const cacheKey = getCacheKeyForGeneralCollectionPagination(orderBy, ascending, pageNumber);
+		let responseData: TCollectionPaginationData;
+
 		try {
-			const collections = await findCollections(
-				pageNumber,
-				ascending,
-				orderBy,
-				PUBLIC_POST_COLLECTION_SELECTORS,
-			);
-			const responseData: TCollectionPaginationData = {
-				collections,
-				pageNumber,
-				orderBy,
-				ascending,
-			};
+			const cachedResponseData =
+				await getRemoteResponseFromCache<TCollectionPaginationData>(cacheKey);
+			if (cachedResponseData) {
+				responseData = cachedResponseData;
+			} else {
+				const collections = await findCollections(
+					pageNumber,
+					ascending,
+					orderBy,
+					PUBLIC_POST_COLLECTION_SELECTORS,
+				);
+
+				responseData = {
+					collections,
+					pageNumber,
+					orderBy,
+					ascending,
+				};
+
+				cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_COLLECTION_GENERAL);
+				cacheMultipleToCollectionRemotely(
+					collections.map((collection) => getCacheKeyForIndividualCollectionKeys(collection.id)),
+					cacheKey,
+				);
+			}
+
 			return createSuccessResponse(
 				handlerType,
 				'Successfully fetched paginated collections',
@@ -467,6 +489,13 @@ export const handleDeleteCollection = async (event: RequestEvent) => {
 					);
 				}
 
+				const individualCacheKey = getCacheKeyForIndividualCollection(collectionId);
+				const associatedCacheKey = getCacheKeyForIndividualCollectionKeys(collectionId);
+
+				invalidateCacheRemotely(individualCacheKey);
+				const associatedCacheKeys = await getRemoteAssociatedKeys(associatedCacheKey);
+				invalidateMultipleCachesRemotely(associatedCacheKeys);
+
 				return createSuccessResponse('api-route', 'Successfully deleted the collection');
 			} catch (error) {
 				logger.error(error);
@@ -510,6 +539,14 @@ export const handleUpdateCollection = async (event: RequestEvent) => {
 				}
 
 				const updatedCollection = await updateCollection(collectionId, title, description);
+
+				const cacheKey = getCacheKeyForIndividualCollection(collectionId);
+				const associatedKey = getCacheKeyForIndividualCollectionKeys(collectionId);
+
+				invalidateCacheRemotely(cacheKey);
+				const associatedCacheKeys = await getRemoteAssociatedKeys(associatedKey);
+				invalidateMultipleCachesRemotely(associatedCacheKeys);
+
 				return createSuccessResponse(
 					'api-route',
 					'Successfully edited the collection',
@@ -575,6 +612,9 @@ export const handleCreateCollection = async (
 				});
 				finalCollectionId = newCollection.id;
 
+				const cacheKey = getCacheKeyForGeneralCollectionPagination('createdAt', false, 0);
+				invalidateCacheRemotely(cacheKey);
+
 				return createSuccessResponse(
 					handlerType,
 					'Collection created successfully',
@@ -583,6 +623,8 @@ export const handleCreateCollection = async (
 				);
 			} catch (error) {
 				if (isRedirect(error)) throw error;
+
+				logger.error(error);
 
 				if (finalThumbnailImageUrls.length > 0) {
 					deleteBatchFromBucket(AWS_COLLECTION_PICTURE_BUCKET_NAME, finalThumbnailImageUrls);

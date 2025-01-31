@@ -1,10 +1,7 @@
 import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
-import { normalizeQuery } from '$lib/shared/helpers/search';
-import type { TPost, TPostOrderByColumn } from '$lib/shared/types/posts';
+import type { TPost } from '$lib/shared/types/posts';
 import type { TAppSearchResult } from '$lib/shared/types/search';
 import type { RequestEvent } from '@sveltejs/kit';
-import { z } from 'zod';
-import { boolStrSchema, pageNumberSchema } from '../constants/reusableSchemas';
 import {
 	searchAllSections,
 	searchForArtists,
@@ -21,7 +18,14 @@ import {
 } from '../helpers/controllers';
 import QueryBuilder from '../helpers/search';
 import { cacheResponseRemotely, getRemoteResponseFromCache } from '../helpers/sessions';
-import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
+import type { TControllerHandlerVariant } from '../types/controllers';
+import {
+	CACHE_TIME_NO_RESULTS_SECONDS,
+	CACHE_TIME_RESULTS_SECONDS,
+	getCacheKeyAdvanced,
+	getCacheKeyGeneral,
+} from './cache-strategies/search';
+import { AdvancedPostSearchResultsSchema, GetSearchResultsSchema } from './request-schemas/search';
 
 type TSearchResults = {
 	posts: TPost[];
@@ -30,74 +34,6 @@ type TSearchResults = {
 	orderBy: string;
 	ascending: boolean;
 };
-
-const getCacheKeyAdvanced = (
-	query: string,
-	limit: number,
-	pageNumber: number,
-	orderBy: TPostOrderByColumn,
-	ascending: boolean,
-) => {
-	return `${query}-${limit}-${pageNumber}-${orderBy}-${ascending}`;
-};
-
-const getCacheKeyGeneral = (query: string, searchSection: string, limit: number) => {
-	return `${query}-${searchSection}-${limit}`;
-};
-
-const CACHE_TIME_SECONDS = 60;
-const CACHE_TIME_NO_RESULTS_SECONDS = 300;
-
-const limitSchema = z
-	.string()
-	.optional()
-	.default(`${MAXIMUM_POSTS_PER_PAGE}`)
-	.transform((val) => parseInt(val, 10))
-	.refine((val) => !isNaN(val), { message: 'Invalid limit, must be a number' });
-
-const AdvancedPostSearchResultsSchema = {
-	urlSearchParams: z.object({
-		query: z
-			.string()
-			.min(1, 'The query length needs to be least one character long')
-			.transform((val) => {
-				const tokens = normalizeQuery(val).split(' ');
-				return tokens.toSorted().join(' ');
-			}),
-		limit: limitSchema,
-		pageNumber: pageNumberSchema,
-		orderBy: z
-			.union([
-				z.literal('views'),
-				z.literal('likes'),
-				z.literal('createdAt'),
-				z.literal('updatedAt'),
-				z.literal('commentCount'),
-			])
-			.default('createdAt'),
-		ascending: boolStrSchema,
-	}),
-} satisfies TRequestSchema;
-
-const GetSearchResultsSchema = {
-	urlSearchParams: z.object({
-		query: z
-			.string()
-			.min(1, 'The query length needs to be least one character one long')
-			.transform((val) => normalizeQuery(val)),
-		limit: limitSchema,
-		searchSection: z
-			.union([
-				z.literal('posts'),
-				z.literal('tags'),
-				z.literal('artists'),
-				z.literal('users'),
-				z.literal('collections'),
-				z.literal('all'),
-			])
-			.default('all'),
-	}),
-} satisfies TRequestSchema;
 
 export const handleGetAdvancedPostSearchResults = async (
 	event: RequestEvent,
@@ -146,7 +82,9 @@ export const handleGetAdvancedPostSearchResults = async (
 					cacheResponseRemotely(
 						cacheKey,
 						searchResponse,
-						searchResponse.posts.length === 0 ? CACHE_TIME_NO_RESULTS_SECONDS : CACHE_TIME_SECONDS,
+						searchResponse.posts.length === 0
+							? CACHE_TIME_NO_RESULTS_SECONDS
+							: CACHE_TIME_RESULTS_SECONDS,
 					);
 				}
 
@@ -204,7 +142,7 @@ export const handleGetSearchResults = async (event: RequestEvent) => {
 							break;
 					}
 
-					cacheResponseRemotely(cacheKey, finalSearchResults, CACHE_TIME_SECONDS);
+					cacheResponseRemotely(cacheKey, finalSearchResults, CACHE_TIME_RESULTS_SECONDS);
 				}
 
 				return createSuccessResponse(

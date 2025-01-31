@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { editPost } from '$lib/client/api/posts';
+	import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
 	import { EDIT_POST_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getActiveModal, getUpdatedPost } from '$lib/client/helpers/context';
@@ -12,6 +13,7 @@
 	import TrashBinSolid from 'flowbite-svelte-icons/TrashBinSolid.svelte';
 	import UndoOutline from 'flowbite-svelte-icons/UndoOutline.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
+	import Img from 'flowbite-svelte/Img.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
 	import Modal from 'flowbite-svelte/Modal.svelte';
@@ -94,6 +96,11 @@
 		resetEditState();
 	};
 
+	const onImageError = (event: Event) => {
+		const target = event.target as HTMLImageElement;
+		target.src = DefaultPostPicture;
+	};
+
 	let post: TPost | undefined = $state();
 	let description: string = $state('');
 	let sourceLink: string = $state('');
@@ -168,9 +175,10 @@
 		<p class="text-sm mb-5">{uniqueDeletedImagesCount} post image(s) marked for deletion</p>
 		{#each existingPostImageUrls as postImageUrl, index}
 			<div class="flex items-center justify-between">
-				<img
+				<Img
 					alt="editing {index + 1} in {post?.id ?? ''}"
 					src={postImageUrl}
+					onerror={onImageError}
 					class="h-20 w-20 rounded-md object-cover"
 				/>
 				<div class="flex items-center space-x-2">

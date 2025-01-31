@@ -91,11 +91,7 @@
 
 	<p class="text-lg dark:text-white">
 		Author ID: <span class=" dark:text-gray-400">
-			{#if collection.author}
-				<a class="underline" href="/profile/{collection.author.username}">{collection.author.id}</a>
-			{:else}
-				{DELETED_ACCOUNT_HEADING}
-			{/if}
+			{collection.author?.id}
 		</span>
 	</p>
 

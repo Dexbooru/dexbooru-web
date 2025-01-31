@@ -3,6 +3,8 @@
 	import DeleteCollectionConfirmationModal from '$lib/client/components/collections/card/DeleteCollectionConfirmationModal.svelte';
 	import EditCollectionModal from '$lib/client/components/collections/card/EditCollectionModal.svelte';
 	import CollectionsPostUpdateModal from '$lib/client/components/collections/CollectionPostUpdateModal.svelte';
+	import DeleteCommentConfirmationModal from '$lib/client/components/comments/DeleteCommentConfirmationModal.svelte';
+	import EditCommentModal from '$lib/client/components/comments/EditCommentModal.svelte';
 	import ImagePreviewModal from '$lib/client/components/images/ImagePreviewModal.svelte';
 	import LabelMetadataModal from '$lib/client/components/labels/LabelMetadataModal.svelte';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
@@ -57,6 +59,8 @@
 <GlobalSearchModal />
 <HiddenPostModal />
 <PostCardReportModal />
+<EditCommentModal />
+<DeleteCommentConfirmationModal />
 <EditPostModal />
 <DeletePostConfirmationModal />
 <ImagePreviewModal />

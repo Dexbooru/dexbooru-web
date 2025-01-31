@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { createComment } from '$lib/client/api/comments';
+	import { createComment, editComment } from '$lib/client/api/comments';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { convertToMarkdown } from '$lib/client/helpers/comments';
+	import { convertToMarkdown, htmlToMarkdown } from '$lib/client/helpers/comments';
 	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
 	import { COMMENT_TEXT_AREA_ROWS, MAXIMUM_CONTENT_LENGTH } from '$lib/shared/constants/comments';
 	import type { TApiResponse } from '$lib/shared/types/api';
@@ -11,18 +11,30 @@
 	import TabItem from 'flowbite-svelte/TabItem.svelte';
 	import Tabs from 'flowbite-svelte/Tabs.svelte';
 	import Textarea from 'flowbite-svelte/Textarea.svelte';
+	import { onMount } from 'svelte';
 	import EmojiSearch from '../reusable/EmojiSearch.svelte';
 
 	type Props = {
 		onCommentCreate?: (() => void) | null;
+		onCommentEdit?: (() => void) | null;
 		postId: string;
+		content?: string;
+		commentId?: string | null;
 		parentCommentId?: string | null;
 	};
 
-	let { onCommentCreate = null, postId, parentCommentId = null }: Props = $props();
+	let {
+		onCommentCreate = null,
+		onCommentEdit = null,
+		postId,
+		commentId = null,
+		parentCommentId = null,
+		content = '',
+	}: Props = $props();
 
 	let commentCreating = $state(false);
-	let commentContent = $state('');
+	let commentEditing = $state(false);
+	let commentContent = $state(htmlToMarkdown(content));
 	let commentContentMarkdown = $state('');
 
 	const user = getAuthenticatedUser();
@@ -39,6 +51,29 @@
 
 		commentContent += emojiPadding;
 		commentContentMarkdown = await convertToMarkdown(commentContent);
+	};
+
+	const handleCommentEdit = async () => {
+		if (!$user) return;
+		if (!commentContent) return;
+		if (commentContent.length > MAXIMUM_CONTENT_LENGTH) return;
+		if (!commentId) return;
+
+		commentEditing = true;
+		const response = await editComment(postId, commentId, commentContentMarkdown);
+		if (response.ok) {
+			toast.push('The comment was edited successfully', SUCCESS_TOAST_OPTIONS);
+
+			commentTree.update((commentTree) => {
+				commentTree.editComment(commentId, commentContentMarkdown);
+				return commentTree;
+			});
+
+			onCommentEdit && onCommentEdit();
+			commentEditing = false;
+		} else {
+			toast.push('An error occured while editing your comment', FAILURE_TOAST_OPTIONS);
+		}
 	};
 
 	const handleCommentCreate = async () => {
@@ -77,6 +112,14 @@
 			toast.push('An error occured while posting your comment', FAILURE_TOAST_OPTIONS);
 		}
 	};
+
+	onMount(() => {
+		if (content.length > 0) {
+			convertToMarkdown(content).then((markdownResult) => {
+				commentContentMarkdown = markdownResult;
+			});
+		}
+	});
 </script>
 
 <Tabs style="underline">
@@ -100,12 +143,21 @@
 				{commentContent.length} / {MAXIMUM_CONTENT_LENGTH}
 			</p>
 		</div>
-		<Button
-			disabled={commentCreating || commentContent.length === 0}
-			color="blue"
-			class="mt-5"
-			on:click={handleCommentCreate}>Post comment</Button
-		>
+		{#if onCommentCreate}
+			<Button
+				disabled={commentCreating || commentContent.length === 0}
+				color="blue"
+				class="mt-5"
+				on:click={handleCommentCreate}>Post comment</Button
+			>
+		{:else}
+			<Button
+				disabled={commentEditing || commentContent.length === 0}
+				color="blue"
+				class="mt-5"
+				on:click={handleCommentEdit}>Edit comment</Button
+			>
+		{/if}
 	</TabItem>
 	<TabItem>
 		{#snippet title()}

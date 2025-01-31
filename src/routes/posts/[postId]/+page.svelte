@@ -45,6 +45,11 @@
 	};
 
 	onMount(() => {
+		commentTree.update((commentTree) => {
+			post.comments.forEach((comment) => commentTree.addComment(comment));
+			return commentTree;
+		});
+
 		return () => {
 			updatedPost.set({});
 			commentTreeUnsubscribe();

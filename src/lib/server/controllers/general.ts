@@ -8,6 +8,7 @@ import {
 	getRemoteResponseFromCache,
 } from '../helpers/sessions';
 import type { TControllerHandlerVariant, TRequestSchema } from '../types/controllers';
+import { CACHE_KEY, CACHE_TIME_SECONDS } from './cache-strategies/general';
 
 type TResourceCounts = {
 	postCount: number;
@@ -16,9 +17,6 @@ type TResourceCounts = {
 	artistCount: number;
 	userCount: number;
 };
-
-const CACHE_KEY = 'resource-generics';
-const CACHE_TIME_SECONDS = 120;
 
 export const handleLoadSimilaritySearchPage = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(

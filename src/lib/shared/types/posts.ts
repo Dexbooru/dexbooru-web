@@ -1,5 +1,6 @@
 import type { Post, Prisma } from '@prisma/client';
 import type { DefaultArgs } from '@prisma/client/runtime/library';
+import type { TComment } from './comments';
 
 export type TPostLikeAction = 'like' | 'dislike';
 
@@ -55,6 +56,7 @@ export type TPost = Post & {
 	}[];
 	artistString: string;
 	commentCount: number;
+	comments: TComment[];
 };
 
 export type TPostSelector = Prisma.PostSelect<DefaultArgs>;

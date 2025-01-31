@@ -1,13 +1,20 @@
 <script lang="ts">
-	import { createPostCommentsPaginator } from '$lib/client/api/comments';
 	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
+	import { DELETE_COMMENT_MODAL_NAME, EDIT_COMMENT_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
+	import {
+		getActiveModal,
+		getAuthenticatedUser,
+		getCommentTree,
+	} from '$lib/client/helpers/context';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
+	import { MAXIMUM_COMMENTS_PER_POST } from '$lib/shared/constants/posts';
 	import { formatDate, getFormalDateTitle, ymdFormat } from '$lib/shared/helpers/dates';
 	import type { TComment } from '$lib/shared/types/comments';
 	import { toast } from '@zerodevx/svelte-toast';
 	import MessagesSolid from 'flowbite-svelte-icons/MessagesSolid.svelte';
+	import PenSolid from 'flowbite-svelte-icons/PenSolid.svelte';
+	import TrashBinSolid from 'flowbite-svelte-icons/TrashBinSolid.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
@@ -17,33 +24,17 @@
 
 	type Props = {
 		comment: TComment;
-		currentDepth?: number;
 	};
 
-	let { comment, currentDepth = 1 }: Props = $props();
+	let { comment }: Props = $props();
 
-	let repliesLoading = false;
 	let replyBoxOpen = $state(false);
+	let editModeOn = $state(false);
 	let replies: TComment[] = $state([]);
-	let loadMoreButtonText = $state('Load replies');
-	let pageNumber = 0;
-	let noMoreComments = $state(false);
 
 	const user = getAuthenticatedUser();
 	const commentTree = getCommentTree();
-	const replyCommentLoader = createPostCommentsPaginator(comment.postId, comment.id, commentTree);
-
-	const handleLoadRepliesClick = async () => {
-		repliesLoading = true;
-		const paginationData = await replyCommentLoader();
-		repliesLoading = false;
-
-		const { pageNumber: pageNumberResult, noMoreComments: noMoreCommentsResult } = paginationData;
-		loadMoreButtonText =
-			pageNumberResult > 0 && !noMoreComments ? 'Load more replies' : 'Load replies';
-		pageNumber = pageNumberResult;
-		noMoreComments = noMoreCommentsResult;
-	};
+	const activeModal = getActiveModal();
 
 	const handleReplyButtonClick = () => {
 		if (!$user) {
@@ -52,6 +43,32 @@
 		}
 
 		replyBoxOpen = !replyBoxOpen;
+	};
+
+	const handleDeleteButtonClick = () => {
+		if (!$user) {
+			toast.push('You must be signed in to delete comments', FAILURE_TOAST_OPTIONS);
+			return;
+		}
+
+		activeModal.set({
+			focusedModalName: DELETE_COMMENT_MODAL_NAME,
+			modalData: { comment },
+			isOpen: true,
+		});
+	};
+
+	const handleEditButtonClick = () => {
+		if (!$user) {
+			toast.push('You must be signed in to edit comments', FAILURE_TOAST_OPTIONS);
+			return;
+		}
+
+		activeModal.set({
+			focusedModalName: EDIT_COMMENT_MODAL_NAME,
+			modalData: { comment },
+			isOpen: true,
+		});
 	};
 
 	const commentTreeUnsubscribe = commentTree.subscribe((commentTree) => {
@@ -105,16 +122,30 @@
 		{@html comment.content}
 	</p>
 
-	<div class="flex items-center mt-4 space-x-3">
-		<Button class="flex space-x-2" color="green" on:click={handleReplyButtonClick}>
-			<MessagesSolid />
-			<span>{replyBoxOpen ? 'Hide reply' : 'Reply'}</span>
-		</Button>
-		{#if !noMoreComments && comment.replyCount > 0}
-			<Button on:click={() => handleLoadRepliesClick()} class="flex space-x-2" color="blue">
-				<MessagesSolid />
-				<span>{loadMoreButtonText}</span>
-			</Button>
+	<div class="flex space-x-2">
+		{#if $commentTree.getCount() < MAXIMUM_COMMENTS_PER_POST}
+			<div class="flex items-center mt-4 space-x-3">
+				<Button class="flex space-x-2" color="green" on:click={handleReplyButtonClick}>
+					<MessagesSolid />
+					<span>{replyBoxOpen ? 'Hide reply' : 'Reply'}</span>
+				</Button>
+			</div>
+		{/if}
+
+		{#if $user && comment.author.id === $user.id}
+			<div class="flex items-center mt-4 space-x-3">
+				<Button class="flex space-x-2" color="blue" on:click={handleEditButtonClick}>
+					<PenSolid />
+					<span>Edit</span></Button
+				>
+			</div>
+
+			<div class="flex items-center mt-4 space-x-3">
+				<Button class="flex space-x-2" color="red" on:click={handleDeleteButtonClick}>
+					<TrashBinSolid />
+					<span>Delete</span></Button
+				>
+			</div>
 		{/if}
 	</div>
 
@@ -131,6 +162,6 @@
 
 <div class="ml-5 border-l-2">
 	{#each replies as reply (reply.id)}
-		<Comment currentDepth={currentDepth + 1} comment={reply} />
+		<Comment comment={reply} />
 	{/each}
 </div>

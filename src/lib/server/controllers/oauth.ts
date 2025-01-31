@@ -2,7 +2,6 @@ import { DEFAULT_PASSWORD_LENGTH } from '$lib/shared/constants/auth';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import type { UserAuthenticationSource } from '@prisma/client';
 import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
-import { z } from 'zod';
 import {
 	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
 	OAUTH_TEMPORARY_PASSWORD_EMAIL_SUBJECT,
@@ -29,27 +28,14 @@ import {
 	getUserClaimsFromEncodedJWTToken,
 } from '../helpers/sessions';
 import { createTotpChallenge } from '../helpers/totp';
-import type { TRequestSchema } from '../types/controllers';
 import type { IOauthProvider, TOauthApplication, TSimplifiedUserResponse } from '../types/oauth';
+import { OauthCallbackSchema, OauthStoreSchema } from './request-schemas/oauth';
 
 type TOauthProcessingUrlParams = {
 	redirectTo?: string;
 	token: string;
 	applicationName: TOauthApplication;
 };
-
-const OauthStoreSchema = {
-	body: z.object({
-		token: z.string().min(1, { message: 'Token is required' }),
-	}),
-} satisfies TRequestSchema;
-
-const OauthCallbackSchema = {
-	urlSearchParams: z.object({
-		state: z.string().min(1, { message: 'State is required' }),
-		code: z.string().min(1, { message: 'Code is required' }),
-	}),
-} satisfies TRequestSchema;
 
 const buildOauthProcessingUrl = (data: TOauthProcessingUrlParams): string => {
 	const { redirectTo = '/', token, applicationName } = data;

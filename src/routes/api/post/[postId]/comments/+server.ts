@@ -1,8 +1,8 @@
 import {
 	handleCreatePostComment,
-	handleDeletePostComments,
-	handleEditPostComments,
+	handleDeletePostComment,
 	handleGetPostComments,
+	handleUpdatePostComment,
 } from '$lib/server/controllers/comments';
 import type { RequestHandler } from '@sveltejs/kit';
 
@@ -11,11 +11,11 @@ export const GET: RequestHandler = async (request) => {
 };
 
 export const PUT: RequestHandler = async (request) => {
-	return (await handleEditPostComments(request)) as ReturnType<RequestHandler>;
+	return (await handleUpdatePostComment(request)) as ReturnType<RequestHandler>;
 };
 
 export const DELETE: RequestHandler = async (request) => {
-	return (await handleDeletePostComments(request)) as ReturnType<RequestHandler>;
+	return (await handleDeletePostComment(request)) as ReturnType<RequestHandler>;
 };
 
 export const POST: RequestHandler = async (request) => {
