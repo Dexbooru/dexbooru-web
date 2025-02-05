@@ -5,6 +5,8 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async (event) => {
 	return (await handleGetPost(event, 'page-server-load')) as {
 		post: TPost;
+		similarPosts: TPost[];
+		similarities: Record<string, number>;
 		uploadedSuccessfully: boolean;
 		hasLikedPost: boolean;
 	};

@@ -1,4 +1,5 @@
 import { PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
+import { MAXIMUM_SIMILAR_POSTS_PER_POST } from '$lib/shared/constants/posts';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { Prisma } from '@prisma/client';
 import prisma from '../prisma';
@@ -227,4 +228,71 @@ export async function createPost(
 
 export async function findTotalPostCount() {
 	return await prisma.post.count();
+}
+
+export async function findSimilarPosts(
+	postId: string,
+	tagString: string,
+	artistString: string,
+	selectors?: TPostSelector,
+) {
+	if (tagString.length === 0 && artistString.length === 0) {
+		return {
+			posts: [] as TPost[],
+			similarities: {} as Record<string, number>,
+		};
+	}
+
+	const tags = tagString.split(',');
+	const artists = artistString.split(',');
+
+	const orStatements: Prisma.PostWhereInput['OR'] = [];
+	tags.forEach((tag) => {
+		orStatements.push({
+			tagString: {
+				contains: tag,
+			},
+		});
+	});
+	artists.forEach((artist) => {
+		orStatements.push({
+			artistString: {
+				contains: artist,
+			},
+		});
+	});
+
+	const similarPosts = (await prisma.post.findMany({
+		where: {
+			id: {
+				not: {
+					equals: postId,
+				},
+			},
+			OR: orStatements,
+		},
+		select: selectors,
+		take: MAXIMUM_SIMILAR_POSTS_PER_POST,
+	})) as TPost[];
+
+	const originalSet = new Set([...tags, ...artists]);
+
+	const similarityMap: Record<string, number> = {};
+	similarPosts.forEach((similarPost) => {
+		const similarTags = similarPost.tagString.split(',');
+		const similarArtists = similarPost.artistString.split(',');
+
+		const similarSet = new Set([...similarTags, ...similarArtists]);
+		const intersection = new Set([...originalSet].filter((item) => similarSet.has(item)));
+
+		const union = new Set([...originalSet, ...similarSet]);
+		const jaccardSimilarity = union.size === 0 ? 0 : (intersection.size / union.size) * 100;
+		similarityMap[similarPost.id] = jaccardSimilarity;
+	});
+
+	const filteredSimilarPosts = similarPosts.filter((post) => similarityMap[post.id] > 40);
+	return {
+		posts: filteredSimilarPosts,
+		similarities: similarityMap,
+	};
 }

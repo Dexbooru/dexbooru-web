@@ -2,6 +2,7 @@ import type { TPost } from '../types/posts';
 
 export const MAXIMUM_SOURCE_LINK_LENGTH = 450;
 export const MAXIMUM_POSTS_PER_PAGE = 27;
+export const MAXIMUM_SIMILAR_POSTS_PER_POST = 6;
 export const MAXIMUM_TAGS_PER_POST = 20;
 export const MAXIMUM_ARTISTS_PER_POST = 5;
 export const MAXIMUM_POST_DESCRIPTION_LENGTH = 500;

@@ -21,6 +21,7 @@ import {
 	findPostByIdWithUpdatedViewCount,
 	findPostsByAuthorId,
 	findPostsByPage,
+	findSimilarPosts,
 	hasUserLikedPost,
 	likePostById,
 	updatePost,
@@ -473,22 +474,39 @@ export const handleGetPost = async (
 		const user = event.locals.user;
 
 		const cacheKey = getCacheKeyForIndividualPost(postId);
-		let finalData: TPost | { post: TPost; uploadedSuccessfully?: boolean; hasLikedPost?: boolean };
+		let finalData:
+			| TPost
+			| {
+					post: TPost;
+					similarPosts: TPost[];
+					similarities?: Record<string, number>;
+					uploadedSuccessfully?: boolean;
+					hasLikedPost?: boolean;
+			  };
 
 		try {
-			const cachedData = await getRemoteResponseFromCache<{
-				post: TPost;
-				uploadedSuccessfully?: boolean;
-				hasLikedPost?: boolean;
-			}>(cacheKey);
+			const cachedData = await getRemoteResponseFromCache<
+				| TPost
+				| {
+						post: TPost;
+						similarPosts: TPost[];
+						similarities?: Record<string, number>;
+						uploadedSuccessfully?: boolean;
+						hasLikedPost?: boolean;
+				  }
+			>(cacheKey);
 
 			if (cachedData) {
 				if (cachedData === null) {
 					return throwPostNotFoundError(handlerType, postId);
 				}
 
-				finalData = cachedData;
-				finalData.uploadedSuccessfully = uploadedSuccessfully;
+				if ('post' in cachedData && 'similarPosts' in cachedData) {
+					finalData = cachedData;
+					finalData.uploadedSuccessfully = uploadedSuccessfully;
+				} else {
+					finalData = cachedData as TPost;
+				}
 			} else {
 				const selectors = {
 					...PUBLIC_POST_SELECTORS,
@@ -496,6 +514,13 @@ export const handleGetPost = async (
 						select: PUBLIC_COMMENT_SELECTORS,
 					},
 				};
+				const similaritySelectors = {
+					id: true,
+					tagString: true,
+					artistString: true,
+					imageUrls: true,
+				};
+
 				const post =
 					handlerType === 'api-route'
 						? await findPostById(postId, selectors)
@@ -509,11 +534,26 @@ export const handleGetPost = async (
 				post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
 				post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
 
+				const { posts: similarPosts, similarities } = await findSimilarPosts(
+					post.id,
+					post.tagString,
+					post.artistString,
+					similaritySelectors,
+				);
+				similarPosts.forEach((similarPost) => {
+					similarPost.tags = similarPost.tagString.split(',').map((tag) => ({ name: tag }));
+					similarPost.artists = similarPost.artistString
+						.split(',')
+						.map((artist) => ({ name: artist }));
+				});
+
 				const hasLikedPost =
 					user.id !== NULLABLE_USER.id ? await hasUserLikedPost(user.id, post.id) : false;
 
 				finalData =
-					handlerType === 'api-route' ? post : { post, uploadedSuccessfully, hasLikedPost };
+					handlerType === 'api-route'
+						? post
+						: { post, similarPosts, similarities, uploadedSuccessfully, hasLikedPost };
 
 				cacheResponseRemotely(cacheKey, finalData, CACHE_TIME_INDIVIDUAL_POST_FOUND);
 			}

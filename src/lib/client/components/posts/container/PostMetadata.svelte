@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getCommentTree, getUpdatedPost } from '$lib/client/helpers/context';
-	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
+	import { formatNumberWithCommas, roundNumber } from '$lib/client/helpers/posts';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPost } from '$lib/shared/types/posts';
@@ -8,9 +8,11 @@
 
 	type Props = {
 		post: TPost;
+		similarPosts: TPost[];
+		similarities: Record<string, number>;
 	};
 
-	let { post }: Props = $props();
+	let { post, similarPosts, similarities }: Props = $props();
 
 	const updatedPost = getUpdatedPost();
 	const commentTree = getCommentTree();
@@ -93,3 +95,25 @@
 	<p class="text-lg dark:text-white">Artists</p>
 	<LabelContainer labelType="artist" labelColor="green" labels={post.artists} />
 </div>
+
+{#if similarPosts.length > 0}
+	<p class="text-lg dark:text-white">Similar posts (found {similarPosts.length})</p>
+	<section class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+		{#each similarPosts as post (post.id)}
+			<div class="flex flex-col items-center">
+				<a href="/posts/{post.id}" class="block">
+					<img
+						width="200"
+						height="200"
+						alt={post.tagString + post.artistString}
+						src={post.imageUrls[0]}
+						class="w-[200px] h-[200px] object-contain rounded-lg transition-transform duration-200 hover:scale-105"
+					/>
+				</a>
+				<span class="text-sm dark:text-gray-300 text-center mt-2">
+					Similarity: {roundNumber(similarities[post.id], 2)}%
+				</span>
+			</div>
+		{/each}
+	</section>
+{/if}

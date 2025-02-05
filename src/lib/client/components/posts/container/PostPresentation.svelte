@@ -9,11 +9,19 @@
 
 	type Props = {
 		post: TPost;
+		similarPosts: TPost[];
+		similarities: Record<string, number>;
 		totalPostCommentCount?: string;
 		hasLikedPost?: boolean;
 	};
 
-	let { post, totalPostCommentCount = '0', hasLikedPost = false }: Props = $props();
+	let {
+		post,
+		totalPostCommentCount = '0',
+		hasLikedPost = false,
+		similarPosts = [],
+		similarities = {},
+	}: Props = $props();
 
 	const user = getAuthenticatedUser();
 	const commentTree = getCommentTree();
@@ -25,7 +33,7 @@
 	</section>
 
 	<section class="space-y-2">
-		<PostMetadata {post} />
+		<PostMetadata {post} {similarPosts} {similarities} />
 	</section>
 </div>
 

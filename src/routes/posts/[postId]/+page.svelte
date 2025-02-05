@@ -22,6 +22,8 @@
 	let { data }: Props = $props();
 
 	let post: TPost = $derived(data.post);
+	let similarPosts: TPost[] = $derived(data.similarPosts);
+	let similarities: Record<string, number> = $derived(data.similarities);
 	let uploadedSuccessfully = $derived(data.uploadedSuccessfully);
 	let hasLikedPost = $derived(data.hasLikedPost);
 	let totalPostCommentCount: string = $state('0');
@@ -111,5 +113,5 @@
 {/if}
 
 <main class="m-5 space-y-5">
-	<PostPresentation {hasLikedPost} {post} {totalPostCommentCount} />
+	<PostPresentation {hasLikedPost} {post} {totalPostCommentCount} {similarPosts} {similarities} />
 </main>
