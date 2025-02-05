@@ -115,6 +115,12 @@
 	{/if}
 
 	<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
+		<Button href="/collections/post/{postId}" class="w-full sm:w-auto space-x-2" color="blue">
+			<span>View collections</span>
+		</Button>
+	</div>
+
+	<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
 		<Button
 			on:click={() => handleModalOpen(REPORT_MODAL_NAME, { postId })}
 			class="w-full sm:w-auto space-x-2"

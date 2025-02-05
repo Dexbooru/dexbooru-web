@@ -44,22 +44,20 @@
 					{/each}
 				</SidebarDropdownWrapper>
 
-				{#if uniqueAuthors.length > 0}
-					<SidebarDropdownWrapper label="All Authors">
-						{#snippet icon()}
-							<UserSolid
-								class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-							/>
-						{/snippet}
+				<SidebarDropdownWrapper isOpen={uniqueAuthors.length > 0} label="All Authors">
+					{#snippet icon()}
+						<UserSolid
+							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+						/>
+					{/snippet}
 
-						{#each uniqueAuthors as uniqueAuthor}
-							<SidebarDropdownItem
-								href="/profile/{uniqueAuthor.username}"
-								label={uniqueAuthor.username}
-							/>
-						{/each}
-					</SidebarDropdownWrapper>
-				{/if}
+					{#each uniqueAuthors as uniqueAuthor}
+						<SidebarDropdownItem
+							href="/profile/{uniqueAuthor.username}"
+							label={uniqueAuthor.username}
+						/>
+					{/each}
+				</SidebarDropdownWrapper>
 			</SidebarGroup>
 		</SidebarWrapper>
 	</Sidebar>

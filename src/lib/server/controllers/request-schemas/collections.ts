@@ -1,10 +1,13 @@
-import { PageNumberSchema, BoolStrSchema } from "$lib/server/constants/reusableSchemas";
-import type { TRequestSchema } from "$lib/server/types/controllers";
-import { MAXIMUM_COLLECTION_TITLE_LENGTH, MAXIMUM_COLLECTION_DESCRIPTION_LENGTH } from "$lib/shared/constants/collections";
-import { MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB } from "$lib/shared/constants/images";
-import { isFileImageSmall, isFileImage } from "$lib/shared/helpers/images";
-import { isLabelAppropriate } from "$lib/shared/helpers/labels";
-import { z } from "zod";
+import { BoolStrSchema, PageNumberSchema } from '$lib/server/constants/reusableSchemas';
+import type { TRequestSchema } from '$lib/server/types/controllers';
+import {
+	MAXIMUM_COLLECTION_DESCRIPTION_LENGTH,
+	MAXIMUM_COLLECTION_TITLE_LENGTH,
+} from '$lib/shared/constants/collections';
+import { MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB } from '$lib/shared/constants/images';
+import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
+import { isLabelAppropriate } from '$lib/shared/helpers/labels';
+import { z } from 'zod';
 
 const CollectionPaginationSchema = z.object({
 	pageNumber: PageNumberSchema,
@@ -91,12 +94,24 @@ const UpdateCollectionsPostsSchema = {
 	}),
 } satisfies TRequestSchema;
 
+const GetPostCollectionsSchema = {
+	pathParams: z.object({
+		postId: z.string().uuid(),
+	}),
+	urlSearchParams: z.object({
+		pageNumber: PageNumberSchema,
+		ascending: BoolStrSchema,
+		orderBy: z.union([z.literal('createdAt'), z.literal('updatedAt')]).default('createdAt'),
+	}),
+} satisfies TRequestSchema;
+
 export {
 	CreateCollectionSchema,
 	DeleteCollectionSchema,
 	GetAuthenticatedUserCollectionsSchema,
 	GetCollectionSchema,
 	GetCollectionsSchema,
+	GetPostCollectionsSchema,
 	GetUserCollectionsSchema,
 	UpdateCollectionSchema,
 	UpdateCollectionsPostsSchema,

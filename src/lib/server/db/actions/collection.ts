@@ -61,6 +61,30 @@ export async function findCollectionsFromIds(
 	})) as TPostCollection[];
 }
 
+export async function findCollectionsForPost(
+	postId: string,
+	pageNumber: number,
+	ascending: boolean,
+	orderBy: TCollectionOrderByColumn,
+	selectors?: Prisma.PostCollectionSelect<DefaultArgs>,
+) {
+	return (await prisma.postCollection.findMany({
+		where: {
+			posts: {
+				some: {
+					id: postId,
+				},
+			},
+		},
+		skip: pageNumber * MAXIMUM_COLLECTIONS_PER_PAGE,
+		take: MAXIMUM_COLLECTIONS_PER_PAGE,
+		select: selectors,
+		orderBy: {
+			[orderBy]: ascending ? 'asc' : 'desc',
+		},
+	})) as TPostCollection[];
+}
+
 export async function findCollections(
 	pageNumber: number,
 	ascending: boolean,
