@@ -7,6 +7,8 @@ ALTER TABLE "Post"
 ADD COLUMN searchable tsvector
     GENERATED ALWAYS AS (to_tsvector('english', 
                             COALESCE(description, '') || ' ' || 
+                            COALESCE('Post.tagString', '') || ' ' ||
+                            COALESCE('Post.artistString', '') || ' ' ||
                             COALESCE('Post.authorId', ''))) STORED;
 
 ALTER TABLE "Tag"

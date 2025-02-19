@@ -1,32 +1,33 @@
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function debounce(fn: Function, timeoutMs: number) {
+export function debounce<T extends (..._args: unknown[]) => void>(
+	fn: T,
+	timeoutMs: number,
+): (..._args: Parameters<T>) => void {
 	let currentTimeoutId: NodeJS.Timeout | undefined = undefined;
 
-	return (...args: never[]) => {
+	return (..._args: Parameters<T>) => {
 		clearTimeout(currentTimeoutId);
 		currentTimeoutId = setTimeout(() => {
-			fn(...args);
+			fn(..._args);
 		}, timeoutMs);
 	};
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 export function memoize<T extends (..._args: unknown[]) => unknown>(
 	fn: T,
 	isAsync: boolean = false,
 ): T {
-	const cachedResults: Map<string, ReturnType<T>> = new Map();
+	const cachedResults = new Map<string, ReturnType<T>>();
 
 	if (isAsync) {
-		return (async (...args: Parameters<T>): Promise<ReturnType<T>> => {
+		return (async (...args: Parameters<T>): Promise<Awaited<ReturnType<T>>> => {
 			const stringifiedArgs = JSON.stringify(args);
 			if (cachedResults.has(stringifiedArgs)) {
-				return cachedResults.get(stringifiedArgs)!;
+				return cachedResults.get(stringifiedArgs) as Awaited<ReturnType<T>>;
 			}
 
-			const result = await (fn(...args) as Promise<ReturnType<T>>);
-			cachedResults.set(stringifiedArgs, result);
-			return result;
+			const result = await fn(...args);
+			cachedResults.set(stringifiedArgs, result as ReturnType<T>);
+			return result as Awaited<ReturnType<T>>;
 		}) as T;
 	}
 

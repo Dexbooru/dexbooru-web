@@ -37,8 +37,8 @@
 		}
 	});
 
-	const fetchQueryResults = memoize(async (query: string) => {
-		const response = await getGlobalSearchResults(query);
+	const fetchQueryResults = memoize(async (query: unknown) => {
+		const response = await getGlobalSearchResults(query as string);
 		if (response.ok) {
 			const responseData: TApiResponse<TAppSearchResult> = await response.json();
 			return responseData.data;
