@@ -37,13 +37,14 @@
 			</h2>
 			<ul class="flex flex-col">
 				{#each tags as tag (tag.id)}
-					<li
+					<button
+						type="button"
 						onclick={onLabelClick}
 						class="flex items-center px-4 py-2 transition-all duration-150 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
 					>
 						<TagSolid class="w-5 h-5 mr-2 text-gray-700 dark:text-gray-300" />
 						<span class="text-gray-900 dark:text-gray-100">{tag.name}</span>
-					</li>
+					</button>
 				{/each}
 			</ul>
 		{/if}
@@ -56,13 +57,14 @@
 			</h2>
 			<ul class="flex flex-col">
 				{#each artists as artist (artist.id)}
-					<li
+					<button
+						type="button"
 						onclick={onLabelClick}
 						class="flex items-center px-4 py-2 transition-all duration-150 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
 					>
 						<PalleteSolid class="w-5 h-5 mr-2 text-gray-700 dark:text-gray-300" />
 						<span class="text-gray-900 dark:text-gray-100">{artist.name}</span>
-					</li>
+					</button>
 				{/each}
 			</ul>
 		{/if}
