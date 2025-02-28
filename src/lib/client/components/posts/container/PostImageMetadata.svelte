@@ -7,6 +7,7 @@
 		PREVIEW_IMAGE_SUFFIX,
 	} from '$lib/shared/constants/images';
 	import type { TPost } from '$lib/shared/types/posts';
+	import Alert from 'flowbite-svelte/Alert.svelte';
 	import Table from 'flowbite-svelte/Table.svelte';
 	import TableBody from 'flowbite-svelte/TableBody.svelte';
 	import TableBodyCell from 'flowbite-svelte/TableBodyCell.svelte';
@@ -76,6 +77,13 @@
 
 	const updatedPost = getUpdatedPost();
 </script>
+
+{#if post.moderationStatus === 'PENDING'}
+	<Alert color="yellow" class="!border !border-yellow-100">
+		<span class="font-medium">Note:</span>
+		This post is currently pending approval by a moderator
+	</Alert>
+{/if}
 
 {#if Object.keys($updatedPost).length > 0 && $updatedPost.imageUrls !== undefined}
 	<ImageCollection

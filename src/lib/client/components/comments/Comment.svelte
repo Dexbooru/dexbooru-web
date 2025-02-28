@@ -9,6 +9,7 @@
 	} from '$lib/client/helpers/context';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { MAXIMUM_COMMENTS_PER_POST } from '$lib/shared/constants/posts';
+	import { isModerationRole } from '$lib/shared/helpers/auth/role';
 	import { formatDate, getFormalDateTitle, ymdFormat } from '$lib/shared/helpers/dates';
 	import type { TComment } from '$lib/shared/types/comments';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -123,7 +124,7 @@
 	</p>
 
 	<div class="flex space-x-2">
-		{#if $commentTree.getCount() < MAXIMUM_COMMENTS_PER_POST}
+		{#if $user && $commentTree.getCount() < MAXIMUM_COMMENTS_PER_POST}
 			<div class="flex items-center mt-4 space-x-3">
 				<Button class="flex space-x-2" color="green" on:click={handleReplyButtonClick}>
 					<MessagesSolid />
@@ -132,7 +133,7 @@
 			</div>
 		{/if}
 
-		{#if $user && comment.author.id === $user.id}
+		{#if $user && (comment.author.id === $user.id || isModerationRole($user.role))}
 			<div class="flex items-center mt-4 space-x-3">
 				<Button class="flex space-x-2" color="blue" on:click={handleEditButtonClick}>
 					<PenSolid />

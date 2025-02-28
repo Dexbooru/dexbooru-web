@@ -22,11 +22,13 @@ export async function findComments(
 	return comments;
 }
 
-export async function findCommentById(commentId: string) {
+export async function findCommentById(commentId: string, selectors?: TCommentSelector) {
 	return await prisma.comment.findFirst({
+		relationLoadStrategy: 'join',
 		where: {
 			id: commentId,
 		},
+		select: selectors,
 	});
 }
 
@@ -47,15 +49,10 @@ export async function editCommentContentById(
 	return updateCommentBatchResult.count > 0;
 }
 
-export async function deleteCommentById(
-	commentId: string,
-	authorId: string,
-	postId: string,
-): Promise<boolean> {
+export async function deleteCommentById(commentId: string, postId: string): Promise<boolean> {
 	const deletedComment = await prisma.comment.delete({
 		where: {
 			id: commentId,
-			authorId,
 		},
 	});
 

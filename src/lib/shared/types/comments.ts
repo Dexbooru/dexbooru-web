@@ -1,4 +1,4 @@
-import type { Comment } from '@prisma/client';
+import type { Comment, UserRole } from '@prisma/client';
 
 export type TCommentCreateBody = {
 	parentCommentId: string | null;
@@ -20,6 +20,7 @@ export type TComment = Comment & {
 		id: string;
 		username: string;
 		profilePictureUrl: string;
+		role: UserRole;
 	};
 	parentComment?: TComment;
 };

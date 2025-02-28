@@ -1,4 +1,4 @@
-import type { Post, Prisma } from '@prisma/client';
+import type { Post, Prisma, UserRole } from '@prisma/client';
 import type { DefaultArgs } from '@prisma/client/runtime/library';
 import type { TComment } from './comments';
 
@@ -42,6 +42,7 @@ export type TPost = Post & {
 		id: string;
 		username: string;
 		profilePictureUrl: string;
+		role: UserRole;
 	};
 	tagString: string;
 	tags: {

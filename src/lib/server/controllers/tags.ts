@@ -1,5 +1,4 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { ARTISTS_PAGINATION_CACHE_TIME_SECONDS } from '../constants/sessions';
 import { getTagsWithStartingLetter } from '../db/actions/tag';
 import {
 	createErrorResponse,
@@ -8,7 +7,10 @@ import {
 } from '../helpers/controllers';
 import { cacheResponseRemotely, getRemoteResponseFromCache } from '../helpers/sessions';
 import logger from '../logging/logger';
-import { getLabelLetterCacheKey } from './cache-strategies/labels';
+import {
+	TAGS_PAGINATION_CACHE_TIME_SECONDS,
+	getLabelLetterCacheKey,
+} from './cache-strategies/labels';
 import { GetTagsSchema } from './request-schemas/tags';
 
 export const handleGetTags = async (event: RequestEvent) => {
@@ -22,7 +24,7 @@ export const handleGetTags = async (event: RequestEvent) => {
 				(await getRemoteResponseFromCache<{ name: string }[]>(cacheKey)) ??
 				(await getTagsWithStartingLetter(letter, pageNumber));
 
-			cacheResponseRemotely(cacheKey, tags, ARTISTS_PAGINATION_CACHE_TIME_SECONDS);
+			cacheResponseRemotely(cacheKey, tags, TAGS_PAGINATION_CACHE_TIME_SECONDS);
 
 			return createSuccessResponse(
 				'api-route',

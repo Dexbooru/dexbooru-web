@@ -1,3 +1,4 @@
+import { LABEL_CUT_LENGTH, LABEL_CUT_THRESHOLD } from '$lib/client/constants/labels';
 import {
 	MAXIMUM_COLLECTION_DESCRIPTION_LENGTH,
 	MAXIMUM_COLLECTION_TITLE_LENGTH,
@@ -69,4 +70,17 @@ export const getUniqueLabelsFromPosts = (posts: TPost[], labelType: 'tag' | 'art
 	const allLabelsFlattened = allLabels.flat();
 
 	return [...new Set(allLabelsFlattened)];
+};
+
+export const renderLabel = (
+	label: string,
+	labelType: 'tag' | 'artist',
+	onPostsViewPage: boolean = false,
+) => {
+	if (onPostsViewPage) return label;
+
+	const maximumLabelLength = labelType === 'tag' ? MAXIMUM_TAG_LENGTH : MAXIMUM_ARTIST_LENGTH;
+	return label.length >= LABEL_CUT_THRESHOLD * maximumLabelLength
+		? label.slice(0, LABEL_CUT_LENGTH) + '...'
+		: label;
 };

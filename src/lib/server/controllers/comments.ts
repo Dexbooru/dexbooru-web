@@ -1,5 +1,6 @@
 import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
 import { MAXIMUM_COMMENTS_PER_POST } from '$lib/shared/constants/posts';
+import { isModerationRole } from '$lib/shared/helpers/auth/role';
 import type { TComment, TCommentPaginationData } from '$lib/shared/types/comments';
 import type { RequestEvent } from '@sveltejs/kit';
 import { GENERAL_COMMENTS_SELECTORS, PUBLIC_COMMENT_SELECTORS } from '../constants/comments';
@@ -132,7 +133,11 @@ export const handleDeletePostComment = async (event: RequestEvent) => {
 			const commentId = data.urlSearchParams.commentId;
 
 			try {
-				const comment = await findCommentById(commentId);
+				const comment = (await findCommentById(commentId, {
+					postId: true,
+					authorId: true,
+					author: { select: { role: true } },
+				})) as TComment;
 				if (!comment) {
 					return createErrorResponse(
 						'api-route',
@@ -149,15 +154,22 @@ export const handleDeletePostComment = async (event: RequestEvent) => {
 					);
 				}
 
-				if (comment.authorId !== event.locals.user.id) {
+				if (comment.authorId !== event.locals.user.id && !isModerationRole(comment.author.role)) {
 					return createErrorResponse(
 						'api-route',
 						403,
-						`The authenticated user with id: ${event.locals.user.id} does not match the comment's author id`,
+						`The authenticated user with id: ${event.locals.user.id} does not match the comment's author id or they do not have moderator permissions`,
 					);
 				}
 
-				await deleteCommentById(commentId, event.locals.user.id, postId);
+				if (comment.authorId !== event.locals.user.id && isModerationRole(comment.author.role)) {
+					await editCommentContentById(
+						commentId,
+						'This comment has been removed by a site moderator',
+					);
+				} else {
+					await deleteCommentById(commentId, postId);
+				}
 
 				const postCacheKey = getCacheKeyForIndividualPost(postId);
 				invalidateCacheRemotely(postCacheKey);

@@ -131,7 +131,7 @@
 		</Button>
 	</div>
 
-	{#if $user && $user.id === author.id}
+	{#if $user && ($user.id === author.id || $user.role === 'OWNER')}
 		<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
 			<Button
 				color="green"

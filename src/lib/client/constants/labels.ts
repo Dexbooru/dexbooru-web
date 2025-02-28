@@ -1,5 +1,7 @@
 export const MAXIMUM_RENDERABLE_TAGS = 15;
 export const MAXIMUM_RENDERABLE_ARTISTS = 15;
+export const LABEL_CUT_THRESHOLD = 0.45;
+export const LABEL_CUT_LENGTH = 20;
 
 export const ESTIMATED_TAG_RATING_LABEL_MAP: Record<'q' | 'e' | 's', string> = {
 	q: 'Questionable',

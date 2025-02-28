@@ -1,11 +1,11 @@
 import {
 	MAXIMUM_USERNAME_LENGTH,
 	MINIMUM_USERNAME_LENGTH,
-	USERNAME_REQUIREMENTS
+	USERNAME_REQUIREMENTS,
 } from '../../constants/auth';
-import type { IAuthFieldRequirements } from '../../types/auth';
+import type { TAuthFieldRequirements } from '../../types/auth';
 
-export const getUsernameRequirements = (username: string): IAuthFieldRequirements => {
+export const getUsernameRequirements = (username: string): TAuthFieldRequirements => {
 	const satisfied: string[] = [];
 	const unsatisfied: string[] = [];
 	// Check for spaces in the username
@@ -29,7 +29,7 @@ export const getUsernameRequirements = (username: string): IAuthFieldRequirement
 		if (!username) {
 			return {
 				satisfied: [],
-				unsatisfied: Array.from(Object.values(USERNAME_REQUIREMENTS))
+				unsatisfied: Array.from(Object.values(USERNAME_REQUIREMENTS)),
 			};
 		} else {
 			satisfied.push(USERNAME_REQUIREMENTS['spaces']);
@@ -38,6 +38,6 @@ export const getUsernameRequirements = (username: string): IAuthFieldRequirement
 
 	return {
 		satisfied,
-		unsatisfied
+		unsatisfied,
 	};
 };

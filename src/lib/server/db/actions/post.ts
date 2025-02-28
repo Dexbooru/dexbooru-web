@@ -20,11 +20,10 @@ export async function hasUserLikedPost(userId: string, postId: string) {
 	return !!post;
 }
 
-export async function deletePostById(postId: string, authorId: string): Promise<TPost> {
+export async function deletePostById(postId: string): Promise<TPost> {
 	const deletedPost = await prisma.post.delete({
 		where: {
 			id: postId,
-			authorId,
 		},
 		select: {
 			tags: {

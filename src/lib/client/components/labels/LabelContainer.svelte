@@ -3,7 +3,7 @@
 		MAXIMUM_RENDERABLE_ARTISTS,
 		MAXIMUM_RENDERABLE_TAGS,
 	} from '$lib/client/constants/labels';
-	import { MAXIMUM_ARTIST_LENGTH, MAXIMUM_TAG_LENGTH } from '$lib/shared/constants/labels';
+	import { renderLabel } from '$lib/shared/helpers/labels';
 	import Badge from 'flowbite-svelte/Badge.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import type { ComponentProps } from 'svelte';
@@ -34,26 +34,19 @@
 		handleLabelClose = null,
 	}: Props = $props();
 
-	const maximumLabelsLength = $derived(
+	let maximumLabelsLength = $derived(
 		labelType === 'tag' ? MAXIMUM_RENDERABLE_TAGS : MAXIMUM_RENDERABLE_ARTISTS,
 	);
-	const unwrappedLabels = $derived(
+	let unwrappedLabels = $derived(
 		labels.map((label) => (typeof label === 'object' ? label.name : label)),
 	);
-	const slicedUnwrappedLabels = $derived(unwrappedLabels.slice(0, maximumLabelsLength));
+	let slicedUnwrappedLabels = $derived(unwrappedLabels.slice(0, maximumLabelsLength));
 
 	let showAllLabels = $state(false);
 	let processedLabels: string[] = $derived.by(() => {
 		if (!sliceLabels) return unwrappedLabels;
 		return showAllLabels ? unwrappedLabels : slicedUnwrappedLabels;
 	});
-
-	const renderLabel = (label: string) => {
-		if (onPostsViewPage) return label;
-		return label.length >= 0.75 * maximumLabelLength ? label.slice(0, 20) + '...' : label;
-	};
-
-	const maximumLabelLength = labelType === 'tag' ? MAXIMUM_TAG_LENGTH : MAXIMUM_ARTIST_LENGTH;
 </script>
 
 <div class="flex flex-wrap">
@@ -66,7 +59,7 @@
 			class="ml-1 mr-1 mb-1"
 			rounded
 			color={labelColor}
-			>{renderLabel(label)}
+			>{renderLabel(label, labelType, onPostsViewPage)}
 		</Badge>
 	{/each}
 </div>

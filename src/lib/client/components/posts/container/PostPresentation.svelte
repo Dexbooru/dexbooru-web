@@ -40,7 +40,7 @@
 <div class="space-y-2">
 	{#if $user && $commentTree.getCount() < MAXIMUM_COMMENTS_PER_POST}
 		<CommentTextbox postId={post.id} />
-	{:else}
+	{:else if $user}
 		<p class="text-gray-500 dark:text-gray-400 text-lg italic">
 			The maximum of {MAXIMUM_COMMENTS_PER_POST} comments has been reached. Sorry :((
 		</p>

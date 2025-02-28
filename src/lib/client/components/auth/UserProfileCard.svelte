@@ -77,7 +77,9 @@
 			{#if $user && $user.id === targetUser.id}
 				<DropdownItem>Export data</DropdownItem>
 			{/if}
-			<DropdownItem>Report account</DropdownItem>
+			{#if $user && $user.id !== targetUser.id}
+				<DropdownItem>Report account</DropdownItem>
+			{/if}
 		</Dropdown>
 	</div>
 	<div class="flex flex-col items-center pb-4">

@@ -1,5 +1,4 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { ARTISTS_PAGINATION_CACHE_TIME_SECONDS } from '../constants/sessions';
 import { getArtistsWithStartingLetter } from '../db/actions/artist';
 import {
 	createErrorResponse,
@@ -8,7 +7,10 @@ import {
 } from '../helpers/controllers';
 import { cacheResponseRemotely, getRemoteResponseFromCache } from '../helpers/sessions';
 import logger from '../logging/logger';
-import { getLabelLetterCacheKey } from './cache-strategies/labels';
+import {
+	ARTISTS_PAGINATION_CACHE_TIME_SECONDS,
+	getLabelLetterCacheKey,
+} from './cache-strategies/labels';
 import { GetArtistsSchema } from './request-schemas/artists';
 
 export const handleGetArtists = async (event: RequestEvent) => {

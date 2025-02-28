@@ -3,6 +3,7 @@
 	import { formatNumberWithCommas, roundNumber } from '$lib/client/helpers/posts';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { formatDate } from '$lib/shared/helpers/dates';
+	import { capitalize } from '$lib/shared/helpers/util';
 	import type { TPost } from '$lib/shared/types/posts';
 	import LabelContainer from '../../labels/LabelContainer.svelte';
 
@@ -20,6 +21,10 @@
 
 <p class="text-lg dark:text-white">
 	ID: <span class=" dark:text-gray-400">{post.id}</span>
+</p>
+
+<p class="text-lg dark:text-white">
+	Moderation status: <span class=" dark:text-gray-400">{capitalize(post.moderationStatus)}</span>
 </p>
 
 <p class="text-lg dark:text-white">

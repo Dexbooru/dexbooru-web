@@ -4,6 +4,7 @@
 	import { CHAR_OPTIONS_LOWERCASE } from '$lib/client/constants/labels';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
+	import { renderLabel } from '$lib/shared/helpers/labels';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -94,7 +95,9 @@
 						href="/posts/{labelType}/{encodeURIComponent(label)}"
 					>
 						<span class="mt-0.5"
-							># {label} - {formatNumberWithCommas(labelCounts.get(label) ?? 0)}</span
+							># {renderLabel(label, labelType, false)} - {formatNumberWithCommas(
+								labelCounts.get(label) ?? 0,
+							)}</span
 						>
 						{#if labelType === 'tag'}
 							<TagSolid />

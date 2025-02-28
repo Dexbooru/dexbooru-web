@@ -445,7 +445,7 @@ export const handleCreatePost = async (
 				logger.error(error);
 
 				if (newPostId) {
-					deletePostById(newPostId, event.locals.user.id);
+					deletePostById(newPostId);
 				}
 				if (newPostImageUrls.length > 0) {
 					deleteBatchFromBucket(AWS_POST_PICTURE_BUCKET_NAME, newPostImageUrls);
@@ -867,6 +867,7 @@ export const handleDeletePost = async (event: RequestEvent) => {
 					author: {
 						select: {
 							id: true,
+							role: true,
 						},
 					},
 				});
@@ -878,15 +879,15 @@ export const handleDeletePost = async (event: RequestEvent) => {
 					);
 				}
 
-				if (event.locals.user.id !== post.author.id) {
+				if (event.locals.user.id !== post.author.id && post.author.role !== 'OWNER') {
 					return createErrorResponse(
 						'api-route',
 						403,
-						'You are not authorized to delete this post, as you are not the author',
+						'You are not authorized to delete this post, as you are not the author or a site owner',
 					);
 				}
 
-				await deletePostById(postId, event.locals.user.id);
+				await deletePostById(postId);
 
 				if (post.imageUrls.length > 0) {
 					deleteBatchFromBucket(AWS_POST_PICTURE_BUCKET_NAME, post.imageUrls);
