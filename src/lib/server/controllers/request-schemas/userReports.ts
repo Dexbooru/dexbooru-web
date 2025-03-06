@@ -4,51 +4,48 @@ import { MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH } from '$lib/shared/constants/
 import { z } from 'zod';
 import { ModerationReviewStatusSchema } from './moderation';
 
-const PostReportCategorySchema = z.enum([
-	'ILLEGAL',
-	'IMPROPER_TAGGING',
-	'INAPPROPRIATE',
-	'OFF_TOPIC',
+const UserReportCategorySchema = z.enum([
+	'NSFW_PROFILE_PICTURE',
+	'INAPPROPRIATE_USERNAME',
 	'OTHER',
-	'SPAM',
 ]);
 
-const DeletePostReportSchema = {
+const DeleteUserReportSchema = {
 	pathParams: z.object({
-		postId: z.string().uuid(),
+		username: z.string().min(1, 'Username must be at least 1 character long'),
 	}),
 	urlSearchParams: z.object({
 		reportId: z.string().uuid(),
 	}),
 } satisfies TRequestSchema;
 
-const GetPostReportsSchema = {
+const GetUserReportsSchema = {
 	pathParams: z.object({
-		postId: z.string().uuid(),
+		username: z.string().min(1, 'Username must be at least 1 character long'),
 	}),
 } satisfies TRequestSchema;
 
-const CreatePostReportSchema = {
+const CreateUserReportSchema = {
 	pathParams: z.object({
-		postId: z.string().uuid(),
+		username: z.string().min(1, 'Username must be at least 1 character long'),
 	}),
 	body: z.object({
 		description: z.string().max(MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH).optional(),
-		category: PostReportCategorySchema,
+		category: UserReportCategorySchema,
 	}),
 } satisfies TRequestSchema;
 
-const GetPostsReportsSchema = {
+const GetUsersReportsSchema = {
 	urlSearchParams: z.object({
 		pageNumber: PageNumberSchema,
-		category: PostReportCategorySchema.optional(),
+		category: UserReportCategorySchema.optional(),
 		reviewStatus: ModerationReviewStatusSchema.optional().default('NOT_REVIEWED'),
 	}),
 } satisfies TRequestSchema;
 
 export {
-	CreatePostReportSchema,
-	DeletePostReportSchema,
-	GetPostReportsSchema,
-	GetPostsReportsSchema,
+	CreateUserReportSchema,
+	DeleteUserReportSchema,
+	GetUserReportsSchema,
+	GetUsersReportsSchema,
 };

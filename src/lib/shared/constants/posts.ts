@@ -15,6 +15,7 @@ export const EMPTY_POST: TPost = {
 		id: '',
 		username: '',
 		profilePictureUrl: '',
+		role: 'USER',
 	},
 	commentCount: 0,
 	authorId: '',

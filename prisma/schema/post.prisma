@@ -13,13 +13,6 @@ enum PostReportCategory {
     OTHER
 }
 
-enum PostReportReviewStatus {
-  NOT_REVIEWED
-  IN_REVIEW
-  REJECTED
-  ACCEPTED
-}
-
 model Post {
     id               String               @id @default(uuid())
     createdAt        DateTime             @default(now())
@@ -42,8 +35,8 @@ model Post {
     author           User?                @relation(name: "created posts", fields: [authorId], references: [id], onDelete: SetNull)
     authorId         String?
     likedBy          User[]               @relation(name: "liked posts")
-    reports          PostReport[]
     collections      PostCollection[]
+    matchingReports  PostReport[]         @relation(name: "post matching reports")
 
     @@index([id])
     @@index([authorId])
@@ -51,9 +44,14 @@ model Post {
 
 model PostReport {
     id           String                 @id @default(uuid())
+    createdAt    DateTime               @default(now())
     category     PostReportCategory
     description  String?                @db.VarChar(250)
-    reviewStatus PostReportReviewStatus @default(NOT_REVIEWED)
-    post         Post?                  @relation(fields: [postId], references: [id], onDelete: Cascade)
+    reviewStatus ModerationReportStatus @default(NOT_REVIEWED)
+    post         Post?                  @relation(fields: [postId], references: [id], onDelete: SetNull, name: "post matching reports")
     postId       String?
+    author       User?                  @relation(fields: [authorId], references: [id], onDelete: SetNull, name: "posts reported by")
+    authorId     String?
+
+    @@index([id])
 }

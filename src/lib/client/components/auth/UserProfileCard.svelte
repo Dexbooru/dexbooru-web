@@ -1,19 +1,21 @@
 <script lang="ts">
 	import { addFriend, deleteFriend } from '$lib/client/api/friends';
 	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
+	import {
+		REPORT_USER_LIST_MODAL_NAME,
+		REPORT_USER_MODAL_NAME,
+	} from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { getAuthenticatedUser } from '$lib/client/helpers/context';
+	import { getActiveModal, getAuthenticatedUser } from '$lib/client/helpers/context';
+	import { isModerationRole } from '$lib/shared/helpers/auth/role';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 	import type { LinkedUserAccount } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
-	import DotsHorizontalOutline from 'flowbite-svelte-icons/DotsHorizontalOutline.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
-	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
-	import DropdownItem from 'flowbite-svelte/DropdownItem.svelte';
 	import OauthIcon from './OauthIcon.svelte';
 
 	type Props = {
@@ -29,6 +31,7 @@
 	let deleteFriendLoading = $state(false);
 
 	const user = getAuthenticatedUser();
+	const activeModal = getActiveModal();
 
 	const handleAddFriend = async () => {
 		if (!$user || $user.id === targetUser.id) return;
@@ -65,23 +68,11 @@
 
 	const onImageError = (event: Event) => {
 		const target = event.target as HTMLImageElement;
-
 		target.src = DefaultProfilePicture;
 	};
 </script>
 
 <Card class="mx-4 sm:mx-auto p-4 sm:p-6" style="min-width: 300px; max-width: 550px;">
-	<div class="flex justify-end">
-		<DotsHorizontalOutline class="hover:cursor-pointer" />
-		<Dropdown class="w-36">
-			{#if $user && $user.id === targetUser.id}
-				<DropdownItem>Export data</DropdownItem>
-			{/if}
-			{#if $user && $user.id !== targetUser.id}
-				<DropdownItem>Report account</DropdownItem>
-			{/if}
-		</Dropdown>
-	</div>
 	<div class="flex flex-col items-center pb-4">
 		<Avatar size="lg" src={targetUser.profilePictureUrl} onerror={onImageError} />
 		<h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">
@@ -129,7 +120,34 @@
 			<strong>{userStatistics.averageViews}</strong></span
 		>
 
-		<div class="flex flex-col mt-3 space-y-3">
+		<div class="flex flex-col mt-5 space-y-3">
+			{#if $user && $user.id !== targetUser.id}
+				<Button
+					color="yellow"
+					on:click={() =>
+						activeModal.set({
+							isOpen: true,
+							focusedModalName: REPORT_USER_MODAL_NAME,
+							modalData: { user: targetUser },
+						})}>Report user</Button
+				>
+			{/if}
+
+			{#if $user && isModerationRole($user.role)}
+				<Button
+					on:click={() => {
+						activeModal.set({
+							isOpen: true,
+							focusedModalName: REPORT_USER_LIST_MODAL_NAME,
+							modalData: { user: targetUser },
+						});
+					}}
+					color="red"
+				>
+					<span>Show reports</span>
+				</Button>
+			{/if}
+
 			{#if $user}
 				{#if $user.id !== targetUser.id}
 					{#if friendStatus === 'not-friends'}

@@ -1,10 +1,29 @@
-import type { PostReportCategory } from '@prisma/client';
+import { MAXIMUM_REPORTS_PER_PAGE } from '$lib/shared/constants/reports';
+import type { ModerationReportStatus, PostReportCategory } from '@prisma/client';
 import prisma from '../prisma';
+
+export const findPostReportsViaPagination = async (
+	pageNumber: number,
+	reviewStatus: ModerationReportStatus,
+	category: PostReportCategory | undefined,
+) => {
+	return await prisma.postReport.findMany({
+		where: {
+			reviewStatus,
+			...(category ? { category } : {}),
+		},
+		skip: pageNumber * MAXIMUM_REPORTS_PER_PAGE,
+		take: MAXIMUM_REPORTS_PER_PAGE,
+		orderBy: {
+			createdAt: 'desc',
+		},
+	});
+};
 
 export const findPostReportsFromPostId = async (postId: string) => {
 	const reports = await prisma.postReport.findMany({
 		where: {
-			id: postId,
+			postId,
 		},
 	});
 

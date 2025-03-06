@@ -4,27 +4,52 @@ enum UserRole {
     USER
 }
 
+enum UserReportCategory {
+    NSFW_PROFILE_PICTURE
+    INAPPROPRIATE_USERNAME
+    OTHER
+}
+
 model User {
-    id                       String                    @id @default(uuid())
-    username                 String                    @unique() @db.VarChar(12)
-    createdAt                DateTime                  @default(now())
-    updatedAt                DateTime                  @default(now())
-    email                    String                    @unique() @db.VarChar(254)
-    profilePictureUrl        String
-    password                 String
-    role                     UserRole                  @default(USER)
-    createdPosts             Post[]                    @relation(name: "created posts")
-    likedPosts               Post[]                    @relation(name: "liked posts")
-    createdComments          Comment[]
-    friends                  User[]                    @relation(name: "user friends")
-    symmetricFriends         User[]                    @relation(name: "user friends")
-    sentFriendRequests       FriendRequest[]           @relation(name: "friend requests sent")
-    receivedFriendRequests   FriendRequest[]           @relation(name: "friend requests received")
-    passwordRecoveryAttempts PasswordRecoveryAttempt[]
-    postCollections          PostCollection[]          @relation(name: "post collection author")
-    preferences              UserPreference?           @relation(name: "user profile preferences")
-    linkedAccounts           LinkedUserAccount[]
+    id                         String                    @id @default(uuid())
+    username                   String                    @unique() @db.VarChar(12)
+    createdAt                  DateTime                  @default(now())
+    updatedAt                  DateTime                  @default(now())
+    email                      String                    @unique() @db.VarChar(254)
+    profilePictureUrl          String
+    password                   String
+    role                       UserRole                  @default(USER)
+    superRolePromotionAt       DateTime?
+    createdPosts               Post[]                    @relation(name: "created posts")
+    likedPosts                 Post[]                    @relation(name: "liked posts")
+    createdComments            Comment[]
+    friends                    User[]                    @relation(name: "user friends")
+    symmetricFriends           User[]                    @relation(name: "user friends")
+    sentFriendRequests         FriendRequest[]           @relation(name: "friend requests sent")
+    receivedFriendRequests     FriendRequest[]           @relation(name: "friend requests received")
+    passwordRecoveryAttempts   PasswordRecoveryAttempt[]
+    postCollections            PostCollection[]          @relation(name: "post collection author")
+    preferences                UserPreference?           @relation(name: "user profile preferences")
+    linkedAccounts             LinkedUserAccount[]
+    matchingReports            UserReport[]              @relation(name: "user matching reports")
+    userReportsSubmitted       UserReport[]              @relation(name: "users reported by")
+    collectionReportsSubmitted PostCollectionReport[]    @relation(name: "collections reported by")
+    postReportsSubmitted       PostReport[]              @relation(name: "posts reported by")
 
     @@index([id])
     @@index([username])
+}
+
+model UserReport {
+    id           String                 @id @default(uuid())
+    createdAt    DateTime               @default(now())
+    category     UserReportCategory
+    description  String?                @db.VarChar(250)
+    reviewStatus ModerationReportStatus @default(NOT_REVIEWED)
+    user         User?                  @relation(fields: [userId], references: [id], onDelete: SetNull, name: "user matching reports")
+    userId       String?
+    author       User?                  @relation(fields: [authorId], references: [id], onDelete: SetNull, name: "users reported by")
+    authorId     String?
+
+    @@index([id])
 }

@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import ApplicationLogo from '$lib/client/assets/app_logo.webp';
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
+	import { isModerationRole } from '$lib/shared/helpers/auth/role';
 	import { getPathFromUrl } from '$lib/shared/helpers/urls';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import DarkMode from 'flowbite-svelte/DarkMode.svelte';
@@ -49,6 +50,9 @@
 		{#if $user}
 			<NavLi href="/posts/upload">Upload</NavLi>
 			<NavLi href="/chat">Chat</NavLi>
+			{#if isModerationRole($user.role)}
+				<NavLi id="moderation-link" href="/moderation">Moderation</NavLi>
+			{/if}
 		{/if}
 	</NavUl>
 </Navbar>

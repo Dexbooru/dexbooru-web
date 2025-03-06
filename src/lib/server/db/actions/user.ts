@@ -5,13 +5,49 @@ import type { TUser } from '$lib/shared/types/users';
 import type { UserRole } from '@prisma/client';
 import prisma from '../prisma';
 
-export async function updateUserRole(username: string, newRole: UserRole) {
+export async function findAllModerators() {
+	return (await prisma.user.findMany({
+		where: {
+			role: {
+				in: ['MODERATOR', 'OWNER'],
+			},
+		},
+		select: {
+			id: true,
+			username: true,
+			profilePictureUrl: true,
+			role: true,
+			superRolePromotionAt: true,
+		},
+	})) as TUser[];
+}
+
+export async function updateUserRoleById(id: string, newRole: UserRole) {
+	const superRolePromotionAt = ['OWNER', 'MODERATOR'].includes(newRole) ? new Date() : null;
+
+	const updatedUser = await prisma.user.update({
+		where: {
+			id,
+		},
+		data: {
+			role: newRole,
+			superRolePromotionAt,
+		},
+	});
+
+	return updatedUser;
+}
+
+export async function updateUserRoleByUsername(username: string, newRole: UserRole) {
+	const superRolePromotionAt = ['OWNER', 'MODERATOR'].includes(newRole) ? new Date() : null;
+
 	const updatedUser = await prisma.user.update({
 		where: {
 			username,
 		},
 		data: {
 			role: newRole,
+			superRolePromotionAt,
 		},
 	});
 

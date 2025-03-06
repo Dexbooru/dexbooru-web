@@ -1,0 +1,6 @@
+enum ModerationReportStatus {
+    NOT_REVIEWED
+    IN_REVIEW
+    REJECTED
+    ACCEPTED
+}

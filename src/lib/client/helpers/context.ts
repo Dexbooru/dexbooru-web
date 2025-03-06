@@ -7,6 +7,7 @@ import type {
 } from '$lib/shared/types/collections';
 import type { TComment, TCommentPaginationData } from '$lib/shared/types/comments';
 import type { TFriendData } from '$lib/shared/types/friends';
+import type { TModerationPaginationData } from '$lib/shared/types/moderation';
 import type { TUserNotifications } from '$lib/shared/types/notifcations';
 import type { THiddenPagePostData, TPost, TPostPaginationData } from '$lib/shared/types/posts';
 import type { TUser } from '$lib/shared/types/users';
@@ -28,6 +29,7 @@ import {
 	FRIEND_DATA_CONTEXT_KEY,
 	HIDDEN_COLLECTIONS_PAGE_CONTEXT_KEY,
 	HIDDEN_POSTS_PAGE_CONTEXT_KEY,
+	MODERATION_PAGINATION_DATA_CONTEXT_KEY,
 	NSFW_COLLECTIONS_PAGE_CONTEXT_KEY,
 	NSFW_POST_PAGE_CONTEXT_KEY,
 	ORIGINAL_COLLECTIONS_PAGE_CONTEXT_KEY,
@@ -87,6 +89,12 @@ export const initLayoutContexts = (data: LayoutData) => {
 	updateCommentPaginationData(null);
 	updateFriendsData(null);
 	updateUpdatedPost({});
+	updateModerationPaginationData(null);
+};
+
+export const updateModerationPaginationData = (data: TModerationPaginationData | null) => {
+	const updatedData = writable(data);
+	setContext(MODERATION_PAGINATION_DATA_CONTEXT_KEY, updatedData);
 };
 
 export const updateUpdatedPost = (updatedPost: Partial<TPost>) => {
@@ -217,6 +225,12 @@ export const updateAuthenticatedUserNotifications = (notifications: TUserNotific
 export const updateAuthenticatedUserPreferences = (userPreferences: UserPreference) => {
 	const updatedUserPreferences = writable(userPreferences);
 	setContext(USER_PREFERENCE_CONTEXT_KEY, updatedUserPreferences);
+};
+
+export const getModerationPaginationData = () => {
+	return getContext<Writable<TModerationPaginationData | null>>(
+		MODERATION_PAGINATION_DATA_CONTEXT_KEY,
+	);
 };
 
 export const getUpdatedPost = () => {

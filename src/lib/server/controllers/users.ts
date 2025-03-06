@@ -36,7 +36,8 @@ import {
 	updatePasswordByUserId,
 	updateProfilePictureByUserId,
 	updateUsernameByUserId,
-	updateUserRole,
+	updateUserRoleById,
+	updateUserRoleByUsername,
 } from '../db/actions/user';
 import {
 	createErrorResponse,
@@ -81,6 +82,7 @@ import {
 	UserRoleUpdateSchema,
 	UserUpdatePasswordAccountRecoverySchema,
 } from './request-schemas/users';
+import { UUID_REGEX } from '$lib/shared/constants/search';
 
 export const handleGetUserSettings = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(event, 'page-server-load', {}, async (_) => {
@@ -331,10 +333,10 @@ export const handleUpdateUserRole = async (event: RequestEvent) => {
 		UserRoleUpdateSchema,
 		async (data) => {
 			const targetUsername = data.pathParams.username;
-			const newRole = data.body.newRole;
+			const { newRole } = data.body;
 
 			try {
-				const user = await findUserById(event.locals.user.id, { role: true });
+				const user = await findUserById(event.locals.user.id, { username: true, role: true });
 				if (!user) {
 					return createErrorResponse(
 						'api-route',
@@ -351,7 +353,16 @@ export const handleUpdateUserRole = async (event: RequestEvent) => {
 					);
 				}
 
-				const updatedUser = await updateUserRole(targetUsername, newRole);
+				if (user.username === targetUsername && newRole !== 'OWNER') {
+					return createErrorResponse(
+						'api-route',
+						403,
+						'Imageboard owners cannot demote themselves to a lower role',
+					);
+				}
+
+				const updateDbFn = UUID_REGEX.test(targetUsername) ? updateUserRoleById : updateUserRoleByUsername;
+				const updatedUser = await updateDbFn(targetUsername, newRole);
 				if (!updatedUser) {
 					return createErrorResponse(
 						'api-route',
@@ -360,9 +371,21 @@ export const handleUpdateUserRole = async (event: RequestEvent) => {
 					);
 				}
 
+				if (newRole === 'OWNER') {
+					await updateUserRoleById(event.locals.user.id, 'MODERATOR');
+				}
+
+				const filteredUser: Partial<TUser> = {
+					id: updatedUser.id,
+					role: updatedUser.role,
+					username: updatedUser.username,
+					profilePictureUrl: updatedUser.profilePictureUrl,
+				};
+
 				return createSuccessResponse(
 					'api-route',
 					`Successfully updated the user role of the user: ${targetUsername} to ${newRole}`,
+					filteredUser,
 				);
 			} catch (error) {
 				logger.error(error);
@@ -508,7 +531,9 @@ export const handleGetUser = async (
 		try {
 			let friendStatus: TFriendStatus = 'not-friends';
 
-			const targetUser = (await findUserByName(targetUsername, {
+			const dbFinderFn = UUID_REGEX.test(targetUsername) ? findUserById : findUserByName;
+
+			const targetUser = (await dbFinderFn(targetUsername, {
 				...PUBLIC_USER_SELECTORS,
 				updatedAt: true,
 				linkedAccounts: {

@@ -14,7 +14,7 @@
 	import Img from 'flowbite-svelte/Img.svelte';
 	import { flip } from 'svelte/animate';
 	import PostCard from '../posts/card/PostCard.svelte';
-	import CollectionCardActions from './card/CollectionCardActions.svelte';
+	import CollectionActions from './card/CollectionActions.svelte';
 
 	type Props = {
 		collection: TPostCollection;
@@ -61,7 +61,7 @@
 	alt={collection.description}
 />
 <div class="flex">
-	<CollectionCardActions onCollectionViewPage {collection} />
+	<CollectionActions onCollectionViewPage {collection} />
 </div>
 
 <section class="space-y-2">

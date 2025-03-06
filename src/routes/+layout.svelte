@@ -9,9 +9,11 @@
 	import LabelMetadataModal from '$lib/client/components/labels/LabelMetadataModal.svelte';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
 	import Navbar from '$lib/client/components/layout/Navbar.svelte';
+	import PromoteModModal from '$lib/client/components/moderation/PromoteModModal.svelte';
+	import ReportListModal from '$lib/client/components/moderation/ReportListModal.svelte';
+	import ReportModal from '$lib/client/components/moderation/ReportModal.svelte';
 	import DeletePostConfirmationModal from '$lib/client/components/posts/card/DeletePostConfirmationModal.svelte';
 	import EditPostModal from '$lib/client/components/posts/card/EditPostModal.svelte';
-	import PostCardReportModal from '$lib/client/components/posts/card/PostCardReportModal.svelte';
 	import HiddenPostModal from '$lib/client/components/posts/container/HiddenPostModal.svelte';
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
@@ -50,15 +52,25 @@
 	<meta property="og:locale" content="en_US" />
 </svelte:head>
 
+<!--- Main application layout -->
 <Navbar />
 <div class="flex-grow">
 	{@render children?.()}
 </div>
 <Footer />
+
+<!-- Reusable app toast -->
 <SvelteToast options={TOAST_DEFAULT_OPTIONS} />
+
+<!-- Modals -->
 <GlobalSearchModal />
 <HiddenPostModal />
-<PostCardReportModal />
+<ReportModal reportType="user" />
+<ReportModal reportType="post" />
+<ReportModal reportType="collection" />
+<ReportListModal reportType="userReports" />
+<ReportListModal reportType="postCollectionReports" />
+<ReportListModal reportType="postReports" />
 <EditCommentModal />
 <DeleteCommentConfirmationModal />
 <EditPostModal />
@@ -68,3 +80,4 @@
 <EditCollectionModal />
 <DeleteCollectionConfirmationModal />
 <LabelMetadataModal />
+<PromoteModModal />

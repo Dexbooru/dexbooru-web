@@ -24,3 +24,4 @@ export const COMMENTS_PAGE_CONTEXT_KEY = 'commentsPage';
 export const COMMENT_PAGINATION_DATA_CONTEXT_KEY = 'commentPaginationData';
 export const FRIEND_DATA_CONTEXT_KEY = 'userFriendsData';
 export const UPDATED_POST_CONTEXT_KEY = 'updatedPost';
+export const MODERATION_PAGINATION_DATA_CONTEXT_KEY = 'moderationPaginationData';

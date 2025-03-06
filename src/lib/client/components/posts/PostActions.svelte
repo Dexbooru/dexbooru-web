@@ -5,6 +5,7 @@
 		DELETE_POST_MODAL_NAME,
 		EDIT_POST_MODAL_NAME,
 		REPORT_MODAL_NAME,
+		REPORT_POST_LIST_MODAL_NAME,
 	} from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import {
@@ -13,6 +14,7 @@
 		getUpdatedPost,
 	} from '$lib/client/helpers/context';
 	import { normalizeCount } from '$lib/client/helpers/posts';
+	import { isModerationRole } from '$lib/shared/helpers/auth/role';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
@@ -122,7 +124,7 @@
 
 	<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
 		<Button
-			on:click={() => handleModalOpen(REPORT_MODAL_NAME, { postId })}
+			on:click={() => handleModalOpen(REPORT_MODAL_NAME, { post })}
 			class="w-full sm:w-auto space-x-2"
 			color="yellow"
 		>
@@ -130,6 +132,18 @@
 			<ExclamationCircleSolid />
 		</Button>
 	</div>
+
+	{#if $user && isModerationRole($user.role)}
+		<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
+			<Button
+				on:click={() => handleModalOpen(REPORT_POST_LIST_MODAL_NAME, { post })}
+				class="w-full sm:w-auto space-x-2"
+				color="red"
+			>
+				<span>Show reports</span>
+			</Button>
+		</div>
+	{/if}
 
 	{#if $user && ($user.id === author.id || $user.role === 'OWNER')}
 		<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
