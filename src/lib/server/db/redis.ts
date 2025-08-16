@@ -12,9 +12,9 @@ const redisClientSingleton = async () => {
 	const connectionParams: RedisClientOptions<RedisModules, RedisFunctions, RedisScripts> = {};
 	if (DB_REDIS_URL.length > 0) {
 		connectionParams.url = DB_REDIS_URL;
-	} else {
-		connectionParams.password = DB_REDIS_PASSWORD;
 	}
+
+	connectionParams.password = DB_REDIS_PASSWORD;
 
 	const client = await createClient(connectionParams).connect();
 

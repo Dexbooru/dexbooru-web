@@ -1,0 +1,53 @@
+services:
+  app:
+    container_name: dexbooru-app
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    ports:
+      - "${PORT}:5173"
+    environment:
+      - PORT=${PORT}
+      - ORIGIN=${ORIGIN}
+    depends_on:
+      - postgres
+      - redis
+      - localstack
+
+  localstack:
+    image: localstack/localstack:s3-latest
+    container_name: dexbooru-localstack
+    restart: always
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  postgres:
+    image: postgres:latest
+    container_name: dexbooru-postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    container_name: dexbooru-redis
+    restart: always
+    command: ["redis-server","--requirepass","${DB_REDIS_PASSWORD}"]
+    ports:
+      - "${DB_REDIS_PORT}:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  localstack-data:
+  pg-data:
+  redis-data:
