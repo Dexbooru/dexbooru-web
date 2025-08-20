@@ -11,8 +11,10 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 yarn-error.log
 .vercel
-scripts/mock_data
-scripts/venv
+
+# scripts
+scripts/venv/
+mock_data/
 
 # docker
 /docker/redis/data

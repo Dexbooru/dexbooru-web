@@ -100,6 +100,22 @@ const artistFactory = (overrides: Partial<Artist> = {}): Artist => {
 	};
 };
 
+const socialMediaLinkFactory = (): string => {
+	const username = faker.internet.userName();
+	const platforms = [
+		`https://www.patreon.com/${username}`,
+		`https://www.instagram.com/${username}`,
+		`https://twitter.com/${username}`,
+		`https://x.com/${username}`,
+		`https://www.artstation.com/${username}`,
+		`https://www.deviantart.com/${username}`,
+		`https://www.facebook.com/${username}`,
+		`https://www.pixiv.net/en/users/${faker.number.int({ min: 10000, max: 10000000 })}`,
+	];
+
+	return faker.helpers.arrayElement(platforms);
+};
+
 const user = Object.assign(userFactory, {
 	createMany: (count: number, overrides: Partial<User> = {}): User[] => {
 		return Array.from({ length: count }, () => userFactory(overrides));
@@ -136,4 +152,10 @@ const artist = Object.assign(artistFactory, {
 	},
 });
 
-export default { artist, comment, post, postCollection, tag, user };
+const socialMediaLink = Object.assign(socialMediaLinkFactory, {
+	createMany: (count: number): string[] => {
+		return Array.from({ length: count }, () => socialMediaLinkFactory());
+	},
+});
+
+export default { artist, comment, post, postCollection, socialMediaLink, tag, user };

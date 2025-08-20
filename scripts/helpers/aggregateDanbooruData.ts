@@ -57,7 +57,7 @@ const DEFAULT_FORBIDDEN_TAGS = [
 ];
 const DEFAULT_POST_PICTURE_URL =
 	'https://preview.redd.it/xcnycjjyvuz51.jpg?width=1050&format=pjpg&auto=webp&s=c801d1ad05e698d151ebf484d585ba1af1220c99';
-const DEFAULT_OUTPUT_DIR = path.join('mock_data', 'danbooru');
+const DEFAULT_OUTPUT_DIR = path.join('../', 'mock_data', 'danbooru');
 const DEFAULT_BATCH_SIZE = 10;
 const DEFAULT_BATCH_DELAY = 1500;
 const DEFAULT_POST_DELAY = 100;
@@ -200,7 +200,7 @@ async function aggregateDanbooruPosts(options: TAggregateOptions = {}) {
 	} = options;
 
 	const logger = buildLogger(logLevel);
-	
+
 	const total = Math.max(1, Number(amount) || 1);
 	const batchSize = Math.max(1, Math.min(Number(rawBatchSize) || 1, total));
 	const userForbidden = blacklistedTags

@@ -1,16 +1,18 @@
-import { Faker, en } from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import { PrismaClient, User } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 import { TDanbooruPost } from './aggregateDanbooruData';
+import factories from './factories';
 import buildLogger from './logger';
 
 const TOTAL_ARTISTS = 3000;
 const BUFFER_SIZE = 20;
-const DATASET_DIR = 'mock_data/danbooru';
+const DATASET_DIR = path.join('../', 'mock_data', 'danbooru');
 const ARTIST_SAMPLE_MIN = 1;
 const ARTIST_SAMPLE_MAX = 6;
+const DELETION_MODELS = ['user', 'comment', 'postCollection', 'post', 'artist', 'tag'];
 
 const getJsonlFiles = (dir: string) =>
 	fs
@@ -19,7 +21,7 @@ const getJsonlFiles = (dir: string) =>
 		.map((d) => path.join(dir, d.name))
 		.sort();
 
-const getRandomArtists = (faker: Faker, artists: string[]) => {
+const getRandomArtists = (artists: string[]) => {
 	const artistSet = new Set<string>();
 	const sampleSize = faker.number.int({ min: ARTIST_SAMPLE_MIN, max: ARTIST_SAMPLE_MAX });
 	while (artistSet.size < sampleSize) {
@@ -94,23 +96,30 @@ const renderTable = (rows: Array<[string, string | number]>) => {
 	return '\n' + line + header + mid + body + end;
 };
 
-async function dumpDanbooruData({
-	mockUsers: users,
+async function dumpData({
 	dbClient: prismaClient,
 	logger,
 }: {
-	mockUsers: User[];
 	dbClient: PrismaClient;
 	logger: ReturnType<typeof buildLogger>;
 }) {
 	try {
-		logger.info('Deleting existing posts, artists, and tags from the database');
-		await prismaClient.tag.deleteMany({});
-		await prismaClient.artist.deleteMany({});
-		await prismaClient.post.deleteMany({});
-		logger.info('Deleted all existing data');
+		logger.info(`Deleting all records of: ${DELETION_MODELS.join(', ')} from the database`);
 
-		const faker = new Faker({ locale: [en] });
+		for (const model of DELETION_MODELS) {
+			await prismaClient[model].deleteMany({});
+			logger.info(`Deleted all records from ${model}`);
+		}
+
+		logger.info('Deleted all existing data successfully');
+
+		const mockUsers = factories.user.createMany(20);
+		const userWriteResult = await prismaClient.user.createMany({
+			data: mockUsers,
+		});
+
+		logger.debug(`Inserted ${userWriteResult.count} mock users into the database.`);
+
 		const files = getJsonlFiles(DATASET_DIR);
 		if (files.length === 0) {
 			logger.error(`No .jsonl files found in ${DATASET_DIR}`);
@@ -147,6 +156,7 @@ async function dumpDanbooruData({
 				data: tags.map((tag) => ({
 					id: faker.string.uuid(),
 					name: tag,
+					description: faker.lorem.sentence(),
 				})),
 				skipDuplicates: true,
 			});
@@ -157,6 +167,10 @@ async function dumpDanbooruData({
 				data: artists.map((artist) => ({
 					id: faker.string.uuid(),
 					name: artist,
+					description: faker.lorem.sentence(),
+					socialMediaLinks: factories.socialMediaLink.createMany(
+						faker.number.int({ min: 0, max: 3 }),
+					),
 				})),
 				skipDuplicates: true,
 			});
@@ -173,9 +187,9 @@ async function dumpDanbooruData({
 				if (currentPostBuffer.length === BUFFER_SIZE) {
 					const postCreationPromises = currentPostBuffer.map((post) =>
 						generatePostCreationPromise(
-							getRandomUser(users),
+							getRandomUser(mockUsers),
 							post,
-							getRandomArtists(faker, artists),
+							getRandomArtists(artists),
 							faker.lorem.paragraph(),
 							prismaClient,
 						),
@@ -193,9 +207,9 @@ async function dumpDanbooruData({
 		if (currentPostBuffer.length > 0) {
 			const postCreationPromises = currentPostBuffer.map((post) =>
 				generatePostCreationPromise(
-					getRandomUser(users),
+					getRandomUser(mockUsers),
 					post,
-					getRandomArtists(faker, artists),
+					getRandomArtists(artists),
 					faker.lorem.paragraph(),
 					prismaClient,
 				),
@@ -204,17 +218,42 @@ async function dumpDanbooruData({
 			postsProcessed += currentPostBuffer.length;
 		}
 
+		const dbPostCount = await prismaClient.post.count();
+		const dbPosts = await prismaClient.post.findMany({ select: { id: true } });
+		const comments = factories.comment.createMany(dbPostCount * 3);
+
+		let commentIndex = 0;
+		dbPosts.forEach((post) => {
+			const postComments = comments.slice(commentIndex, commentIndex + 3);
+			postComments.forEach((comment) => {
+				comment.postId = post.id;
+
+				const usersIndex = Math.floor(Math.random() * mockUsers.length);
+				comment.authorId = mockUsers[usersIndex].id;
+			});
+
+			commentIndex += 3;
+		});
+
+		const commentWriteResult = await prismaClient.comment.createMany({
+			data: comments,
+		});
+
+		logger.info(`Inserted ${commentWriteResult.count} comments into the database.`);
+
 		const table = renderTable([
 			['Unique tags', tags.length],
 			['Unique artists', artists.length],
 			['Total posts discovered', totalPosts],
 			['Total posts inserted', postsProcessed],
+			['Total users inserted', userWriteResult.count],
+			['Total comments inserted', commentWriteResult.count],
 		]);
 		console.log(table);
 	} catch (error) {
-		logger.error('Error during Danbooru data dump:', error);
+		logger.error('Error during Dexbooru data dump:', error);
 		throw error;
 	}
 }
 
-export default dumpDanbooruData;
+export default dumpData;
