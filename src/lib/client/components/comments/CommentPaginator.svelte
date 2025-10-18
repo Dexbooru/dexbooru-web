@@ -51,7 +51,7 @@
 </script>
 
 {#if $commentPaginationData}
-	<div id="pagination-container" class="flex space-x-3 justify-center">
+	<div id="pagination-container" class="flex m-3 space-x-3 justify-center">
 		{#if noCommentsOnPage && !!!['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $commentPaginationData.pageNumber > 0}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}

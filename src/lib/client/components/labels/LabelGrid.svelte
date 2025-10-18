@@ -49,11 +49,11 @@
 		if (response.ok) {
 			const responseData: TApiResponse<(Tag & Artist)[]> = await response.json();
 			const rawLabels: (Tag & Artist)[] = responseData.data;
+
 			const rawLabelNames = rawLabels.map((rawLabel) => rawLabel.name);
 			labels = !pressedLoadingMore ? rawLabelNames : [...labels, ...rawLabelNames];
 			rawLabels.forEach((rawLabel) => {
-				const labelName = rawLabel.name;
-				const labelCount = rawLabel.postCount;
+				const { name: labelName, postCount: labelCount } = rawLabel;
 				labelCounts.set(labelName, labelCount);
 			});
 
@@ -71,7 +71,7 @@
 	};
 </script>
 
-<main class="flex flex-col justify-center m-7 space-y-5">
+<main class="flex flex-col flex-grow justify-center m-7 space-y-5">
 	<h1 class="text-4xl dark:text-white text-center">
 		{labelType === 'tag' ? 'Tags' : 'Artists'} Index
 	</h1>

@@ -64,10 +64,17 @@
 		commentEditing = true;
 		const response = await editComment(postId, commentId, commentContentMarkdown);
 		if (response.ok) {
+			const responseData: TApiResponse<TComment> = await response.json();
+			const newComment = responseData.data;
+
 			toast.push('The comment was edited successfully', SUCCESS_TOAST_OPTIONS);
 
 			commentTree.update((commentTree) => {
-				commentTree.editComment(commentId, commentContentMarkdown);
+				commentTree.editComment(
+					newComment.id,
+					commentContentMarkdown,
+					new Date(newComment.updatedAt),
+				);
 				return commentTree;
 			});
 
@@ -125,10 +132,7 @@
 </script>
 
 <Tabs style="underline">
-	<TabItem open>
-		{#snippet title()}
-			<span>Your comment</span>
-		{/snippet}
+	<TabItem open title="Your comment">
 		<div class="flex flex-col space-y-2">
 			<div class="flex">
 				<EmojiSearch {handleEmoji} />
@@ -161,10 +165,7 @@
 			>
 		{/if}
 	</TabItem>
-	<TabItem>
-		{#snippet title()}
-			<span>Preview your markdown comment</span>
-		{/snippet}
+	<TabItem title="Preview your markdown comment">
 		<div class="z-10 flex flex-col p-4 dark:bg-gray-700 dark:border-gray-600 text-left">
 			{#if commentContentMarkdown.length > 0}
 				<p class="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">

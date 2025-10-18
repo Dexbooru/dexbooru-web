@@ -19,15 +19,28 @@
 	import Modal from 'flowbite-svelte/Modal.svelte';
 	import Select from 'flowbite-svelte/Select.svelte';
 
+	const user = getAuthenticatedUser();
+	const activeModal = getActiveModal();
+	const moderationData = getModerationPaginationData();
+
 	let promotionUsername = $state('');
 	let selectedNewRole = $state<UserRole | ''>('');
 	let updatingUserRole = $state(false);
 	let updateRoleButtonDisabled = $derived.by(() => {
+		const promotionExists = $moderationData?.moderators.some(
+			(moderator) =>
+				(moderator.username === promotionUsername || moderator.id === promotionUsername) &&
+				moderator.role === selectedNewRole,
+		);
+
 		return (
 			promotionUsername.length === 0 ||
 			selectedNewRole.length === 0 ||
-			($user && $user.username === promotionUsername && selectedNewRole === 'OWNER') ||
-			($user && $user.username === promotionUsername && $user.role === 'OWNER') ||
+			($user &&
+				($user.username || $user.id) === promotionUsername &&
+				selectedNewRole === 'OWNER') ||
+			($user && ($user.username || $user.id) === promotionUsername && $user.role === 'OWNER') ||
+			promotionExists ||
 			updatingUserRole
 		);
 	});
@@ -51,11 +64,16 @@
 		if (response.ok) {
 			const responseData: TApiResponse<TUser> = await response.json();
 			const updatedUser = responseData.data;
+
 			moderationData.update((data) => {
 				if (data) {
 					if (updatedUser.role === 'USER') {
 						data.moderators = data.moderators.filter(
 							(moderator) => moderator.id !== updatedUser.id,
+						);
+					} else if (data.moderators.some((moderator) => moderator.id === updatedUser.id)) {
+						data.moderators = data.moderators.map((moderator) =>
+							moderator.id === updatedUser.id ? updatedUser : moderator,
 						);
 					} else {
 						data.moderators.push(updatedUser);
@@ -76,10 +94,6 @@
 
 		updatingUserRole = false;
 	};
-
-	const user = getAuthenticatedUser();
-	const activeModal = getActiveModal();
-	const moderationData = getModerationPaginationData();
 </script>
 
 <Modal
@@ -96,7 +110,7 @@
 		type="url"
 		bind:value={promotionUsername}
 		name="promotionUsername"
-		placeholder="Enter the username"
+		placeholder="Enter the username or user id"
 		required
 		class="w-full p-2 border border-gray-300 rounded-md"
 	/>

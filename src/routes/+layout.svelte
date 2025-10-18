@@ -52,12 +52,16 @@
 	<meta property="og:locale" content="en_US" />
 </svelte:head>
 
-<!--- Main application layout -->
-<Navbar />
-<div class="flex-grow">
-	{@render children?.()}
+<div class="flex flex-col min-h-screen">
+	<!--- Main application layout -->
+	<Navbar />
+	<div class="flex-grow">
+		{@render children?.()}
+	</div>
+	{#if page.route.id === '/'}
+		<Footer />
+	{/if}
 </div>
-<Footer />
 
 <!-- Reusable app toast -->
 <SvelteToast options={TOAST_DEFAULT_OPTIONS} />

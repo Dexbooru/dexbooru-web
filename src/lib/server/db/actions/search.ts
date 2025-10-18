@@ -10,7 +10,7 @@ import prisma from '../prisma';
 export async function searchForTags(query: string, limit: number): Promise<TAppSearchResult> {
 	const searchStatement = Prisma.sql`
       SELECT
-          t."id", t."name"
+          t."id", t."name", t."postCount"
       FROM 
           "Tag" t
       WHERE
@@ -28,7 +28,7 @@ export async function searchForTags(query: string, limit: number): Promise<TAppS
 export async function searchForArtists(query: string, limit: number): Promise<TAppSearchResult> {
 	const searchStatement = Prisma.sql`
       SELECT
-          a."id", a."name"
+          a."id", a."name", a."postCount"
       FROM 
           "Artist" a
       WHERE

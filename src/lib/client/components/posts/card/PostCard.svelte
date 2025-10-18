@@ -1,16 +1,17 @@
 <script lang="ts">
 	import ImageCarousel from '$lib/client/components/images/ImageCarousel.svelte';
 	import PostCardBody from '$lib/client/components/posts/card/PostCardBody.svelte';
+	import PostCardTooltip from '$lib/client/components/posts/card/PostCardTooltip.svelte';
 	import { HIDDEN_POSTS_MODAL_NAME } from '$lib/client/constants/layout';
 	import {
 		POST_CARD_CAROUSEL_SLIDE_DURATION,
-		POST_CARD_CAROUSEL_TRANSITION_FUNCTION,
+		POST_CARD_CAROUSEL_TRANSITION_FUNCTION
 	} from '$lib/client/constants/posts';
 	import { getActiveModal, getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
 		NSFW_PREVIEW_IMAGE_SUFFIX,
-		PREVIEW_IMAGE_SUFFIX,
+		PREVIEW_IMAGE_SUFFIX
 	} from '$lib/shared/constants/images';
 	import type { TPost } from '$lib/shared/types/posts';
 	import Card from 'flowbite-svelte/Card.svelte';
@@ -28,7 +29,9 @@
 	const { id: postId, tags, artists, isNsfw } = post;
 	let imageUrls = $state(post.imageUrls);
 
-	const imagesAlt = `${tags.map((tag) => tag.name).join(', ')} by ${artists.map((artist) => artist.name).join(', ')}`;
+	const imagesAlt = `${tags.map((tag) => tag.name).join(', ')} by ${artists
+		.map((artist) => artist.name)
+		.join(', ')}`;
 	const userPreferences = getAuthenticatedUserPreferences();
 	const activeModal = getActiveModal();
 
@@ -37,7 +40,7 @@
 		imageUrls = imageUrls.filter((imageUrl) => {
 			if (
 				IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionBaseUrl) =>
-					imageUrl.includes(exclusionBaseUrl),
+					imageUrl.includes(exclusionBaseUrl)
 				)
 			) {
 				return true;
@@ -57,14 +60,16 @@
 </script>
 
 {#if $userPreferences.hidePostMetadataOnPreview && !onCollectionViewPage}
-	<ImageCarousel
-		resourceType="posts"
-		resourceHref="/posts/{postId}"
-		{imageUrls}
-		{imagesAlt}
-		slideDuration={POST_CARD_CAROUSEL_SLIDE_DURATION}
-		transitionFunction={POST_CARD_CAROUSEL_TRANSITION_FUNCTION}
-	/>
+	<PostCardTooltip {artists} {tags}>
+		<ImageCarousel
+			resourceType="posts"
+			resourceHref="/posts/{postId}"
+			{imageUrls}
+			{imagesAlt}
+			slideDuration={POST_CARD_CAROUSEL_SLIDE_DURATION}
+			transitionFunction={POST_CARD_CAROUSEL_TRANSITION_FUNCTION}
+		/>
+	</PostCardTooltip>
 {:else}
 	<Card class="self-start">
 		{#if isNsfw && $userPreferences.autoBlurNsfw && $activeModal.focusedModalName !== HIDDEN_POSTS_MODAL_NAME}

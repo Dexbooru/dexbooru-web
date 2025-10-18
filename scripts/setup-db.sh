@@ -27,32 +27,15 @@ log "Starting postgres and redis"
 $COMPOSE -f "$COMPOSE_FILE" --project-directory "$PROJECT_DIR" up -d postgres redis
 log "Containers started"
 
-log "Waiting for postgres readiness"
-deadline=$((SECONDS+120))
-until docker exec dexbooru-postgres pg_isready -h localhost -p 5432 >/dev/null 2>&1; do
-  if (( SECONDS >= deadline )); then
-    log "Postgres not ready after timeout"
-    exit 1
-  fi
-  sleep 2
-done
-log "Postgres is ready"
+log "Postgres and redis are ready"
 
-log "Waiting for redis readiness"
-deadline=$((SECONDS+90))
-REDIS_PASS="$(docker exec dexbooru-redis printenv DB_REDIS_PASSWORD 2>/dev/null || true)"
-until docker exec dexbooru-redis sh -lc "redis-cli ${REDIS_PASS:+-a \"$REDIS_PASS\"} ping | grep -qi PONG" >/dev/null 2>&1; do
-  if (( SECONDS >= deadline )); then
-    log "Redis not ready after timeout"
-    exit 1
-  fi
-  sleep 2
-done
-log "Redis is ready"
+cd "$PROJECT_DIR"
 
 log "Running pnpm dbgenerate"
-cd "$PROJECT_DIR"
 pnpm dbgenerate
+
+log "Running pnpm dbmigrate"
+pnpm dbmigrate
 
 log "Running pnpm dbseed"
 pnpm dbseed

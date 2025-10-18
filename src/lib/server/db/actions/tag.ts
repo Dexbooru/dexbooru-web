@@ -17,7 +17,7 @@ export async function updateTagMetadata(tagName: string, description: string | n
 	return updatedTag;
 }
 
-export async function getTagMetadata(tagName: string): Promise<Tag | null> {
+export async function findTagMetadata(tagName: string): Promise<Tag | null> {
 	const tag = await prisma.tag.findUnique({
 		where: {
 			name: tagName,
@@ -94,6 +94,7 @@ export async function getTagsWithStartingLetter(letter: string, pageNumber: numb
 		take: MAXIMUM_TAGS_PER_PAGE,
 		select: {
 			name: true,
+			postCount: true,
 		},
 	});
 

@@ -121,7 +121,7 @@
 	<div class="grid grid-cols-3 gap-4">
 		{#each collection.posts as post (post.id)}
 			<div animate:flip={{ duration: POSTS_GRID_ANIMATION_DURATION_MS }}>
-				<PostCard onCollectionViewPage {post} />
+				<PostCard  {post} />
 			</div>
 		{/each}
 	</div>

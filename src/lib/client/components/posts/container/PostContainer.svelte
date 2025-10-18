@@ -10,7 +10,6 @@
 	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
-	import Searchbar from '../../reusable/Searchbar.svelte';
 
 	type Props = {
 		postContainerTitle: string;
@@ -19,7 +18,6 @@
 	let { postContainerTitle }: Props = $props();
 	let uniqueTags: string[] = $state([]);
 	let uniqueArtists: string[] = $state([]);
-	let currentPageQuery: string = $state('');
 
 	const originalPostPage = getOriginalPostsPage();
 	const postsPage = getPostsPage();
@@ -29,24 +27,6 @@
 		if (page.url.pathname.includes('/posts/tag')) return 'tag';
 		if (page.url.pathname.includes('/posts/artist')) return 'artist';
 		return null;
-	};
-
-	const onPostSearch = (query: string) => {
-		const cleanedQuery = query.toLocaleLowerCase().trim();
-		currentPageQuery = cleanedQuery;
-
-		const filteredPosts = $originalPostPage.filter((post) => {
-			const tagHasQuery = post.tags
-				.map((tag) => tag.name)
-				.find((tagName) => tagName.toLocaleLowerCase().includes(cleanedQuery));
-			const artistHasQuery = post.artists
-				.map((artist) => artist.name)
-				.find((artistName) => artistName.toLocaleLowerCase().includes(cleanedQuery));
-
-			return tagHasQuery || artistHasQuery;
-		});
-
-		postsPage.set(filteredPosts);
 	};
 
 	const postPageStoreUnsubscribe = postsPage.subscribe((updatedPosts) => {
@@ -71,19 +51,6 @@
 				{postContainerTitle}
 			</h1>
 			<div class="flex flex-col space-y-2">
-				{#if $originalPostPage.length > 0}
-					<Searchbar
-						inputElementId="post-page-searchbar"
-						customClass="sm:mr-auto sm:ml-auto md:ml-0 md:mr-auto"
-						width="30rem"
-						queryInputHandler={onPostSearch}
-						queryInputClear={() => {
-							postsPage.set($originalPostPage);
-							currentPageQuery = '';
-						}}
-						placeholder="Search by tag/artist keyword(s) on this page"
-					/>
-				{/if}
 				{#if ['/posts/tag', '/posts/artist'].some( (path) => page.url.pathname.includes(path), ) && getPageLabelType()}
 					<Button
 						on:click={() =>
@@ -93,7 +60,7 @@
 								isOpen: true,
 							})}
 						color="blue"
-						class="w-[20rem] sm:mr-auto sm:ml-auto md:ml-0 md:mr-auto"
+						class="w-full sm:w-[20rem] sm:mr-auto sm:ml-auto md:ml-0 md:mr-auto"
 					>
 						{#if getPageLabelType() === 'tag'}
 							<TagSolid class="mr-2" />
@@ -103,12 +70,13 @@
 						View metadata for this {getPageLabelType()}</Button
 					>
 				{/if}
+
+				{#if $originalPostPage.length > 0}
+					<PostPaginator />
+				{/if}
 			</div>
 		</div>
 		<PostGrid />
-		{#if $originalPostPage.length > 0 && currentPageQuery.length === 0}
-			<PostPaginator />
-		{/if}
 	</div>
 </main>
 
@@ -148,6 +116,7 @@
 
 		#post-container-body {
 			grid-area: unset;
+			width: 100%;
 			padding: 1rem;
 		}
 	}

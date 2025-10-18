@@ -50,11 +50,12 @@ class CommentTree {
 		this.data.set(currentParentId, filteredAssociatedComments);
 	}
 
-	editComment(commentId: string, newContent: string) {
+	editComment(commentId: string, newContent: string, updatedAt: Date) {
 		for (const comments of this.data.values()) {
 			const comment = comments.find((c) => c.id === commentId);
 			if (comment) {
 				comment.content = newContent;
+				comment.updatedAt = updatedAt;
 				return true;
 			}
 		}

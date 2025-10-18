@@ -10,6 +10,7 @@
 	import GroupItem from 'flowbite-svelte/GroupItem.svelte';
 	import ListPlaceholder from 'flowbite-svelte/ListPlaceholder.svelte';
 	import { convert as parseHtmlString } from 'html-to-text';
+	import { onMount } from 'svelte';
 	import CommentPaginator from './CommentPaginator.svelte';
 
 	const paginationData = getCommentPaginationData();
@@ -57,6 +58,28 @@
 			page.data.ascending ?? false,
 		),
 	);
+
+	const paginationDataUnsubscribe = paginationData.subscribe((data) => {
+		if (!data) return;
+
+		console.log(data);
+
+		const images = Array.from(document.querySelectorAll('img')) as HTMLImageElement[];
+		images.forEach((image) => {
+			if (image.alt.includes('profile of')) {
+				console.log(image);
+				image.onerror = () => {
+					image.src = DefaultProfilePicture;
+				};
+			}
+		});
+	});
+
+	onMount(() => {
+		return () => {
+			paginationDataUnsubscribe();
+		};
+	});
 </script>
 
 <svelte:head>
@@ -74,6 +97,7 @@
 			</h1>
 		{:else}
 			<h1 class="text-4xl m-4 dark:text-white">{titleData.title}</h1>
+			<CommentPaginator />
 			{#each Object.entries(commentDateGroups) as [date, comments]}
 				<Group
 					divClass="p-4 mb-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 comment-date-group"
@@ -95,8 +119,6 @@
 					/>
 				</Group>
 			{/each}
-
-			<CommentPaginator />
 		{/if}
 	{:else}
 		{#each Array(page.data.comments?.length ?? 0) as _}

@@ -12,7 +12,15 @@ const BUFFER_SIZE = 20;
 const DATASET_DIR = path.join('../', 'mock_data', 'danbooru');
 const ARTIST_SAMPLE_MIN = 1;
 const ARTIST_SAMPLE_MAX = 6;
-const DELETION_MODELS = ['user', 'comment', 'postCollection', 'post', 'artist', 'tag'];
+const DELETION_MODELS = [
+	'user',
+	'comment',
+	'postCollection',
+	'post',
+	'artist',
+	'tag',
+	'userPreference',
+];
 
 const getJsonlFiles = (dir: string) =>
 	fs
@@ -119,6 +127,12 @@ async function dumpData({
 		});
 
 		logger.debug(`Inserted ${userWriteResult.count} mock users into the database.`);
+
+		const userPreferenceWriteResult = await prismaClient.userPreference.createMany({
+			data: mockUsers.map((user) => ({ userId: user.id })),
+		});
+
+		logger.debug(`Inserted ${userPreferenceWriteResult.count} user preferences into the database.`);
 
 		const files = getJsonlFiles(DATASET_DIR);
 		if (files.length === 0) {

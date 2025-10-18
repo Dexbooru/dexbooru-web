@@ -25,11 +25,7 @@
 
 {#if (page.data.posts ?? []).length > 0}
 	<div
-		class="p-3 sm:flex sm:flex-col md:grid lg:grid xl:grid grid-cols-1 {(useHiddenPosts ||
-			useNsfwPosts) &&
-			'place-items-left'} {!useHiddenPosts &&
-			!useNsfwPosts &&
-			'space-y-3 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'} gap-4 auto-rows-min"
+		class="p-3 grid grid-cols-1 sm:grid-cols-3 gap-4 auto-rows-min"
 	>
 		{#if $postPaginationData}
 			{#each useHiddenPosts ? $blacklistedPostPage : useNsfwPosts ? $nsfwPostPage : $postPage as post (post.id)}

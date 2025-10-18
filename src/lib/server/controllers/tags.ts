@@ -21,7 +21,7 @@ export const handleGetTags = async (event: RequestEvent) => {
 			const cacheKey = getLabelLetterCacheKey('tags', pageNumber, letter);
 
 			const tags =
-				(await getRemoteResponseFromCache<{ name: string }[]>(cacheKey)) ??
+				(await getRemoteResponseFromCache<{ name: string; postCount: number }[]>(cacheKey)) ??
 				(await getTagsWithStartingLetter(letter, pageNumber));
 
 			cacheResponseRemotely(cacheKey, tags, TAGS_PAGINATION_CACHE_TIME_SECONDS);

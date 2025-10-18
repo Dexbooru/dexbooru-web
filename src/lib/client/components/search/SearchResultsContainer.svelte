@@ -13,15 +13,7 @@
 	};
 
 	let { results }: Props = $props();
-	let { posts, artists, tags, users, collections } = $state(results);
-
-	$effect(() => {
-		posts = results.posts;
-		artists = results.artists;
-		tags = results.tags;
-		users = results.users;
-		collections = results.collections;
-	});
+	let { posts, artists, tags, users, collections } = $derived(results);
 </script>
 
 <div in:slide out:slide>

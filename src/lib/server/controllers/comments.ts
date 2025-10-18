@@ -227,7 +227,7 @@ export const handleUpdatePostComment = async (event: RequestEvent) => {
 					);
 				}
 
-				await editCommentContentById(commentId, content);
+				const updatedComment = await editCommentContentById(commentId, content);
 
 				const postCacheKey = getCacheKeyForIndividualPost(postId);
 				invalidateCacheRemotely(postCacheKey);
@@ -235,6 +235,7 @@ export const handleUpdatePostComment = async (event: RequestEvent) => {
 				return createSuccessResponse(
 					'api-route',
 					`Successfully edited the comment content for the id: ${commentId}`,
+					updatedComment,
 				);
 			} catch (error) {
 				logger.error(error);

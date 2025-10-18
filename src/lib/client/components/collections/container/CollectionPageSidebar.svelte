@@ -4,7 +4,7 @@
 	import { getCollectionPage } from '$lib/client/helpers/context';
 	import type { TCollectionOrderByColumn } from '$lib/shared/types/collections';
 	import OrderedListSolid from 'flowbite-svelte-icons/ListOrdoredSolid.svelte';
-	import UserSolid from 'flowbite-svelte-icons/UserSolid.svelte';
+	import UserSolid from 'flowbite-svelte-icons/UsersGroupOutline.svelte'
 	import Sidebar from 'flowbite-svelte/Sidebar.svelte';
 	import SidebarDropdownItem from 'flowbite-svelte/SidebarDropdownItem.svelte';
 	import SidebarDropdownWrapper from 'flowbite-svelte/SidebarDropdownWrapper.svelte';

@@ -3,10 +3,10 @@
 	import { getPostPaginationData } from '$lib/client/helpers/context';
 	import { buildUrl } from '$lib/client/helpers/urls';
 	import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
-	import Button from 'flowbite-svelte/Button.svelte';
-	import PaginationItem from 'flowbite-svelte/PaginationItem.svelte';
 	import ArrowLeftSolid from 'flowbite-svelte-icons/ArrowLeftSolid.svelte';
 	import ArrowRightSolid from 'flowbite-svelte-icons/ArrowRightSolid.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import PaginationItem from 'flowbite-svelte/PaginationItem.svelte';
 	import { onMount } from 'svelte';
 
 	let previousPageUrl: URL = $state(new URL('http://mock.com'));
@@ -54,7 +54,7 @@
 </script>
 
 {#if $postPaginationData}
-	<div id="pagination-container" class="flex space-x-3 justify-center">
+	<div id="pagination-container" class="flex flex-wrap gap-3 justify-center">
 		{#if noPostsOnPage && !!!['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $postPaginationData.pageNumber > 0}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}

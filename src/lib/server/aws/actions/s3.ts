@@ -1,9 +1,5 @@
 import { dev } from '$app/environment';
-import {
-	AWS_CLOUDFRONT_COLLECTION_PICTURE_BASE_URL,
-	AWS_CLOUDFRONT_POSTS_BASE_URL,
-	AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL,
-} from '$env/static/private';
+import { AWS_CLOUDFRONT_CDN_URL } from '$env/static/private';
 import {
 	AWS_LOCAL_COLLECTION_PICTURE_BASE_URL,
 	AWS_LOCAL_POSTS_BASE_URL,
@@ -20,13 +16,11 @@ import awsS3 from '../s3';
 const getObjectBaseUrl = (objectSource: TS3ObjectSource): string => {
 	switch (objectSource) {
 		case 'collections':
-			return dev
-				? AWS_LOCAL_COLLECTION_PICTURE_BASE_URL
-				: AWS_CLOUDFRONT_COLLECTION_PICTURE_BASE_URL;
+			return dev ? AWS_LOCAL_COLLECTION_PICTURE_BASE_URL : AWS_CLOUDFRONT_CDN_URL + '/collections';
 		case 'posts':
-			return dev ? AWS_LOCAL_POSTS_BASE_URL : AWS_CLOUDFRONT_POSTS_BASE_URL;
+			return dev ? AWS_LOCAL_POSTS_BASE_URL : AWS_CLOUDFRONT_CDN_URL + '/posts';
 		case 'profile_pictures':
-			return dev ? AWS_LOCAL_PROFILE_PICTURE_BASE_URL : AWS_CLOUDFRONT_PROFILE_PICTURE_BASE_URL;
+			return dev ? AWS_LOCAL_PROFILE_PICTURE_BASE_URL : AWS_CLOUDFRONT_CDN_URL + 'profile-pictures';
 		default:
 			return '';
 	}
@@ -85,14 +79,14 @@ export async function deleteBatchFromBucket(
 
 export async function uploadBatchToBucket(
 	bucketName: string,
-	objectSources: TS3ObjectSource,
+	objectSource: TS3ObjectSource,
 	fileBuffers: Buffer[],
 	contentType: string = 'webp',
 	objectIds: string[] = [],
 ): Promise<string[]> {
 	const objectUrls = await Promise.all(
 		fileBuffers.map((fileBuffer, index) =>
-			uploadToBucket(bucketName, objectSources, fileBuffer, contentType, objectIds[index]),
+			uploadToBucket(bucketName, objectSource, fileBuffer, contentType, objectIds[index]),
 		),
 	);
 	return objectUrls;

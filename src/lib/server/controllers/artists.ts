@@ -21,7 +21,7 @@ export const handleGetArtists = async (event: RequestEvent) => {
 			const cacheKey = getLabelLetterCacheKey('artists', pageNumber, letter);
 
 			const artists =
-				(await getRemoteResponseFromCache<{ name: string }[]>(cacheKey)) ??
+				(await getRemoteResponseFromCache<{ name: string; postCount: number }[]>(cacheKey)) ??
 				(await getArtistsWithStartingLetter(letter, pageNumber));
 
 			cacheResponseRemotely(cacheKey, artists, ARTISTS_PAGINATION_CACHE_TIME_SECONDS);

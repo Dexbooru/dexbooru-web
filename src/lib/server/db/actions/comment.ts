@@ -35,8 +35,8 @@ export async function findCommentById(commentId: string, selectors?: TCommentSel
 export async function editCommentContentById(
 	commentId: string,
 	updatedContent: string,
-): Promise<boolean> {
-	const updateCommentBatchResult = await prisma.comment.updateMany({
+): Promise<Partial<Comment>> {
+	const updatedComment = await prisma.comment.update({
 		where: {
 			id: commentId,
 		},
@@ -44,9 +44,14 @@ export async function editCommentContentById(
 			content: updatedContent,
 			updatedAt: new Date(),
 		},
+		select: {
+			id: true,
+			content: true,
+			updatedAt: true,
+		},
 	});
 
-	return updateCommentBatchResult.count > 0;
+	return updatedComment;
 }
 
 export async function deleteCommentById(commentId: string, postId: string): Promise<boolean> {

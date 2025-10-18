@@ -1,4 +1,5 @@
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
+import { UUID_REGEX } from '$lib/shared/constants/search';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import type { TFriendStatus } from '$lib/shared/types/friends';
 import type { TUser } from '$lib/shared/types/users';
@@ -82,7 +83,6 @@ import {
 	UserRoleUpdateSchema,
 	UserUpdatePasswordAccountRecoverySchema,
 } from './request-schemas/users';
-import { UUID_REGEX } from '$lib/shared/constants/search';
 
 export const handleGetUserSettings = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(event, 'page-server-load', {}, async (_) => {
@@ -361,7 +361,9 @@ export const handleUpdateUserRole = async (event: RequestEvent) => {
 					);
 				}
 
-				const updateDbFn = UUID_REGEX.test(targetUsername) ? updateUserRoleById : updateUserRoleByUsername;
+				const updateDbFn = UUID_REGEX.test(targetUsername)
+					? updateUserRoleById
+					: updateUserRoleByUsername;
 				const updatedUser = await updateDbFn(targetUsername, newRole);
 				if (!updatedUser) {
 					return createErrorResponse(
@@ -380,6 +382,7 @@ export const handleUpdateUserRole = async (event: RequestEvent) => {
 					role: updatedUser.role,
 					username: updatedUser.username,
 					profilePictureUrl: updatedUser.profilePictureUrl,
+					superRolePromotionAt: updatedUser.superRolePromotionAt,
 				};
 
 				return createSuccessResponse(

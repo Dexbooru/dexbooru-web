@@ -9,7 +9,6 @@
 	import PlusSolid from 'flowbite-svelte-icons/PlusSolid.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
-	import Searchbar from '../../reusable/Searchbar.svelte';
 	import CollectionCreateDrawer from '../CollectionCreateDrawer.svelte';
 	import CollectionPageSidebar from './CollectionPageSidebar.svelte';
 	import CollectionPaginator from './CollectionPaginator.svelte';
@@ -29,23 +28,6 @@
 	const originalCollectionPage = getOriginalCollectionPage();
 	const pathname = page.url.pathname;
 	const collectionsUsername = page.params.username;
-
-	const onCollectionSearch = (query: string) => {
-		const cleanedQuery = query.toLocaleLowerCase().trim();
-		currentPageQuery = cleanedQuery;
-
-		const filteredCollections = $originalCollectionPage.filter((collection) => {
-			const titleHasQuery = collection.title.toLocaleLowerCase().includes(cleanedQuery);
-			const descriptionHasQuery = collection.description.toLocaleLowerCase().includes(cleanedQuery);
-			const uploaderHasQuery = collection.author.username
-				.toLocaleLowerCase()
-				.includes(cleanedQuery);
-
-			return titleHasQuery || descriptionHasQuery || uploaderHasQuery;
-		});
-
-		collectionPage.set(filteredCollections);
-	};
 
 	const collectionPageUnsubscribe = collectionPage.subscribe((collections) => {
 		const collectionAuthorMap = new Map<
@@ -72,28 +54,18 @@
 	</div>
 	<div id="collection-container-body" class="space-y-4 mb-5">
 		<div id="collection-container-title" class="block space-y-3">
-			<h1 class="text-4xl dark:text-white">{collectionContainerTitle}</h1>
-			<div class="flex">
-				{#if $originalCollectionPage.length > 0}
-					<Searchbar
-						inputElementId="collection-page-searchbar"
-						width="25rem"
-						queryInputHandler={onCollectionSearch}
-						queryInputClear={() => {
-							collectionPage.set($originalCollectionPage);
-							currentPageQuery = '';
-						}}
-						placeholder="Search by keyword(s) on this page"
-					/>
-				{/if}
-
-				{#if $user && (pathname === '/collections' || pathname === '/collections/created' || (pathname.includes('collections/users') && collectionsUsername === $user.username))}
-					<Button on:click={() => (collectionCreateDrawerHidden = false)}>
-						Create collection
-						<PlusSolid class="ml-3" />
-					</Button>
-				{/if}
-			</div>
+			<h1 class="lg:text-4xl md:text-3xl sm:text-3xl text-lg dark:text-white">
+				{collectionContainerTitle}
+			</h1>
+			{#if $user && (pathname === '/collections' || pathname === '/collections/created' || (pathname.includes('collections/users') && collectionsUsername === $user.username))}
+				<Button
+					on:click={() => (collectionCreateDrawerHidden = false)}
+					class="w-full sm:w-[20rem] sm:mr-auto sm:ml-auto md:ml-0 md:mr-auto"
+				>
+					Create collection
+					<PlusSolid class="ml-3" />
+				</Button>
+			{/if}
 		</div>
 		<CollectionsGrid />
 		{#if $originalCollectionPage.length > 0 && currentPageQuery.length === 0}
@@ -122,19 +94,25 @@
 	}
 
 	@media screen and (max-width: 767px) {
-		#collection-container,
-		#collection-container-body {
-			display: block;
-			margin-left: auto;
-			margin-right: auto;
-		}
-
 		#collection-container-sidebar {
 			display: none;
 		}
 
 		#collection-container-title {
 			text-align: center;
+		}
+
+		#collection-container {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+		}
+
+		#collection-container-body {
+			grid-area: unset;
+			width: 100%;
+			padding: 1rem;
 		}
 	}
 </style>

@@ -106,6 +106,7 @@ export async function getArtistsWithStartingLetter(letter: string, pageNumber: n
 		take: MAXIMUM_ARTISTS_PER_PAGE,
 		select: {
 			name: true,
+			postCount: true,
 		},
 	});
 

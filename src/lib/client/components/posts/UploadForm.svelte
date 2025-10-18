@@ -168,8 +168,8 @@
 	});
 </script>
 
-<main>
-	<Card size="lg" class="mt-3 mb-3 ml-auto mr-auto w-full space-y-2">
+<main class="flex justify-center px-4 sm:px-6 lg:px-8">
+	<Card size="lg" class="mt-3 mb-3 w-full max-w-3xl space-y-2">
 		<Heading class="mb-5 mt-2 text-center ">Upload a post!</Heading>
 		<form
 			id="upload-form"
@@ -203,7 +203,7 @@
 				<Label for="tag-input"
 					>Please specify one or more tags (max of {MAXIMUM_TAGS_PER_POST}):</Label
 				>
-				<div class="flex gap-2 mt-2 justify-around">
+				<div class="flex flex-col sm:flex-row gap-2 mt-2">
 					<Input
 						id="tag-input"
 						on:keypress={(event) => handleLabelKeypress(event, 'tag')}
@@ -212,18 +212,19 @@
 						maxlength={MAXIMUM_TAG_LENGTH}
 						type="text"
 						placeholder="Enter a tag name"
-						class="flex-grow"
+						class="w-full"
 					/>
-					<p class="leading-none dark:text-gray-400 text-right mt-2">
-						{tag.length}/{MAXIMUM_TAG_LENGTH}
-					</p>
 					<Button
+						class="w-full sm:w-auto"
 						disabled={tags.length === MAXIMUM_TAGS_PER_POST || tag.length === 0}
 						type="button"
 						on:click={() => addLabel('tag')}>Add</Button
 					>
 				</div>
-				<div class="mt-2 max-h-32 overflow-y-auto w-1/2">
+				<p class="leading-none dark:text-gray-400 text-right mt-2">
+					{tag.length}/{MAXIMUM_TAG_LENGTH}
+				</p>
+				<div class="mt-2 max-h-32 overflow-y-auto w-full">
 					<LabelContainer
 						handleLabelClose={(event) => removeLabel(event, 'tag')}
 						labelIsDismissable
@@ -238,7 +239,7 @@
 				<Label for="artist-input"
 					>Please specify one or more artists (max of {MAXIMUM_ARTISTS_PER_POST}):</Label
 				>
-				<div class="flex gap-2 mt-2">
+				<div class="flex flex-col sm:flex-row gap-2 mt-2">
 					<Input
 						id="artist-input"
 						on:keypress={(event) => handleLabelKeypress(event, 'artist')}
@@ -247,17 +248,18 @@
 						maxlength={MAXIMUM_ARTIST_LENGTH}
 						type="text"
 						placeholder="Enter an artist name"
-						class="flex-grow"
+						class="w-full"
 					/>
-					<p class="leading-none dark:text-gray-400 text-right mt-2">
-						{artist.length}/{MAXIMUM_ARTIST_LENGTH}
-					</p>
 					<Button
+						class="w-full sm:w-auto"
 						disabled={artists.length === MAXIMUM_ARTISTS_PER_POST || artist.length === 0}
 						type="button"
 						on:click={() => addLabel('artist')}>Add</Button
 					>
 				</div>
+				<p class="leading-none dark:text-gray-400 text-right mt-2">
+					{artist.length}/{MAXIMUM_ARTIST_LENGTH}
+				</p>
 				<div class="mt-2 max-h-32 overflow-y-auto">
 					<LabelContainer
 						handleLabelClose={(event) => removeLabel(event, 'artist')}
