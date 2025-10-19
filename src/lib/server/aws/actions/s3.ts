@@ -16,13 +16,26 @@ import awsS3 from '../s3';
 const getObjectBaseUrl = (objectSource: TS3ObjectSource): string => {
 	switch (objectSource) {
 		case 'collections':
-			return dev ? AWS_LOCAL_COLLECTION_PICTURE_BASE_URL : AWS_CLOUDFRONT_CDN_URL + '/collections';
+			return dev ? AWS_LOCAL_COLLECTION_PICTURE_BASE_URL : AWS_CLOUDFRONT_CDN_URL;
 		case 'posts':
-			return dev ? AWS_LOCAL_POSTS_BASE_URL : AWS_CLOUDFRONT_CDN_URL + '/posts';
+			return dev ? AWS_LOCAL_POSTS_BASE_URL : AWS_CLOUDFRONT_CDN_URL;
 		case 'profile_pictures':
-			return dev ? AWS_LOCAL_PROFILE_PICTURE_BASE_URL : AWS_CLOUDFRONT_CDN_URL + 'profile-pictures';
+			return dev ? AWS_LOCAL_PROFILE_PICTURE_BASE_URL : AWS_CLOUDFRONT_CDN_URL;
 		default:
 			return '';
+	}
+};
+
+const buildObjectId = (objectSource: TS3ObjectSource, objectId: string) => {
+	switch (objectSource) {
+		case 'collections':
+			return `collections/${objectId}`;
+		case 'posts':
+			return `posts/${objectId}`;
+		case 'profile_pictures':
+			return `profile-pictures/${objectId}`;
+		default:
+			return objectId;
 	}
 };
 
@@ -43,7 +56,8 @@ export async function uploadToBucket(
 	contentType: string = 'webp',
 	overrideObjectId: string = '',
 ): Promise<string> {
-	const objectId = overrideObjectId.length > 0 ? overrideObjectId : crypto.randomUUID();
+	const baseObjectId = overrideObjectId.length > 0 ? overrideObjectId : crypto.randomUUID();
+	const objectId = buildObjectId(objectSource, baseObjectId);
 	const uploadParams = {
 		Bucket: bucketName,
 		Key: objectId,
