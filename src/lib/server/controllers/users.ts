@@ -907,6 +907,8 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			redirect(302, `/posts`);
 		} catch (error) {
 			if (isRedirect(error)) throw error;
+
+			logger.error(error);
 			return createErrorResponse(
 				'form-action',
 				500,
@@ -956,6 +958,8 @@ export const handleProcessUserTotp = async (event: RequestEvent) => {
 				redirect(302, `/posts`);
 			} catch (error) {
 				if (isRedirect(error)) throw error;
+
+				logger.error(error);
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -1203,45 +1207,3 @@ export const handleToggleUserTwoFactorAuthentication = async (event: RequestEven
 		true,
 	);
 };
-
-// export const handleExportUserData = async (event: RequestEvent) => {
-// 	return await validateAndHandleRequest(
-// 		event,
-// 		'api-route',
-// 		UserDataExportSchema,
-// 		async (data) => {
-// 			const {
-// 				exportFriends,
-// 				exportLikedPosts,
-// 				exportLinkedAccounts,
-// 				exportCreatedPostCollections,
-// 				exportPreferences,
-// 				exportUploadedPosts,
-// 				sendEmail,
-// 				format,
-// 			} = data.body;
-// 			const user = event.locals.user;
-
-// 			try {
-// 				const exportedData: TUserExportData = {
-// 					user: await findUserById(user.id, PUBLIC_USER_SELECTORS),
-// 					friends: exportFriends ? await findFriendsForUser(user.id) : [],
-// 					likedPosts: exportLikedPosts ? await findLikedPostsByAuthorId(),
-// 					linkedAccounts: [],
-// 					createdPostCollections: [],
-// 					preferences: {},
-// 					uploadedPosts: [],
-// 				};
-
-// 			} catch (error) {
-// 				logger.error(error);
-// 				return createErrorResponse(
-// 					'api-route',
-// 					500,
-// 					'An unexpected error occured while trying to export user data',
-// 				);
-// 			}
-// 		},
-// 		true,
-// 	);
-// };
