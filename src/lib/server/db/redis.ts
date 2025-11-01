@@ -1,12 +1,14 @@
-import { dev } from '$app/environment';
+import { building, dev } from '$app/environment';
 import { DB_REDIS_PASSWORD, DB_REDIS_URL } from '$env/static/private';
 import {
 	createClient,
 	type RedisClientOptions,
 	type RedisFunctions,
 	type RedisModules,
-	type RedisScripts,
+	type RedisScripts
 } from 'redis';
+
+type RedisClient = ReturnType<typeof createClient>;
 
 const redisClientSingleton = async () => {
 	const connectionParams: RedisClientOptions<RedisModules, RedisFunctions, RedisScripts> = {};
@@ -21,14 +23,31 @@ const redisClientSingleton = async () => {
 	return client;
 };
 
-type RedisClientSingleton = ReturnType<typeof redisClientSingleton>;
+const mockRedisClient = {
+	get: async () => null,
+	set: async () => 'OK',
+	del: async () => 1,
+	sMembers: async () => [],
+	sAdd: async () => 1,
+	ping: async () => 'PONG'
+} as unknown as RedisClient;
 
-const globalForPrisma = globalThis as unknown as {
-	redis: Awaited<RedisClientSingleton | undefined>;
+const globalForRedis = globalThis as unknown as {
+	redis: RedisClient | undefined;
 };
 
-const redis = globalForPrisma.redis ?? (await redisClientSingleton());
-
-if (dev) globalForPrisma.redis = redis;
+const redis = await (async () => {
+	if (building) {
+		return mockRedisClient;
+	}
+	if (globalForRedis.redis) {
+		return globalForRedis.redis;
+	}
+	const client = await redisClientSingleton();
+	if (dev) {
+		globalForRedis.redis = client;
+	}
+	return client;
+})();
 
 export default redis;
