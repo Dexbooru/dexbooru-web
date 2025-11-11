@@ -77,8 +77,8 @@ brew --version
 Firstly as with all projects, clone this repository on your machine:
 
 ```bash
-git clone https://github.com/t-shah02/dexbooru-rewrite.git
-cd dexbooru-rewrite
+git clone https://github.com/Dexbooru/dexbooru-web.git
+cd dexbooru-web
 ```
 
 Install all the project dependencies from `package.json` by running the following command at the root level of the project:
