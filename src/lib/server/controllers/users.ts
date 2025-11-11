@@ -872,7 +872,6 @@ export const handleCreateUser = async (event: RequestEvent) => {
 
 		try {
 			const user = await findUserByNameOrEmail(email, username);
-			logger.info('found the user:', user);
 			if (user) {
 				return createErrorResponse('form-action', 409, 'Invalid registration data', {
 					email,
@@ -880,8 +879,6 @@ export const handleCreateUser = async (event: RequestEvent) => {
 					reason: 'An account with this username or email already exists!',
 				});
 			}
-
-			logger.info('proceeding with user creation');
 
 			let finalProfilePictureUrl = '';
 			let finalProfilePictureBuffer: Buffer;
@@ -892,7 +889,6 @@ export const handleCreateUser = async (event: RequestEvent) => {
 				finalProfilePictureBuffer = await runDefaultProfilePictureTransformationPipeline(username);
 			}
 
-			logger.info('uploading to the bucket', AWS_PROFILE_PICTURE_BUCKET_NAME);
 			const profilePictureObjectUrl = await uploadToBucket(
 				AWS_PROFILE_PICTURE_BUCKET_NAME,
 				'profile_pictures',
@@ -900,22 +896,16 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			);
 			finalProfilePictureUrl = profilePictureObjectUrl;
 
-			logger.info('the url for profile picture is', finalProfilePictureUrl);
-
 			const hashedPassword = await hashPassword(password);
-			logger.info('hashed the password');
 
 			const newUser = await createUser(username, email, hashedPassword, finalProfilePictureUrl);
 			const encodedAuthToken = generateEncodedUserTokenFromRecord(newUser, true);
 			event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(true));
 
-			logger.info('built the cookie');
-
 			await createUserPreferences(newUser.id);
 
 			redirect(302, `/posts`);
 		} catch (error) {
-			logger.error('before redirect error', error);
 			if (isRedirect(error)) throw error;
 
 			logger.error('after the redirect', error);

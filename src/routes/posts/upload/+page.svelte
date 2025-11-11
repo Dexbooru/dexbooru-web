@@ -7,8 +7,6 @@
 	};
 
 	let { form }: Props = $props();
-
-	console.log(form);
 </script>
 
 <svelte:head>
