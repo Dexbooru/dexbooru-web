@@ -29,7 +29,6 @@
 
 <Table hoverable>
 	<TableHead>
-		<TableHeadCell>ID</TableHeadCell>
 		<TableHeadCell>Description</TableHeadCell>
 		<TableHeadCell>Created at</TableHeadCell>
 		<TableHeadCell>Author</TableHeadCell>
@@ -40,9 +39,6 @@
 	<TableBody tableBodyClass="divide-y">
 		{#each posts ?? [] as post (post.id)}
 			<TableBodyRow>
-				<TableBodyCell>
-					<HighlightedText query={$globalQuery} fullText={post.id} /></TableBodyCell
-				>
 				<TableBodyCell tdClass="px-1 py-4 whitespace-wrap font-medium">
 					<HighlightedText query={$globalQuery} fullText={post.description} />
 				</TableBodyCell>

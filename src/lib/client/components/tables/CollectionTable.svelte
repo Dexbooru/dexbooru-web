@@ -29,7 +29,6 @@
 
 <Table hoverable>
 	<TableHead>
-		<TableHeadCell>ID</TableHeadCell>
 		<TableHeadCell>Title</TableHeadCell>
 		<TableHeadCell>Description</TableHeadCell>
 		<TableHeadCell>Created at</TableHeadCell>
@@ -41,7 +40,6 @@
 	<TableBody tableBodyClass="divide-y">
 		{#each collections ?? [] as collection}
 			<TableBodyRow>
-				<TableBodyCell>{collection.id}</TableBodyCell>
 				<TableBodyCell tdClass="px-1 py-4 whitespace-wrap font-medium">
 					<HighlightedText query={$globalQuery} fullText={collection.title} />
 				</TableBodyCell>

@@ -29,7 +29,6 @@
 
 <Table hoverable>
 	<TableHead>
-		<TableHeadCell>ID</TableHeadCell>
 		<TableHeadCell>Username</TableHeadCell>
 		<TableHeadCell>Created at</TableHeadCell>
 		<TableHeadCell>
@@ -39,9 +38,6 @@
 	<TableBody tableBodyClass="divide-y">
 		{#each users ?? [] as user (user.id)}
 			<TableBodyRow>
-				<TableBodyCell>
-					<HighlightedText query={$globalQuery} fullText={user.id} />
-				</TableBodyCell>
 				<TableBodyCell class="text-center">
 					<Avatar
 						class="ml-auto mr-auto"
