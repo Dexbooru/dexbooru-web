@@ -21,7 +21,6 @@
 
 <Table hoverable>
 	<TableHead>
-		<TableHeadCell>ID</TableHeadCell>
 		<TableHeadCell>Name</TableHeadCell>
 		<TableHeadCell>
 			<span class="sr-only">Related posts</span>
@@ -30,9 +29,6 @@
 	<TableBody tableBodyClass="divide-y">
 		{#each labels ?? [] as label (label.id)}
 			<TableBodyRow>
-				<TableBodyCell>
-					<HighlightedText query={$globalQuery} fullText={label.id} />
-				</TableBodyCell>
 				<TableBodyCell>
 					<HighlightedText query={$globalQuery} fullText={label.name} />
 				</TableBodyCell>
