@@ -53,7 +53,7 @@
 	{#each processedLabels as label (label)}
 		<Badge
 			dismissable={labelIsDismissable}
-			on:close={handleLabelClose as (_event: CustomEvent<any>) => void}
+			onclose={handleLabelClose as (_event: CustomEvent<any>) => void}
 			href={labelIsLink ? `/posts/${labelType}/${label}` : undefined}
 			large={labelsAreLarge}
 			class="ml-1 mr-1 mb-1"
