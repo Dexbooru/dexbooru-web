@@ -146,6 +146,32 @@ export async function findPaginatedCommentsByPostId(
 	return comments;
 }
 
+export async function updateParentCommentReplyCount(parentCommentId: string) {
+	await prisma.comment.update({
+		where: {
+			id: parentCommentId,
+		},
+		data: {
+			replyCount: {
+				increment: 1,
+			},
+		},
+	});
+}
+
+export async function updatePostCommentCount(postId: string) {
+	await prisma.post.update({
+		where: {
+			id: postId,
+		},
+		data: {
+			commentCount: {
+				increment: 1,
+			},
+		},
+	});
+}
+
 export async function createComment(
 	authorId: string,
 	postId: string,
@@ -162,28 +188,10 @@ export async function createComment(
 	});
 
 	if (parentCommentId) {
-		prisma.comment.update({
-			where: {
-				id: parentCommentId,
-			},
-			data: {
-				replyCount: {
-					increment: 1,
-				},
-			},
-		});
+		await updateParentCommentReplyCount(parentCommentId);
 	}
 
-	prisma.post.update({
-		where: {
-			id: postId,
-		},
-		data: {
-			commentCount: {
-				increment: 1,
-			},
-		},
-	});
+	await updatePostCommentCount(postId);
 
 	return newComment;
 }
