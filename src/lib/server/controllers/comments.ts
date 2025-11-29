@@ -27,7 +27,10 @@ import {
 import logger from '../logging/logger';
 import type { TControllerHandlerVariant } from '../types/controllers';
 import { CACHE_TIME_CATEGORY_COMMENTS, getCacheKeyWithCategory } from './cache-strategies/comments';
-import { getCacheKeyForIndividualPost } from './cache-strategies/posts';
+import {
+	getCacheKeyForIndividualPost,
+	getCacheKeyWithPostCategory,
+} from './cache-strategies/posts';
 import {
 	CreateCommentSchema,
 	DeletePostCommentsSchema,
@@ -327,6 +330,14 @@ export const handleCreatePostComment = async (event: RequestEvent) => {
 
 				const postCacheKey = getCacheKeyForIndividualPost(postId);
 				invalidateCacheRemotely(postCacheKey);
+
+				const commentsPostsOrderCacheKey = getCacheKeyWithPostCategory(
+					'general',
+					0,
+					'commentCount',
+					false,
+				);
+				invalidateCacheRemotely(commentsPostsOrderCacheKey);
 
 				return createSuccessResponse(
 					'api-route',
