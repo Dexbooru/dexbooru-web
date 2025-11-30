@@ -1,5 +1,7 @@
 import type sanitize from 'sanitize-html';
 
+export const COMMENT_CONTAINER_EMOJI_CHUNK_SIZE = 6;
+
 export const MAXIMUM_COMMENT_REPLY_DEPTH_LOAD = 1;
 export const MAXIMUM_COMMENT_REPLY_DEPTH_ABSOLUTE = 10;
 
