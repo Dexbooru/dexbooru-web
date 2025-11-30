@@ -34,3 +34,5 @@ export const EMPTY_POST: TPost = {
 	artistString: '',
 	comments: [],
 };
+
+export const POST_SOURCE_TYPES = ['VIDEOGAME', 'ANIME', 'MANGA', 'OTHER'] as const;

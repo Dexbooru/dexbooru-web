@@ -1,17 +1,17 @@
 model Comment {
-    id              String    @id @default(uuid())
-    createdAt       DateTime  @default(now())
-    updatedAt       DateTime  @default(now())
-    content         String    @db.VarChar(1500)
-    replyCount      Int       @default(0)
-    replies         Comment[] @relation(name: "replies")
-    post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-    postId          String
-    parentComment   Comment?  @relation(name: "replies", fields: [parentCommentId], references: [id], onDelete: SetNull)
-    parentCommentId String?
-    author          User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
-    authorId        String?
+  id              String    @id @default(uuid())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now())
+  content         String    @db.VarChar(1500)
+  replyCount      Int       @default(0)
+  replies         Comment[] @relation(name: "replies")
+  post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId          String
+  parentComment   Comment?  @relation(name: "replies", fields: [parentCommentId], references: [id], onDelete: SetNull)
+  parentCommentId String?
+  author          User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId        String?
 
-    @@index([authorId])
-    @@index([postId])
+  @@index([authorId])
+  @@index([postId])
 }

@@ -2,5 +2,6 @@
 	"editor.formatOnSave": true,
 	"editor.codeActionsOnSave": {
 		"source.organizeImports": "explicit"
-	}
+	},
+	"prisma.pinToPrisma6": true
 }
