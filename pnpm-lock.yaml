@@ -14,6 +14,9 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.940.0
         version: 3.940.0
+      '@humanspeak/svelte-virtual-list':
+        specifier: ^0.3.6
+        version: 0.3.6(svelte@5.41.0)
       '@prisma/client':
         specifier: ^6.17.1
         version: 6.17.1(prisma@6.17.1(typescript@5.9.3))(typescript@5.9.3)
@@ -59,9 +62,6 @@ importers:
       sharp:
         specifier: ^0.32.6
         version: 0.32.6
-      svelte-tiny-virtual-list:
-        specifier: ^2.1.2
-        version: 2.1.2
       turndown:
         specifier: ^7.2.1
         version: 7.2.1
@@ -808,6 +808,11 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@humanspeak/svelte-virtual-list@0.3.6':
+    resolution: {integrity: sha512-ls5FicD5b8nXi87GG7mj9nIoTkIl0M/JkmmE21KWnTabtDRnqEjZ7kOsU3ZEAWc0/HW8PlRwF50yqKwpaLeBMw==}
+    peerDependencies:
+      svelte: ^5.0.0
 
   '@humanwhocodes/config-array@0.13.0':
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}
@@ -3225,9 +3230,6 @@ packages:
       svelte:
         optional: true
 
-  svelte-tiny-virtual-list@2.1.2:
-    resolution: {integrity: sha512-jeP/WMvgFUR4mYXHGPiCexjX5DuzSO+3xzHNhxfcsFyy+uYPtnqI5UGb383swpzQAyXB0OBqYfzpYihD/5gxnA==}
-
   svelte@5.41.0:
     resolution: {integrity: sha512-mP3vFFv5OUM5JN189+nJVW74kQ1dGqUrXTEzvCEVZqessY0GxZDls1nWVvt4Sxyv2USfQvAZO68VRaeIZvpzKg==}
     engines: {node: '>=18'}
@@ -4602,6 +4604,11 @@ snapshots:
       '@floating-ui/utils': 0.2.10
 
   '@floating-ui/utils@0.2.10': {}
+
+  '@humanspeak/svelte-virtual-list@0.3.6(svelte@5.41.0)':
+    dependencies:
+      esm-env: 1.2.2
+      svelte: 5.41.0
 
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
@@ -7303,8 +7310,6 @@ snapshots:
       postcss-scss: 4.0.9(postcss@8.5.6)
     optionalDependencies:
       svelte: 5.41.0
-
-  svelte-tiny-virtual-list@2.1.2: {}
 
   svelte@5.41.0:
     dependencies:

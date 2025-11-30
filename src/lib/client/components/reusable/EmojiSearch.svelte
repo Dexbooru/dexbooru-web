@@ -2,6 +2,7 @@
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
 	import DropdownHeader from 'flowbite-svelte/DropdownHeader.svelte';
+	import Popover from 'flowbite-svelte/Popover.svelte';
 	import Search from 'flowbite-svelte/Search.svelte';
 	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import FaceGrinSolid from 'flowbite-svelte-icons/FaceGrinSolid.svelte';
@@ -15,60 +16,107 @@
 
 	let dropdownOpen = $state(false);
 	let loadingEmojis = $state(false);
-	let emojiEntries: [string, string][] = [];
-	let filteredEmojiEntries = $state(emojiEntries);
+	let emojiEntries = $state<[string, string][]>([]);
+	let searchQuery = $state('');
 
-	const handleEmojiButtonClick = async () => {
-		dropdownOpen = true;
+	const CHUNK_SIZE = 6;
 
-		if (emojiEntries.length > 0) return;
+	function chunkArray<T>(array: T[], size: number): T[][] {
+		const result = [];
+		for (let i = 0; i < array.length; i += size) {
+			result.push(array.slice(i, i + size));
+		}
+		return result;
+	}
+
+	let filteredEmojiChunks = $derived(
+		chunkArray(
+			emojiEntries.filter(([name]) => name.toLocaleLowerCase().includes(searchQuery)),
+			CHUNK_SIZE,
+		),
+	);
+
+	const loadEmojis = async () => {
+		if (emojiEntries.length > 0 || loadingEmojis) return;
 		loadingEmojis = true;
-		emojiEntries = Object.entries(await import('$lib/client/assets/emoji-set.json')).filter(
-			(item) => item[0] !== 'default',
-		) as [string, string][];
-		loadingEmojis = false;
-		filteredEmojiEntries = emojiEntries;
+		try {
+			const module = await import('$lib/client/assets/emoji-set.json');
+			const emojiData = module.default || module;
+			emojiEntries = Object.entries(emojiData).filter(
+				([key]) => key !== 'default',
+			) as [string, string][];
+		} catch (error) {
+			console.error('Failed to load emojis:', error);
+		} finally {
+			loadingEmojis = false;
+		}
 	};
 
-	const handleEmojiClick = (event: Event) => {
-		const target = event.target as HTMLLIElement;
-		handleEmoji(`:${target?.textContent?.split('-')[1].trim()}:`);
-		dropdownOpen = false;
+	const handleEmojiButtonClick = () => {
+		dropdownOpen = true;
+		loadEmojis();
 	};
 
 	const handleOnInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
-		filteredEmojiEntries = emojiEntries.filter(([name]) =>
-			name.toLocaleLowerCase().includes(target.value.toLowerCase()),
-		);
+		searchQuery = target.value.toLowerCase();
 	};
 
-	const transformEmojiListItem = (item: unknown) =>
-		`${(item as [string, string])[1]} - ${(item as [string, string])[0]}`;
+	const handleEmojiClick = (name: string) => {
+		handleEmoji(`:${name}:`);
+		dropdownOpen = false;
+	};
+
+	// Helper to generate safe IDs for Popover triggers
+	const getEmojiId = (name: string) => `emoji-${name.replace(/[^a-zA-Z0-9-_]/g, '_')}`;
 </script>
 
-<Button color="alternative" class="align-middle" on:click={handleEmojiButtonClick}>
-	<FaceGrinSolid class="w-4 h-4" />
+<Button
+	color="alternative"
+	class="align-middle"
+	onmouseenter={loadEmojis}
+	onclick={handleEmojiButtonClick}
+>
+	<FaceGrinSolid class="h-4 w-4" />
 </Button>
 
 <Dropdown
-	open={dropdownOpen}
+	bind:open={dropdownOpen}
 	placement="bottom"
-	classContainer="ml-3 text-sm !h-40 sm:w-3/4 md:w-1/2 lg:w-1/3 bg-gray-100 dark:bg-gray-900"
+	classContainer="ml-3 text-sm !h-80 sm:w-3/4 md:w-1/2 lg:w-1/3 bg-gray-100 dark:bg-gray-900"
 >
-	<DropdownHeader class="bg-gray-100 dark:bg-gray-900 sticky top-0">
+	<DropdownHeader class="sticky top-0 bg-gray-100 dark:bg-gray-900">
 		<Search size="md" on:input={handleOnInput} />
 	</DropdownHeader>
 
 	{#if loadingEmojis}
-		<Spinner class="ml-2 mt-2" />
+		<div class="flex justify-center p-4">
+			<Spinner size="6" />
+		</div>
+	{:else}
+		<VirtualizedList listHeight={240} data={filteredEmojiChunks}>
+			{#snippet children(chunk)}
+				<div class="flex justify-between px-2 py-1">
+					{#each chunk as [name, emoji]}
+						{@const emojiId = getEmojiId(name)}
+						<button
+							id={emojiId}
+							class="rounded p-2 text-2xl hover:bg-gray-200 dark:hover:bg-gray-700"
+							onclick={() => handleEmojiClick(name)}
+						>
+							{emoji}
+						</button>
+						<Popover triggeredBy="#{emojiId}" class="w-auto text-sm font-light z-50">
+							{name}
+						</Popover>
+					{/each}
+					{#if chunk.length < CHUNK_SIZE}
+						{#each Array(CHUNK_SIZE - chunk.length) as _}
+							<div class="w-[40px]"></div>
+						{/each}
+					{/if}
+				</div>
+			{/snippet}
+		</VirtualizedList>
 	{/if}
-
-	<VirtualizedList
-		listHeight={85}
-		data={filteredEmojiEntries}
-		handleListItemClick={handleEmojiClick}
-		listItemFn={transformEmojiListItem}
-		listItemClass="rounded hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 align-middle"
-	/>
 </Dropdown>
