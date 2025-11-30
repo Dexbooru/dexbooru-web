@@ -15,12 +15,16 @@ services:
       - localstack
 
   localstack:
-    image: localstack/localstack:s3-latest
+    image: localstack/localstack:latest
     container_name: dexbooru-localstack
     restart: always
     ports:
-      - "4566:4566"
+      - "4566-4597:4566-4597"
+    environment:
+      - SERVICES=s3,sqs
+      - AWS_DEFAULT_REGION=us-east-1
     volumes:
+      - ./scripts/init-localstack.sh:/etc/localstack/init/ready.d/init-aws.sh
       - localstack-data:/var/lib/localstack
       - /var/run/docker.sock:/var/run/docker.sock
 

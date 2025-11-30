@@ -1,3 +1,4 @@
+import { uploadStatusEmitter } from '$lib/server/events/uploadStatus';
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { MAXIMUM_IMAGES_PER_POST } from '$lib/shared/constants/images';
 import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
@@ -10,6 +11,7 @@ import type {
 } from '$lib/shared/types/posts';
 import { isHttpError, isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
 import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
+import { enqueueBatchUploadedPostImages } from '../aws/actions/sqs';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { PUBLIC_COMMENT_SELECTORS } from '../constants/comments';
 import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../constants/posts';
@@ -47,7 +49,6 @@ import {
 	invalidateCacheRemotely,
 	invalidateMultipleCachesRemotely,
 } from '../helpers/sessions';
-import { uploadStatusEmitter } from '$lib/server/events/uploadStatus';
 import logger from '../logging/logger';
 import type { TControllerHandlerVariant, TPostFetchCategory } from '../types/controllers';
 import {
@@ -450,6 +451,11 @@ export const handleCreatePost = async (
 						uploadStatusEmitter.emit(uploadId, 'Redirecting to post...');
 					}
 					redirect(302, `/posts/${newPost.id}?uploadedSuccessfully=true`);
+				}
+
+				if (newPostId.length > 0) {
+					const postImageInputs = newPost.imageUrls.map(imageUrl => ({ postId: newPost.id, imageUrl }));
+					enqueueBatchUploadedPostImages(postImageInputs);
 				}
 
 				return createSuccessResponse(handlerType, 'Post created successfully', { newPost }, 201);

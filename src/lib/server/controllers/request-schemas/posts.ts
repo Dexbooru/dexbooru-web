@@ -135,6 +135,7 @@ const CreatePostSchema = {
 						'At least one of the providedd artists did not meet requirements and was not appropriate',
 				},
 			),
+		uploadId: z.string().uuid().optional(),
 	}),
 } satisfies TRequestSchema;
 
@@ -160,13 +161,11 @@ const PostUpdateSchema = {
 
 export {
 	CreatePostSchema,
-	DeletePostSchema,
-	GetPostSchema,
-	GetPostsByAuthorSchema,
-	GetPostsSchema,
+	DeletePostSchema, GetPostsByAuthorSchema, GetPostSchema, GetPostsSchema,
 	GetPostsWithArtistNameSchema,
 	GetPostsWithTagNameSchema,
 	GetSimilarPostsSchema,
 	LikePostSchema,
-	PostUpdateSchema,
+	PostUpdateSchema
 };
+
