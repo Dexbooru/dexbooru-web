@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { getEstimatedPostRating } from '$lib/client/api/mlApi';
 	import { ESTIMATED_TAG_RATING_LABEL_MAP } from '$lib/client/constants/labels';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
@@ -15,6 +16,7 @@
 	} from '$lib/shared/constants/posts';
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate, transformLabel } from '$lib/shared/helpers/labels';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
@@ -24,9 +26,10 @@
 	import Label from 'flowbite-svelte/Label.svelte';
 	import Li from 'flowbite-svelte/Li.svelte';
 	import List from 'flowbite-svelte/List.svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
 	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import Textarea from 'flowbite-svelte/Textarea.svelte';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/posts/upload/$types';
 	import PostPictureUpload from '../files/PostPictureUpload.svelte';
 	import LabelContainer from '../labels/LabelContainer.svelte';
@@ -51,6 +54,10 @@
 		file: File;
 	}[] = $state([]);
 	let loadingPostPictures = $state(false);
+	let loading = $state(false);
+	let statusMessage = $state('Uploading post... Please wait.');
+	let eventSource: EventSource | null = null;
+
 	let uploadButtonDisabled = $derived.by(() => {
 		const isValidForm =
 			!loadingPostPictures &&
@@ -161,9 +168,55 @@
 		}
 	};
 
+	const handleSubmit: SubmitFunction = ({ formData }) => {
+		loading = true;
+		statusMessage = 'Uploading post... Please wait.';
+
+		const uploadId = crypto.randomUUID();
+		formData.append('uploadId', uploadId);
+
+		formData.delete('postPictures');
+		postImages.forEach(({ file }) => {
+			formData.append('postPictures', file);
+		});
+
+		eventSource = new EventSource(`/api/events/upload-status/${uploadId}`);
+		eventSource.onmessage = (event) => {
+			statusMessage = event.data;
+		};
+		eventSource.onerror = () => {
+			if (eventSource) {
+				eventSource.close();
+				eventSource = null;
+			}
+		};
+
+		return async ({ result, update }) => {
+			loading = false;
+			if (eventSource) {
+				eventSource.close();
+				eventSource = null;
+			}
+
+			if (result.type === 'failure') {
+				const reason = result.data?.reason as string | undefined;
+				if (reason) {
+					toast.push(reason, FAILURE_TOAST_OPTIONS);
+				}
+			}
+			await update();
+		};
+	};
+
 	onMount(() => {
 		if (form?.reason) {
 			toast.push(form.reason, FAILURE_TOAST_OPTIONS);
+		}
+	});
+
+	onDestroy(() => {
+		if (eventSource) {
+			eventSource.close();
 		}
 	});
 </script>
@@ -176,6 +229,7 @@
 			method="POST"
 			class="flex flex-col justify-center"
 			enctype="multipart/form-data"
+			use:enhance={handleSubmit}
 		>
 			<section class="space-y-2">
 				<Label class="mb-1 " for="description-textarea">
@@ -322,4 +376,13 @@
 			>
 		</form>
 	</Card>
+
+	<Modal bind:open={loading} size="xs" dismissable={false} class="w-full">
+		<div class="flex flex-col items-center">
+			<Spinner size="12" />
+			<p class="mt-4 text-lg font-semibold text-gray-900 dark:text-white text-center">
+				{statusMessage}
+			</p>
+		</div>
+	</Modal>
 </main>

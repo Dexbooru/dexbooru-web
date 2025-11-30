@@ -47,6 +47,7 @@ import {
 	invalidateCacheRemotely,
 	invalidateMultipleCachesRemotely,
 } from '../helpers/sessions';
+import { uploadStatusEmitter } from '$lib/server/events/uploadStatus';
 import logger from '../logging/logger';
 import type { TControllerHandlerVariant, TPostFetchCategory } from '../types/controllers';
 import {
@@ -84,7 +85,10 @@ const throwPostNotFoundError = (handlerType: TControllerHandlerVariant, postId: 
 	return errorResponse;
 };
 
-const uploadPostImages = async (postPictures: File[], isNsfw: boolean) => {
+const uploadPostImages = async (postPictures: File[], isNsfw: boolean, uploadId?: string) => {
+	if (uploadId) {
+		uploadStatusEmitter.emit(uploadId, 'Processing images...');
+	}
 	const postImageBufferMaps = await runPostImageTransformationPipelineInBatch(postPictures, isNsfw);
 	const {
 		fileObjectIds,
@@ -93,6 +97,9 @@ const uploadPostImages = async (postPictures: File[], isNsfw: boolean) => {
 		imageWidths: postImageWidths,
 	} = flattenImageBuffers(postImageBufferMaps);
 
+	if (uploadId) {
+		uploadStatusEmitter.emit(uploadId, 'Uploading images to server...');
+	}
 	const postImageUrls = await uploadBatchToBucket(
 		AWS_POST_PICTURE_BUCKET_NAME,
 		'posts',
@@ -394,7 +401,7 @@ export const handleCreatePost = async (
 		handlerType,
 		CreatePostSchema,
 		async (data) => {
-			const { description, tags, artists, isNsfw, postPictures, sourceLink } = data.form;
+			const { description, tags, artists, isNsfw, postPictures, sourceLink, uploadId } = data.form;
 			const errorData = {
 				sourceLink,
 				description,
@@ -411,9 +418,13 @@ export const handleCreatePost = async (
 				const { postImageUrls, postImageWidths, postImageHeights } = await uploadPostImages(
 					postPictures,
 					isNsfw,
+					uploadId,
 				);
 				newPostImageUrls = postImageUrls;
 
+				if (uploadId) {
+					uploadStatusEmitter.emit(uploadId, 'Adding to our collection...');
+				}
 				const newPost = await createPost(
 					sourceLink,
 					description,
@@ -435,6 +446,9 @@ export const handleCreatePost = async (
 						getCacheKeyForPostAuthor(newPost.author?.username ?? '', 0, 'createdAt', false),
 					);
 
+					if (uploadId) {
+						uploadStatusEmitter.emit(uploadId, 'Redirecting to post...');
+					}
 					redirect(302, `/posts/${newPost.id}?uploadedSuccessfully=true`);
 				}
 
@@ -449,6 +463,10 @@ export const handleCreatePost = async (
 				}
 				if (newPostImageUrls.length > 0) {
 					deleteBatchFromBucket(AWS_POST_PICTURE_BUCKET_NAME, newPostImageUrls);
+				}
+
+				if (uploadId) {
+					uploadStatusEmitter.emit(uploadId, 'Error occurred during upload.');
 				}
 
 				const message = 'An unexpected error occurred while creating the post';
