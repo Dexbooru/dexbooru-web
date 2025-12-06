@@ -1,4 +1,4 @@
-import type { SvelteToastOptions } from '@zerodevx/svelte-toast/stores';
+import type { SvelteToastOptions } from '@zerodevx/svelte-toast';
 
 export const TOAST_DURATION_MS = 1500;
 export const TOAST_DEFAULT_OPTIONS: SvelteToastOptions = {
