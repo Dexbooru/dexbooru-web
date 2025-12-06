@@ -23,9 +23,9 @@ export const COMMENT_SANITIZATION_OPTIONS: sanitize.IOptions = {
 		'li',
 		'blockquote',
 		'code',
-		'pre'
+		'pre',
 	],
 	allowedAttributes: {
-		a: ['href', 'target']
-	}
+		a: ['href', 'target'],
+	},
 };

@@ -50,9 +50,9 @@ export const interleaveStrings = (a: string, b: string): string => {
 };
 
 export const chunkArray = <T>(array: T[], size: number): T[][] => {
-		const result = [];
-		for (let i = 0; i < array.length; i += size) {
-			result.push(array.slice(i, i + size));
-		}
-		return result;
+	const result = [];
+	for (let i = 0; i < array.length; i += size) {
+		result.push(array.slice(i, i + size));
 	}
+	return result;
+};

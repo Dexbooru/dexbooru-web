@@ -5,7 +5,7 @@ import {
 	type RedisClientOptions,
 	type RedisFunctions,
 	type RedisModules,
-	type RedisScripts
+	type RedisScripts,
 } from 'redis';
 
 type RedisClient = ReturnType<typeof createClient>;
@@ -29,7 +29,7 @@ const mockRedisClient = {
 	del: async () => 1,
 	sMembers: async () => [],
 	sAdd: async () => 1,
-	ping: async () => 'PONG'
+	ping: async () => 'PONG',
 } as unknown as RedisClient;
 
 const globalForRedis = globalThis as unknown as {

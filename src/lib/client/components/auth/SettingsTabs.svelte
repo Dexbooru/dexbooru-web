@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { LinkedUserAccount } from '$generated/prisma/browser';
 	import { VALID_TAB_NAMES } from '$lib/client/constants/settings';
-	import type { LinkedUserAccount } from '@prisma/client';
 	import GridSolid from 'flowbite-svelte-icons/GridSolid.svelte';
 	import LockSolid from 'flowbite-svelte-icons/LockSolid.svelte';
 	import UserCircleSolid from 'flowbite-svelte-icons/UserCircleSolid.svelte';

@@ -1,4 +1,4 @@
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '$generated/prisma/browser';
 
 export const MODERATION_NAME_MAP: Record<UserRole, string> = {
 	MODERATOR: 'Moderator',

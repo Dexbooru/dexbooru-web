@@ -1,4 +1,3 @@
-
 export const DEXBOORU_CORE_API_URL: string = import.meta.env.VITE_DEXBOORU_CORE_API_URL ?? '';
 
 const wsProtocol = DEXBOORU_CORE_API_URL.toLocaleLowerCase().startsWith('https') ? 'wss' : 'ws';

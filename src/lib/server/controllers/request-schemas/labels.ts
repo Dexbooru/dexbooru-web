@@ -1,6 +1,11 @@
-import type { TRequestSchema } from "$lib/server/types/controllers";
-import { MAXIMUM_TAG_DESCRIPTION_LENGTH, MAXIMUM_ARTIST_DESCRIPTION_LENGTH, MAXIMUM_ARTIST_SOCIAL_MEDIAS_LENGTH, MAXIMUM_ARTIST_SOCIAL_MEDIA_LENGTH } from "$lib/shared/constants/labels";
-import { z } from "zod";
+import type { TRequestSchema } from '$lib/server/types/controllers';
+import {
+	MAXIMUM_TAG_DESCRIPTION_LENGTH,
+	MAXIMUM_ARTIST_DESCRIPTION_LENGTH,
+	MAXIMUM_ARTIST_SOCIAL_MEDIAS_LENGTH,
+	MAXIMUM_ARTIST_SOCIAL_MEDIA_LENGTH,
+} from '$lib/shared/constants/labels';
+import { z } from 'zod';
 
 const GetLabelMetadataSchema = {
 	pathParams: z.object({

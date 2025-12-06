@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { PostCollectionReport, PostReport, UserReport } from '$generated/prisma/browser';
 	import {
 		REPORT_MODAL_LIST_CONFIG,
 		REPORT_TYPE_TO_MODAL_CONFIG_KEY,
@@ -10,7 +11,6 @@
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import type { TPost } from '$lib/shared/types/posts';
 	import type { TUser } from '$lib/shared/types/users';
-	import type { PostCollectionReport, PostReport, UserReport } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Modal from 'flowbite-svelte/Modal.svelte';
 	import { onMount } from 'svelte';

@@ -4,7 +4,7 @@
 		getAuthenticatedUser,
 		getAuthenticatedUserNotifications,
 	} from '$lib/client/helpers/context';
-	import { DropdownDivider } from 'flowbite-svelte';
+	import DropdownDivider from 'flowbite-svelte/DropdownDivider.svelte';
 	import AngleDownOutline from 'flowbite-svelte-icons/AngleDownOutline.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
@@ -34,11 +34,7 @@
 {/if}
 
 {#if $user}
-	<div
-		role="group"
-		class="relative"
-		onmouseenter={() => (dropdownOpen = true)}
-	>
+	<div role="group" class="relative" onmouseenter={() => (dropdownOpen = true)}>
 		<Button
 			id="navbar-profile-picture"
 			class="!p-1 flex space-x-4 bg-transparent hover:bg-gray-100 dark:bg-slate-700 dark:hover:bg-gray-700 text-gray-900 dark:text-white focus:ring-0"
@@ -54,15 +50,30 @@
 		</Button>
 
 		<Dropdown simple bind:isOpen={dropdownOpen} class="list-none w-44 bg-white dark:bg-gray-700">
-			<DropdownItem href="/profile/{$user?.username}" class="text-gray-900 dark:text-white">Your Profile</DropdownItem>
-			<DropdownItem href="/posts/uploaded" class="text-gray-900 dark:text-white">Your Posts</DropdownItem>
-			<DropdownItem href="/collections/created" class="text-gray-900 dark:text-white">Your Collections</DropdownItem>
-			<DropdownItem href="/comments/created" class="text-gray-900 dark:text-white">Your Comments</DropdownItem>
-			<DropdownItem href="/friends" class="text-gray-900 dark:text-white">Your Friends</DropdownItem>
-			<DropdownItem href="/posts/liked" class="text-gray-900 dark:text-white">Liked Posts</DropdownItem>
-			<DropdownItem href="/profile/settings" class="text-gray-900 dark:text-white">Settings</DropdownItem>
+			<DropdownItem href="/profile/{$user?.username}" class="text-gray-900 dark:text-white"
+				>Your Profile</DropdownItem
+			>
+			<DropdownItem href="/posts/uploaded" class="text-gray-900 dark:text-white"
+				>Your Posts</DropdownItem
+			>
+			<DropdownItem href="/collections/created" class="text-gray-900 dark:text-white"
+				>Your Collections</DropdownItem
+			>
+			<DropdownItem href="/comments/created" class="text-gray-900 dark:text-white"
+				>Your Comments</DropdownItem
+			>
+			<DropdownItem href="/friends" class="text-gray-900 dark:text-white">Your Friends</DropdownItem
+			>
+			<DropdownItem href="/posts/liked" class="text-gray-900 dark:text-white"
+				>Liked Posts</DropdownItem
+			>
+			<DropdownItem href="/profile/settings" class="text-gray-900 dark:text-white"
+				>Settings</DropdownItem
+			>
 			<DropdownDivider />
-			<DropdownItem href="/profile/logout" class="text-gray-900 dark:text-white">Sign out</DropdownItem>
+			<DropdownItem href="/profile/logout" class="text-gray-900 dark:text-white"
+				>Sign out</DropdownItem
+			>
 		</Dropdown>
 	</div>
 {/if}

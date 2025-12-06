@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Artist, Tag } from '$generated/prisma/browser';
 	import { updateLabelMetadata } from '$lib/client/api/labels';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
@@ -10,7 +11,6 @@
 	} from '$lib/shared/constants/labels';
 	import { URL_REGEX } from '$lib/shared/constants/urls';
 	import type { TApiResponse } from '$lib/shared/types/api';
-	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import PlusOutline from 'flowbite-svelte-icons/PlusOutline.svelte';
 	import TrashBinSolid from 'flowbite-svelte-icons/TrashBinSolid.svelte';
@@ -22,7 +22,7 @@
 	type Props = {
 		labelType: 'tag' | 'artist' | undefined;
 		metadata: (Tag & Artist) | undefined;
-		updateMetadata: (metadata: Tag & Artist) => void;
+		updateMetadata: (_metadata: Tag & Artist) => void;
 	};
 
 	let { labelType, metadata, updateMetadata }: Props = $props();

@@ -1,7 +1,7 @@
 <script lang="ts">
+	import type { PostCollectionReport, PostReport, UserReport } from '$generated/prisma/browser';
 	import { getModerationPaginationData } from '$lib/client/helpers/context';
 	import { MAXIMUM_REPORTS_PER_PAGE } from '$lib/shared/constants/reports';
-	import type { PostCollectionReport, PostReport, UserReport } from '@prisma/client';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import { onMount } from 'svelte';

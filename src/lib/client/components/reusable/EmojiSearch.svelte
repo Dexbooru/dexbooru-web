@@ -11,7 +11,7 @@
 	import VirtualizedList from './VirtualizedList.svelte';
 
 	type Props = {
-		handleEmoji: (targetEmoji: string) => void;
+		handleEmoji: (_targetEmoji: string) => void;
 	};
 
 	let { handleEmoji }: Props = $props();
@@ -20,7 +20,6 @@
 	let loadingEmojis = $state(false);
 	let emojiEntries = $state<[string, string][]>([]);
 	let searchQuery = $state('');
-
 
 	let filteredEmojiChunks = $derived(
 		chunkArray(
@@ -35,9 +34,10 @@
 		try {
 			const module = await import('$lib/client/assets/emoji-set.json');
 			const emojiData = module.default || module;
-			emojiEntries = Object.entries(emojiData).filter(
-				([key]) => key !== 'default',
-			) as [string, string][];
+			emojiEntries = Object.entries(emojiData).filter(([key]) => key !== 'default') as [
+				string,
+				string,
+			][];
 		} catch (error) {
 			console.error('Failed to load emojis:', error);
 		} finally {
@@ -75,7 +75,7 @@
 <Dropdown
 	bind:isOpen={dropdownOpen}
 	placement="bottom"
-	class="ml-3 text-sm !h-80 sm:w-3/4 md:w-1/2 lg:w-1/3 bg-gray-100 dark:bg-gray-900"
+	class="ml-3 text-sm h-80 sm:w-3/4 md:w-1/2 lg:w-1/3 bg-gray-100 dark:bg-gray-900"
 >
 	<DropdownHeader class="sticky top-0 bg-gray-100 dark:bg-gray-900">
 		<Search size="md" oninput={handleOnInput} />
@@ -104,7 +104,7 @@
 					{/each}
 					{#if chunk.length < COMMENT_CONTAINER_EMOJI_CHUNK_SIZE}
 						{#each Array(COMMENT_CONTAINER_EMOJI_CHUNK_SIZE - chunk.length) as _}
-							<div class="w-[40px]"></div>
+							<div class="w-10"></div>
 						{/each}
 					{/if}
 				</div>

@@ -161,11 +161,13 @@ const PostUpdateSchema = {
 
 export {
 	CreatePostSchema,
-	DeletePostSchema, GetPostsByAuthorSchema, GetPostSchema, GetPostsSchema,
+	DeletePostSchema,
+	GetPostsByAuthorSchema,
+	GetPostSchema,
+	GetPostsSchema,
 	GetPostsWithArtistNameSchema,
 	GetPostsWithTagNameSchema,
 	GetSimilarPostsSchema,
 	LikePostSchema,
-	PostUpdateSchema
+	PostUpdateSchema,
 };
-

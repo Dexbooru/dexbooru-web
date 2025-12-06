@@ -1,4 +1,4 @@
-import type { UserPreference } from '@prisma/client';
+import type { UserPreference } from '$generated/prisma/client';
 import type {
 	TEmailRequirements,
 	TPasswordRequirements,

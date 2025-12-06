@@ -1,5 +1,5 @@
+import type { UserPreference } from '$generated/prisma/browser';
 import type { TUser } from '$lib/shared/types/users';
-import type { UserPreference } from '@prisma/client';
 import type { Writable } from 'svelte/store';
 import { GLOBAL_SEARCH_MODAL_NAME } from '../constants/layout';
 import type { IDeviceStoreData } from '../types/device';

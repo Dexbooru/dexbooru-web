@@ -1,5 +1,5 @@
-import type { FriendRequest, Prisma } from '@prisma/client';
-import type { DefaultArgs } from '@prisma/client/runtime/library';
+import type { FriendRequest, Prisma } from '$generated/prisma/client';
+import type { DefaultArgs } from '@prisma/client/runtime/client';
 
 export type TFriendData = {
 	friends: TChatFriend[];

@@ -1,8 +1,8 @@
-import { URL_REGEX } from '$lib/shared/constants/urls';
+import { Prisma } from '$generated/prisma/client';
+import type { DefaultArgs } from '@prisma/client/runtime/client';
 import { UUID_REGEX } from '$lib/shared/constants/search';
+import { URL_REGEX } from '$lib/shared/constants/urls';
 import type { TPostOrderByColumn } from '$lib/shared/types/posts';
-import type { Prisma } from '@prisma/client';
-import { type DefaultArgs } from '@prisma/client/runtime/library';
 import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../constants/posts';
 import type { TControllerHandlerVariant } from '../types/controllers';
 
@@ -17,6 +17,7 @@ const VALID_PREFIXES: readonly TPrefix[] = [
 	'moderationStatus',
 	'sourceLink',
 ];
+
 const NEGATION_TABLE: Record<TOperation, TOperation> = {
 	'!=': '=',
 	'=': '!=',

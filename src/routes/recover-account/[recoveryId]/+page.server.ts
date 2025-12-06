@@ -1,9 +1,9 @@
+import type { PasswordRecoveryAttempt } from '$generated/prisma/client';
 import {
 	handleGetPasswordRecoverySession,
 	handlePasswordUpdateAccountRecovery,
 } from '$lib/server/controllers/users';
 import type { TUser } from '$lib/shared/types/users';
-import type { PasswordRecoveryAttempt } from '@prisma/client';
 import type { Actions, PageServerLoad } from './$types';
 
 export const actions: Actions = {

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import type { Artist, Tag } from '$generated/prisma/browser';
 	import { getLabelMetadata } from '$lib/client/api/labels';
 	import { LABEL_METADATA_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getActiveModal } from '$lib/client/helpers/context';
 	import type { TApiResponse } from '$lib/shared/types/api';
-	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Modal from 'flowbite-svelte/Modal.svelte';
 	import Spinner from 'flowbite-svelte/Spinner.svelte';

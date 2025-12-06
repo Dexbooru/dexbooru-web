@@ -1,5 +1,5 @@
+import type { Prisma } from '$generated/prisma/client';
 import { NULLABLE_USER_USER_PREFERENCES } from '$lib/shared/constants/auth';
-import type { Prisma } from '@prisma/client';
 import prisma from '../prisma';
 
 export const findUserPreferences = async (userId: string) => {

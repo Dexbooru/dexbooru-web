@@ -24,21 +24,19 @@
 </script>
 
 {#if (page.data.posts ?? []).length > 0}
-	<div
-		class="p-3 grid grid-cols-1 sm:grid-cols-3 gap-4 auto-rows-min"
-	>
+	<div class="p-3 grid grid-cols-1 sm:grid-cols-3 gap-4 auto-rows-min">
 		{#if $postPaginationData}
 			{#each useHiddenPosts ? $blacklistedPostPage : useNsfwPosts ? $nsfwPostPage : $postPage as post (post.id)}
 				<PostCard {post} />
 			{/each}
 		{:else}
-			{#each Array(page.data.posts?.length).fill(0) as _, i}
+			{#each Array(page.data.posts?.length).fill(0) as _, _i}
 				<CardPlaceholder size="md" />
 			{/each}
 		{/if}
 	</div>
 {:else}
-	<div class="flex flex-col space-y-5 !mt-20">
+	<div class="flex flex-col space-y-5 mt-20">
 		<p class="text-6xl dark:text-white text-center">No posts found</p>
 		{#if (!$postPaginationData ? (page.data.posts ?? []) : useHiddenPosts ? $blacklistedPostPage : useNsfwPosts ? $nsfwPostPage : $postPage).length === 0}
 			<PostPaginator />

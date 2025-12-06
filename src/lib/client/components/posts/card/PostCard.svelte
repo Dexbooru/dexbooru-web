@@ -5,13 +5,13 @@
 	import { HIDDEN_POSTS_MODAL_NAME } from '$lib/client/constants/layout';
 	import {
 		POST_CARD_CAROUSEL_SLIDE_DURATION,
-		POST_CARD_CAROUSEL_TRANSITION_FUNCTION
+		POST_CARD_CAROUSEL_TRANSITION_FUNCTION,
 	} from '$lib/client/constants/posts';
 	import { getActiveModal, getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
 		NSFW_PREVIEW_IMAGE_SUFFIX,
-		PREVIEW_IMAGE_SUFFIX
+		PREVIEW_IMAGE_SUFFIX,
 	} from '$lib/shared/constants/images';
 	import type { TPost } from '$lib/shared/types/posts';
 	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
@@ -40,7 +40,7 @@
 		imageUrls = imageUrls.filter((imageUrl) => {
 			if (
 				IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionBaseUrl) =>
-					imageUrl.includes(exclusionBaseUrl)
+					imageUrl.includes(exclusionBaseUrl),
 				)
 			) {
 				return true;

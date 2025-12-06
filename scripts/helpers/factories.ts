@@ -1,14 +1,14 @@
-import { faker } from '@faker-js/faker';
 import type {
-	Artist,
-	Comment,
-	Post,
-	PostCollection,
-	PostModerationStatus,
-	Tag,
-	User,
-	UserRole,
-} from '@prisma/client';
+    Artist,
+    Comment,
+    Post,
+    PostCollection,
+    PostModerationStatus,
+    Tag,
+    User,
+    UserRole,
+} from '../../src/generated/prisma/client'
+import { faker } from '@faker-js/faker';
 
 const userFactory = (overrides: Partial<User> = {}): User => {
 	return {

@@ -1,7 +1,7 @@
+import type { Prisma } from '$generated/prisma/client';
 import { PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
 import { MAXIMUM_SIMILAR_POSTS_PER_POST } from '$lib/shared/constants/posts';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
-import type { Prisma } from '@prisma/client';
 import prisma from '../prisma';
 import { decrementArtistPostCount, incrementArtistPostCount } from './artist';
 import { decrementTagPostCount, incrementTagPostCount } from './tag';

@@ -101,7 +101,7 @@ export const handleGetPostCollectionReports = async (
 				return createSuccessResponse(
 					handlerType,
 					'Successfully fetched the post collection reports.',
-				{ postCollectionReports },
+					{ postCollectionReports },
 				);
 			} catch (error) {
 				logger.error(error);

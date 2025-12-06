@@ -1,4 +1,4 @@
-import type { Artist } from '@prisma/client';
+import type { Artist } from '$generated/prisma/client';
 import type { RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
 import { findArtistMetadata, updateArtistMetadata } from '../db/actions/artist';

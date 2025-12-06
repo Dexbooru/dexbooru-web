@@ -1,7 +1,7 @@
-import { PageNumberSchema, BoolStrSchema } from "$lib/server/constants/reusableSchemas";
-import type { TRequestSchema } from "$lib/server/types/controllers";
-import { MAXIMUM_CONTENT_LENGTH } from "$lib/shared/constants/comments";
-import { z } from "zod";
+import { PageNumberSchema, BoolStrSchema } from '$lib/server/constants/reusableSchemas';
+import type { TRequestSchema } from '$lib/server/types/controllers';
+import { MAXIMUM_CONTENT_LENGTH } from '$lib/shared/constants/comments';
+import { z } from 'zod';
 
 const GeneralCommentsSchema = {
 	urlSearchParams: z.object({

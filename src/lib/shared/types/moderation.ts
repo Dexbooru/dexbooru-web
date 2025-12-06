@@ -1,4 +1,4 @@
-import type { PostCollectionReport, PostReport, UserReport } from '@prisma/client';
+import type { PostCollectionReport, PostReport, UserReport } from '$generated/prisma/client';
 import type { TUser } from './users';
 
 export type TModerationPaginationData = {

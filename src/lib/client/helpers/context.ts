@@ -1,3 +1,4 @@
+import type { UserPreference } from '$generated/prisma/browser';
 import { NULLABLE_USER, NULLABLE_USER_USER_PREFERENCES } from '$lib/shared/constants/auth';
 import CommentTree from '$lib/shared/helpers/comments';
 import type {
@@ -11,7 +12,6 @@ import type { TModerationPaginationData } from '$lib/shared/types/moderation';
 import type { TUserNotifications } from '$lib/shared/types/notifcations';
 import type { THiddenPagePostData, TPost, TPostPaginationData } from '$lib/shared/types/posts';
 import type { TUser } from '$lib/shared/types/users';
-import type { UserPreference } from '@prisma/client';
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
 import type { LayoutData } from '../../../routes/$types';

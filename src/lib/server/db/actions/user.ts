@@ -1,8 +1,8 @@
+import type { UserRole } from '$generated/prisma/client';
 import { roundNumber } from '$lib/client/helpers/posts';
 import type { TUserSelector } from '$lib/server/types/users';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import type { TUser } from '$lib/shared/types/users';
-import type { UserRole } from '@prisma/client';
 import prisma from '../prisma';
 
 export async function findAllModerators() {

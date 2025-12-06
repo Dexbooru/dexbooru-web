@@ -3,9 +3,9 @@
 	import type { Snippet } from 'svelte';
 
 	type Props = {
-		data: any[];
+		data: unknown[];
 		listHeight: number;
-		children: Snippet<[any]>;
+		children: Snippet<[unknown]>;
 	};
 
 	let { data, listHeight, children }: Props = $props();

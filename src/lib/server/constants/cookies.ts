@@ -1,7 +1,10 @@
 import { dev } from '$app/environment';
 import type { SerializeOptions } from 'cookie';
 
-type CookieOptions = Pick<SerializeOptions, 'path' | 'sameSite' | 'secure' | 'maxAge' | 'httpOnly'> & {
+type CookieOptions = Pick<
+	SerializeOptions,
+	'path' | 'sameSite' | 'secure' | 'maxAge' | 'httpOnly'
+> & {
 	sameSite: 'strict' | 'lax' | 'none'; // Explicitly define sameSite as a literal type
 };
 

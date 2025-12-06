@@ -3,5 +3,5 @@
 	"editor.codeActionsOnSave": {
 		"source.organizeImports": "explicit"
 	},
-	"prisma.pinToPrisma6": true
+	"prisma.pinToPrisma6": false
 }

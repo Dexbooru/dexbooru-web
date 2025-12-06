@@ -1,5 +1,5 @@
-import type { TRequestSchema } from "$lib/server/types/controllers";
-import { z } from "zod";
+import type { TRequestSchema } from '$lib/server/types/controllers';
+import { z } from 'zod';
 
 const OauthStoreSchema = {
 	body: z.object({

@@ -1,6 +1,6 @@
+import type { Tag } from '$generated/prisma/client';
 import { MAXIMUM_TAGS_PER_PAGE } from '$lib/server/constants/tags';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
-import type { Tag } from '@prisma/client';
 import prisma from '../prisma';
 
 export async function updateTagMetadata(tagName: string, description: string | null) {

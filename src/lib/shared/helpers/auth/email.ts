@@ -2,7 +2,7 @@ import {
 	EMAIL_REGEX,
 	EMAIL_REQUIREMENTS,
 	MAXIMUM_EMAIL_LENGTH,
-	MINIMUM_EMAIL_LENGTH
+	MINIMUM_EMAIL_LENGTH,
 } from '../../constants/auth';
 import type { TAuthFieldRequirements } from '../../types/auth';
 

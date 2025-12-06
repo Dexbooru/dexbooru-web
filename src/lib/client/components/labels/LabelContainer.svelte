@@ -13,12 +13,15 @@
 		labelType: 'tag' | 'artist';
 		onPostsViewPage?: boolean;
 		labelsAreLarge?: boolean;
-		labelColor?: 'red' | 'green' | 'primary'
+		labelColor?: 'red' | 'green' | 'primary';
 		labelIsLink?: boolean;
 		labelIsDismissable?: boolean;
 		handleLabelClose?:
-			| ((event: Event & {
-    currentTarget: EventTarget & HTMLDivElement}) => void)
+			| ((
+					_event: Event & {
+						currentTarget: EventTarget & HTMLDivElement;
+					},
+			  ) => void)
 			| null;
 	};
 

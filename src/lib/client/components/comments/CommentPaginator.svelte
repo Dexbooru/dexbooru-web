@@ -52,7 +52,7 @@
 
 {#if $commentPaginationData}
 	<div id="pagination-container" class="flex m-3 space-x-3 justify-center">
-		{#if noCommentsOnPage && !!!['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $commentPaginationData.pageNumber > 0}
+		{#if noCommentsOnPage && !['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $commentPaginationData.pageNumber > 0}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}
 			{#if ($commentPaginationData.pageNumber - 1 >= 0 || noCommentsLeft) && $commentPaginationData.pageNumber !== 0}
@@ -67,7 +67,11 @@
 			{/if}
 
 			{#if !noCommentsLeft}
-				<PaginationItem href={nextPageUrl.href} size="large" class="flex items-center next-page-link">
+				<PaginationItem
+					href={nextPageUrl.href}
+					size="large"
+					class="flex items-center next-page-link"
+				>
 					Next
 					<ArrowRightOutline class="ml-2 w-5 h-5" />
 				</PaginationItem>

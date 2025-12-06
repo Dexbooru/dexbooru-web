@@ -14,7 +14,6 @@ export const doPasswordsMatch = async (
 	return await bcrypt.compare(password, hashedPassword);
 };
 
-
 export const generateRandomPassword = (passwordSize: number): string => {
 	let generatedPassword: string = '';
 
@@ -24,4 +23,4 @@ export const generateRandomPassword = (passwordSize: number): string => {
 	}
 
 	return generatedPassword;
-}
+};

@@ -5,7 +5,8 @@
 	import { getActiveModal, getCommentTree } from '$lib/client/helpers/context';
 	import type { TComment } from '$lib/shared/types/comments';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button, Modal } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
+	import Modal from 'flowbite-svelte/Modal.svelte';
 	import ExclamationCircleOutline from 'flowbite-svelte-icons/ExclamationCircleOutline.svelte';
 	import { onMount } from 'svelte';
 
@@ -64,11 +65,8 @@
 		<h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
 			Are you sure you want to delete this comment?
 		</h3>
-		<Button
-			disabled={commentDeletionLoading}
-			onclick={handleDeleteComment}
-			color="red"
-			class="me-2">Yes, I'm sure</Button
+		<Button disabled={commentDeletionLoading} onclick={handleDeleteComment} color="red" class="me-2"
+			>Yes, I'm sure</Button
 		>
 		<Button
 			onclick={() => activeModal.set({ isOpen: false, focusedModalName: null })}

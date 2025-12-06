@@ -2,7 +2,7 @@ import {
 	MAXIMUM_PASSWORD_LENGTH,
 	MINIMUM_PASSWORD_LENGTH,
 	PASSWORD_REQUIREMENTS,
-	SPECIAL_CHARACTER_REGEX
+	SPECIAL_CHARACTER_REGEX,
 } from '$lib/shared/constants/auth';
 import type { TAuthFieldRequirements } from '$lib/shared/types/auth';
 
@@ -40,7 +40,7 @@ export const getPasswordRequirements = (password: string): TAuthFieldRequirement
 			hasLowercaseCharacter,
 			hasUppercaseCharacter,
 			hasNumber,
-			hasSpecialCharacter
+			hasSpecialCharacter,
 		].reduce((acc, cur) => acc && cur);
 		if (charactersChecksPass) break;
 	}
@@ -71,6 +71,6 @@ export const getPasswordRequirements = (password: string): TAuthFieldRequirement
 
 	return {
 		satisfied: satisifedRequirements,
-		unsatisfied: unsatisfiedRequirements
+		unsatisfied: unsatisfiedRequirements,
 	};
 };

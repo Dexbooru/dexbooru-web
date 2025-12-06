@@ -1,8 +1,8 @@
 <script lang="ts">
+	import type { Artist, Tag } from '$generated/prisma/browser';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { getFaviconFromUrl } from '$lib/client/helpers/urls';
 	import { formatDate } from '$lib/shared/helpers/dates';
-	import type { Artist, Tag } from '@prisma/client';
 	import Img from 'flowbite-svelte/Img.svelte';
 
 	type Props = {

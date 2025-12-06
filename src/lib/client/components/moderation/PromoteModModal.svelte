@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { UserRole } from '$generated/prisma/browser';
 	import { updateUserRole } from '$lib/client/api/users';
 	import { PROMOTE_USER_MODAL_NAME } from '$lib/client/constants/layout';
 	import { MODERATION_NAME_MAP } from '$lib/client/constants/moderation';
@@ -10,9 +11,8 @@
 	} from '$lib/client/helpers/context';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { TUser } from '$lib/shared/types/users';
-	import { UserRole } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { Button } from 'flowbite-svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import Alert from 'flowbite-svelte/Alert.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';

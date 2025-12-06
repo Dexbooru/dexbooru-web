@@ -1,4 +1,4 @@
-import type { UserAuthenticationSource } from '@prisma/client';
+import type { UserAuthenticationSource } from '$generated/prisma/client';
 import type { RequestEvent } from '@sveltejs/kit';
 import {
 	findLinkedAccountsFromUserId,

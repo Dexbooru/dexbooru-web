@@ -1,9 +1,9 @@
+import type { FriendRequest } from '$generated/prisma/client';
 import type {
 	TChatFriend,
 	TFriendRequest,
 	TFriendRequestSelector,
 } from '$lib/shared/types/friends';
-import type { FriendRequest } from '@prisma/client';
 import prisma from '../prisma';
 
 export async function findAllUserFriendRequests(userId: string) {

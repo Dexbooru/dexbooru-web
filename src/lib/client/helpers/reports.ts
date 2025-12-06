@@ -1,9 +1,9 @@
-import { capitalize } from '$lib/shared/helpers/util';
 import type {
 	PostCollectionReportCategory,
 	PostReportCategory,
 	UserReportCategory,
-} from '@prisma/client';
+} from '$generated/prisma/browser';
+import { capitalize } from '$lib/shared/helpers/util';
 
 export const normalizeReportReasonName = (
 	reasonCategory: UserReportCategory | PostReportCategory | PostCollectionReportCategory,

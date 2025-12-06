@@ -12,6 +12,9 @@ vite.config.ts.timestamp-*
 yarn-error.log
 .vercel
 
+# generated prisma client
+src/generated/*
+
 # scripts
 scripts/venv/
 mock_data/

@@ -1,4 +1,4 @@
-import type { PostCollectionReportCategory } from '@prisma/client';
+import type { PostCollectionReportCategory } from '$generated/prisma/browser';
 import { getApiAuthHeaders } from '../helpers/auth';
 
 export const createPostCollectionReport = async (

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import type { PostCollectionReport, PostReport, UserReport } from '$generated/prisma/browser';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import { capitalize } from '$lib/shared/helpers/util';
-	import type { PostCollectionReport, PostReport, UserReport } from '@prisma/client';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
 

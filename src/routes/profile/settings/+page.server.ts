@@ -1,3 +1,4 @@
+import type { LinkedUserAccount } from '$generated/prisma/client';
 import { handleUpdateLinkedAccounts } from '$lib/server/controllers/linkedAccounts';
 import {
 	handleChangePassword,
@@ -9,7 +10,6 @@ import {
 	handleUpdatePostPreferences,
 	handleUpdateUserInterfacePreferences,
 } from '$lib/server/controllers/users';
-import type { LinkedUserAccount } from '@prisma/client';
 import type { Action, Actions, PageServerLoad } from './$types';
 
 const handleAccountDeletion: Action = async (event) => {

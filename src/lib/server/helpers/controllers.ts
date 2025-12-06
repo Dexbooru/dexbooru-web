@@ -22,7 +22,7 @@ export const isRequestEvent = (object: unknown) => {
 	if (typeof object !== 'object') return false;
 
 	const objectKeys = Object.keys(object);
-	const validKeyNotInObject = VALID_REQUEST_EVENT_KEYS.some(key => !objectKeys.includes(key));	
+	const validKeyNotInObject = VALID_REQUEST_EVENT_KEYS.some((key) => !objectKeys.includes(key));
 	return !validKeyNotInObject;
 };
 

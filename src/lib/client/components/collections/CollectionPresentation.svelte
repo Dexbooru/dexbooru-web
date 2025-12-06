@@ -6,7 +6,10 @@
 	} from '$lib/client/constants/images';
 	import { POSTS_GRID_ANIMATION_DURATION_MS } from '$lib/client/constants/posts';
 	import { getOriginalPostsPage } from '$lib/client/helpers/context';
-	import { computeDownScaledImageRatios, transformImageDimensions } from '$lib/client/helpers/images';
+	import {
+		computeDownScaledImageRatios,
+		transformImageDimensions,
+	} from '$lib/client/helpers/images';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
@@ -176,7 +179,7 @@
 	<div class="grid grid-cols-3 gap-4">
 		{#each collection.posts as post (post.id)}
 			<div animate:flip={{ duration: POSTS_GRID_ANIMATION_DURATION_MS }}>
-				<PostCard  {post} />
+				<PostCard {post} />
 			</div>
 		{/each}
 	</div>

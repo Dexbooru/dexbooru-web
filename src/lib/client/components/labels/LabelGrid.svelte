@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Artist, Tag } from '$generated/prisma/browser';
 	import { getArtists } from '$lib/client/api/artists';
 	import { getTags } from '$lib/client/api/tags';
 	import { CHAR_OPTIONS_LOWERCASE } from '$lib/client/constants/labels';
@@ -6,9 +7,8 @@
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { renderLabel } from '$lib/shared/helpers/labels';
 	import type { TApiResponse } from '$lib/shared/types/api';
-	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
-	import PalleteSolid from 'flowbite-svelte-icons/PaletteSolid.svelte'
+	import PalleteSolid from 'flowbite-svelte-icons/PaletteSolid.svelte';
 	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Spinner from 'flowbite-svelte/Spinner.svelte';

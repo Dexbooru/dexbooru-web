@@ -54,7 +54,7 @@
 			!tags.some((tag) => !isLabelAppropriate(tag, 'tag')) &&
 			!artists.some((artist) => !isLabelAppropriate(artist, 'artist')) &&
 			!postImages.some(
-				(postImage) => !isFileImage(postImage.file) || !isFileImageSmall(postImage.file, 'post')
+				(postImage) => !isFileImage(postImage.file) || !isFileImageSmall(postImage.file, 'post'),
 			);
 		return !isValidForm;
 	});

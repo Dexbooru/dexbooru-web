@@ -10,17 +10,17 @@ export const GET: RequestHandler = async ({ params, url }) => {
 
 	if (!authorId || !pageNumber || !pageLimit) {
 		error(400, {
-        			message:
-        				'At least one of the required parameters was missing for finding the comments of a author!'
-        		});
+			message:
+				'At least one of the required parameters was missing for finding the comments of a author!',
+		});
 	}
 
 	const convertedPageNumber = parseInt(pageNumber);
 	const convertedPageLimit = parseInt(pageLimit);
 	if (isNaN(convertedPageNumber) || isNaN(convertedPageLimit)) {
 		error(400, {
-        			message: 'The page number and the page limit parameters must be positive whole numbers!'
-        		});
+			message: 'The page number and the page limit parameters must be positive whole numbers!',
+		});
 	}
 
 	const comments = await findCommentsByAuthorId(
@@ -28,7 +28,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 		convertedPageNumber,
 		convertedPageLimit,
 		'createdAt',
-		PUBLIC_AUTHOR_COMMENT_SELECTIONS
+		PUBLIC_AUTHOR_COMMENT_SELECTIONS,
 	);
 	if (!comments) {
 		error(400, { message: `There is no author with the id: ${authorId} that exists!` });

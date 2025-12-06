@@ -1,4 +1,4 @@
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '$generated/prisma/browser';
 import { getApiAuthHeaders } from '../helpers/auth';
 
 export const updateUserRole = async (username: string, newRole: UserRole) => {

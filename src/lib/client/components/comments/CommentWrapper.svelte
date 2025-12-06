@@ -62,7 +62,6 @@
 	const paginationDataUnsubscribe = paginationData.subscribe((data) => {
 		if (!data) return;
 
-
 		const images = Array.from(document.querySelectorAll('img')) as HTMLImageElement[];
 		images.forEach((image) => {
 			if (image.alt.includes('profile of')) {

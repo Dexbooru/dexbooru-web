@@ -1,7 +1,7 @@
+import type { Comment } from '$generated/prisma/client';
 import type { TCommentSelector } from '$lib/server/types/comments';
 import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
 import type { TCommentOrderByColumn } from '$lib/shared/types/comments';
-import type { Comment } from '@prisma/client';
 import prisma from '../prisma';
 
 export async function findComments(

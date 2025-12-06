@@ -32,7 +32,7 @@
 		if (labels.length === maxLabels) {
 			toast.push(
 				`You have reached the maximum amount of ${type}s a post can have`,
-				FAILURE_TOAST_OPTIONS
+				FAILURE_TOAST_OPTIONS,
 			);
 			return;
 		}
@@ -52,7 +52,7 @@
 		if (labels.includes(transformedLabel)) {
 			toast.push(
 				`A ${type} called ${transformedLabel} was previously added already!`,
-				FAILURE_TOAST_OPTIONS
+				FAILURE_TOAST_OPTIONS,
 			);
 			return;
 		}
@@ -61,7 +61,7 @@
 		currentInput = '';
 	};
 
-	const removeLabel = (event: CustomEvent<any> & { explicitOriginalTarget: Element }) => {
+	const removeLabel = (event: CustomEvent<unknown> & { explicitOriginalTarget: Element }) => {
 		const target = event.explicitOriginalTarget as Element;
 		const badgeDiv = target.closest('div');
 

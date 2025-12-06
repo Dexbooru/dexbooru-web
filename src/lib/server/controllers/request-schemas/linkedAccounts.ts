@@ -1,6 +1,6 @@
+import type { UserAuthenticationSource } from '$generated/prisma/client';
 import { BoolStrSchema } from '$lib/server/constants/reusableSchemas';
 import type { TRequestSchema } from '$lib/server/types/controllers';
-import type { UserAuthenticationSource } from '@prisma/client';
 import { z } from 'zod';
 
 const GetUserLinkedAccountsSchema = {

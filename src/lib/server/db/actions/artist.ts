@@ -1,6 +1,6 @@
+import type { Artist } from '$generated/prisma/client';
 import { MAXIMUM_ARTISTS_PER_PAGE } from '$lib/server/constants/artists';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
-import type { Artist } from '@prisma/client';
 import prisma from '../prisma';
 
 export async function updateArtistMetadata(

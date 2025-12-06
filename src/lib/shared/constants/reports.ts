@@ -2,7 +2,7 @@ import type {
 	PostCollectionReportCategory,
 	PostReportCategory,
 	UserReportCategory,
-} from '@prisma/client';
+} from '$generated/prisma/client';
 
 export const MAXIMUM_REPORTS_PER_PAGE = 30;
 export const MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH = 250;

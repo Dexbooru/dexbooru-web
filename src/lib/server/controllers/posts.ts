@@ -454,7 +454,10 @@ export const handleCreatePost = async (
 				}
 
 				if (newPostId.length > 0) {
-					const postImageInputs = newPost.imageUrls.map(imageUrl => ({ postId: newPost.id, imageUrl }));
+					const postImageInputs = newPost.imageUrls.map((imageUrl) => ({
+						postId: newPost.id,
+						imageUrl,
+					}));
 					enqueueBatchUploadedPostImages(postImageInputs);
 				}
 

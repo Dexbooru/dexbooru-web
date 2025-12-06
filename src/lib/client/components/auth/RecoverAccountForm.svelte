@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import type { PasswordRecoveryAttempt } from '$generated/prisma/browser';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getChangePasswordAuthRequirements } from '$lib/client/helpers/context';
 	import type { TUser } from '$lib/shared/types/users';
-	import type { PasswordRecoveryAttempt } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { LinkedUserAccount } from '$generated/prisma/browser';
 	import { addFriend, deleteFriend } from '$lib/client/api/friends';
 	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 	import {
@@ -11,7 +12,6 @@
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
-	import type { LinkedUserAccount } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';

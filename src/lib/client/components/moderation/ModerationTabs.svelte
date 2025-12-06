@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { PostCollectionReport, PostReport, UserReport } from '$generated/prisma/browser';
 	import { getCollectionsReports } from '$lib/client/api/collectionReports';
 	import { getModerators } from '$lib/client/api/moderation';
 	import { getPostsReports } from '$lib/client/api/postReports';
@@ -10,7 +11,6 @@
 	import { isModerationRole } from '$lib/shared/helpers/auth/role';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { TUser } from '$lib/shared/types/users';
-	import type { PostCollectionReport, PostReport, UserReport } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import TabItem from 'flowbite-svelte/TabItem.svelte';

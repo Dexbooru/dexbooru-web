@@ -1,4 +1,4 @@
-import type { $Enums } from '@prisma/client';
+import type { $Enums } from '$generated/prisma/client';
 
 export const isModerationRole = (role: $Enums.UserRole) => {
 	if (role === 'MODERATOR' || role === 'OWNER') {

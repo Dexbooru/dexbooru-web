@@ -1,4 +1,4 @@
-import type { Prisma, UserAuthenticationSource } from '@prisma/client';
+import type { Prisma, UserAuthenticationSource } from '$generated/prisma/client';
 import prisma from '../prisma';
 
 export const updateLinkedAccountsForUserFromId = async (

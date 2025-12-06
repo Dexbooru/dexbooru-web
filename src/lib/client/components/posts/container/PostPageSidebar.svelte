@@ -5,13 +5,11 @@
 	import OrderedListOutline from 'flowbite-svelte-icons/OrderedListOutline.svelte';
 	import PalleteSolid from 'flowbite-svelte-icons/PaletteSolid.svelte';
 	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
-	import {
-		Sidebar,
-		SidebarItem,
-		SidebarDropdownWrapper,
-		SidebarGroup,
-		SidebarWrapper
-	} from 'flowbite-svelte';
+	import Sidebar from 'flowbite-svelte/Sidebar.svelte';
+	import SidebarDropdownWrapper from 'flowbite-svelte/SidebarDropdownWrapper.svelte';
+	import SidebarGroup from 'flowbite-svelte/SidebarGroup.svelte';
+	import SidebarItem from 'flowbite-svelte/SidebarItem.svelte';
+	import SidebarWrapper from 'flowbite-svelte/SidebarWrapper.svelte';
 	import HiddenPostAlert from './HiddenPostAlert.svelte';
 
 	type Props = {

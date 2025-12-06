@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { LinkedUserAccount } from '$generated/prisma/browser';
 	import { capitalize } from '$lib/shared/helpers/util';
-	import type { LinkedUserAccount } from '@prisma/client';
 	import DiscordSolid from 'flowbite-svelte-icons/DiscordSolid.svelte';
 	import GithubSolid from 'flowbite-svelte-icons/GithubSolid.svelte';
 	import GoogleSolid from 'flowbite-svelte-icons/GoogleSolid.svelte';

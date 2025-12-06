@@ -1,4 +1,4 @@
-import type { Artist, Tag } from '@prisma/client';
+import type { Artist, Tag } from '$generated/prisma/client';
 
 export type TSearchSection = 'posts' | 'tags' | 'artists' | 'users' | 'all';
 

@@ -1,10 +1,10 @@
+import { Prisma, type Artist, type Tag } from '$generated/prisma/client';
 import type {
 	TAppSearchResult,
 	TPostCollectionSearchResults,
 	TPostSearchResults,
 	TUserSearchResults,
 } from '$lib/shared/types/search';
-import { Prisma, type Artist, type Tag } from '@prisma/client';
 import prisma from '../prisma';
 
 export async function searchForTags(query: string, limit: number): Promise<TAppSearchResult> {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { UserRole } from '$generated/prisma/browser';
 	import { PROMOTE_USER_MODAL_NAME } from '$lib/client/constants/layout';
 	import {
 		getActiveModal,
@@ -9,7 +10,6 @@
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import { capitalize } from '$lib/shared/helpers/util';
 	import type { TUser } from '$lib/shared/types/users';
-	import type { UserRole } from '@prisma/client';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Listgroup from 'flowbite-svelte/Listgroup.svelte';

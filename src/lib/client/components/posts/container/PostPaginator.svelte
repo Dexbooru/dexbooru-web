@@ -55,7 +55,7 @@
 
 {#if $postPaginationData}
 	<div id="pagination-container" class="flex flex-wrap gap-3 justify-center">
-		{#if noPostsOnPage && !!!['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $postPaginationData.pageNumber > 0}
+		{#if noPostsOnPage && !['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $postPaginationData.pageNumber > 0}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}
 			{#if ($postPaginationData.pageNumber - 1 >= 0 || noPostsLeft) && $postPaginationData.pageNumber !== 0}
@@ -70,7 +70,11 @@
 			{/if}
 
 			{#if !noPostsLeft}
-				<PaginationItem href={nextPageUrl.href} size="large" class="flex items-center next-page-link">
+				<PaginationItem
+					href={nextPageUrl.href}
+					size="large"
+					class="flex items-center next-page-link"
+				>
 					Next
 					<ArrowRightOutline class="ml-2 w-5 h-5" />
 				</PaginationItem>

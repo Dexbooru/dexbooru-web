@@ -1,5 +1,6 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import minimist from 'minimist';
+import { PrismaClient, UserRole } from '../src/generated/prisma/client';
 import { hashPassword } from '../src/lib/server/helpers/password';
 import aggregateDanbooruPosts, { TAggregateOptions } from './helpers/aggregateDanbooruData';
 import dumpData from './helpers/dumpData';
@@ -11,7 +12,10 @@ const OWNER_PASSWORD = 'password';
 
 async function main() {
 	const logger = createLogger('debug');
-	const dbClient = new PrismaClient();
+	const adapter = new PrismaPg({
+		connectionString: process.env.DATABASE_URL ?? '',
+	});
+	const dbClient = new PrismaClient({ adapter});
 	await dbClient.$connect();
 
 	const args = minimist(process.argv.slice(2)) as TAggregateOptions;

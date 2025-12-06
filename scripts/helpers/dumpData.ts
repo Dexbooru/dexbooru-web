@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
-import { PrismaClient, User } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
+import { PrismaClient, User } from '../../src/generated/prisma/client';
 import { TDanbooruPost } from './aggregateDanbooruData';
 import factories from './factories';
 import buildLogger from './logger';
@@ -115,7 +115,8 @@ async function dumpData({
 		logger.info(`Deleting all records of: ${DELETION_MODELS.join(', ')} from the database`);
 
 		for (const model of DELETION_MODELS) {
-			await prismaClient[model].deleteMany({});
+			// @ts-expect-error Dynamic model access
+			await prismaClient[model as keyof PrismaClient].deleteMany({});
 			logger.info(`Deleted all records from ${model}`);
 		}
 

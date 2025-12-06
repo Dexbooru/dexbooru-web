@@ -1,5 +1,5 @@
-import type { Post, PostSourceType, Prisma, UserRole } from '@prisma/client';
-import type { DefaultArgs } from '@prisma/client/runtime/library';
+import type { Post, PostSourceType, Prisma, UserRole } from '$generated/prisma/client';
+import type { DefaultArgs } from '@prisma/client/runtime/client';
 import type { TComment } from './comments';
 
 export type TPostLikeAction = 'like' | 'dislike';
@@ -13,7 +13,7 @@ export type TPostSource = {
 	sourceTitle: string;
 	sourceType: PostSourceType;
 	characterName: string;
-}
+};
 
 export type TUpdatePostBody = {
 	description: string;

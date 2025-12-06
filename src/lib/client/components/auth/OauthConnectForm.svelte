@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LinkedUserAccount } from '@prisma/client';
+	import type { LinkedUserAccount } from '$generated/prisma/browser';
 	import Card from 'flowbite-svelte/Card.svelte';
 	import OauthLinks from './OauthLinks.svelte';
 

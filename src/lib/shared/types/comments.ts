@@ -1,4 +1,4 @@
-import type { Comment, UserRole } from '@prisma/client';
+import type { Comment, UserRole } from '$generated/prisma/client';
 
 export type TCommentCreateBody = {
 	parentCommentId: string | null;

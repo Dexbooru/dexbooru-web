@@ -209,7 +209,11 @@
 		<Label for="collectionThumbnail" class="mb-2 "
 			>Collection Thumbnnail (maximum image size is {MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB} MB)</Label
 		>
-		<Fileupload onchange={onFileChange} accept={FILE_IMAGE_ACCEPT.join(',')} name="collectionThumbnail" />
+		<Fileupload
+			onchange={onFileChange}
+			accept={FILE_IMAGE_ACCEPT.join(',')}
+			name="collectionThumbnail"
+		/>
 	</div>
 
 	{#if thumbnailLoading}

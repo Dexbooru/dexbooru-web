@@ -1,9 +1,9 @@
 <script lang="ts">
+	import type { LinkedUserAccount } from '$generated/prisma/browser';
 	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 	import UserProfileCard from '$lib/client/components/auth/UserProfileCard.svelte';
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
-	import type { LinkedUserAccount } from '@prisma/client';
 	import type { PageData } from './$types';
 
 	type Props = {

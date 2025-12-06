@@ -8,7 +8,7 @@
 	import { getActiveModal, getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { isModerationRole } from '$lib/shared/helpers/auth/role';
 	import type { TPostCollection } from '$lib/shared/types/collections';
-	import { ArrowRightAltSolid } from 'flowbite-svelte-icons';
+	import ArrowRightAltSolid from 'flowbite-svelte-icons/ArrowRightAltSolid.svelte';
 	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import PenSolid from 'flowbite-svelte-icons/PenSolid.svelte';
 	import TrashBinSolid from 'flowbite-svelte-icons/TrashBinSolid.svelte';

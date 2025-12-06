@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { type LinkedUserAccount, type UserAuthenticationSource } from '$generated/prisma/browser';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { type LinkedUserAccount, type UserAuthenticationSource } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import DiscordSolid from 'flowbite-svelte-icons/DiscordSolid.svelte';
 	import GithubSolid from 'flowbite-svelte-icons/GithubSolid.svelte';
@@ -95,7 +95,7 @@
 	authorizationUrl: string | undefined,
 	location: 'login' | 'security-settings',
 	disconnectedAccounts: UserAuthenticationSource[],
-	updateDisconnectedAccounts: (platform: UserAuthenticationSource) => void,
+	updateDisconnectedAccounts: (_platform: UserAuthenticationSource) => void,
 )}
 	<div class="flex items-center justify-between space-x-2">
 		<div class="flex items-center space-x-3">

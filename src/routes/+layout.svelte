@@ -24,7 +24,7 @@
 	} from '$lib/client/helpers/dom';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import { onMount } from 'svelte';
-	import '../app.postcss';
+	import '../app.css';
 	import type { LayoutData } from './$types';
 
 	type Props = {

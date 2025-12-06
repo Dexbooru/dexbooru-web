@@ -4,4 +4,4 @@ export type TUploadFormFields = {
 	artists: string;
 	isNsfw: string;
 	postPictures: FileList;
-}
+};

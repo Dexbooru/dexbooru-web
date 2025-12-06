@@ -1,4 +1,4 @@
-import type { PostCollection } from '@prisma/client';
+import type { PostCollection } from '$generated/prisma/client';
 import type { TPost } from './posts';
 
 export type TCollectionPaginationData = {

@@ -1,4 +1,4 @@
-import type { UserReportCategory } from '@prisma/client';
+import type { UserReportCategory } from '$generated/prisma/browser';
 import { getApiAuthHeaders } from '../helpers/auth';
 
 export const createUserReport = async (

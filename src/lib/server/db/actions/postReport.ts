@@ -1,5 +1,5 @@
+import type { ModerationReportStatus, PostReportCategory } from '$generated/prisma/client';
 import { MAXIMUM_REPORTS_PER_PAGE } from '$lib/shared/constants/reports';
-import type { ModerationReportStatus, PostReportCategory } from '@prisma/client';
 import prisma from '../prisma';
 
 export const findPostReportsViaPagination = async (

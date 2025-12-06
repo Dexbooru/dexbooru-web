@@ -10,7 +10,7 @@
 		POST_PICTURE_PREVIEW_HEIGHT,
 		POST_PICTURE_PREVIEW_WIDTH,
 	} from '$lib/shared/constants/images';
-	import Carousel from 'flowbite-svelte/Carousel.svelte';	
+	import Carousel from 'flowbite-svelte/Carousel.svelte';
 	import { type Component } from 'svelte';
 	import type { HTMLImgAttributes } from 'svelte/elements';
 

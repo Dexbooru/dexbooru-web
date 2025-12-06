@@ -1,9 +1,8 @@
 <script lang="ts">
-	import ChatMessageContainer from "$lib/client/components/chat/ChatMessageContainer.svelte";
-
+	import ChatMessageContainer from '$lib/client/components/chat/ChatMessageContainer.svelte';
 </script>
 
-<svelte:head>	
+<svelte:head>
 	<title>Chat</title>
 </svelte:head>
 

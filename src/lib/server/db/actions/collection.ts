@@ -1,8 +1,8 @@
+import type { Prisma } from '$generated/prisma/client';
 import { PUBLIC_POST_COLLECTION_SELECTORS } from '$lib/server/constants/collections';
 import { MAXIMUM_COLLECTIONS_PER_PAGE } from '$lib/shared/constants/collections';
 import type { TCollectionOrderByColumn, TPostCollection } from '$lib/shared/types/collections';
-import type { Prisma } from '@prisma/client';
-import type { DefaultArgs } from '@prisma/client/runtime/library';
+import type { DefaultArgs } from '@prisma/client/runtime/client';
 import prisma from '../prisma';
 
 export async function createCollection(data: Prisma.PostCollectionUncheckedCreateInput) {

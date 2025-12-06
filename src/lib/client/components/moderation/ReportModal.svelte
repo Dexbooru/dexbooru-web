@@ -1,4 +1,9 @@
 <script lang="ts">
+	import {
+		PostCollectionReportCategory,
+		UserReportCategory,
+		type PostReportCategory,
+	} from '$generated/prisma/browser';
 	import { REPORT_MODAL_CONFIG } from '$lib/client/constants/reports';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getActiveModal } from '$lib/client/helpers/context';
@@ -12,11 +17,6 @@
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import type { TPost } from '$lib/shared/types/posts';
 	import type { TUser } from '$lib/shared/types/users';
-	import {
-		PostCollectionReportCategory,
-		UserReportCategory,
-		type PostReportCategory,
-	} from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
@@ -90,7 +90,7 @@
 			return;
 		}
 
-		// @ts-ignore
+		// @ts-expect-error - dynamic function call based on report type
 		const response = await apiFunction(entityId, selectedReportReasonCategory, reportVerbalReason);
 		if (response.ok) {
 			toast.push(`The ${reportType} was reported successfully!`, SUCCESS_TOAST_OPTIONS);
