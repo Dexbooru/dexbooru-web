@@ -44,7 +44,7 @@
 {#if $user && ($blacklistedPostsPage.length > 0 || $nsfwPostsPage.length > 0)}
 	<hr class="mt-2 mb-2" />
 	<Button
-		on:click={() => activeModal.set({ isOpen: true, focusedModalName: HIDDEN_POSTS_MODAL_NAME })}
+		onclick={() => activeModal.set({ isOpen: true, focusedModalName: HIDDEN_POSTS_MODAL_NAME })}
 		color="red"
 	>
 		{`Click to display ${titleParts.join(' and ')} post(s)`}

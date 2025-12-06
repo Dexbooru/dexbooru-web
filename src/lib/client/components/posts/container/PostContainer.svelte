@@ -6,7 +6,7 @@
 	import { LABEL_METADATA_MODAL_NAME } from '$lib/client/constants/layout';
 	import { getActiveModal, getOriginalPostsPage, getPostsPage } from '$lib/client/helpers/context';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
-	import PalleteSolid from 'flowbite-svelte-icons/PalleteSolid.svelte';
+	import PalleteSolid from 'flowbite-svelte-icons/PaletteSolid.svelte';
 	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
@@ -53,7 +53,7 @@
 			<div class="flex flex-col space-y-2">
 				{#if ['/posts/tag', '/posts/artist'].some( (path) => page.url.pathname.includes(path), ) && getPageLabelType()}
 					<Button
-						on:click={() =>
+						onclick={() =>
 							activeModal.set({
 								focusedModalName: LABEL_METADATA_MODAL_NAME,
 								modalData: { labelType: getPageLabelType() },

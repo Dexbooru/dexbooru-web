@@ -126,9 +126,9 @@
 		id="postPicturesInput"
 		required
 		name="postPictures"
-		accept={FILE_IMAGE_ACCEPT}
+		accept={FILE_IMAGE_ACCEPT.join(',')}
 		multiple
-		on:change={onFileChange}
+		onchange={onFileChange}
 	/>
 </Label>
 
@@ -142,7 +142,7 @@
 				color="alternative"
 				class="w-[200px] h-[200px] bg-no-repeat bg-cover bg-center"
 				style="background-image: url({imageBase64});"
-				on:click={() =>
+				onclick={() =>
 					activeModal.set({
 						isOpen: true,
 						focusedModalName: IMAGE_PREVIEW_MODAL_NAME,

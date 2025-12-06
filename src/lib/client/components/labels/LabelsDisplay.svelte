@@ -2,7 +2,7 @@
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { renderLabel } from '$lib/shared/helpers/labels';
 	import type { TPost } from '$lib/shared/types/posts';
-	import PalleteSolid from 'flowbite-svelte-icons/PalleteSolid.svelte';
+	import PalleteSolid from 'flowbite-svelte-icons/PaletteSolid.svelte';
 	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
 
 	type Props = {

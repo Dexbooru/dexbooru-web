@@ -6,7 +6,6 @@
 	import { renderLabel } from '$lib/shared/helpers/labels';
 	import Badge from 'flowbite-svelte/Badge.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
-	import type { ComponentProps } from 'svelte';
 
 	type Props = {
 		sliceLabels?: boolean;
@@ -14,11 +13,12 @@
 		labelType: 'tag' | 'artist';
 		onPostsViewPage?: boolean;
 		labelsAreLarge?: boolean;
-		labelColor?: ComponentProps<Badge>['color'];
+		labelColor?: 'red' | 'green' | 'primary'
 		labelIsLink?: boolean;
 		labelIsDismissable?: boolean;
 		handleLabelClose?:
-			| ((event: CustomEvent<any> & { explicitOriginalTarget: Element }) => void)
+			| ((event: Event & {
+    currentTarget: EventTarget & HTMLDivElement}) => void)
 			| null;
 	};
 
@@ -53,7 +53,7 @@
 	{#each processedLabels as label (label)}
 		<Badge
 			dismissable={labelIsDismissable}
-			onclose={handleLabelClose as (_event: CustomEvent<any>) => void}
+			onclose={handleLabelClose ? (event) => handleLabelClose(event) : undefined}
 			href={labelIsLink ? `/posts/${labelType}/${label}` : undefined}
 			large={labelsAreLarge}
 			class="ml-1 mr-1 mb-1"
@@ -64,7 +64,7 @@
 	{/each}
 </div>
 {#if sliceLabels && labels.length > maximumLabelsLength}
-	<Button size="sm" class="ml-1 mr-1 mb-1" on:click={() => (showAllLabels = !showAllLabels)}
+	<Button size="sm" class="ml-1 mr-1 mb-1" onclick={() => (showAllLabels = !showAllLabels)}
 		>{showAllLabels ? 'Show less' : 'Show all'}
 	</Button>
 {/if}

@@ -54,7 +54,7 @@
 		title="Hidden posts on this page based on your preferences"
 		open={$activeModal.isOpen && $activeModal.focusedModalName === HIDDEN_POSTS_MODAL_NAME}
 		outsideclose
-		on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+		onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	>
 		<Tabs style="underline">
 			<TabItem
@@ -82,7 +82,7 @@
 		</Tabs>
 
 		{#snippet footer()}
-			<Button on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+			<Button onclick={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 				>Close</Button
 			>
 		{/snippet}

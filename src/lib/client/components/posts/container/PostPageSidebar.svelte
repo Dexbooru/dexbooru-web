@@ -2,14 +2,16 @@
 	import { page } from '$app/state';
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/posts';
-	import OrderedListSolid from 'flowbite-svelte-icons/ListOrdoredSolid.svelte';
-	import PalleteSolid from 'flowbite-svelte-icons/PalleteSolid.svelte';
+	import OrderedListOutline from 'flowbite-svelte-icons/OrderedListOutline.svelte';
+	import PalleteSolid from 'flowbite-svelte-icons/PaletteSolid.svelte';
 	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
-	import Sidebar from 'flowbite-svelte/Sidebar.svelte';
-	import SidebarDropdownItem from 'flowbite-svelte/SidebarDropdownItem.svelte';
-	import SidebarDropdownWrapper from 'flowbite-svelte/SidebarDropdownWrapper.svelte';
-	import SidebarGroup from 'flowbite-svelte/SidebarGroup.svelte';
-	import SidebarWrapper from 'flowbite-svelte/SidebarWrapper.svelte';
+	import {
+		Sidebar,
+		SidebarItem,
+		SidebarDropdownWrapper,
+		SidebarGroup,
+		SidebarWrapper
+	} from 'flowbite-svelte';
 	import HiddenPostAlert from './HiddenPostAlert.svelte';
 
 	type Props = {
@@ -22,7 +24,7 @@
 	const postsBaseUrl = page.url.origin + page.url.pathname;
 </script>
 
-<Sidebar>
+<Sidebar position="static">
 	<SidebarWrapper>
 		<SidebarGroup>
 			<SidebarDropdownWrapper
@@ -30,13 +32,13 @@
 				label="Order by"
 			>
 				{#snippet icon()}
-					<OrderedListSolid
+					<OrderedListOutline
 						class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
 					/>
 				{/snippet}
 				{#each Object.values(ORDER_BY_TRANSLATION_MAP) as orderOptions}
 					{#each orderOptions as { label, isActive, getHref }}
-						<SidebarDropdownItem
+						<SidebarItem
 							href={getHref(postsBaseUrl)}
 							{label}
 							active={isActive(page.data.orderBy ?? 'createdAt', page.data.ascending ?? false)}

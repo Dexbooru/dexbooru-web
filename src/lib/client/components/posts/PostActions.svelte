@@ -89,7 +89,7 @@
 <div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0">
 	<Button
 		disabled={postLikeLoading}
-		on:click={handleLikePost}
+		onclick={handleLikePost}
 		color="green"
 		class="flex items-center justify-center w-full sm:w-auto space-x-3"
 	>
@@ -104,7 +104,7 @@
 
 	{#if $user}
 		<Button
-			on:click={() =>
+			onclick={() =>
 				activeModal.set({
 					isOpen: true,
 					focusedModalName: COLLECTIONS_MODAL_NAME,
@@ -124,7 +124,7 @@
 
 	<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
 		<Button
-			on:click={() => handleModalOpen(REPORT_MODAL_NAME, { post })}
+			onclick={() => handleModalOpen(REPORT_MODAL_NAME, { post })}
 			class="w-full sm:w-auto space-x-2"
 			color="yellow"
 		>
@@ -136,7 +136,7 @@
 	{#if $user && isModerationRole($user.role)}
 		<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
 			<Button
-				on:click={() => handleModalOpen(REPORT_POST_LIST_MODAL_NAME, { post })}
+				onclick={() => handleModalOpen(REPORT_POST_LIST_MODAL_NAME, { post })}
 				class="w-full sm:w-auto space-x-2"
 				color="red"
 			>
@@ -150,7 +150,7 @@
 			<Button
 				color="green"
 				class="w-full sm:w-auto space-x-2"
-				on:click={() =>
+				onclick={() =>
 					handleModalOpen(EDIT_POST_MODAL_NAME, {
 						post,
 						handleUpdatePost: (updatedPost: TPost) => {
@@ -163,7 +163,7 @@
 			</Button>
 			<Button
 				class="w-full sm:w-auto space-x-2"
-				on:click={() => handleModalOpen(DELETE_POST_MODAL_NAME, { post })}
+				onclick={() => handleModalOpen(DELETE_POST_MODAL_NAME, { post })}
 				color="red"
 			>
 				<span>Delete post</span>

@@ -35,7 +35,7 @@
 	autoclose
 	outsideclose
 	open={$activeModal.isOpen && $activeModal.focusedModalName === IMAGE_PREVIEW_MODAL_NAME}
-	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+	onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 >
 	<Img src={imageBase64} alt={imageAlt} />
 </Modal>
