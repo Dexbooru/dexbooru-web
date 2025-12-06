@@ -51,8 +51,8 @@
 		"eslint-config-prettier": "^8.10.2",
 		"eslint-plugin-svelte": "^2.46.1",
 		"flowbite": "^1.8.1",
-		"flowbite-svelte": "^0.44.24",
-		"flowbite-svelte-icons": "^0.4.5",
+		"flowbite-svelte": "^1.29.1",
+		"flowbite-svelte-icons": "^3.0.0",
 		"husky": "^8.0.3",
 		"lint-staged": "^15.5.2",
 		"minimist": "^1.2.8",
@@ -80,6 +80,7 @@
 		"@zerodevx/svelte-toast": "^0.9.6",
 		"base32-encode": "^2.0.0",
 		"bcryptjs": "^2.4.3",
+		"cookie": "^1.1.1",
 		"html-to-text": "^9.0.5",
 		"jdenticon": "^3.3.0",
 		"jsonwebtoken": "^9.0.2",
@@ -94,6 +95,9 @@
 		"turndown": "^7.2.1",
 		"winston": "^3.18.3",
 		"zod": "^3.25.76"
+	},
+	"peerDependencies": {
+		"svelte": "^3.55.1 || ^4.0.0 || ^5.0.0 || ^5.41.0"
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx}": [
