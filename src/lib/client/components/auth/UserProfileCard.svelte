@@ -124,7 +124,7 @@
 			{#if $user && $user.id !== targetUser.id}
 				<Button
 					color="yellow"
-					on:click={() =>
+					onclick={() =>
 						activeModal.set({
 							isOpen: true,
 							focusedModalName: REPORT_USER_MODAL_NAME,
@@ -135,7 +135,7 @@
 
 			{#if $user && isModerationRole($user.role)}
 				<Button
-					on:click={() => {
+					onclick={() => {
 						activeModal.set({
 							isOpen: true,
 							focusedModalName: REPORT_USER_LIST_MODAL_NAME,
@@ -151,14 +151,14 @@
 			{#if $user}
 				{#if $user.id !== targetUser.id}
 					{#if friendStatus === 'not-friends'}
-						<Button disabled={addFriendLoading} on:click={handleAddFriend}>Add friend</Button>
+						<Button disabled={addFriendLoading} onclick={handleAddFriend}>Add friend</Button>
 					{:else if friendStatus === 'request-pending'}
 						<Button disabled>Friend request pending</Button>
 					{:else if friendStatus === 'are-friends'}
 						<Button disabled={deleteFriendLoading} href="/chat/{targetUser.username}"
 							>Chat with them</Button
 						>
-						<Button disabled={deleteFriendLoading} on:click={handleDeleteFriend}>Unfriend</Button>
+						<Button disabled={deleteFriendLoading} onclick={handleDeleteFriend}>Unfriend</Button>
 					{/if}
 
 					<Button href="/posts/uploaded/{targetUser.username}" color="blue"

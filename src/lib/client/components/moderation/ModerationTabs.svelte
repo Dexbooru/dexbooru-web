@@ -232,7 +232,7 @@
 
 <Tabs class="mt-5" tabStyle="underline">
 	<TabItem
-		on:click={() => handleTabClick('user-reports')}
+		onclick={() => handleTabClick('user-reports')}
 		open={currentTab === 'user-reports'}
 		title="User Reports"
 	>
@@ -244,7 +244,7 @@
 		/>
 	</TabItem>
 	<TabItem
-		on:click={() => handleTabClick('post-reports')}
+		onclick={() => handleTabClick('post-reports')}
 		open={currentTab === 'post-reports'}
 		title="Post Reports"
 	>
@@ -256,7 +256,7 @@
 		/>
 	</TabItem>
 	<TabItem
-		on:click={() => handleTabClick('post-collection-reports')}
+		onclick={() => handleTabClick('post-collection-reports')}
 		open={currentTab === 'post-collection-reports'}
 		title="Post Collection Reports"
 	>
@@ -269,7 +269,7 @@
 	</TabItem>
 	{#if $user && isModerationRole($user.role)}
 		<TabItem
-			on:click={() => handleTabClick('moderator-list')}
+			onclick={() => handleTabClick('moderator-list')}
 			open={currentTab === 'moderator-list'}
 			disabled={!isModerationRole($user.role)}
 			title="Moderator List"

@@ -87,7 +87,7 @@
 	outsideclose
 	class="w-screen"
 	placement="top-center"
-	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+	onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 >
 	<div class="flex relative">
 		<Searchbar
@@ -100,7 +100,7 @@
 			queryChangeHandler={clearResultsOnEmptyQuery}
 		/>
 		{#if searchResultsLoading}
-			<Spinner color="pink" class="absolute top-2 right-2" size="7" />
+			<Spinner color="pink" class="absolute top-2 right-2" size="4" />
 		{/if}
 	</div>
 
@@ -110,7 +110,7 @@
 
 	<GradientButton
 		color="green"
-		on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+		onclick={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 		href="/similarity-search">Find posts via similarity search here</GradientButton
 	>
 </Modal>

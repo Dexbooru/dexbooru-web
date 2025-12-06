@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import type { TAppSearchResult } from '$lib/shared/types/search';
-	import PalleteSolid from 'flowbite-svelte-icons/PalleteSolid.svelte';
+	import PalleteSolid from 'flowbite-svelte-icons/PaletteSolid.svelte';
 	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
 	import { fade, slide } from 'svelte/transition';
 

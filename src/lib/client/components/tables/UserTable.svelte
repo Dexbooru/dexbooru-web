@@ -35,7 +35,7 @@
 			<span class="sr-only">View profile</span>
 		</TableHeadCell>
 	</TableHead>
-	<TableBody tableBodyClass="divide-y">
+	<TableBody class="divide-y">
 		{#each users ?? [] as user (user.id)}
 			<TableBodyRow>
 				<TableBodyCell class="text-center">

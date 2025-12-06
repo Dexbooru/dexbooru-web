@@ -141,9 +141,9 @@
 		<div class="mb-6 space-y-1">
 			<Label for="image-file" class="dark:text-gray-200 ">Upload Image</Label>
 			<Fileupload
-				on:change={onImageFileChange}
+				onchange={onImageFileChange}
 				id="image-file"
-				accept={FILE_IMAGE_ACCEPT}
+				accept={FILE_IMAGE_ACCEPT.join(',')}
 				class="w-full dark:text-gray-200 dark:placeholder-gray-400 dark:bg-gray-700"
 			/>
 			<Input name="imageFile" type="hidden" value={imageFile} />

@@ -99,7 +99,7 @@
 <Modal
 	outsideclose
 	open={$activeModal.isOpen && $activeModal.focusedModalName === PROMOTE_USER_MODAL_NAME}
-	on:close={handleModalClose}
+	onclose={handleModalClose}
 	title="Promote/Demote a user for moderation"
 >
 	<Label class="mb-1" for="promotion-username">
@@ -126,7 +126,7 @@
 		bind:value={selectedNewRole}
 	/>
 
-	<Button disabled={updateRoleButtonDisabled} on:click={handleUpdateUserRole}>Update role</Button>
+	<Button disabled={updateRoleButtonDisabled} onclick={handleUpdateUserRole}>Update role</Button>
 
 	{#if selectedNewRole === 'OWNER' && promotionUsername.length > 0 && $user && $user.username !== promotionUsername}
 		<Alert color="red">

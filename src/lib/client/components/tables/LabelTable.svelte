@@ -26,7 +26,7 @@
 			<span class="sr-only">Related posts</span>
 		</TableHeadCell>
 	</TableHead>
-	<TableBody tableBodyClass="divide-y">
+	<TableBody class="divide-y">
 		{#each labels ?? [] as label (label.id)}
 			<TableBodyRow>
 				<TableBodyCell>

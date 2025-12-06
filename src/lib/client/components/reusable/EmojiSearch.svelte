@@ -73,12 +73,12 @@
 </Button>
 
 <Dropdown
-	bind:open={dropdownOpen}
+	bind:isOpen={dropdownOpen}
 	placement="bottom"
-	classContainer="ml-3 text-sm !h-80 sm:w-3/4 md:w-1/2 lg:w-1/3 bg-gray-100 dark:bg-gray-900"
+	class="ml-3 text-sm !h-80 sm:w-3/4 md:w-1/2 lg:w-1/3 bg-gray-100 dark:bg-gray-900"
 >
 	<DropdownHeader class="sticky top-0 bg-gray-100 dark:bg-gray-900">
-		<Search size="md" on:input={handleOnInput} />
+		<Search size="md" oninput={handleOnInput} />
 	</DropdownHeader>
 
 	{#if loadingEmojis}
