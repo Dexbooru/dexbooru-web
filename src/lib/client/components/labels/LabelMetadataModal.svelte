@@ -71,7 +71,7 @@
 	outsideclose
 >
 	{#if loadingLabelMetadata}
-		<Spinner class="!ml-auto !mr-auto !block" size="10" />
+		<Spinner class="ml-auto mr-auto block" size="10" />
 	{/if}
 
 	<Tabs style="underline">
