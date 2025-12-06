@@ -92,7 +92,7 @@
 		title="Your post was uploaded succesfully! 🚀🚀"
 		open={uploadSuccessModalOpen}
 		outsideclose
-		on:close={uploadSuccessModalClose}
+		onclose={uploadSuccessModalClose}
 	>
 		<p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
 			We got your post into Dexbooru succesfully! It should show up in your uploaded posts that can
@@ -107,7 +107,7 @@
 		</p>
 
 		{#snippet footer()}
-			<Button on:click={uploadSuccessModalClose}>Return to post</Button>
+			<Button onclick={uploadSuccessModalClose}>Return to post</Button>
 		{/snippet}
 	</Modal>
 {/if}
