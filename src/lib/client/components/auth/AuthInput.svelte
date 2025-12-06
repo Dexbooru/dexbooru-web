@@ -108,7 +108,7 @@
 			<div class="flex space-x-2">
 				<Input
 					bind:value={input}
-					on:input={onPasswordChange}
+					oninput={onPasswordChange}
 					type={showPassword ? 'text' : 'password'}
 					name={inputName}
 					placeholder="•••••"
@@ -132,7 +132,7 @@
 		<div class="flex flex-col space-y-2">
 			<Input
 				bind:value={input}
-				on:input={onConfirmedPasswordChange}
+				oninput={onConfirmedPasswordChange}
 				type={showConfirmedPassword ? 'text' : 'password'}
 				name={inputName}
 				placeholder="•••••"
@@ -150,7 +150,7 @@
 		<div class="flex space-x-2">
 			<Input
 				bind:value={input}
-				on:input={onUsernameChange}
+				oninput={onUsernameChange}
 				type="text"
 				name={inputName}
 				placeholder="Your username"
@@ -170,7 +170,7 @@
 		<div class="flex space-x-2">
 			<Input
 				bind:value={input}
-				on:input={onEmailChange}
+				oninput={onEmailChange}
 				type="email"
 				name={inputName}
 				placeholder="Your email"

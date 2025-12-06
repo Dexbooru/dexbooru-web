@@ -36,7 +36,7 @@
 	});
 </script>
 
-<Card>
+<Card class="p-6 sm:p-8">
 	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">Interface</h3>
 	<form
 		use:enhance={() => {
@@ -73,9 +73,10 @@
 		<Label class="space-y-2 mb-3">
 			<span>Custom Site-wide CSS (max of {MAXIMUM_SITE_WIDE_CSS_LENGTH} characters)</span>
 			<Textarea
+				class="w-full"
 				maxlength={MAXIMUM_SITE_WIDE_CSS_LENGTH}
 				bind:value={customSiteCss}
-				rows="8"
+				rows={8}
 				name="customSiteWideCss"
 				placeholder="Enter your CSS here"
 			/>

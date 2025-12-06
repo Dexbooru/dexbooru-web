@@ -44,7 +44,7 @@
 	};
 </script>
 
-<Card>
+<Card class="p-6 sm:p-8">
 	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
 		2FA
 		<br />
@@ -89,7 +89,7 @@
 		{:else}
 			<Button
 				disabled={currentPassword.length === 0 || totpLoading}
-				on:click={handleTotpGeneration}
+				onclick={handleTotpGeneration}
 				type="button">Generate QR Code</Button
 			>
 		{/if}
