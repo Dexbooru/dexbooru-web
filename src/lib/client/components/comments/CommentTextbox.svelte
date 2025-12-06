@@ -139,11 +139,12 @@
 			</div>
 
 			<Textarea
+				class="w-full"
 				bind:value={commentContent}
 				placeholder="Leave a comment on this post... Feel free to use emojis, links and markdown!"
 				rows={COMMENT_TEXT_AREA_ROWS}
 				maxlength={MAXIMUM_CONTENT_LENGTH}
-				on:input={handleOnInput}
+				oninput={handleOnInput}
 			/>
 			<p class="leading-none dark:text-gray-400">
 				{commentContent.length} / {MAXIMUM_CONTENT_LENGTH}
@@ -154,14 +155,14 @@
 				disabled={commentCreating || commentContent.length === 0}
 				color="blue"
 				class="mt-5"
-				on:click={handleCommentCreate}>Post comment</Button
+				onclick={handleCommentCreate}>Post comment</Button
 			>
 		{:else}
 			<Button
 				disabled={commentEditing || commentContent.length === 0}
 				color="blue"
 				class="mt-5"
-				on:click={handleCommentEdit}>Edit comment</Button
+				onclick={handleCommentEdit}>Edit comment</Button
 			>
 		{/if}
 	</TabItem>

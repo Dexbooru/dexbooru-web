@@ -3,10 +3,10 @@
 	import { getCommentPaginationData } from '$lib/client/helpers/context';
 	import { buildUrl } from '$lib/client/helpers/urls';
 	import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
+	import ArrowLeftOutline from 'flowbite-svelte-icons/ArrowLeftOutline.svelte';
+	import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import PaginationItem from 'flowbite-svelte/PaginationItem.svelte';
-	import ArrowLeftSolid from 'flowbite-svelte-icons/ArrowLeftSolid.svelte';
-	import ArrowRightSolid from 'flowbite-svelte-icons/ArrowRightSolid.svelte';
 	import { onMount } from 'svelte';
 
 	let previousPageUrl: URL = $state(new URL('http://mock.com'));
@@ -58,18 +58,18 @@
 			{#if ($commentPaginationData.pageNumber - 1 >= 0 || noCommentsLeft) && $commentPaginationData.pageNumber !== 0}
 				<PaginationItem
 					href={previousPageUrl.href}
-					large
+					size="large"
 					class="flex items-center previous-page-link"
 				>
-					<ArrowLeftSolid class="mr-2 w-5 h-5" />
+					<ArrowLeftOutline class="mr-2 w-5 h-5" />
 					Previous
 				</PaginationItem>
 			{/if}
 
 			{#if !noCommentsLeft}
-				<PaginationItem href={nextPageUrl.href} large class="flex items-center next-page-link">
+				<PaginationItem href={nextPageUrl.href} size="large" class="flex items-center next-page-link">
 					Next
-					<ArrowRightSolid class="ml-2 w-5 h-5" />
+					<ArrowRightOutline class="ml-2 w-5 h-5" />
 				</PaginationItem>
 			{/if}
 		{/if}
