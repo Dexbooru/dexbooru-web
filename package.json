@@ -10,7 +10,7 @@
 		"preview": "dotenv -e .env -o -- vite preview",
 		"run-build": "dotenv -e .env -o -- node build/index.js",
 		"preinstall": "npx only-allow pnpm",
-		"postinstall": "prisma generate",
+		"postinstall": "svelte-kit sync && prisma generate",
 		"dbpredeploy": "dotenv -e .env -o -- prisma migrate deploy",
 		"dbseed": "dotenv -e .env -o -- prisma db push --force-reset && prisma db seed",
 		"dbmigrate": "dotenv -e .env -o -- prisma migrate dev",
@@ -110,7 +110,7 @@
 	"engines": {
 		"node": ">=20.0.0"
 	},
-	"packageManager": "pnpm@9.12.0",
+	"packageManager": "pnpm@10.24.0",
 	"exports": {
 		".": {
 			"svelte": "./dist/index.js"
