@@ -439,6 +439,14 @@ export const handleCreatePost = async (
 				);
 				newPostId = newPost.id;
 
+				if (newPost) {
+					enqueueBatchUploadedPostImages(newPost);
+
+					if (uploadId) {
+						uploadStatusEmitter.emit(uploadId, 'Enqueing post images for classification...');
+					}
+				}
+
 				if (handlerType === 'form-action') {
 					indexPostImages(newPost.id, postImageUrls);
 
@@ -451,14 +459,6 @@ export const handleCreatePost = async (
 						uploadStatusEmitter.emit(uploadId, 'Redirecting to post...');
 					}
 					redirect(302, `/posts/${newPost.id}?uploadedSuccessfully=true`);
-				}
-
-				if (newPostId.length > 0) {
-					const postImageInputs = newPost.imageUrls.map((imageUrl) => ({
-						postId: newPost.id,
-						imageUrl,
-					}));
-					enqueueBatchUploadedPostImages(postImageInputs);
 				}
 
 				return createSuccessResponse(handlerType, 'Post created successfully', { newPost }, 201);

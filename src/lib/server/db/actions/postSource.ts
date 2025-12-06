@@ -1,6 +1,16 @@
+import type { PostSourceType } from '$generated/prisma/client';
 import type { TPostSource } from '$lib/shared/types/posts';
-import type { PostSourceType } from '@prisma/client';
 import prisma from '../prisma';
+
+export const getPostSourcesByPostId = async (postId: string) => {
+	const postSources = await prisma.postSource.findMany({
+		where: {
+			postId,
+		},
+	});
+
+	return postSources;
+};
 
 export const createPostSource = async (
 	postId: string,
