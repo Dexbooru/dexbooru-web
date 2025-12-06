@@ -93,7 +93,7 @@
 <Modal
 	title="Edit this collection"
 	open={$activeModal.isOpen && $activeModal.focusedModalName === EDIT_COLLECTION_MODAL_NAME}
-	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+	onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	size="xs"
 	outsideclose
 	class="w-full"
@@ -117,9 +117,10 @@
 		characters)
 	</Label>
 	<Textarea
+		class="w-full"
 		id="collection-description-textarea"
 		maxlength={MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
-		rows="5"
+		rows={5}
 		bind:value={description}
 		name="description"
 		placeholder="Enter a description"
@@ -131,7 +132,7 @@
 
 	<Button
 		disabled={editingCollection || title.length === 0 || description.length === 0}
-		on:click={handleOnEditClick}
+		onclick={handleOnEditClick}
 		class="w-full"
 		color="green">Edit collection</Button
 	>

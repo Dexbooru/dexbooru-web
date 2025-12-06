@@ -6,10 +6,10 @@
 		getOriginalCollectionPage,
 	} from '$lib/client/helpers/context';
 
-	import PlusSolid from 'flowbite-svelte-icons/PlusSolid.svelte';
+	import PlusOutline from 'flowbite-svelte-icons/PlusOutline.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
-	import CollectionCreateDrawer from '../CollectionCreateDrawer.svelte';
+	import CollectionCreateModal from '../CollectionCreateModal.svelte';
 	import CollectionPageSidebar from './CollectionPageSidebar.svelte';
 	import CollectionPaginator from './CollectionPaginator.svelte';
 	import CollectionsGrid from './CollectionsGrid.svelte';
@@ -19,7 +19,7 @@
 	};
 
 	let { collectionContainerTitle }: Props = $props();
-	let collectionCreateDrawerHidden: boolean = $state(true);
+	let isCollectionCreateModalOpen: boolean = $state(false);
 	let uniqueAuthors: { id: string; username: string; profilePictureUrl: string }[] = $state([]);
 	let currentPageQuery = $state('');
 
@@ -48,32 +48,35 @@
 	});
 </script>
 
-<main id="collection-container" class="mt-5">
-	<div id="collection-container-sidebar">
-		<CollectionPageSidebar {uniqueAuthors} />
-	</div>
-	<div id="collection-container-body" class="space-y-4 mb-5">
-		<div id="collection-container-title" class="block space-y-3">
-			<h1 class="lg:text-4xl md:text-3xl sm:text-3xl text-lg dark:text-white">
-				{collectionContainerTitle}
-			</h1>
-			{#if $user && (pathname === '/collections' || pathname === '/collections/created' || (pathname.includes('collections/users') && collectionsUsername === $user.username))}
-				<Button
-					on:click={() => (collectionCreateDrawerHidden = false)}
-					class="w-full sm:w-[20rem] sm:mr-auto sm:ml-auto md:ml-0 md:mr-auto"
-				>
-					Create collection
-					<PlusSolid class="ml-3" />
-				</Button>
+<div>
+	<main id="collection-container" class="mt-5">
+		<div id="collection-container-sidebar">
+			<CollectionPageSidebar {uniqueAuthors} />
+		</div>
+		<div id="collection-container-body" class="space-y-4 mb-5">
+			<div id="collection-container-title" class="block space-y-3">
+				<h1 class="lg:text-4xl md:text-3xl sm:text-3xl text-lg dark:text-white">
+					{collectionContainerTitle}
+				</h1>
+				{#if $user && (pathname === '/collections' || pathname === '/collections/created' || (pathname.includes('collections/users') && collectionsUsername === $user.username))}
+					<Button
+						onclick={() => (isCollectionCreateModalOpen = true)}
+						class="w-full sm:w-[20rem] sm:mr-auto sm:ml-auto md:ml-0 md:mr-auto"
+					>
+						Create collection
+						<PlusOutline class="ml-3" />
+					</Button>
+				{/if}
+			</div>
+			<CollectionsGrid />
+			{#if $originalCollectionPage.length > 0 && currentPageQuery.length === 0}
+				<CollectionPaginator />
 			{/if}
 		</div>
-		<CollectionsGrid />
-		{#if $originalCollectionPage.length > 0 && currentPageQuery.length === 0}
-			<CollectionPaginator />
-		{/if}
-	</div>
-</main>
-<CollectionCreateDrawer bind:isHidden={collectionCreateDrawerHidden} />
+	</main>
+</div>
+
+<CollectionCreateModal bind:isOpen={isCollectionCreateModalOpen} />
 
 <style>
 	#collection-container {
