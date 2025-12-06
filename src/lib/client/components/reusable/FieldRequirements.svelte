@@ -13,7 +13,15 @@
 	import Popover from 'flowbite-svelte/Popover.svelte';
 
 	type Props = {
-		requirementsPlacement?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
+		requirementsPlacement?:
+			| 'bottom-start'
+			| 'bottom-end'
+			| 'top-start'
+			| 'top-end'
+			| 'left'
+			| 'right'
+			| 'right-end'
+			| 'left-end';
 		requirementsType: 'email' | 'username' | 'password';
 		popoverButtonId: string;
 		satisifedRequirements?: string[];

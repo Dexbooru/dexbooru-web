@@ -214,11 +214,23 @@
 				value={disconnectedAccounts.join(',')}
 				name="disconnectedLinkedAccounts"
 			/>
-			<Input type="hidden" value={discordAccount?.isPublic ?? false} name="isDiscordPublic" />
-			<Input type="hidden" value={githubAccount?.isPublic ?? false} name="isGithubPublic" />
-			<Input type="hidden" value={googleAccount?.isPublic ?? false} name="isGooglePublic" />
+			<Input
+				type="hidden"
+				value={(discordAccount?.isPublic ?? false).toString()}
+				name="isDiscordPublic"
+			/>
+			<Input
+				type="hidden"
+				value={(githubAccount?.isPublic ?? false).toString()}
+				name="isGithubPublic"
+			/>
+			<Input
+				type="hidden"
+				value={(googleAccount?.isPublic ?? false).toString()}
+				name="isGooglePublic"
+			/>
 
-			<Button disabled={linkedAccountsUpdating} type="submit" class="!w-full" size="md"
+			<Button disabled={linkedAccountsUpdating} type="submit" class="w-full" size="md"
 				>Update connected apps</Button
 			>
 		</form>

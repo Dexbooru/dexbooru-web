@@ -89,7 +89,7 @@
 		<VirtualizedList listHeight={240} data={filteredEmojiChunks}>
 			{#snippet children(chunk)}
 				<div class="flex justify-between px-2 py-1">
-					{#each chunk as [name, emoji]}
+					{#each chunk as [string, string][] as [name, emoji]}
 						{@const emojiId = getEmojiId(name)}
 						<button
 							id={emojiId}
@@ -102,8 +102,8 @@
 							{name}
 						</Popover>
 					{/each}
-					{#if chunk.length < COMMENT_CONTAINER_EMOJI_CHUNK_SIZE}
-						{#each Array(COMMENT_CONTAINER_EMOJI_CHUNK_SIZE - chunk.length) as _}
+					{#if (chunk as [string, string][]).length < COMMENT_CONTAINER_EMOJI_CHUNK_SIZE}
+						{#each Array(COMMENT_CONTAINER_EMOJI_CHUNK_SIZE - (chunk as [string, string][]).length) as _}
 							<div class="w-10"></div>
 						{/each}
 					{/if}

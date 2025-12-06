@@ -86,7 +86,7 @@
 		</Label>
 		<div class="flex items-start">
 			<Checkbox bind:checked={rememberMe}>Remember me</Checkbox>
-			<Input type="hidden" name="rememberMe" value={rememberMe} />
+			<Input type="hidden" name="rememberMe" value={rememberMe.toString()} />
 		</div>
 		<Button disabled={loginFormButtonDisabled} type="submit" class="w-full">Log in</Button>
 

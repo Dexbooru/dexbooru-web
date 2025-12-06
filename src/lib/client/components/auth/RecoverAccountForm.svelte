@@ -88,8 +88,12 @@
 			formStore={changePasswordRequirements}
 		/>
 
-		<Input type="hidden" name="passwordRecoveryAttemptId" value={passwordRecoveryAttempt.id} />
-		<Input type="hidden" name="userId" value={passwordRecoveryAttempt.userId} />
+		<Input
+			type="hidden"
+			name="passwordRecoveryAttemptId"
+			value={passwordRecoveryAttempt.id?.toString()}
+		/>
+		<Input type="hidden" name="userId" value={passwordRecoveryAttempt.userId?.toString()} />
 
 		<Button disabled={updatePasswordButtonDisabled || passwordUpdating} type="submit" class="w-full"
 			>Update your password</Button

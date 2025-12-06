@@ -2,7 +2,7 @@ import type { Prisma, UserPreference } from '$generated/prisma/client';
 import type { TPostCollection } from '$lib/shared/types/collections';
 import type { TPost } from '$lib/shared/types/posts';
 import type { TUser } from '$lib/shared/types/users';
-import type { DefaultArgs } from '@prisma/client/runtime/library';
+import type { DefaultArgs } from '@prisma/client/runtime/client.js';
 
 export type TUserSelector = Prisma.UserSelect<DefaultArgs>;
 
