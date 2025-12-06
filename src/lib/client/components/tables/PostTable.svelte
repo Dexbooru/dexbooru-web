@@ -36,10 +36,10 @@
 			<span class="sr-only">View post</span>
 		</TableHeadCell>
 	</TableHead>
-	<TableBody tableBodyClass="divide-y">
+	<TableBody class="divide-y">
 		{#each posts ?? [] as post (post.id)}
 			<TableBodyRow>
-				<TableBodyCell tdClass="px-1 py-4 whitespace-wrap font-medium">
+				<TableBodyCell class="px-1 py-4 whitespace-wrap font-medium">
 					<HighlightedText query={$globalQuery} fullText={post.description} />
 				</TableBodyCell>
 				<TableBodyCell>{formatDate(new Date(post.createdAt))}</TableBodyCell>

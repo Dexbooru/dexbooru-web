@@ -114,7 +114,7 @@
 
 <Modal
 	open={$activeModal.isOpen && $activeModal.focusedModalName === modalName}
-	on:close={handleModalClose}
+	onclose={handleModalClose}
 	size="xs"
 	outsideclose
 	class="w-full"
@@ -136,7 +136,8 @@
 			>Additional report description (max of {MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH} characters)</span
 		>
 		<Textarea
-			rows="4"
+			class="w-full"
+			rows={4}
 			placeholder="Enter a brief description to provide more context"
 			bind:value={reportVerbalReason}
 			maxlength={MAXIMUM_REPORT_REASON_DESCRIPTION_LENGTH}
@@ -144,7 +145,7 @@
 	</Label>
 	<Button
 		disabled={reportSending || selectedReportReasonCategory === ''}
-		on:click={sendReport}
+		onclick={sendReport}
 		class="w-full"
 		color="red">Report this {reportType}</Button
 	>

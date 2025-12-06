@@ -66,7 +66,7 @@
 <Modal
 	title="Metadata for the {labelType} called: {labelName}"
 	open={$activeModal.isOpen && $activeModal.focusedModalName === LABEL_METADATA_MODAL_NAME}
-	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+	onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	size="xs"
 	outsideclose
 >

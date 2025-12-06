@@ -46,7 +46,7 @@
 		id={isChangingProfilePicture ? 'newProfilePictureInput' : 'profilePictureInput'}
 		name={isChangingProfilePicture ? 'newProfilePicture' : 'profilePicture'}
 		accept="image/*"
-		on:change={onProfilePictureChange}
+		onchange={onProfilePictureChange}
 	/>
 </Label>
 

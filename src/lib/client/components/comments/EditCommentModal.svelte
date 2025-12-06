@@ -28,7 +28,7 @@
 	open={$activeModal.isOpen &&
 		$activeModal.focusedModalName === EDIT_COMMENT_MODAL_NAME &&
 		targetEditComment !== null}
-	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+	onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	size="lg"
 	outsideclose
 	class="w-full"

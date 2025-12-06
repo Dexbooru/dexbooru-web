@@ -138,7 +138,7 @@
 <Modal
 	title="Edit this post"
 	open={$activeModal.isOpen && $activeModal.focusedModalName === EDIT_POST_MODAL_NAME}
-	on:close={handleModalClose}
+	onclose={handleModalClose}
 	size="xs"
 	outsideclose
 	class="w-full"
@@ -149,7 +149,7 @@
 	<Textarea
 		id="post-description-textarea"
 		maxlength={MAXIMUM_POST_DESCRIPTION_LENGTH}
-		rows="5"
+		rows={5}
 		bind:value={description}
 		name="description"
 		placeholder="Enter a description"
@@ -186,7 +186,7 @@
 						<Button
 							color="red"
 							size="xs"
-							on:click={() => {
+							onclick={() => {
 								if (!deletionPostImageUrls.includes(postImageUrl)) {
 									const postImageId = getImageId(postImageUrl);
 									const matchingPostImageIdUrls =
@@ -202,7 +202,7 @@
 						<Button
 							color="blue"
 							size="xs"
-							on:click={() => {
+							onclick={() => {
 								const postImageId = getImageId(postImageUrl);
 								deletionPostImageUrls = deletionPostImageUrls.filter(
 									(url) => !url.includes(postImageId),
@@ -224,7 +224,7 @@
 		{maximumImagesAllowed}
 	/>
 
-	<Button disabled={editButtonDisabled} on:click={handleOnEditClick} class="w-full" color="green"
+	<Button disabled={editButtonDisabled} onclick={handleOnEditClick} class="w-full" color="green"
 		>Edit post</Button
 	>
 </Modal>

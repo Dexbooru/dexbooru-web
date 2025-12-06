@@ -67,13 +67,13 @@
 
 <div class="relative {!isGlobal && 'mr-4'} {customClass} " style="width: {width}">
 	<div class="flex absolute inset-y-0 start-0 items-center ps-3 pointer-events-none">
-		<SearchOutline class="w-4 h-4 " />
+		<SearchOutline class="w-4 h-5 text-gray-500 dark:text-gray-400" />
 	</div>
 	<Input
 		{autofocus}
 		{...optionalProps}
-		on:input={handleOnInput}
-		on:input={handleOnChange}
+		oninput={handleOnInput}
+		onchange={handleOnChange}
 		class="ps-10"
 		{placeholder}
 		{required}

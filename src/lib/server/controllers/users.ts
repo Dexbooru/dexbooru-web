@@ -1,3 +1,4 @@
+import type { SerializeOptions } from 'cookie';
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { UUID_REGEX } from '$lib/shared/constants/search';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
@@ -900,8 +901,7 @@ export const handleCreateUser = async (event: RequestEvent) => {
 
 			const newUser = await createUser(username, email, hashedPassword, finalProfilePictureUrl);
 			const encodedAuthToken = generateEncodedUserTokenFromRecord(newUser, true);
-			event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(true));
-
+			                        event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(true) as SerializeOptions & { path: string });
 			await createUserPreferences(newUser.id);
 
 			redirect(302, `/posts`);
@@ -951,7 +951,7 @@ export const handleProcessUserTotp = async (event: RequestEvent) => {
 				}
 
 				const encodedAuthToken = generateEncodedUserTokenFromRecord(user, rememberMe);
-				event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(rememberMe));
+                                event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(rememberMe) as SerializeOptions & { path: string });
 
 				deleteTotpChallenge(challengeId);
 
@@ -1032,8 +1032,7 @@ export const handleUserAuthFlowForm = async (event: RequestEvent) => {
 			}
 
 			const encodedAuthToken = generateEncodedUserTokenFromRecord(user, rememberMe);
-			event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(rememberMe));
-
+			                        event.cookies.set(SESSION_ID_KEY, encodedAuthToken, buildCookieOptions(rememberMe) as SerializeOptions & { path: string });
 			redirect(302, `/posts`);
 		} catch (error) {
 			if (isRedirect(error)) throw error;

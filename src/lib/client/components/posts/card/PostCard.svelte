@@ -14,9 +14,9 @@
 		PREVIEW_IMAGE_SUFFIX
 	} from '$lib/shared/constants/images';
 	import type { TPost } from '$lib/shared/types/posts';
+	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
 	import Toast from 'flowbite-svelte/Toast.svelte';
-	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import { onMount } from 'svelte';
 
 	type Props = {
@@ -75,7 +75,7 @@
 		{#if isNsfw && $userPreferences.autoBlurNsfw && $activeModal.focusedModalName !== HIDDEN_POSTS_MODAL_NAME}
 			<Toast
 				dismissable={false}
-				divClass="w-full max-w-xs p-4 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3 mt-2 mb-2"
+				class="w-full max-w-xs p-4 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3 mt-2 mb-2"
 				contentClass="flex space-x-4 rtl:space-x-reverse divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-700"
 			>
 				<ExclamationCircleSolid class="w-5 h-5 text-primary-600 dark:text-primary-500" />

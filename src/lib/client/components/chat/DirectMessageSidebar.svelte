@@ -7,7 +7,7 @@
 	import type { TChatRoom } from '$lib/client/types/core';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TChatFriend } from '$lib/shared/types/friends';
-	import PlusSolid from 'flowbite-svelte-icons/PlusSolid.svelte';
+	import PlusOutline from 'flowbite-svelte-icons/PlusOutline.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
@@ -68,7 +68,7 @@
 	<section class="flex justify-between mb-4">
 		<h2 class="text-xl font-bold mt-1">Direct Messages</h2>
 		<Button id="new-chat-btn" size="sm" color="green">
-			<PlusSolid />
+			<PlusOutline />
 		</Button>
 		<CreateChatRoomContainer friends={filteredFriends} />
 	</section>

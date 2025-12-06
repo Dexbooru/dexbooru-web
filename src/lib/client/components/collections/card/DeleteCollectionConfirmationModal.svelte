@@ -86,7 +86,7 @@
 	open={$activeModal.isOpen &&
 		$activeModal.focusedModalName === DELETE_COLLECTION_MODAL_NAME &&
 		targetDeletionCollection !== null}
-	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+	onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	size="xs"
 	outsideclose
 	class="w-full"
@@ -98,12 +98,12 @@
 		</h3>
 		<Button
 			disabled={collectionDeletionLoading}
-			on:click={handleDeleteCollection}
+			onclick={handleDeleteCollection}
 			color="red"
 			class="me-2">Yes, I'm sure</Button
 		>
 		<Button
-			on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+			onclick={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 			color="alternative">No, cancel</Button
 		>
 	</div>

@@ -37,13 +37,13 @@
 			<span class="sr-only">View collection</span>
 		</TableHeadCell>
 	</TableHead>
-	<TableBody tableBodyClass="divide-y">
+	<TableBody class="divide-y">
 		{#each collections ?? [] as collection}
 			<TableBodyRow>
-				<TableBodyCell tdClass="px-1 py-4 whitespace-wrap font-medium">
+				<TableBodyCell class="px-1 py-4 whitespace-wrap font-medium">
 					<HighlightedText query={$globalQuery} fullText={collection.title} />
 				</TableBodyCell>
-				<TableBodyCell tdClass="px-1 py-4 whitespace-wrap font-medium">
+				<TableBodyCell class="px-1 py-4 whitespace-wrap font-medium">
 					<HighlightedText query={$globalQuery} fullText={collection.description} />
 				</TableBodyCell>
 				<TableBodyCell>{formatDate(new Date(collection.createdAt))}</TableBodyCell>

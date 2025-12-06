@@ -1,3 +1,4 @@
+import type { SerializeOptions } from 'cookie';
 import { DEFAULT_PASSWORD_LENGTH } from '$lib/shared/constants/auth';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import type { UserAuthenticationSource } from '@prisma/client';
@@ -77,7 +78,7 @@ export const handleOauthStorage = async (event: RequestEvent) => {
 			return createErrorResponse('api-route', 401, 'Invalid token');
 		}
 
-		event.cookies.set(SESSION_ID_KEY, token, buildCookieOptions(true));
+		event.cookies.set(SESSION_ID_KEY, token, buildCookieOptions(true) as SerializeOptions & { path: string });
 
 		return createSuccessResponse(
 			'api-route',

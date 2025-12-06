@@ -46,7 +46,7 @@
 	});
 </script>
 
-<Card class="mt-4 mb-2">
+<Card class="mt-4 mb-2 p-6 shadow-lg">
 	<form class="flex flex-col space-y-6" method="POST">
 		<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">
 			Login to Dexbooru!
@@ -74,12 +74,12 @@
 				{#if showPassword}
 					<EyeSlashOutline
 						class="absolute top-3 right-3 cursor-pointer text-gray-400 dark:text-gray-500"
-						on:click={() => (showPassword = false)}
+						onclick={() => (showPassword = false)}
 					/>
 				{:else}
 					<EyeOutline
 						class="absolute top-3 right-3 cursor-pointer text-gray-400 dark:text-gray-500"
-						on:click={() => (showPassword = true)}
+						onclick={() => (showPassword = true)}
 					/>
 				{/if}
 			</div>

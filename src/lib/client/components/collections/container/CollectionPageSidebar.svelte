@@ -3,12 +3,12 @@
 	import { ORDER_BY_TRANSLATION_MAP } from '$lib/client/constants/collections';
 	import { getCollectionPage } from '$lib/client/helpers/context';
 	import type { TCollectionOrderByColumn } from '$lib/shared/types/collections';
-	import OrderedListSolid from 'flowbite-svelte-icons/ListOrdoredSolid.svelte';
-	import UserSolid from 'flowbite-svelte-icons/UsersGroupOutline.svelte'
+	import OrderedListOutline from 'flowbite-svelte-icons/OrderedListOutline.svelte';
+	import UserSolid from 'flowbite-svelte-icons/UsersGroupOutline.svelte';
 	import Sidebar from 'flowbite-svelte/Sidebar.svelte';
-	import SidebarDropdownItem from 'flowbite-svelte/SidebarDropdownItem.svelte';
 	import SidebarDropdownWrapper from 'flowbite-svelte/SidebarDropdownWrapper.svelte';
 	import SidebarGroup from 'flowbite-svelte/SidebarGroup.svelte';
+	import SidebarDropdownItem from 'flowbite-svelte/SidebarItem.svelte';
 	import SidebarWrapper from 'flowbite-svelte/SidebarWrapper.svelte';
 
 	type Props = {
@@ -21,12 +21,12 @@
 </script>
 
 {#if page.data.collections}
-	<Sidebar>
+	<Sidebar position="static">
 		<SidebarWrapper>
 			<SidebarGroup>
 				<SidebarDropdownWrapper isOpen={$collectionPage.length > 0} label="Order by">
 					{#snippet icon()}
-						<OrderedListSolid
+						<OrderedListOutline
 							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
 						/>
 					{/snippet}

@@ -33,10 +33,10 @@
 	import Textarea from 'flowbite-svelte/Textarea.svelte';
 
 	type Props = {
-		isHidden: boolean;
+		isOpen: boolean;
 	};
 
-	let { isHidden = $bindable() }: Props = $props();
+	let { isOpen = $bindable() }: Props = $props();
 
 	let collectionCreating: boolean = $state(false);
 	let title: string = $state('');
@@ -127,7 +127,7 @@
 				description = '';
 				isNsfw = false;
 				resetFileUploadState();
-				isHidden = true;
+				isOpen = false;
 
 				const newCollection = result.data?.newCollection as TPostCollection;
 				originalCollectionPage.update((collections) => {
@@ -190,9 +190,10 @@
 		<Textarea
 			placeholder="Enter a description"
 			maxlength={MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
-			rows="4"
+			rows={4}
 			name="description"
 			bind:value={description}
+			class="w-full"
 		/>
 		<p class="leading-none dark:text-gray-400 text-right mt-2">
 			{description.length}/{MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
@@ -201,14 +202,14 @@
 
 	<div class="mb-6">
 		<Checkbox class="" bind:checked={isNsfw}>Is NSFW?</Checkbox>
-		<Input type="hidden" value={isNsfw} name="isNsfw" />
+		<Input type="hidden" value={isNsfw.toString()} name="isNsfw" />
 	</div>
 
 	<div class="mb-6">
 		<Label for="collectionThumbnail" class="mb-2 "
 			>Collection Thumbnnail (maximum image size is {MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB} MB)</Label
 		>
-		<Fileupload on:change={onFileChange} accept={FILE_IMAGE_ACCEPT} name="collectionThumbnail" />
+		<Fileupload onchange={onFileChange} accept={FILE_IMAGE_ACCEPT.join(',')} name="collectionThumbnail" />
 	</div>
 
 	{#if thumbnailLoading}

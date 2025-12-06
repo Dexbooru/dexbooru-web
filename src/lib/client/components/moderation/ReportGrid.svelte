@@ -57,7 +57,7 @@
 			</div>
 		{:else if reports.length >= MAXIMUM_REPORTS_PER_PAGE}
 			<div class="flex justify-center mt-8">
-				<Button color="blue" on:click={handleLoadMoreReports}>Load more</Button>
+				<Button color="blue" onclick={handleLoadMoreReports}>Load more</Button>
 			</div>
 		{/if}
 	</section>

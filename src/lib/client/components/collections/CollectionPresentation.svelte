@@ -6,11 +6,14 @@
 	} from '$lib/client/constants/images';
 	import { POSTS_GRID_ANIMATION_DURATION_MS } from '$lib/client/constants/posts';
 	import { getOriginalPostsPage } from '$lib/client/helpers/context';
+	import { computeDownScaledImageRatios, transformImageDimensions } from '$lib/client/helpers/images';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { DELETED_ACCOUNT_HEADING } from '$lib/shared/constants/auth';
 	import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TPostCollection } from '$lib/shared/types/collections';
+	import Alert from 'flowbite-svelte/Alert.svelte';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import Img from 'flowbite-svelte/Img.svelte';
 	import { flip } from 'svelte/animate';
 	import PostCard from '../posts/card/PostCard.svelte';
@@ -24,13 +27,23 @@
 
 	const originalPostPage = getOriginalPostsPage();
 
-	let originalThumbnail = $state('');
+	let originalThumbnail = $derived(
+		collection.thumbnailImageUrls.find((imageUrl) => imageUrl.includes(ORIGINAL_IMAGE_SUFFIX)) ??
+			'',
+	);
+	let showResizeAlert = $state(false);
+	let resizeRatios: number[] = $state([]);
+	let originalImageDims: { imageWidth: number; imageHeight: number } = $state({
+		imageWidth: 0,
+		imageHeight: 0,
+	});
+	let resizedImageDims: { imageWidth: number; imageHeight: number } = $state({
+		imageWidth: 0,
+		imageHeight: 0,
+	});
 
 	$effect(() => {
 		originalPostPage.set(collection.posts);
-		originalThumbnail =
-			collection.thumbnailImageUrls.find((imageUrl) => imageUrl.includes(ORIGINAL_IMAGE_SUFFIX)) ??
-			'';
 	});
 
 	const onImageError = (event: Event) => {
@@ -39,6 +52,36 @@
 		target.src = DefaultPostCollectionPicture;
 		target.width = POST_COLLECTION_IMAGE_FALLBACK_WIDTH;
 		target.height = POST_COLLECTION_IMAGE_FALLBACK_HEIGHT;
+	};
+
+	const onImageLoad = (event: Event) => {
+		const target = event.target as HTMLImageElement;
+		const { naturalWidth, naturalHeight } = target;
+
+		originalImageDims = { imageWidth: naturalWidth, imageHeight: naturalHeight };
+		const transformedDims = transformImageDimensions(
+			naturalWidth,
+			naturalHeight,
+			window.innerWidth,
+			window.innerHeight,
+		);
+
+		if (
+			transformedDims.imageWidth !== naturalWidth ||
+			transformedDims.imageHeight !== naturalHeight
+		) {
+			resizedImageDims = transformedDims;
+			resizeRatios = computeDownScaledImageRatios([resizedImageDims], [originalImageDims]);
+			showResizeAlert = true;
+		} else {
+			resizedImageDims = originalImageDims;
+			showResizeAlert = false;
+		}
+	};
+
+	const showOriginalImage = () => {
+		resizedImageDims = originalImageDims;
+		showResizeAlert = false;
 	};
 </script>
 
@@ -54,11 +97,23 @@
 	/>
 </svelte:head>
 
+{#if showResizeAlert && resizeRatios.length > 0}
+	<Alert class="p-4 gap-3 text-sm mb-4" color="yellow">
+		<span class="font-medium"
+			>Image resized to {resizeRatios[0]}% of original size for better viewing.</span
+		>
+		<Button color="alternative" size="xs" onclick={showOriginalImage}>Show Original</Button>
+	</Alert>
+{/if}
+
 <Img
 	class="whole-collection-image"
 	onerror={onImageError}
+	onload={onImageLoad}
 	src={originalThumbnail}
 	alt={collection.description}
+	width={resizedImageDims.imageWidth > 0 ? resizedImageDims.imageWidth : undefined}
+	height={resizedImageDims.imageHeight > 0 ? resizedImageDims.imageHeight : undefined}
 />
 <div class="flex">
 	<CollectionActions onCollectionViewPage {collection} />

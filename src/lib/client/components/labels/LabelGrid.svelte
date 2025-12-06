@@ -8,7 +8,7 @@
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
-	import PalleteSolid from 'flowbite-svelte-icons/PalleteSolid.svelte';
+	import PalleteSolid from 'flowbite-svelte-icons/PaletteSolid.svelte'
 	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Spinner from 'flowbite-svelte/Spinner.svelte';
@@ -79,7 +79,7 @@
 		{#each CHAR_OPTIONS_LOWERCASE as option}
 			<Button
 				disabled={loadingLabels}
-				on:click={(event) => getLabelsOnCurrentPage(event, false)}
+				onclick={(event: Event) => getLabelsOnCurrentPage(event, false)}
 				class="m-2 items-center justify-center  text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 focus-within:ring-gray-200 dark:focus-within:ring-gray-700 rounded-lg"
 				>{option}</Button
 			>
@@ -117,7 +117,7 @@
 	{#if labels.length > 0 && !loadingLabels && hasLoadedLabelsOnce && !finishedLabelPagination}
 		<Button
 			class="w-1/3 ml-auto mr-auto"
-			on:click={(event) => getLabelsOnCurrentPage(event, true)}
+			onclick={(event: Event) => getLabelsOnCurrentPage(event, true)}
 			color="blue">Load more {labelType}s</Button
 		>
 	{/if}

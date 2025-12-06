@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getUpdatedPost } from '$lib/client/helpers/context';
 	import {
-		IMAGE_FILTER_EXCLUSION_BASE_URLS,
 		NSFW_PREVIEW_IMAGE_SUFFIX,
 		ORIGINAL_IMAGE_SUFFIX,
 		PREVIEW_IMAGE_SUFFIX,
@@ -24,12 +23,10 @@
 
 	const getOriginalSizedImageUrls = (post: Partial<TPost>) => {
 		return (post.imageUrls ?? []).filter((imageUrl) => {
-			if (
-				IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))
-			) {
-				return true;
-			}
-			return imageUrl.includes(ORIGINAL_IMAGE_SUFFIX);
+			if (imageUrl.includes(ORIGINAL_IMAGE_SUFFIX)) return true;
+			return (
+				!imageUrl.includes(PREVIEW_IMAGE_SUFFIX) && !imageUrl.includes(NSFW_PREVIEW_IMAGE_SUFFIX)
+			);
 		});
 	};
 
@@ -40,40 +37,33 @@
 			imageFileName: string;
 			imageUrl: string;
 		}[],
+		originalUrls: string[],
 	) => {
-		return imagesMetadata.filter((metadata) =>
-			metadata.imageFileName.includes(ORIGINAL_IMAGE_SUFFIX),
-		);
+		return imagesMetadata.filter((metadata) => originalUrls.includes(metadata.imageUrl));
 	};
 
 	const getPostImageMetadata = (post: Partial<TPost>) => {
-		return (post.imageUrls ?? [])
-			.map((imageUrl, index) => {
-				if (
-					IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionUrl) => imageUrl.includes(exclusionUrl))
-				) {
-					return null;
-				}
+		return (post.imageUrls ?? []).map((imageUrl, index) => {
+			const imageUrlParts = imageUrl.split('/');
+			const imageFileName = `${imageUrlParts[imageUrlParts.length - 1]}.webp`;
+			const imageWidth = (post.imageWidths ?? [])[index] ?? 0;
+			const imageHeight = (post.imageHeights ?? [])[index] ?? 0;
 
-				const imageUrlParts = imageUrl.split('/');
-				const imageFileName = `${imageUrlParts[imageUrlParts.length - 1]}.webp`;
-				const imageWidth = (post.imageWidths ?? [])[index];
-				const imageHeight = (post.imageHeights ?? [])[index];
-
-				return {
-					imageFileName,
-					imageUrl,
-					imageHeight,
-					imageWidth,
-				};
-			})
-			.filter((metadata) => metadata !== null);
+			return {
+				imageFileName,
+				imageUrl,
+				imageHeight,
+				imageWidth,
+			};
+		});
 	};
 
 	let { post, hasLikedPost = false }: Props = $props();
 	let originalSizedImageUrls = $derived(getOriginalSizedImageUrls(post));
 	let imagesMetadata = $derived(getPostImageMetadata(post));
-	let originalImageDimensions = $derived(getOriginalImageDimensions(imagesMetadata));
+	let originalImageDimensions = $derived(
+		getOriginalImageDimensions(imagesMetadata, originalSizedImageUrls),
+	);
 
 	const updatedPost = getUpdatedPost();
 </script>
@@ -88,7 +78,10 @@
 {#if Object.keys($updatedPost).length > 0 && $updatedPost.imageUrls !== undefined}
 	<ImageCollection
 		imageUrls={getOriginalSizedImageUrls($updatedPost)}
-		imageDimensions={getOriginalImageDimensions(getPostImageMetadata($updatedPost))}
+		imageDimensions={getOriginalImageDimensions(
+			getPostImageMetadata($updatedPost),
+			getOriginalSizedImageUrls($updatedPost),
+		)}
 		imagesAlt={$updatedPost.description ?? post.description}
 	/>
 {:else}
@@ -126,7 +119,7 @@
 				<span class="sr-only">Download image</span>
 			</TableHeadCell>
 		</TableHead>
-		<TableBody tableBodyClass="divide-y !w-1/2">
+		<TableBody class="divide-y !w-1/2">
 			{#each Object.keys($updatedPost).length > 0 && $updatedPost.imageUrls ? getPostImageMetadata($updatedPost) : imagesMetadata as { imageFileName, imageWidth, imageHeight, imageUrl }}
 				{#if imageFileName.includes(ORIGINAL_IMAGE_SUFFIX) || (!imageFileName.includes(NSFW_PREVIEW_IMAGE_SUFFIX) && imageFileName.includes(PREVIEW_IMAGE_SUFFIX))}
 					<TableBodyRow>

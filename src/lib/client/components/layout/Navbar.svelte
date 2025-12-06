@@ -41,7 +41,7 @@
 		<DarkMode />
 		<NavHamburger />
 	</div>
-	<NavUl class="order-1" {activeUrl}>
+	<NavUl class="order-1 space-x-4" {activeUrl}>
 		<NavLi href="/posts">Posts</NavLi>
 		<NavLi href="/tags">Tags</NavLi>
 		<NavLi href="/artists">Artists</NavLi>

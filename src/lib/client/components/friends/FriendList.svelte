@@ -119,12 +119,12 @@
 							<Button
 								color="green"
 								disabled={friendshipActionLoading}
-								on:click={() => handleFriendshipAction('accept', currentFriend)}>Accept</Button
+								onclick={() => handleFriendshipAction('accept', currentFriend)}>Accept</Button
 							>
 							<Button
 								color="red"
 								disabled={friendshipActionLoading}
-								on:click={() => handleFriendshipAction('decline', currentFriend)}>Reject</Button
+								onclick={() => handleFriendshipAction('decline', currentFriend)}>Reject</Button
 							>
 						{/if}
 					</div>

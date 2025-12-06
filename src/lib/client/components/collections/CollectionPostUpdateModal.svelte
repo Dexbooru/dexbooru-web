@@ -20,10 +20,10 @@
 	import { EMPTY_POST } from '$lib/shared/constants/posts';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
+	import UndoOutline from 'flowbite-svelte-icons/UndoOutline.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
 	import Modal from 'flowbite-svelte/Modal.svelte';
-	import UndoOutline from 'flowbite-svelte-icons/UndoOutline.svelte';
 	import { onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 
@@ -146,7 +146,7 @@
 
 <Modal
 	open={$activeModal.isOpen && $activeModal.focusedModalName === COLLECTIONS_MODAL_NAME}
-	on:close={handleModalClose}
+	onclose={handleModalClose}
 	size="lg"
 	outsideclose
 	title="Add/remove this post from your collections"
@@ -160,7 +160,7 @@
 			</p>
 		{:else}
 			<div class="block space-y-5">
-				<Button on:click={resetSelectedCollections} color="red">
+				<Button onclick={resetSelectedCollections} color="red">
 					<UndoOutline class="mr-2" />
 					Reset Selections
 				</Button>
@@ -186,7 +186,7 @@
 										: 'cursor-pointer'}
 									disabled={collection.posts.length === MAXIMUM_POSTS_PER_COLLECTION}
 									checked={selectedCollections.get(collection.id) === 'add'}
-									on:change={() => handleCollectionCheck(collection.id)}
+									onchange={() => handleCollectionCheck(collection.id)}
 								/>
 							</div>
 							<p class="text-sm text-gray-600 dark:text-gray-400 flex-grow">
@@ -199,17 +199,17 @@
 		{/if}
 	</div>
 	{#if $userCollections.length % MAXIMUM_COLLECTIONS_PER_PAGE === 0 && $userCollections.length > 0}
-		<Button color="blue" disabled={userCollectionsLoading} on:click={handleLoadMoreCollections}
+		<Button color="blue" disabled={userCollectionsLoading} onclick={handleLoadMoreCollections}
 			>Load more collections</Button
 		>
 	{/if}
 
 	{#snippet footer()}
-		<Button color="alternative" on:click={handleModalClose}>Cancel</Button>
+		<Button color="alternative" onclick={handleModalClose}>Cancel</Button>
 		<Button
 			disabled={$userCollections.length === 0 || userCollectionsSaving || userCollectionsLoading}
 			color="primary"
-			on:click={handleSave}>Save</Button
+			onclick={handleSave}>Save</Button
 		>
 	{/snippet}
 </Modal>

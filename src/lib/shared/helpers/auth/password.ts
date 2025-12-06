@@ -4,9 +4,9 @@ import {
 	PASSWORD_REQUIREMENTS,
 	SPECIAL_CHARACTER_REGEX
 } from '$lib/shared/constants/auth';
-import type { IAuthFieldRequirements } from '$lib/shared/types/auth';
+import type { TAuthFieldRequirements } from '$lib/shared/types/auth';
 
-export const getPasswordRequirements = (password: string): IAuthFieldRequirements => {
+export const getPasswordRequirements = (password: string): TAuthFieldRequirements => {
 	const satisifedRequirements: string[] = [];
 	const unsatisfiedRequirements: string[] = [];
 

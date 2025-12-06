@@ -149,7 +149,7 @@
 			</h2>
 			{#if $user && $user.role === 'OWNER'}
 				<Button
-					on:click={() =>
+					onclick={() =>
 						activeModal.set({ isOpen: true, focusedModalName: PROMOTE_USER_MODAL_NAME })}
 					color="green">Update user roles</Button
 				>
@@ -167,9 +167,9 @@
 			<Select
 				id="moderation-list-role-selector"
 				class="w-100"
-				on:change={handleRoleChange}
+				onchange={handleRoleChange}
 				bind:value={filterRole}
-				on:input={(event) => console.log(event)}
+				oninput={(event) => console.log(event)}
 				items={[
 					{ name: 'Owner', value: 'OWNER' },
 					{ name: 'Moderator', value: 'MODERATOR' },
@@ -178,14 +178,14 @@
 			<Select
 				id="moderation-list-sorting-selector"
 				class="w-100"
-				on:change={handleSortingCriteriaChange}
+				onchange={handleSortingCriteriaChange}
 				bind:value={sortingCriteria}
 				items={[
 					{ name: 'Username', value: 'username' },
 					{ name: 'Promotion Date', value: 'promotionDate' },
 				]}
 			/>
-			<Button on:click={resetFilters}>Reset list</Button>
+			<Button onclick={resetFilters}>Reset list</Button>
 		</div>
 
 		{#if moderators.length > 0}

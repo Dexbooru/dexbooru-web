@@ -41,7 +41,7 @@
 	};
 </script>
 
-<Card>
+<Card class="p-6 sm:p-8">
 	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
 		Change Profile Picture
 	</h3>
@@ -74,7 +74,7 @@
 	>
 		<ProfilePictureUpload bind:profilePictureFile isChangingProfilePicture />
 		<span class="text-center">------- OR -------</span>
-		<Checkbox on:change={onRemoveProfileCheckedChange} bind:checked={removeProfilePicture}
+		<Checkbox onchange={onRemoveProfileCheckedChange} bind:checked={removeProfilePicture}
 			>Remove Profile Picture</Checkbox
 		>
 		<Input type="hidden" name="removeProfilePicture" value={removeProfilePicture} />

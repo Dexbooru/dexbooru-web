@@ -62,12 +62,10 @@
 	const paginationDataUnsubscribe = paginationData.subscribe((data) => {
 		if (!data) return;
 
-		console.log(data);
 
 		const images = Array.from(document.querySelectorAll('img')) as HTMLImageElement[];
 		images.forEach((image) => {
 			if (image.alt.includes('profile of')) {
-				console.log(image);
 				image.onerror = () => {
 					image.src = DefaultProfilePicture;
 				};
@@ -100,7 +98,7 @@
 			<CommentPaginator />
 			{#each Object.entries(commentDateGroups) as [date, comments]}
 				<Group
-					divClass="p-4 mb-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 comment-date-group"
+					divClass="p-4 mb-4 bg-gray-50 dark:bg-gray-800 comment-date-group space-y-4 border-none"
 					date={`Comments made on: ${date}`}
 				>
 					<GroupItem
@@ -112,7 +110,7 @@
 								comment: parsedContent,
 								src: comment.author.profilePictureUrl ?? DefaultProfilePicture,
 								alt: `profile of ${comment.author.username}`,
-								href: `/profile/${comment.author.username}`,
+								href: `/profile/${comment.author.username}?c=${comment.id}`,
 								isPrivate: false,
 							};
 						})}
@@ -123,7 +121,7 @@
 	{:else}
 		{#each Array(page.data.comments?.length ?? 0) as _}
 			<ListPlaceholder
-				divClass="p-4 h-60 space-y-4 w-full divide-y divide-gray-200 shadow animate-pulse dark:divide-gray-700 dark:border-gray-700"
+				class="p-4 h-60 space-y-4 w-full divide-y divide-gray-200 shadow animate-pulse dark:divide-gray-700 dark:border-gray-700"
 			/>
 		{/each}
 	{/if}

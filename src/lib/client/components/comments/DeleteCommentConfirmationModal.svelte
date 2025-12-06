@@ -54,7 +54,7 @@
 	open={$activeModal.isOpen &&
 		$activeModal.focusedModalName === DELETE_COMMENT_MODAL_NAME &&
 		targetDeletionComment !== null}
-	on:close={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+	onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	size="xs"
 	outsideclose
 	class="w-full"
@@ -66,12 +66,12 @@
 		</h3>
 		<Button
 			disabled={commentDeletionLoading}
-			on:click={handleDeleteComment}
+			onclick={handleDeleteComment}
 			color="red"
 			class="me-2">Yes, I'm sure</Button
 		>
 		<Button
-			on:click={() => activeModal.set({ isOpen: false, focusedModalName: null })}
+			onclick={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 			color="alternative">No, cancel</Button
 		>
 	</div>

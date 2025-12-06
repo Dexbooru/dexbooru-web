@@ -48,6 +48,7 @@ export const NULLABLE_USER: TUser = {
 	username: '',
 	email: '',
 	linkedAccounts: [],
+	superRolePromotionAt: null,
 };
 export const NULLABLE_USER_USER_PREFERENCES: UserPreference = {
 	userId: NONEXISTENT_USER_ID,

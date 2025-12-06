@@ -42,7 +42,7 @@
 	});
 </script>
 
-<Card>
+<Card class="p-6 sm:p-8">
 	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">Posts</h3>
 	<form
 		use:enhance={() => {
@@ -90,8 +90,9 @@
 			<Label class="space-y-2 mb-3">
 				<span>Blacklisted Tags (One per line with a max of {MAXIMUM_BLACKLISTED_TAGS})</span>
 				<Textarea
+					class="w-full"
 					bind:value={blacklistedTags}
-					rows="4"
+					rows={4}
 					name="blacklistedTags"
 					placeholder="Enter one tag per line"
 				/>
@@ -103,8 +104,9 @@
 			<Label class="space-y-2 mb-3">
 				<span>Blacklisted Artists (One per line with a max of {MAXIMUM_BLACKLISTED_ARTISTS})</span>
 				<Textarea
+					class="w-full"
 					bind:value={blacklistedArtists}
-					rows="4"
+					rows={4}
 					name="blacklistedArtists"
 					placeholder="Enter one artist per line"
 				/>

@@ -10,6 +10,11 @@ export const computeDownScaledImageRatios = (dimsA: TImageDism[], dimsB: TImageD
 		const { imageWidth: imageWidthA, imageHeight: imageHeightA } = dimsA[i];
 		const { imageWidth: imageWidthB, imageHeight: imageHeightB } = dimsB[i];
 
+		if (!imageWidthB || !imageHeightB || imageWidthB === 0 || imageHeightB === 0) {
+			ratios.push(100);
+			continue;
+		}
+
 		const ratio = (imageWidthA * imageHeightA) / (imageWidthB * imageHeightB);
 		ratios.push(Math.floor(ratio * 100));
 	}
@@ -23,7 +28,8 @@ export const transformImageDimensions = (
 	screenWidth: number,
 	screenHeight: number,
 ) => {
-	if (screenWidth === 0 || screenHeight === 0) return { imageWidth, imageHeight };
+	if (screenWidth === 0 || screenHeight === 0 || !imageWidth || !imageHeight)
+		return { imageWidth, imageHeight };
 
 	const screenArea = screenWidth * screenHeight;
 	const imageArea = imageWidth * imageHeight;

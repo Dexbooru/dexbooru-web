@@ -126,7 +126,7 @@
 	<div class="flex space-x-2">
 		{#if $user && $commentTree.getCount() < MAXIMUM_COMMENTS_PER_POST}
 			<div class="flex items-center mt-4 space-x-3">
-				<Button class="flex space-x-2" color="green" on:click={handleReplyButtonClick}>
+				<Button class="flex space-x-2" color="green" onclick={handleReplyButtonClick}>
 					<MessagesSolid />
 					<span>{replyBoxOpen ? 'Hide reply' : 'Reply'}</span>
 				</Button>
@@ -135,14 +135,14 @@
 
 		{#if $user && (comment.author.id === $user.id || isModerationRole($user.role))}
 			<div class="flex items-center mt-4 space-x-3">
-				<Button class="flex space-x-2" color="blue" on:click={handleEditButtonClick}>
+				<Button class="flex space-x-2" color="blue" onclick={handleEditButtonClick}>
 					<PenSolid />
 					<span>Edit</span></Button
 				>
 			</div>
 
 			<div class="flex items-center mt-4 space-x-3">
-				<Button class="flex space-x-2" color="red" on:click={handleDeleteButtonClick}>
+				<Button class="flex space-x-2" color="red" onclick={handleDeleteButtonClick}>
 					<TrashBinSolid />
 					<span>Delete</span></Button
 				>

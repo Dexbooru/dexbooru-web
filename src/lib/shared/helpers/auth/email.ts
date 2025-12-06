@@ -4,9 +4,9 @@ import {
 	MAXIMUM_EMAIL_LENGTH,
 	MINIMUM_EMAIL_LENGTH
 } from '../../constants/auth';
-import type { IAuthFieldRequirements } from '../../types/auth';
+import type { TAuthFieldRequirements } from '../../types/auth';
 
-export const getEmailRequirements = (email: string): IAuthFieldRequirements => {
+export const getEmailRequirements = (email: string): TAuthFieldRequirements => {
 	const satisfied: string[] = [];
 	const unsatisfied: string[] = [];
 

@@ -63,7 +63,7 @@
 						<h2 class="mt-1">{friend.username}</h2>
 					</div>
 					<Button
-						on:click={(event) => onChatRoomCreateClick(event, friend.id)}
+						onclick={(event) => onChatRoomCreateClick(event, friend.id)}
 						size="sm"
 						color="green">Start new chat</Button
 					>

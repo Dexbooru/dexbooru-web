@@ -12,12 +12,12 @@
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { Artist, Tag } from '@prisma/client';
 	import { toast } from '@zerodevx/svelte-toast';
+	import PlusOutline from 'flowbite-svelte-icons/PlusOutline.svelte';
+	import TrashBinSolid from 'flowbite-svelte-icons/TrashBinSolid.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
 	import Textarea from 'flowbite-svelte/Textarea.svelte';
-	import PlusSolid from 'flowbite-svelte-icons/PlusSolid.svelte';
-	import TrashBinSolid from 'flowbite-svelte-icons/TrashBinSolid.svelte';
 
 	type Props = {
 		labelType: 'tag' | 'artist' | undefined;
@@ -91,7 +91,7 @@
 				<Textarea
 					bind:value={description}
 					maxlength={MAXIMUM_TAG_DESCRIPTION_LENGTH}
-					rows="3"
+					rows={3}
 					name="tag-description"
 					placeholder="Enter a tag description here"
 				/>
@@ -102,7 +102,7 @@
 				<Textarea
 					bind:value={description}
 					maxlength={MAXIMUM_ARTIST_DESCRIPTION_LENGTH}
-					rows="3"
+					rows={3}
 					name="artist-description"
 					placeholder="Enter a artist description here"
 				/>
@@ -112,11 +112,11 @@
 					<span>Social media links:</span>
 					<Button
 						disabled={socialMediaLinks.length === MAXIMUM_ARTIST_SOCIAL_MEDIAS_LENGTH}
-						on:click={() => socialMediaLinks.push('')}
+						onclick={() => socialMediaLinks.push('')}
 						color="blue"
 						size="xs"
 					>
-						<PlusSolid />
+						<PlusOutline />
 					</Button>
 				</div>
 
@@ -127,12 +127,12 @@
 								<Input
 									maxlength={MAXIMUM_ARTIST_SOCIAL_MEDIA_LENGTH}
 									value={link}
-									on:input={(event) => handleSocialMediaInput(event, index)}
+									oninput={(event) => handleSocialMediaInput(event, index)}
 									type="url"
 									name="social-media-link-{index}"
 									placeholder="Enter a social media link here"
 								/>
-								<Button on:click={() => socialMediaLinks.splice(index, 1)} color="red" size="xs">
+								<Button onclick={() => socialMediaLinks.splice(index, 1)} color="red" size="xs">
 									<TrashBinSolid />
 								</Button>
 							</div>
@@ -142,7 +142,7 @@
 			</Label>
 		{/if}
 
-		<Button on:click={editLabel} disabled={labelEditing || labelEditButtonDisabled}>
+		<Button onclick={editLabel} disabled={labelEditing || labelEditButtonDisabled}>
 			Edit {labelType}
 		</Button>
 	</div>

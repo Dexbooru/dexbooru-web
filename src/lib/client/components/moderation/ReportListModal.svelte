@@ -99,7 +99,7 @@
 	title="{capitalize(configKey)} reports for: {entityId}"
 	outsideclose
 	open={$activeModal.isOpen && $activeModal.focusedModalName === modalName}
-	on:close={handleModalClose}
+	onclose={handleModalClose}
 >
 	{#if reportsLoading}
 		<div class="flex justify-center items-center h-32">

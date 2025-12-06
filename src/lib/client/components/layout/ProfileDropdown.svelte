@@ -4,7 +4,8 @@
 		getAuthenticatedUser,
 		getAuthenticatedUserNotifications,
 	} from '$lib/client/helpers/context';
-	import AngleDownSolid from 'flowbite-svelte-icons/AngleDownSolid.svelte';
+	import { DropdownDivider } from 'flowbite-svelte';
+	import AngleDownOutline from 'flowbite-svelte-icons/AngleDownOutline.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
@@ -29,31 +30,39 @@
 	<NotificationBell {notificationCount} />
 	<NotificationList {notificationCount} />
 {:else}
-	<Spinner size="7" class="mt-3 mr-4" />
+	<Spinner size="8" class="mt-3 mr-4" />
 {/if}
 
 {#if $user}
-	<Button color="light" id="navbar-profile-picture" class="!p-1 flex space-x-4">
-		<Avatar
-			onerror={onImageError}
-			src={$user.profilePictureUrl ?? DefaultProfilePicture}
-			alt="profile of {$user.username}"
-			class="mr-2 hide-alt-text"
-		/>
-		{$user.username}
-		<AngleDownSolid size="sm" class="!mr-2" />
-	</Button>
+	<div
+		role="group"
+		class="relative"
+		onmouseenter={() => (dropdownOpen = true)}
+	>
+		<Button
+			id="navbar-profile-picture"
+			class="!p-1 flex space-x-4 bg-transparent hover:bg-gray-100 dark:bg-slate-700 dark:hover:bg-gray-700 text-gray-900 dark:text-white focus:ring-0"
+		>
+			<Avatar
+				onerror={onImageError}
+				src={$user.profilePictureUrl ?? DefaultProfilePicture}
+				alt="profile of {$user.username}"
+				class="mr-2 hide-alt-text"
+			/>
+			{$user.username}
+			<AngleDownOutline size="sm" class="!mr-2" />
+		</Button>
 
-	<Dropdown bind:open={dropdownOpen}>
-		<DropdownItem href="/profile/{$user?.username}">Your Profile</DropdownItem>
-		<DropdownItem href="/posts/uploaded">Your Posts</DropdownItem>
-		<DropdownItem href="/collections/created">Your Collections</DropdownItem>
-		<DropdownItem href="/comments/created">Your Comments</DropdownItem>
-		<DropdownItem href="/friends">Your Friends</DropdownItem>
-		<DropdownItem href="/posts/liked">Liked Posts</DropdownItem>
-		<DropdownItem href="/profile/settings">Settings</DropdownItem>
-		{#snippet footer()}
-			<DropdownItem href="/profile/logout">Sign out</DropdownItem>
-		{/snippet}
-	</Dropdown>
+		<Dropdown simple bind:isOpen={dropdownOpen} class="list-none w-44 bg-white dark:bg-gray-700">
+			<DropdownItem href="/profile/{$user?.username}" class="text-gray-900 dark:text-white">Your Profile</DropdownItem>
+			<DropdownItem href="/posts/uploaded" class="text-gray-900 dark:text-white">Your Posts</DropdownItem>
+			<DropdownItem href="/collections/created" class="text-gray-900 dark:text-white">Your Collections</DropdownItem>
+			<DropdownItem href="/comments/created" class="text-gray-900 dark:text-white">Your Comments</DropdownItem>
+			<DropdownItem href="/friends" class="text-gray-900 dark:text-white">Your Friends</DropdownItem>
+			<DropdownItem href="/posts/liked" class="text-gray-900 dark:text-white">Liked Posts</DropdownItem>
+			<DropdownItem href="/profile/settings" class="text-gray-900 dark:text-white">Settings</DropdownItem>
+			<DropdownDivider />
+			<DropdownItem href="/profile/logout" class="text-gray-900 dark:text-white">Sign out</DropdownItem>
+		</Dropdown>
+	</div>
 {/if}

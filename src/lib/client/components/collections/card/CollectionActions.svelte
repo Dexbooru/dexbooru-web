@@ -8,7 +8,7 @@
 	import { getActiveModal, getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { isModerationRole } from '$lib/shared/helpers/auth/role';
 	import type { TPostCollection } from '$lib/shared/types/collections';
-	import ArrowRightToBracketSolid from 'flowbite-svelte-icons/ArrowRightToBracketSolid.svelte';
+	import { ArrowRightAltSolid } from 'flowbite-svelte-icons';
 	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import PenSolid from 'flowbite-svelte-icons/PenSolid.svelte';
 	import TrashBinSolid from 'flowbite-svelte-icons/TrashBinSolid.svelte';
@@ -33,7 +33,7 @@
 	{#if !onCollectionViewPage}
 		<Button class="space-x-2" href="/collections/{collection.id}" color="blue">
 			<span>View collection</span>
-			<ArrowRightToBracketSolid />
+			<ArrowRightAltSolid />
 		</Button>
 	{/if}
 
@@ -41,14 +41,14 @@
 		<Button
 			color="green"
 			class="space-x-2"
-			on:click={() => handleModalOpen(EDIT_COLLECTION_MODAL_NAME, { collection })}
+			onclick={() => handleModalOpen(EDIT_COLLECTION_MODAL_NAME, { collection })}
 		>
 			<span>Edit collection</span>
 			<PenSolid />
 		</Button>
 		<Button
 			class="space-x-2"
-			on:click={() => handleModalOpen(DELETE_COLLECTION_MODAL_NAME, { collection })}
+			onclick={() => handleModalOpen(DELETE_COLLECTION_MODAL_NAME, { collection })}
 			color="red"
 		>
 			<span>Delete collection</span>
@@ -58,7 +58,7 @@
 
 	<Button
 		class="space-x-2"
-		on:click={() => handleModalOpen(REPORT_POST_COLLECTION_MODAL_NAME, { collection })}
+		onclick={() => handleModalOpen(REPORT_POST_COLLECTION_MODAL_NAME, { collection })}
 		color="yellow"
 	>
 		<span>Report collection</span>
@@ -67,7 +67,7 @@
 
 	{#if $authenticatedUser && isModerationRole($authenticatedUser.role)}
 		<Button
-			on:click={() => {
+			onclick={() => {
 				activeModal.set({
 					isOpen: true,
 					focusedModalName: REPORT_POST_COLLECTION_LIST_MODAL_NAME,

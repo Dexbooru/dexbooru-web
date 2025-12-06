@@ -44,9 +44,9 @@
 	}
 </script>
 
-<Tabs defaultClass="flex flex-wrap space-x-2 rtl:space-x-revers !p-3" style="underline">
-	<TabItem on:click={() => handleTabClick('personal')} open={currentTab === 'personal'}>
-		{#snippet title()}
+<Tabs style="pills" class="flex flex-wrap space-x-2 rtl:space-x-revers !p-3">
+	<TabItem onclick={() => handleTabClick('personal')} open={currentTab === 'personal'}>
+		{#snippet titleSlot()}
 			<div class="flex items-center gap-2">
 				<UserCircleSolid size="md" />
 				Personal
@@ -59,8 +59,8 @@
 			<DeleteAccountForm />
 		</section>
 	</TabItem>
-	<TabItem on:click={() => handleTabClick('preferences')} open={currentTab === 'preferences'}>
-		{#snippet title()}
+	<TabItem onclick={() => handleTabClick('preferences')} open={currentTab === 'preferences'}>
+		{#snippet titleSlot()}
 			<div slot="title" class="flex items-center gap-2">
 				<GridSolid size="md" />
 				Preferences
@@ -72,8 +72,8 @@
 			<UserInterfacePreferenceForm />
 		</section>
 	</TabItem>
-	<TabItem open={currentTab === 'security'} on:click={() => handleTabClick('security')}>
-		{#snippet title()}
+	<TabItem open={currentTab === 'security'} onclick={() => handleTabClick('security')}>
+		{#snippet titleSlot()}
 			<div slot="title" class="flex items-center gap-2">
 				<LockSolid size="md" />
 				Security

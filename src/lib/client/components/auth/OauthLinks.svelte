@@ -134,14 +134,14 @@
 			{:else}
 				<div class="flex flex-col space-y-2">
 					<Button
-						on:click={() => updateDisconnectedAccounts(account?.platform ?? platform)}
+						onclick={() => updateDisconnectedAccounts(account?.platform ?? platform)}
 						size="sm"
 						color="red"
 					>
 						{disconnectedAccounts.includes(account?.platform ?? platform) ? 'Undo' : 'Unlink'}
 					</Button>
 					<Toggle
-						on:change={() => {
+						onchange={() => {
 							if (account) {
 								account.isPublic = !account.isPublic;
 							}
