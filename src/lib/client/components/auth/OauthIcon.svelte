@@ -23,7 +23,7 @@
 		<GoogleSolid class="w-8 h-8 text-red-600 dark:text-red-400" />
 	{/if}
 
-	<span class="text-md font-medium mt-1">
+	<span class="text-md font-medium mt-1 text-gray-500 dark:text-gray-400">
 		{capitalize(linkedAccount.platform)}: {linkedAccount.platformUsername}
 	</span>
 </div>

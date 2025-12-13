@@ -89,6 +89,7 @@
 			<Label class="space-y-2 mb-3">
 				<span>Description:</span>
 				<Textarea
+					class="w-full"
 					bind:value={description}
 					maxlength={MAXIMUM_TAG_DESCRIPTION_LENGTH}
 					rows={3}

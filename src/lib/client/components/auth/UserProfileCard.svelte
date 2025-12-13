@@ -177,7 +177,7 @@
 
 		{#if linkedAccounts.length > 0}
 			<div class="flex flex-col mt-3 space-y-3">
-				<p>Connected social media platforms:</p>
+				<p class="text-gray-500 dark:text-gray-400">Connected social media platforms:</p>
 				<div class="flex flex-col space-y-4">
 					{#each linkedAccounts as linkedAccount}
 						<OauthIcon {linkedAccount} />

@@ -39,8 +39,8 @@ export async function deletePostById(postId: string): Promise<TPost> {
 		},
 	});
 
-	decrementTagPostCount(deletedPost.tags.map((tag) => tag.name));
-	decrementArtistPostCount(deletedPost.artists.map((artist) => artist.name));
+	await decrementTagPostCount(deletedPost.tags.map((tag) => tag.name));
+	await decrementArtistPostCount(deletedPost.artists.map((artist) => artist.name));
 
 	return deletedPost as TPost;
 }
