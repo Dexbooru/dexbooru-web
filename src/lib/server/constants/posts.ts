@@ -1,8 +1,18 @@
-import type { TPostLikeAction, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
+import type {
+	TPostLikeAction,
+	TPostOrderByColumn,
+	TPostSelector,
+	TPostSourceSelector,
+} from '$lib/shared/types/posts';
 
 export const VALID_ORDERBY_COLUMNS: TPostOrderByColumn[] = ['createdAt', 'likes', 'views'];
 
 export const POST_LIKE_ACTIONS: TPostLikeAction[] = ['like', 'dislike'];
+
+export const PUBLIC_POST_SOURCE_SELECTORS: TPostSourceSelector = {
+	sourceTitle: true,
+	sourceType: true,
+};
 
 export const PUBLIC_POST_SELECTORS: TPostSelector = {
 	id: true,

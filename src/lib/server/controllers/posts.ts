@@ -14,7 +14,11 @@ import { deleteBatchFromBucket, uploadBatchToBucket } from '../aws/actions/s3';
 import { enqueueBatchUploadedPostImages } from '../aws/actions/sqs';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { PUBLIC_COMMENT_SELECTORS } from '../constants/comments';
-import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../constants/posts';
+import {
+	PAGE_SERVER_LOAD_POST_SELECTORS,
+	PUBLIC_POST_SELECTORS,
+	PUBLIC_POST_SOURCE_SELECTORS,
+} from '../constants/posts';
 import { findPostsByArtistName } from '../db/actions/artist';
 import {
 	createPost,
@@ -539,6 +543,9 @@ export const handleGetPost = async (
 					...PUBLIC_POST_SELECTORS,
 					comments: {
 						select: PUBLIC_COMMENT_SELECTORS,
+					},
+					sources: {
+						select: PUBLIC_POST_SOURCE_SELECTORS,
 					},
 				};
 				const similaritySelectors = {

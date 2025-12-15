@@ -65,8 +65,10 @@ export type TPost = Post & {
 	artistString: string;
 	commentCount: number;
 	comments: TComment[];
+	sources: TPostSource[];
 };
 
+export type TPostSourceSelector = Prisma.PostSourceSelect<DefaultArgs>;
 export type TPostSelector = Prisma.PostSelect<DefaultArgs>;
 export type TPostOrderByColumn = 'likes' | 'createdAt' | 'views' | 'commentCount' | 'updatedAt';
 

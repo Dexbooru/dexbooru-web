@@ -65,6 +65,20 @@
 	>
 </p>
 
+{#if post.sources.length > 0}
+	<p class="text-lg dark:text-white whitespace-pre-wrap">
+		Source titles: <span class="dark:text-gray-400"
+			>{post.sources.map((source) => source.sourceTitle).join(', ')}</span
+		>
+	</p>
+
+	<p class="text-lg dark:text-white whitespace-pre-wrap">
+		Source types: <span class="dark:text-gray-400"
+			>{post.sources.map((source) => source.sourceType).join(', ')}</span
+		>
+	</p>
+{/if}
+
 <p class="text-lg dark:text-white whitespace-pre-wrap">
 	Description: <br /><span class="dark:text-gray-400"
 		>{$updatedPost.description ?? post.description}</span
