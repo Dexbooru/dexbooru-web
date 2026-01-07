@@ -10,6 +10,7 @@ export const VALID_ORDERBY_COLUMNS: TPostOrderByColumn[] = ['createdAt', 'likes'
 export const POST_LIKE_ACTIONS: TPostLikeAction[] = ['like', 'dislike'];
 
 export const PUBLIC_POST_SOURCE_SELECTORS: TPostSourceSelector = {
+	characterName: true,
 	sourceTitle: true,
 	sourceType: true,
 };

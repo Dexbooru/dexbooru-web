@@ -53,9 +53,9 @@
 				profilePictureChanging = false;
 				if (result.type === 'success') {
 					toast.push('The profile picture was updated successfully!', SUCCESS_TOAST_OPTIONS);
-					// @ts-ignore
+
 					user.update((currentUser) => {
-						// @ts-ignore
+						// @ts-expect-error: TS doesn't know about the data property on result
 						const updatedUser = { ...currentUser, ...result.data.data };
 						return updatedUser;
 					});
@@ -73,11 +73,11 @@
 		class="flex flex-col space-y-3"
 	>
 		<ProfilePictureUpload bind:profilePictureFile isChangingProfilePicture />
-		<span class="text-center">------- OR -------</span>
+		<span class="dark:text-white text-center">------- OR -------</span>
 		<Checkbox onchange={onRemoveProfileCheckedChange} bind:checked={removeProfilePicture}
 			>Remove Profile Picture</Checkbox
 		>
-		<Input type="hidden" name="removeProfilePicture" value={removeProfilePicture} />
+		<Input type="hidden" name="removeProfilePicture" value={removeProfilePicture.toString()} />
 		<Button disabled={changeProfileButtonDisabled || profilePictureChanging} type="submit"
 			>Change Profile Picture</Button
 		>
