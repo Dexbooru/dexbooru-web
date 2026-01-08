@@ -91,4 +91,10 @@
 		<span>{formatNumberWithCommas(collectionCount)} collections</span>, and
 		<span>{formatNumberWithCommas(userCount)} users</span>.
 	</p>
+	<a
+		href="/docs/search-syntax"
+		class="mt-4 text-sm text-blue-600 hover:underline dark:text-blue-400"
+	>
+		Need help searching? Check out our Search Syntax Guide
+	</a>
 </main>

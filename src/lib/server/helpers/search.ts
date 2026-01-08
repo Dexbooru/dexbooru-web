@@ -1,8 +1,8 @@
 import { Prisma } from '$generated/prisma/client';
-import type { DefaultArgs } from '@prisma/client/runtime/client';
 import { UUID_REGEX } from '$lib/shared/constants/search';
 import { URL_REGEX } from '$lib/shared/constants/urls';
 import type { TPostOrderByColumn } from '$lib/shared/types/posts';
+import type { DefaultArgs } from '@prisma/client/runtime/client';
 import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../constants/posts';
 import type { TControllerHandlerVariant } from '../types/controllers';
 
@@ -16,6 +16,8 @@ const VALID_PREFIXES: readonly TPrefix[] = [
 	'views',
 	'moderationStatus',
 	'sourceLink',
+	'sourceTitle',
+	'characterName',
 ];
 
 const NEGATION_TABLE: Record<TOperation, TOperation> = {
@@ -44,7 +46,9 @@ type TPrefix =
 	| 'views'
 	| 'createdAt'
 	| 'updatedAt'
-	| 'id';
+	| 'id'
+	| 'sourceTitle'
+	| 'characterName';
 type TQueryToken = {
 	isNegation: boolean;
 	operation?: TOperation;
@@ -104,6 +108,8 @@ class QueryBuilder {
 
 			case 'moderationStatus':
 			case 'uploader':
+			case 'sourceTitle':
+			case 'characterName':
 				return value;
 
 			case 'id':
@@ -119,7 +125,7 @@ class QueryBuilder {
 	}
 
 	private parseOperation(prefix: TPrefix, isNegation: boolean, value: string): TOperation {
-		if (prefix === 'uploader') return '=';
+		if (prefix === 'uploader' || prefix === 'sourceTitle' || prefix === 'characterName') return '=';
 
 		let operationCount = 0;
 		let lastOperation: TOperation | undefined = undefined;
@@ -217,6 +223,14 @@ class QueryBuilder {
 							},
 						};
 					}
+				} else if (prefix === 'sourceTitle' || prefix === 'characterName') {
+					condition.sources = {
+						some: {
+							[prefix]: {
+								[OPERATION_TO_PRISMA_TABLE[operation]]: value,
+							},
+						},
+					};
 				} else {
 					condition[prefix] = {
 						[OPERATION_TO_PRISMA_TABLE[operation]]: value,

@@ -17,7 +17,7 @@ const AdvancedPostSearchResultsSchema = {
 			.string()
 			.min(1, 'The query length needs to be least one character long')
 			.transform((val) => {
-				const tokens = normalizeQuery(val).split(' ');
+				const tokens = val.trim().split(' ');
 				return tokens.toSorted().join(' ');
 			}),
 		limit: LimitSchema,
