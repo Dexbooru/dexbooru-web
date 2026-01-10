@@ -9,6 +9,6 @@
 	let { data }: Props = $props();
 </script>
 
-<main class="m-5 space-y-5">
+<main class="p-4 md:p-8 container mx-auto space-y-6">
 	<CollectionPresentation collection={data.collection} />
 </main>

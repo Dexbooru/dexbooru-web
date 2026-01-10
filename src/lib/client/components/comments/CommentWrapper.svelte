@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import ApplicationLogo from '$lib/client/assets/app_logo.webp';
 	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
+	import CommentPageSidebar from '$lib/client/components/comments/CommentPageSidebar.svelte';
 	import { generateCommentWrapperMetatags } from '$lib/client/helpers/comments';
 	import { getCommentPaginationData } from '$lib/client/helpers/context';
 	import { groupBy } from '$lib/shared/helpers/util';
@@ -86,42 +87,85 @@
 	<meta property="og:image" content={ApplicationLogo} />
 </svelte:head>
 
-<main>
-	{#if $paginationData}
-		{#if page.data.comments?.length === 0}
-			<h1 class="p-4 mt-5 text-xl text-center text-black dark:text-white">
-				No comments found on page {(page.data.pageNumber ?? 0) + 1}
-			</h1>
-		{:else}
-			<h1 class="text-4xl m-4 dark:text-white">{titleData.title}</h1>
-			<CommentPaginator />
-			{#each Object.entries(commentDateGroups) as [date, comments]}
-				<Group
-					divClass="p-4 mb-4 bg-gray-50 dark:bg-gray-800 comment-date-group space-y-4 border-none"
-					date={`Comments made on: ${date}`}
-				>
-					<GroupItem
-						timelines={comments.map((comment) => {
-							const { parsedContent, parsedTitle } = getParsedCommentInfo(comment);
+<main id="comment-container" class="mt-5">
+	<div id="comment-container-sidebar">
+		<CommentPageSidebar />
+	</div>
+	<div id="comment-container-body" class="space-y-4 mb-5">
+		{#if $paginationData}
+			{#if page.data.comments?.length === 0}
+				<h1 class="p-4 mt-5 text-xl text-center text-black dark:text-white">
+					No comments found on page {(page.data.pageNumber ?? 0) + 1}
+				</h1>
+			{:else}
+				<h1 class="text-4xl m-4 dark:text-white">{titleData.title}</h1>
+				<CommentPaginator />
+				{#each Object.entries(commentDateGroups) as [date, comments]}
+					<Group
+						divClass="p-4 mb-4 bg-gray-50 dark:bg-gray-800 comment-date-group space-y-4 border-none"
+						date={`Comments made on: ${date}`}
+					>
+						<GroupItem
+							timelines={comments.map((comment) => {
+								const { parsedContent, parsedTitle } = getParsedCommentInfo(comment);
 
-							return {
-								title: parsedTitle,
-								comment: parsedContent,
-								src: comment.author.profilePictureUrl ?? DefaultProfilePicture,
-								alt: `profile of ${comment.author.username}`,
-								href: `/comments/${comment.id}`,
-								isPrivate: false,
-							};
-						})}
-					/>
-				</Group>
+								return {
+									title: parsedTitle,
+									comment: parsedContent,
+									src: comment.author.profilePictureUrl ?? DefaultProfilePicture,
+									alt: `profile of ${comment.author.username}`,
+									href: `/comments/${comment.id}`,
+									isPrivate: false,
+								};
+							})}
+						/>
+					</Group>
+				{/each}
+			{/if}
+		{:else}
+			{#each Array(page.data.comments?.length ?? 0) as _}
+				<ListPlaceholder
+					class="p-4 h-60 space-y-4 w-full divide-y divide-gray-200 shadow animate-pulse dark:divide-gray-700 dark:border-gray-700"
+				/>
 			{/each}
 		{/if}
-	{:else}
-		{#each Array(page.data.comments?.length ?? 0) as _}
-			<ListPlaceholder
-				class="p-4 h-60 space-y-4 w-full divide-y divide-gray-200 shadow animate-pulse dark:divide-gray-700 dark:border-gray-700"
-			/>
-		{/each}
-	{/if}
+	</div>
 </main>
+
+<style>
+	#comment-container {
+		display: grid;
+		grid-template-columns: repeat(4.5, 1fr);
+		grid-template-rows: 0fr repeat(4, 1fr);
+		grid-column-gap: 0px;
+		grid-row-gap: 0px;
+	}
+
+	#comment-container-sidebar {
+		grid-area: 1 / 1 / 6 / 2;
+		align-self: start;
+	}
+
+	#comment-container-body {
+		grid-area: 2 / 2 / 6 / 25;
+	}
+
+	@media screen and (max-width: 767px) {
+		#comment-container-sidebar {
+			display: none;
+		}
+
+		#comment-container {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+		}
+
+		#comment-container-body {
+			grid-area: unset;
+			width: 100%;
+			padding: 1rem;
+		}
+	}
+</style>

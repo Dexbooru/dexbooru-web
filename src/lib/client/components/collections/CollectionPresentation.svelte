@@ -110,7 +110,7 @@
 {/if}
 
 <Img
-	class="whole-collection-image"
+	class="whole-collection-image max-w-full h-auto rounded-lg shadow-lg mb-6"
 	onerror={onImageError}
 	onload={onImageLoad}
 	src={originalThumbnail}
@@ -118,68 +118,111 @@
 	width={resizedImageDims.imageWidth > 0 ? resizedImageDims.imageWidth : undefined}
 	height={resizedImageDims.imageHeight > 0 ? resizedImageDims.imageHeight : undefined}
 />
-<div class="flex">
+<div class="flex mb-6">
 	<CollectionActions onCollectionViewPage {collection} />
 </div>
 
-<section class="space-y-2">
-	<p class="text-lg dark:text-white">
-		ID: <span class=" dark:text-gray-400">{collection.id}</span>
-	</p>
+<section
+	class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-sm mb-8 border dark:border-gray-700"
+>
+	<div class="space-y-1">
+		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+			ID
+		</p>
+		<p class="text-lg font-medium dark:text-white break-all">{collection.id}</p>
+	</div>
 
-	<p class="text-lg dark:text-white">
-		Uploaded at: <span class=" dark:text-gray-400">{formatDate(collection.createdAt)}</span>
-	</p>
+	<div class="space-y-1">
+		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+			Uploaded at
+		</p>
+		<p class="text-lg font-medium dark:text-white">{formatDate(collection.createdAt)}</p>
+	</div>
 
-	<p class="text-lg dark:text-white">
-		Last updated at: <span class=" dark:text-gray-400">{formatDate(collection.updatedAt)}</span>
-	</p>
+	<div class="space-y-1">
+		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+			Last updated at
+		</p>
+		<p class="text-lg font-medium dark:text-white">{formatDate(collection.updatedAt)}</p>
+	</div>
 
-	<p class="text-lg dark:text-white">
-		Author Username: <span class=" dark:text-gray-400">
+	<div class="space-y-1">
+		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+			Author
+		</p>
+		<p class="text-lg font-medium dark:text-white">
 			{#if collection.author}
-				<a class="underline" href="/profile/{collection.author.username}"
-					>{collection.author.username}</a
+				<a
+					class="hover:underline text-primary-600 dark:text-primary-500"
+					href="/profile/{collection.author.username}">{collection.author.username}</a
 				>
+				<span class="text-sm text-gray-400 ml-2">({collection.author.id})</span>
 			{:else}
 				{DELETED_ACCOUNT_HEADING}
 			{/if}
-		</span>
-	</p>
+		</p>
+	</div>
 
-	<p class="text-lg dark:text-white">
-		Author ID: <span class=" dark:text-gray-400">
-			{collection.author?.id}
-		</span>
-	</p>
+	<div class="space-y-1">
+		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+			Total posts
+		</p>
+		<p class="text-lg font-medium dark:text-white">
+			{formatNumberWithCommas($originalPostPage.length)}
+		</p>
+	</div>
 
-	<p class="text-lg dark:text-white">
-		Total posts: <span class=" dark:text-gray-400"
-			>{formatNumberWithCommas($originalPostPage.length)}</span
+	<div class="space-y-1">
+		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+			Is NSFW?
+		</p>
+		<p class="text-lg font-medium dark:text-white">
+			<span class={collection.isNsfw ? 'text-red-500' : 'text-green-500'}>
+				{collection.isNsfw ? 'Yes' : 'No'}
+			</span>
+		</p>
+	</div>
+
+	<div class="space-y-1 md:col-span-2">
+		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+			Title
+		</p>
+		<p id="collection-title" class="text-lg font-medium dark:text-white whitespace-pre-wrap">
+			{collection.title}
+		</p>
+	</div>
+
+	<div class="space-y-1 md:col-span-2">
+		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+			Description
+		</p>
+		<p
+			id="collection-description"
+			class="text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed"
 		>
-	</p>
-
-	<p class="text-lg dark:text-white whitespace-pre-wrap">
-		Title: <br /><span id="collection-title" class=" dark:text-gray-400">{collection.title}</span>
-	</p>
-
-	<p class="text-lg dark:text-white whitespace-pre-wrap">
-		Description: <br /><span id="collection-description" class=" dark:text-gray-400"
-			>{collection.description}</span
-		>
-	</p>
-
-	<p class="text-lg dark:text-white">
-		Is Nsfw?: <span class=" dark:text-gray-400">{collection.isNsfw ? 'Yes' : 'No'}</span>
-	</p>
+			{collection.description}
+		</p>
+	</div>
 </section>
 
 {#if collection.posts.length > 0}
-	<h2 class="text-2xl font-semibold dark:text-white mt-6 mb-4">Posts in this Collection:</h2>
-	<div class="grid grid-cols-3 gap-4">
+	<h2 class="text-2xl font-bold dark:text-white mt-8 mb-6 flex items-center gap-3">
+		Posts in this Collection
+		<span
+			class="text-sm font-normal text-gray-500 dark:text-gray-400 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full"
+		>
+			{collection.posts.length}
+		</span>
+	</h2>
+	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 		{#each collection.posts as post (post.id)}
-			<div animate:flip={{ duration: POSTS_GRID_ANIMATION_DURATION_MS }}>
-				<PostCard {post} />
+			<div
+				animate:flip={{ duration: POSTS_GRID_ANIMATION_DURATION_MS }}
+				class="flex justify-center w-full"
+			>
+				<div class="w-full max-w-sm">
+					<PostCard {post} />
+				</div>
 			</div>
 		{/each}
 	</div>
