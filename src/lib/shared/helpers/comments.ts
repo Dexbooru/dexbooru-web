@@ -1,4 +1,5 @@
 import type { TComment } from '../types/comments';
+import { normalizeQuery } from './search';
 
 class CommentTree {
 	private data: Map<string, TComment[]>;
@@ -15,6 +16,14 @@ class CommentTree {
 		if (commentATime === commentBTime) return 0;
 		if (commentATime > commentBTime) return -1;
 		return 1;
+	}
+
+	search(query: string): TComment[] {
+		const normalizedQuery = normalizeQuery(query);
+		const allComments = Array.from(this.data.values()).flat();
+		return allComments.filter((comment) =>
+			normalizeQuery(comment.content).includes(normalizedQuery),
+		);
 	}
 
 	addComment(comment: TComment) {

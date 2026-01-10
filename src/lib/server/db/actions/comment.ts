@@ -94,7 +94,7 @@ export async function findCommentsByAuthorId(
 	pageLimit: number,
 	orderBy: TCommentOrderByColumn,
 	selectors?: TCommentSelector,
-): Promise<Comment[] | null> {
+) {
 	const comments = await prisma.comment.findMany({
 		where: {
 			authorId,
@@ -110,11 +110,12 @@ export async function findCommentsByAuthorId(
 	return comments;
 }
 
-export async function findCommentsByPostId(postId: string): Promise<Comment[] | null> {
+export async function findCommentsByPostId(postId: string, selectors?: TCommentSelector) {
 	const comments = await prisma.comment.findMany({
 		where: {
 			postId,
 		},
+		select: selectors,
 		orderBy: {
 			createdAt: 'desc',
 		},
@@ -129,7 +130,7 @@ export async function findPaginatedCommentsByPostId(
 	pageNumber: number,
 	pageLimit: number,
 	selectors?: TCommentSelector,
-): Promise<Comment[] | null> {
+) {
 	const comments = await prisma.comment.findMany({
 		where: {
 			postId,

@@ -25,12 +25,12 @@
 
 	type Props = {
 		comment: TComment;
+		showReplies?: boolean;
 	};
 
-	let { comment }: Props = $props();
+	let { comment, showReplies = true }: Props = $props();
 
 	let replyBoxOpen = $state(false);
-	let editModeOn = $state(false);
 	let replies: TComment[] = $state([]);
 
 	const user = getAuthenticatedUser();
@@ -120,6 +120,7 @@
 	</div>
 
 	<p class="text-gray-500 dark:text-gray-400">
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html comment.content}
 	</p>
 
@@ -161,8 +162,10 @@
 	{/if}
 </article>
 
-<div class="ml-5 border-l-2">
-	{#each replies as reply (reply.id)}
-		<Comment comment={reply} />
-	{/each}
-</div>
+{#if showReplies}
+	<div class="ml-5 border-l-2">
+		{#each replies as reply (reply.id)}
+			<Comment comment={reply} />
+		{/each}
+	</div>
+{/if}

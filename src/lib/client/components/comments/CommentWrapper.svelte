@@ -109,7 +109,7 @@
 								comment: parsedContent,
 								src: comment.author.profilePictureUrl ?? DefaultProfilePicture,
 								alt: `profile of ${comment.author.username}`,
-								href: `/profile/${comment.author.username}?c=${comment.id}`,
+								href: `/comments/${comment.id}`,
 								isPrivate: false,
 							};
 						})}

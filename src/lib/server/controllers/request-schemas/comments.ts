@@ -62,10 +62,17 @@ const CreateCommentSchema = {
 	}),
 } satisfies TRequestSchema;
 
+const GetCommentSchema = {
+	pathParams: z.object({
+		commentId: z.string().uuid(),
+	}),
+} satisfies TRequestSchema;
+
 export {
 	CreateCommentSchema,
 	DeletePostCommentsSchema,
 	EditPostCommentsSchmea,
 	GeneralCommentsSchema,
 	GetPostCommentsSchema,
+	GetCommentSchema,
 };
