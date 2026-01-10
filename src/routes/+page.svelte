@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getGlobalSearchResults } from '$lib/client/api/search';
 	import ApplicationLogo from '$lib/client/assets/app_logo.webp';
+	import SignWaifus from '$lib/client/components/index/SignWaifus.svelte';
 	import Searchbar from '$lib/client/components/reusable/Searchbar.svelte';
 	import SearchResultsDropdown from '$lib/client/components/search/SearchResultsDropdown.svelte';
 	import { SEARCH_DEBOUNCE_TIMEOUT_MS } from '$lib/client/constants/search';
@@ -97,4 +98,8 @@
 	>
 		Need help searching? Check out our Search Syntax Guide
 	</a>
+
+	{#if postCount > 0}
+		<SignWaifus {postCount} />
+	{/if}
 </main>
