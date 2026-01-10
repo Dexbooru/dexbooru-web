@@ -81,6 +81,9 @@ importers:
       '@faker-js/faker':
         specifier: ^8.4.1
         version: 8.4.1
+      '@flowbite-svelte-plugins/chart':
+        specifier: ^0.2.4
+        version: 0.2.4(svelte@5.41.0)(tailwindcss@4.1.17)
       '@sveltejs/adapter-node':
         specifier: ^5.4.0
         version: 5.4.0(@sveltejs/kit@2.47.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.41.0)(vite@5.4.20(@types/node@20.19.22)(lightningcss@1.30.2)))(svelte@5.41.0)(vite@5.4.20(@types/node@20.19.22)(lightningcss@1.30.2)))
@@ -836,6 +839,12 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@flowbite-svelte-plugins/chart@0.2.4':
+    resolution: {integrity: sha512-0+Cmw7m7QqlhzPOVU7zFH/qrp1X1zLEoTiBPws83EucDZCETru5eE5rlmbH+SZxPH9Id4EMahpZzXKIgZ0cyLA==}
+    peerDependencies:
+      svelte: ^5.0.0
+      tailwindcss: ^4.1.4
 
   '@hono/node-server@1.19.6':
     resolution: {integrity: sha512-Shz/KjlIeAhfiuE93NDKVdZ7HdBVLQAfdbaXEaoAVO3ic9ibRSLGIQGkcBbFyuLr+7/1D5ZCINM8B+6IvXeMtw==}
@@ -1980,6 +1989,9 @@ packages:
   ansi-styles@6.2.3:
     resolution: {integrity: sha512-4Dj6M28JB+oAH8kFkTLUo+a2jwOFkuqb3yucU0CANcRRUbxS0cP0nZYCGjcc3BNXwRIsUVmDGgzawme7zvJHvg==}
     engines: {node: '>=12'}
+
+  apexcharts@4.7.0:
+    resolution: {integrity: sha512-iZSrrBGvVlL+nt2B1NpqfDuBZ9jX61X9I2+XV0hlYXHtTwhwLTHDKGXjNXAgFBDLuvSYCB/rq2nPWVPRv2DrGA==}
 
   apexcharts@5.3.6:
     resolution: {integrity: sha512-sVEPw+J0Gp0IHQabKu8cfdsxlfME0e36Wid7RIaPclGM2OUt+O7O4+6mfAmTUYhy5bDk8cNHzEhPfVtLCIXEJA==}
@@ -4829,6 +4841,12 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
+  '@flowbite-svelte-plugins/chart@0.2.4(svelte@5.41.0)(tailwindcss@4.1.17)':
+    dependencies:
+      apexcharts: 4.7.0
+      svelte: 5.41.0
+      tailwindcss: 4.1.17
+
   '@hono/node-server@1.19.6(hono@4.10.6)':
     dependencies:
       hono: 4.10.6
@@ -6144,6 +6162,15 @@ snapshots:
   ansi-styles@5.2.0: {}
 
   ansi-styles@6.2.3: {}
+
+  apexcharts@4.7.0:
+    dependencies:
+      '@svgdotjs/svg.draggable.js': 3.0.6(@svgdotjs/svg.js@3.2.5)
+      '@svgdotjs/svg.filter.js': 3.0.9
+      '@svgdotjs/svg.js': 3.2.5
+      '@svgdotjs/svg.resize.js': 2.0.5(@svgdotjs/svg.js@3.2.5)(@svgdotjs/svg.select.js@4.0.3(@svgdotjs/svg.js@3.2.5))
+      '@svgdotjs/svg.select.js': 4.0.3(@svgdotjs/svg.js@3.2.5)
+      '@yr/monotone-cubic-spline': 1.0.3
 
   apexcharts@5.3.6:
     dependencies:

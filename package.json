@@ -27,6 +27,7 @@
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^8.4.1",
+		"@flowbite-svelte-plugins/chart": "^0.2.4",
 		"@sveltejs/adapter-node": "^5.4.0",
 		"@sveltejs/kit": "^2.47.1",
 		"@sveltejs/vite-plugin-svelte": "^4.0.4",

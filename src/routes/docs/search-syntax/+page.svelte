@@ -1,16 +1,14 @@
 <script lang="ts">
-	import {
-		Heading,
-		Li,
-		List,
-		P,
-		Table,
-		TableBody,
-		TableBodyCell,
-		TableBodyRow,
-		TableHead,
-		TableHeadCell,
-	} from 'flowbite-svelte';
+	import Heading from 'flowbite-svelte/Heading.svelte';
+	import Li from 'flowbite-svelte/Li.svelte';
+	import List from 'flowbite-svelte/List.svelte';
+	import P from 'flowbite-svelte/P.svelte';
+	import Table from 'flowbite-svelte/Table.svelte';
+	import TableBody from 'flowbite-svelte/TableBody.svelte';
+	import TableBodyCell from 'flowbite-svelte/TableBodyCell.svelte';
+	import TableBodyRow from 'flowbite-svelte/TableBodyRow.svelte';
+	import TableHead from 'flowbite-svelte/TableHead.svelte';
+	import TableHeadCell from 'flowbite-svelte/TableHeadCell.svelte';
 </script>
 
 <svelte:head>
