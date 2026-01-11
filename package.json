@@ -111,7 +111,7 @@
 	"engines": {
 		"node": ">=20.0.0"
 	},
-	"packageManager": "pnpm@10.24.0",
+	"packageManager": "pnpm@10.28.0",
 	"exports": {
 		".": {
 			"svelte": "./dist/index.js"
