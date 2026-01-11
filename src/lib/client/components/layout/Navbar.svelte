@@ -47,6 +47,7 @@
 		<NavLi href="/artists">Artists</NavLi>
 		<NavLi href="/comments">Comments</NavLi>
 		<NavLi href="/collections">Collections</NavLi>
+		<NavLi href="/analytics">Analytics</NavLi>
 		{#if $user}
 			<NavLi href="/posts/upload">Upload</NavLi>
 			<NavLi href="/chat">Chat</NavLi>

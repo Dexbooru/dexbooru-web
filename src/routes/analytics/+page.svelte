@@ -1,11 +1,20 @@
 <script lang="ts">
+	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 	import { PIE_CHART_COLORS, PIE_CHART_OPTIONS } from '$lib/client/constants/analytics';
-	import { TOP_K_LABEL_COUNT } from '$lib/shared/constants/analytics';
+	import { TOP_K_LABEL_COUNT, TOP_K_POST_LOOKBACK_HOURS } from '$lib/shared/constants/analytics';
+	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TAnalyticsData } from '$lib/shared/types/analytics';
 	import Chart from '@flowbite-svelte-plugins/chart/Chart.svelte';
 	import type { ApexOptions } from 'apexcharts';
+	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
 	import Heading from 'flowbite-svelte/Heading.svelte';
+	import Table from 'flowbite-svelte/Table.svelte';
+	import TableBody from 'flowbite-svelte/TableBody.svelte';
+	import TableBodyCell from 'flowbite-svelte/TableBodyCell.svelte';
+	import TableBodyRow from 'flowbite-svelte/TableBodyRow.svelte';
+	import TableHead from 'flowbite-svelte/TableHead.svelte';
+	import TableHeadCell from 'flowbite-svelte/TableHeadCell.svelte';
 	import type { PageData } from './$types';
 
 	type Props = {
@@ -14,7 +23,7 @@
 
 	let { data }: Props = $props();
 
-	let { topArtists, topTags }: TAnalyticsData = data;
+	let { topArtists, topTags, topLikedPosts, topViewedPosts }: TAnalyticsData = data;
 
 	let tagOptions: ApexOptions = $state({
 		...PIE_CHART_OPTIONS,
@@ -34,6 +43,14 @@
 	const hasArtistData = $derived(
 		topArtists.length > 0 && topArtists.some((artist) => artist.postCount > 0),
 	);
+	const hasLikedPostData = $derived(topLikedPosts.length > 0);
+	const hasViewedPostData = $derived(topViewedPosts.length > 0);
+
+	const onImageError = (event: Event) => {
+		const target = event.target as HTMLImageElement;
+
+		target.src = DefaultProfilePicture;
+	};
 </script>
 
 <svelte:head>
@@ -77,6 +94,120 @@
 			</div>
 			{#if hasArtistData}
 				<Chart options={artistOptions} class="py-6" />
+			{:else}
+				<div class="flex min-h-[300px] items-center justify-center">
+					<p class="text-center text-gray-500 dark:text-gray-400">Not enough data available.</p>
+				</div>
+			{/if}
+		</Card>
+	</div>
+
+	<div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+		<Card class="w-full max-w-none p-6 lg:p-8">
+			<div class="mb-8 flex items-center justify-center">
+				<h5 class="text-2xl font-bold leading-none text-gray-900 dark:text-white">
+					Top {topLikedPosts.length} Most Liked Posts over the past {TOP_K_POST_LOOKBACK_HOURS} hour(s)
+				</h5>
+			</div>
+			{#if hasLikedPostData}
+				<div class="overflow-x-auto">
+					<Table hoverable>
+						<TableHead>
+							<TableHeadCell>Description</TableHeadCell>
+							<TableHeadCell>Author</TableHeadCell>
+							<TableHeadCell>Likes</TableHeadCell>
+							<TableHeadCell>Date</TableHeadCell>
+							<TableHeadCell>Link</TableHeadCell>
+						</TableHead>
+						<TableBody class="divide-y">
+							{#each topLikedPosts as post}
+								<TableBodyRow>
+									<TableBodyCell class="min-w-[150px] whitespace-normal">
+										{post.description.length > 50
+											? post.description.slice(0, 50) + '...'
+											: post.description}
+									</TableBodyCell>
+									<TableBodyCell class="flex items-center space-x-2">
+										<Avatar
+											src={post.author?.profilePictureUrl ?? DefaultProfilePicture}
+											alt={post.author?.username}
+											size="xs"
+											onerror={onImageError}
+										/>
+										<span class="font-medium dark:text-white"
+											>{post.author?.username ?? 'Unknown'}</span
+										>
+									</TableBodyCell>
+									<TableBodyCell>{post.likes}</TableBodyCell>
+									<TableBodyCell>{formatDate(new Date(post.createdAt))}</TableBodyCell>
+									<TableBodyCell>
+										<a
+											href="/posts/{post.id}"
+											class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+											>View</a
+										>
+									</TableBodyCell>
+								</TableBodyRow>
+							{/each}
+						</TableBody>
+					</Table>
+				</div>
+			{:else}
+				<div class="flex min-h-[300px] items-center justify-center">
+					<p class="text-center text-gray-500 dark:text-gray-400">Not enough data available.</p>
+				</div>
+			{/if}
+		</Card>
+
+		<Card class="w-full max-w-none p-6 lg:p-8">
+			<div class="mb-8 flex items-center justify-center">
+				<h5 class="text-2xl font-bold leading-none text-gray-900 dark:text-white">
+					Top {topViewedPosts.length} Most Viewed Posts over the past {TOP_K_POST_LOOKBACK_HOURS} hour(s)
+				</h5>
+			</div>
+			{#if hasViewedPostData}
+				<div class="overflow-x-auto">
+					<Table hoverable>
+						<TableHead>
+							<TableHeadCell>Description</TableHeadCell>
+							<TableHeadCell>Author</TableHeadCell>
+							<TableHeadCell>Views</TableHeadCell>
+							<TableHeadCell>Date</TableHeadCell>
+							<TableHeadCell>Link</TableHeadCell>
+						</TableHead>
+						<TableBody class="divide-y">
+							{#each topViewedPosts as post}
+								<TableBodyRow>
+									<TableBodyCell class="min-w-[150px] whitespace-normal">
+										{post.description.length > 50
+											? post.description.slice(0, 50) + '...'
+											: post.description}
+									</TableBodyCell>
+									<TableBodyCell class="flex items-center space-x-2">
+										<Avatar
+											src={post.author?.profilePictureUrl ?? DefaultProfilePicture}
+											alt={post.author?.username}
+											size="xs"
+											onerror={onImageError}
+										/>
+										<span class="font-medium dark:text-white"
+											>{post.author?.username ?? 'Unknown'}</span
+										>
+									</TableBodyCell>
+									<TableBodyCell>{post.views}</TableBodyCell>
+									<TableBodyCell>{formatDate(new Date(post.createdAt))}</TableBodyCell>
+									<TableBodyCell>
+										<a
+											href="/posts/{post.id}"
+											class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+											>View</a
+										>
+									</TableBodyCell>
+								</TableBodyRow>
+							{/each}
+						</TableBody>
+					</Table>
+				</div>
 			{:else}
 				<div class="flex min-h-[300px] items-center justify-center">
 					<p class="text-center text-gray-500 dark:text-gray-400">Not enough data available.</p>

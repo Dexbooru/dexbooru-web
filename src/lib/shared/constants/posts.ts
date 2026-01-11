@@ -33,6 +33,7 @@ export const EMPTY_POST: TPost = {
 	tagString: '',
 	artistString: '',
 	comments: [],
+	sources: [],
 };
 
 export const POST_SOURCE_TYPES = ['VIDEOGAME', 'ANIME', 'MANGA', 'OTHER'] as const;
