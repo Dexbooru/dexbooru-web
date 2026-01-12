@@ -139,7 +139,7 @@
 	title="Edit this post"
 	open={$activeModal.isOpen && $activeModal.focusedModalName === EDIT_POST_MODAL_NAME}
 	onclose={handleModalClose}
-	size="xs"
+	size="md"
 	outsideclose
 	class="w-full"
 >
@@ -152,6 +152,7 @@
 		rows={5}
 		bind:value={description}
 		name="description"
+		class="w-full"
 		placeholder="Enter a description"
 		required
 	/>

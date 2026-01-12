@@ -79,7 +79,7 @@
 							? `profile picture of ${collection.author.username}`
 							: 'default user account'}
 					/>
-					<p class="mt-2">
+					<p class="mt-2 dark:text-gray-300">
 						{collection.authorId ? collection.author.username : DELETED_ACCOUNT_HEADING}
 					</p>
 				</a>

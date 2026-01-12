@@ -9,6 +9,7 @@ const findTopKMostViewedPosts = async (k: number, lookbackHours: number) => {
 	return (await prisma.post.findMany({
 		select: {
 			id: true,
+			createdAt: true,
 			description: true,
 			views: true,
 		},
@@ -32,6 +33,7 @@ const findTopKMostLikedPosts = async (k: number, lookbackHours: number) => {
 	return (await prisma.post.findMany({
 		select: {
 			id: true,
+			createdAt: true,
 			description: true,
 			likes: true,
 			author: {
