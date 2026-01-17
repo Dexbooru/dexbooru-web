@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import minimist from 'minimist';
 import { PrismaClient, UserRole } from '../src/generated/prisma/client';
@@ -12,13 +13,28 @@ const OWNER_PASSWORD = 'password';
 
 async function main() {
 	const logger = createLogger('debug');
+
+	if (!process.env.DATABASE_URL) {
+		logger.error('DATABASE_URL environment variable is not set.');
+		process.exit(1);
+	}
+
 	const adapter = new PrismaPg({
-		connectionString: process.env.DATABASE_URL ?? '',
+		connectionString: process.env.DATABASE_URL,
 	});
 	const dbClient = new PrismaClient({ adapter});
 	await dbClient.$connect();
 
-	const args = minimist(process.argv.slice(2)) as TAggregateOptions;
+	const args = minimist(process.argv.slice(2), {
+		alias: {
+			batchSize: 'batch-size',
+			blacklistedTags: 'blacklisted-tags',
+			outputDir: 'output-dir',
+			batchDelay: 'batch-delay',
+			postDelay: 'post-delay',
+			logLevel: 'log-level',
+		},
+	}) as TAggregateOptions;
 
 	try {
 		const aggregationResult = await aggregateDanbooruPosts(args);

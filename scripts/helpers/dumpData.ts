@@ -22,6 +22,8 @@ const DELETION_MODELS = [
 	'userPreference',
 ];
 
+const truncate = (str: string, max: number) => (str.length > max ? str.substring(0, max) : str);
+
 const getJsonlFiles = (dir: string) =>
 	fs
 		.readdirSync(dir, { withFileTypes: true })
@@ -53,11 +55,18 @@ const generatePostCreationPromise = (
 	artists.sort();
 	post.tags.sort();
 
+	const artistString = truncate(artists.join(','), 380);
+	const tagString = truncate(post.tags.join(','), 1520);
+	const sourceLink = truncate(
+		'https://danbooru.donmai.us/posts/' + post.imageUrl.split('/')[4],
+		450,
+	);
+
 	return prismaClient.post.create({
 		data: {
-			sourceLink: 'https://danbooru.donmai.us/posts/' + post.imageUrl.split('/')[4],
+			sourceLink,
 			authorId: user.id,
-			description,
+			description: truncate(description, 500),
 			isNsfw: post.isNsfw,
 			views: post.views,
 			likes: post.likes,
@@ -65,18 +74,18 @@ const generatePostCreationPromise = (
 			createdAt: new Date(post.createdAt),
 			artists: {
 				connectOrCreate: artists.map((artist) => ({
-					where: { name: artist },
-					create: { name: artist },
+					where: { name: truncate(artist, 75) },
+					create: { name: truncate(artist, 75) },
 				})),
 			},
-			artistString: artists.join(','),
+			artistString,
 			tags: {
 				connectOrCreate: post.tags.map((tag) => ({
-					where: { name: tag },
-					create: { name: tag },
+					where: { name: truncate(tag, 75) },
+					create: { name: truncate(tag, 75) },
 				})),
 			},
-			tagString: post.tags.join(','),
+			tagString,
 		},
 	});
 };
@@ -170,8 +179,8 @@ async function dumpData({
 			await prismaClient.tag.createMany({
 				data: tags.map((tag) => ({
 					id: faker.string.uuid(),
-					name: tag,
-					description: faker.lorem.sentence(),
+					name: truncate(tag, 75),
+					description: truncate(faker.lorem.sentence(), 200),
 				})),
 				skipDuplicates: true,
 			});
@@ -181,8 +190,8 @@ async function dumpData({
 			await prismaClient.artist.createMany({
 				data: artists.map((artist) => ({
 					id: faker.string.uuid(),
-					name: artist,
-					description: faker.lorem.sentence(),
+					name: truncate(artist, 75),
+					description: truncate(faker.lorem.sentence(), 200),
 					socialMediaLinks: factories.socialMediaLink.createMany(
 						faker.number.int({ min: 0, max: 3 }),
 					),
@@ -209,7 +218,9 @@ async function dumpData({
 							prismaClient,
 						),
 					);
-					await Promise.allSettled(postCreationPromises);
+
+					await prismaClient.$transaction(postCreationPromises);
+
 					postsProcessed += currentPostBuffer.length;
 					logger.info(`Processed ${postsProcessed} posts so far`);
 					currentPostBuffer = [];
@@ -233,6 +244,44 @@ async function dumpData({
 			postsProcessed += currentPostBuffer.length;
 		}
 
+		logger.info('Updating post counts for Artists and Tags...');
+
+		const allTags = await prismaClient.tag.findMany({
+			select: { id: true, _count: { select: { posts: true } } },
+		});
+
+		const tagUpdates = allTags
+			.filter((t) => t._count.posts > 0)
+			.map((t) =>
+				prismaClient.tag.update({
+					where: { id: t.id },
+					data: { postCount: t._count.posts },
+				}),
+			);
+
+		const allArtists = await prismaClient.artist.findMany({
+			select: { id: true, _count: { select: { posts: true } } },
+		});
+
+		const artistUpdates = allArtists
+			.filter((a) => a._count.posts > 0)
+			.map((a) =>
+				prismaClient.artist.update({
+					where: { id: a.id },
+					data: { postCount: a._count.posts },
+				}),
+			);
+
+		const allUpdates = [...tagUpdates, ...artistUpdates];
+		const BATCH_UPDATE_SIZE = 100;
+
+		for (let i = 0; i < allUpdates.length; i += BATCH_UPDATE_SIZE) {
+			const batch = allUpdates.slice(i, i + BATCH_UPDATE_SIZE);
+			await prismaClient.$transaction(batch);
+		}
+
+		logger.info(`Updated post counts for ${allUpdates.length} items.`);
+
 		const dbPostCount = await prismaClient.post.count();
 		const dbPosts = await prismaClient.post.findMany({ select: { id: true } });
 		const comments = factories.comment.createMany(dbPostCount * 3);
@@ -242,6 +291,7 @@ async function dumpData({
 			const postComments = comments.slice(commentIndex, commentIndex + 3);
 			postComments.forEach((comment) => {
 				comment.postId = post.id;
+				comment.content = truncate(comment.content, 1500);
 
 				const usersIndex = Math.floor(Math.random() * mockUsers.length);
 				comment.authorId = mockUsers[usersIndex].id;
