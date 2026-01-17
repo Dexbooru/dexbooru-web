@@ -1,6 +1,8 @@
 export const MAXIMUM_TAG_LENGTH = 75;
 export const MAXIMUM_ARTIST_LENGTH = 75;
 
+export const MAXIMUM_LABELS_PER_PAGE = 100;
+
 export const SEPERATOR_CHARACTER_MAP: Record<string, string> = {
 	'-': '',
 	' ': '_',

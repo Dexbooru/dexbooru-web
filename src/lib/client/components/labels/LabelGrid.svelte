@@ -5,6 +5,7 @@
 	import { CHAR_OPTIONS_LOWERCASE } from '$lib/client/constants/labels';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
+	import { MAXIMUM_LABELS_PER_PAGE } from '$lib/shared/constants/labels';
 	import { renderLabel } from '$lib/shared/helpers/labels';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -71,7 +72,7 @@
 	};
 </script>
 
-<main class="flex flex-col flex-grow justify-center m-7 space-y-5">
+<main class="flex flex-col grow justify-center m-7 space-y-5">
 	<h1 class="text-4xl dark:text-white text-center">
 		{labelType === 'tag' ? 'Tags' : 'Artists'} Index
 	</h1>
@@ -114,9 +115,9 @@
 		<Spinner class="ml-auto mr-auto" size="12" />
 	{/if}
 
-	{#if labels.length > 0 && !loadingLabels && hasLoadedLabelsOnce && !finishedLabelPagination}
+	{#if labels.length >= MAXIMUM_LABELS_PER_PAGE && !loadingLabels && hasLoadedLabelsOnce && !finishedLabelPagination}
 		<Button
-			class="w-1/3 ml-auto mr-auto"
+			class="lg:w-1/3 w-full ml-auto mr-auto"
 			onclick={(event: Event) => getLabelsOnCurrentPage(event, true)}
 			color="blue">Load more {labelType}s</Button
 		>
