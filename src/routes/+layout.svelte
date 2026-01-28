@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { beforeNavigate, afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import DeleteCollectionConfirmationModal from '$lib/client/components/collections/card/DeleteCollectionConfirmationModal.svelte';
 	import EditCollectionModal from '$lib/client/components/collections/card/EditCollectionModal.svelte';
@@ -23,9 +24,13 @@
 		registerDocumentEventListeners,
 	} from '$lib/client/helpers/dom';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
+	import NProgress from 'nprogress';
+	import 'nprogress/nprogress.css';
 	import { onMount } from 'svelte';
 	import '../app.css';
 	import type { LayoutData } from './$types';
+
+	NProgress.configure({ showSpinner: false });
 
 	type Props = {
 		data: LayoutData;
@@ -42,6 +47,14 @@
 		return () => {
 			destroyDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
 		};
+	});
+
+	beforeNavigate(() => {
+		NProgress.start();
+	});
+
+	afterNavigate(() => {
+		NProgress.done();
 	});
 </script>
 

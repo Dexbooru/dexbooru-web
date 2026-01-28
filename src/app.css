@@ -21,3 +21,17 @@
 }
 
 @variant dark (&:where(.dark, .dark *));
+
+/* NProgress overrides */
+#nprogress .bar {
+  background: darkorange !important;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px darkorange, 0 0 5px darkorange !important;
+}
+
+#nprogress .spinner-icon {
+  border-top-color: darkorange !important;
+  border-left-color: darkorange !important;
+}
