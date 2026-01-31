@@ -1,16 +1,17 @@
-import type { SerializeOptions } from 'cookie';
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { UUID_REGEX } from '$lib/shared/constants/search';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import type { TFriendStatus } from '$lib/shared/types/friends';
 import type { TUser } from '$lib/shared/types/users';
 import { isHttpError, isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
+import type { SerializeOptions } from 'cookie';
 import { deleteFromBucket, uploadToBucket } from '../aws/actions/s3';
 import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { SESSION_JWT_API_ENDPOINT_AGE } from '../constants/cookies';
 import {
 	ACCOUNT_RECOVERY_EMAIL_SUBJECT,
 	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
+	DEXBOORU_SUPPORT_DISPLAY_NAME,
 } from '../constants/email';
 import { PUBLIC_USER_SELECTORS } from '../constants/users';
 import { checkIfUserIsFriended } from '../db/actions/friend';
@@ -136,6 +137,7 @@ export const handlePasswordUpdateAccountRecovery = async (event: RequestEvent) =
 
 				const recoveryAttempt = await getPasswordRecoveryAttempt(passwordRecoveryAttemptId, {
 					userId: true,
+					expiresAt: true,
 					senderIpAddress: true,
 				});
 
@@ -161,6 +163,17 @@ export const handlePasswordUpdateAccountRecovery = async (event: RequestEvent) =
 						'form-action',
 						403,
 						'The password recovery session is unauthorized',
+					);
+				}
+
+				const now = Date.now();
+				if (now > recoveryAttempt.expiresAt.getTime()) {
+					await deletePasswordRecoveryAttempt(recoveryAttempt.id);
+
+					return createErrorResponse(
+						'form-action',
+						403,
+						'This password recovery session is expired',
 					);
 				}
 
@@ -275,7 +288,10 @@ export const handleSendForgotPasswordEmail = async (event: RequestEvent) => {
 				const newPasswordRecoveryAttempt = await createPasswordRecoveryAttempt(user.id, ipAddress);
 
 				await sendEmail({
-					sender: `Dexbooru <${DEXBOORU_NO_REPLY_EMAIL_ADDRESS}>`,
+					from: {
+						name: DEXBOORU_SUPPORT_DISPLAY_NAME,
+						address: DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
+					},
 					to: user.email,
 					subject: ACCOUNT_RECOVERY_EMAIL_SUBJECT,
 					html: buildPasswordRecoveryEmailTemplate(user.username, newPasswordRecoveryAttempt.id),
@@ -286,6 +302,10 @@ export const handleSendForgotPasswordEmail = async (event: RequestEvent) => {
 					'The password recovery email was sent successfully',
 				);
 			} catch (error) {
+				console.error(error);
+
+				logger.error(error);
+
 				return createErrorResponse(
 					'form-action',
 					500,

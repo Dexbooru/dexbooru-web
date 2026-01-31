@@ -4,6 +4,7 @@ import { capitalize } from '$lib/shared/helpers/util';
 import nodemailer from 'nodemailer';
 import type { MailOptions } from 'nodemailer/lib/json-transport';
 import { ACCOUNT_RECOVERY_EMAIL_TEMPLATE, OAUTH_PASSWORD_EMAIL_TEMPLATE } from '../constants/email';
+import { RECOVERY_ATTEMPT_EXPIRY_HOURS } from '../constants/passwordRecovery';
 
 const transporter = nodemailer.createTransport({
 	host: SMTP_HOST,
@@ -30,10 +31,9 @@ export const buildPasswordRecoveryEmailTemplate = (
 	publicAccountRecoveryId: string,
 ): string => {
 	const accountRecoveryLink = `${APP_URL}/recover-account/${publicAccountRecoveryId}`;
-	return ACCOUNT_RECOVERY_EMAIL_TEMPLATE.replaceAll('{{username}}', username).replaceAll(
-		'{{accountRecoveryLink}}',
-		accountRecoveryLink,
-	);
+	return ACCOUNT_RECOVERY_EMAIL_TEMPLATE.replaceAll('{{username}}', username)
+		.replaceAll('{{accountRecoveryLink}}', accountRecoveryLink)
+		.replaceAll('{{expiryHours}}', RECOVERY_ATTEMPT_EXPIRY_HOURS.toString());
 };
 
 export const sendEmail = async (mailOptions: MailOptions) => {

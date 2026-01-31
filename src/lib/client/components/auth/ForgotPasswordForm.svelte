@@ -12,7 +12,7 @@
 	let forgotPasswordEmailSending = $state(false);
 </script>
 
-<Card class="mt-20">
+<Card class="mt-20 p-5">
 	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
 		Account Recovery
 	</h3>
@@ -50,6 +50,7 @@
 		<Label class="space-y-2">
 			<span>Email</span>
 			<Input
+				class="mt-1"
 				autofocus
 				bind:value={email}
 				type="email"

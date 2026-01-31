@@ -1,11 +1,16 @@
 import type { Prisma } from '$generated/prisma/client';
+import { RECOVERY_ATTEMPT_EXPIRY_HOURS } from '$lib/server/constants/passwordRecovery';
 import prisma from '../prisma';
 
 export async function createPasswordRecoveryAttempt(userId: string, ipAddress: string) {
+	const attemptExpiresAt = new Date();
+	attemptExpiresAt.setDate(attemptExpiresAt.getDate() + RECOVERY_ATTEMPT_EXPIRY_HOURS / 24);
+
 	return await prisma.passwordRecoveryAttempt.create({
 		data: {
 			id: crypto.randomUUID(),
 			senderIpAddress: ipAddress,
+			expiresAt: attemptExpiresAt,
 			userId,
 		},
 	});

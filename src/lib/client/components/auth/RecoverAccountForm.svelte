@@ -40,7 +40,7 @@
 	});
 </script>
 
-<Card class="mt-20">
+<Card class="mt-20 p-5">
 	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
 		Account Recovery
 	</h3>
