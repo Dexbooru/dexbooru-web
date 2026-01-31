@@ -35,6 +35,22 @@
 	<section class="space-y-2">
 		<PostMetadata {post} {similarPosts} {similarities} />
 	</section>
+
+	{#if post.sources.some((s) => s.sourceType === 'ANIME')}
+		<section class="space-y-2">
+			<p class="text-lg dark:text-white">Anime Info:</p>
+			<div class="flex flex-wrap gap-2">
+				{#each post.sources.filter((s) => s.sourceType === 'ANIME') as source}
+					<a
+						href="/anime/{source.sourceTitle.toLowerCase().replaceAll(' ', '_')}"
+						class="text-blue-500 hover:underline"
+					>
+						Search "{source.sourceTitle}" on Jikan
+					</a>
+				{/each}
+			</div>
+		</section>
+	{/if}
 </div>
 
 <div class="space-y-2">
