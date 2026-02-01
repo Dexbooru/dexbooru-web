@@ -55,7 +55,7 @@
 	</p>
 {/if}
 
-<p class="text-lg dark:text-white whitespace-pre-wrap">
+<p class="text-lg dark:text-white whitespace-pre-wrap break-all">
 	Source link: <a
 		target="_blank"
 		referrerpolicy="no-referrer"

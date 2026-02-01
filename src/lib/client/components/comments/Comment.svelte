@@ -91,7 +91,7 @@
 
 <article class="p-2 mt-2 mb-2 text-base rounded-lg">
 	<div class="flex justify-between items-center mb-2">
-		<div class="flex items-center">
+		<div class="flex flex-wrap items-center">
 			<p
 				class="inline-flex space-x-2 items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold"
 			>
