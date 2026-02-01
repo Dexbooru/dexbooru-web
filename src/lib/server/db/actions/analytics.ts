@@ -12,6 +12,12 @@ const findTopKMostViewedPosts = async (k: number, lookbackHours: number) => {
 			createdAt: true,
 			description: true,
 			views: true,
+			author: {
+				select: {
+					username: true,
+					profilePictureUrl: true,
+				},
+			},
 		},
 		where: {
 			createdAt: {
