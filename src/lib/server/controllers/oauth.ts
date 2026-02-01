@@ -41,7 +41,7 @@ type TOauthProcessingUrlParams = {
 const buildOauthProcessingUrl = (data: TOauthProcessingUrlParams): string => {
 	const { redirectTo = '/', token, applicationName } = data;
 	const searchParams = new URLSearchParams();
-	searchParams.set('token', token);
+	searchParams.set(SESSION_ID_KEY, token);
 	searchParams.set('application', applicationName);
 	searchParams.set('redirectTo', redirectTo);
 
