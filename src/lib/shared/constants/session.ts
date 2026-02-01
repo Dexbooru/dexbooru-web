@@ -1,1 +1,1 @@
-export const SESSION_ID_KEY = 'token';
+export const SESSION_ID_KEY = 'dexbooru-session';
