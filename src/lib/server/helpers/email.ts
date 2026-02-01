@@ -8,8 +8,11 @@ import { RECOVERY_ATTEMPT_EXPIRY_HOURS } from '../constants/passwordRecovery';
 
 const transporter = nodemailer.createTransport({
 	host: SMTP_HOST,
-	port: Number(SMTP_PORT ?? 587),
-	secure: !dev,
+	port: Number(SMTP_PORT),
+	secure: false,
+	tls: {
+		rejectUnauthorized: !dev,
+	},
 	auth: {
 		user: SMTP_USERNAME,
 		pass: SMTP_PASSWORD,
