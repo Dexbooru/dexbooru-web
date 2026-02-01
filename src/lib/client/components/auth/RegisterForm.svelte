@@ -42,7 +42,7 @@
 	});
 </script>
 
-<Card class="mt-5 mb-5 p-6 shadow-lg">
+<Card class="mt-5 mb-5 p-6 ml-3 mr-3 shadow-lg">
 	<form class="flex flex-col space-y-6" method="POST" enctype="multipart/form-data">
 		<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">
 			Register an account on Dexbooru!

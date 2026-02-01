@@ -35,8 +35,10 @@
 		{#if $user}
 			<ProfileDropdown />
 		{:else}
-			<Button href="/login" color="blue">Log in</Button>
-			<Button href="/register" color="green">Register</Button>
+			<div class="hidden md:flex space-x-2">
+				<Button href="/login" color="blue">Log in</Button>
+				<Button href="/register" color="green">Register</Button>
+			</div>
 		{/if}
 		<DarkMode />
 		<NavHamburger />
@@ -50,10 +52,12 @@
 		<NavLi href="/analytics">Analytics</NavLi>
 		{#if $user}
 			<NavLi href="/posts/upload">Upload</NavLi>
-			<NavLi href="/chat">Chat</NavLi>
 			{#if isModerationRole($user.role)}
 				<NavLi id="moderation-link" href="/moderation">Moderation</NavLi>
 			{/if}
+		{:else}
+			<NavLi href="/login" class="md:hidden">Log in</NavLi>
+			<NavLi href="/register" class="md:hidden">Register</NavLi>
 		{/if}
 	</NavUl>
 </Navbar>

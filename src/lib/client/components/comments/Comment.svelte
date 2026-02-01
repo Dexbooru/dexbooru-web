@@ -163,7 +163,7 @@
 </article>
 
 {#if showReplies}
-	<div class="ml-5 border-l-2">
+	<div class="ml-5 border-l-2 dark:border-gray-400">
 		{#each replies as reply (reply.id)}
 			<Comment comment={reply} />
 		{/each}

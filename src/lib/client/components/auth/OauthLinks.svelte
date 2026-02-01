@@ -85,7 +85,7 @@
 	<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Linked Accounts</h2>
 {:else}
 	<h2 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-200">OR</h2>
-	<hr />
+	<hr class="dark:text-gray-500" />
 {/if}
 
 {#snippet LinkedAccountCell(

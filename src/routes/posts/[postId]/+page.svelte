@@ -60,7 +60,7 @@
 </script>
 
 <svelte:head>
-	<title>{post.description} - {post.id}</title>
+	<title>{post.description}</title>
 	<meta property="og:title" content={post.description} />
 	<meta
 		property="og:description"

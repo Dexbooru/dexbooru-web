@@ -24,6 +24,8 @@ describe('CommentTree', () => {
 				role: 'USER',
 			},
 			createdAt: new Date(),
+			updatedAt: new Date(),
+			replyCount: 0,
 			authorId: 'test-user-id',
 		};
 		tree.addComment(rootComment);

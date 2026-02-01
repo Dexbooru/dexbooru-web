@@ -46,7 +46,7 @@
 	});
 </script>
 
-<Card class="mt-4 mb-2 p-6 shadow-lg">
+<Card class="mt-4 mb-2 p-6 ml-3 mr-3 shadow-lg">
 	<form class="flex flex-col space-y-6" method="POST">
 		<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">
 			Login to Dexbooru!
