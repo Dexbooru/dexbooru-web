@@ -1,14 +1,14 @@
 <script lang="ts">
-	import type { TPost } from '$lib/shared/types/posts';
 	import { updatePostModerationStatus } from '$lib/client/api/moderation';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getModerationPaginationData } from '$lib/client/helpers/context';
+	import { formatDate } from '$lib/shared/helpers/dates';
+	import { capitalize } from '$lib/shared/helpers/util';
+	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
+	import Badge from 'flowbite-svelte/Badge.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Modal from 'flowbite-svelte/Modal.svelte';
-	import Badge from 'flowbite-svelte/Badge.svelte';
-	import { capitalize } from '$lib/shared/helpers/util';
-	import { formatDate } from '$lib/shared/helpers/dates';
 
 	type Props = {
 		post: TPost;
@@ -17,6 +17,7 @@
 
 	let { post, open = $bindable() }: Props = $props();
 	let loading = $state(false);
+	let imageUrls = $derived<string[]>(post.imageUrls.slice(0, 1));
 
 	const moderationData = getModerationPaginationData();
 
@@ -27,7 +28,6 @@
 			if (response.ok) {
 				toast.push(`Post ${capitalize(status.toLowerCase())} successfully`, SUCCESS_TOAST_OPTIONS);
 
-				// Update local store to remove the post from pending list
 				moderationData.update((data) => {
 					if (!data) return null;
 					return {
@@ -51,9 +51,15 @@
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 		<div class="space-y-4">
 			<div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-				{#each post.imageUrls as imageUrl (imageUrl)}
-					<img src={imageUrl} alt={post.description} class="w-full h-auto mb-2 last:mb-0" />
-				{/each}
+				{#if imageUrls.length > 0}
+					{#each imageUrls as imageUrl (imageUrl)}
+						<img src={imageUrl} alt={post.description} class="w-full h-auto mb-2 last:mb-0" />
+					{/each}
+				{:else}
+					<div class="w-full h-64 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+						<span class="text-gray-500 dark:text-gray-400">No image available</span>
+					</div>
+				{/if}
 			</div>
 		</div>
 
