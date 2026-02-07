@@ -12,8 +12,18 @@ import {
 import { toPng as toDefaultProfilePng } from 'jdenticon';
 import type { ResizeOptions, Sharp } from 'sharp';
 import sharp from 'sharp';
+import crypto from 'node:crypto';
 import { WEBP_OPTIONS } from '../constants/images';
 import type { TImageData, TImageMetadata } from '../types/images';
+
+export function hashImageBuffer(buffer: Buffer): string {
+	return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+export async function hashFile(file: File): Promise<string> {
+	const arrayBuffer = await file.arrayBuffer();
+	return crypto.createHash('sha256').update(Buffer.from(arrayBuffer)).digest('hex');
+}
 
 const getImageResizeOptions = (width: number, height: number) => {
 	return {
@@ -127,10 +137,15 @@ export function flattenImageBuffers(bufferMaps: TImageData[]) {
 	const fileObjectIds: string[] = [];
 	const imageWidths: number[] = [];
 	const imageHeights: number[] = [];
+	const imageHashes: string[] = [];
 
 	for (let i = 0; i < bufferMaps.length; i++) {
 		const bufferMap = bufferMaps[i];
 		const bufferMapObjectId = crypto.randomUUID();
+
+		if (bufferMap.buffers.original) {
+			imageHashes.push(hashImageBuffer(bufferMap.buffers.original));
+		}
 
 		for (const [imageTypeKey, imageBuffer] of Object.entries(bufferMap.buffers)) {
 			const imageType = imageTypeKey as keyof TImageData['buffers'];
@@ -166,6 +181,7 @@ export function flattenImageBuffers(bufferMaps: TImageData[]) {
 		fileObjectIds,
 		imageWidths,
 		imageHeights,
+		imageHashes,
 	};
 }
 

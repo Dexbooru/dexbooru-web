@@ -43,9 +43,19 @@ const GetUsersReportsSchema = {
 	}),
 } satisfies TRequestSchema;
 
+const UpdateUserReportStatusSchema = {
+	pathParams: z.object({
+		reportId: z.string().uuid(),
+	}),
+	body: z.object({
+		reviewStatus: ModerationReviewStatusSchema,
+	}),
+} satisfies TRequestSchema;
+
 export {
 	CreateUserReportSchema,
 	DeleteUserReportSchema,
 	GetUserReportsSchema,
 	GetUsersReportsSchema,
+	UpdateUserReportStatusSchema,
 };

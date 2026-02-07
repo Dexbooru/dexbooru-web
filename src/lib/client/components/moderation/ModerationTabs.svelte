@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import type { PostCollectionReport, PostReport, UserReport } from '$generated/prisma/browser';
 	import { getCollectionsReports } from '$lib/client/api/collectionReports';
-	import { getModerators } from '$lib/client/api/moderation';
+	import { getModerators, getPendingPosts } from '$lib/client/api/moderation';
 	import { getPostsReports } from '$lib/client/api/postReports';
 	import { getUsersReports } from '$lib/client/api/userReports';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
@@ -12,18 +12,23 @@
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { TUser } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
+	import Button from 'flowbite-svelte/Button.svelte';
 	import Spinner from 'flowbite-svelte/Spinner.svelte';
+	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import TabItem from 'flowbite-svelte/TabItem.svelte';
 	import Tabs from 'flowbite-svelte/Tabs.svelte';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import ModList from './ModList.svelte';
 	import ReportGrid from './ReportGrid.svelte';
+	import PostModerationGrid from './PostModerationGrid.svelte';
+	import type { TPost } from '$lib/shared/types/posts';
 
 	type TTabName =
 		| 'user-reports'
 		| 'post-reports'
 		| 'post-collection-reports'
+		| 'post-decisions'
 		| 'moderator-list'
 		| '';
 
@@ -32,12 +37,14 @@
 	let postReportsLoading = $state(false);
 	let postCollectionReportsLoading = $state(false);
 	let userReportsLoading = $state(false);
+	let pendingPostsLoading = $state(false);
 
 	const TAB_TITLES: Partial<Record<TTabName, string>> = {
 		'moderator-list': 'Moderator List',
 		'post-collection-reports': 'Post Collection Reports',
 		'post-reports': 'Post Reports',
 		'user-reports': 'User Reports',
+		'post-decisions': 'New Post Decisions',
 	};
 
 	const TAB_CONTAINER_IDS: Partial<Record<TTabName, string>> = {
@@ -45,6 +52,7 @@
 		'post-collection-reports': 'post-collection-report-container',
 		'post-reports': 'post-report-container',
 		'user-reports': 'user-report-container',
+		'post-decisions': 'post-decisions-container',
 	};
 
 	const handleTabChange = (tabName: TTabName) => {
@@ -52,6 +60,35 @@
 
 		currentTab = tabName;
 		goto(`?tab=${tabName}`);
+	};
+
+	const handleLoadPendingPosts = async (fromTabClick: boolean) => {
+		const loadedPendingPosts = get(moderationData)?.pendingPosts ?? [];
+		const pendingPostsPageNumber = get(moderationData)?.pendingPostsPageNumber ?? 0;
+
+		if (fromTabClick && loadedPendingPosts.length > 0) return;
+
+		pendingPostsLoading = true;
+
+		const response = await getPendingPosts(pendingPostsPageNumber);
+		if (response.ok) {
+			const responseData: TApiResponse<{ pendingPosts: TPost[] }> = await response.json();
+			moderationData.update((data) => {
+				if (!data) return null;
+				return {
+					...data,
+					pendingPosts: [...data.pendingPosts, ...responseData.data.pendingPosts],
+					pendingPostsPageNumber: data.pendingPostsPageNumber + 1,
+				};
+			});
+		} else {
+			toast.push(
+				'An unexpected error occurred while fetching the pending posts',
+				FAILURE_TOAST_OPTIONS,
+			);
+		}
+
+		pendingPostsLoading = false;
 	};
 
 	const handleLoadPostReports = async (fromTabClick: boolean) => {
@@ -69,7 +106,8 @@
 				if (!data) return null;
 				return {
 					...data,
-					postReports: responseData.data.postReports,
+					postReports: [...data.postReports, ...responseData.data.postReports],
+					postReportPageNumber: data.postReportPageNumber + 1,
 				};
 			});
 		} else {
@@ -98,7 +136,11 @@
 				if (!data) return null;
 				return {
 					...data,
-					postCollectionReports: responseData.data.postCollectionReports,
+					postCollectionReports: [
+						...data.postCollectionReports,
+						...responseData.data.postCollectionReports,
+					],
+					postCollectionReportPageNumber: data.postCollectionReportPageNumber + 1,
 				};
 			});
 		} else {
@@ -126,7 +168,8 @@
 				if (!data) return null;
 				return {
 					...data,
-					userReports: responseData.data.userReports,
+					userReports: [...data.userReports, ...responseData.data.userReports],
+					userReportPageNumber: data.userReportPageNumber + 1,
 				};
 			});
 		} else {
@@ -180,6 +223,9 @@
 			case 'user-reports':
 				await handleLoadUserReports(true);
 				break;
+			case 'post-decisions':
+				await handleLoadPendingPosts(true);
+				break;
 			default:
 				break;
 		}
@@ -216,6 +262,8 @@
 				postReportPageNumber: 0,
 				userReports: [],
 				userReportPageNumber: 0,
+				pendingPosts: [],
+				pendingPostsPageNumber: 0,
 				moderators: [],
 			});
 
@@ -230,68 +278,123 @@
 	<title>Moderation Dashboard {currentTab.length > 0 ? `| ${TAB_TITLES[currentTab]}` : ''}</title>
 </svelte:head>
 
-<Tabs class="mt-5" tabStyle="underline">
-	<TabItem
-		onclick={() => handleTabClick('user-reports')}
-		open={currentTab === 'user-reports'}
-		title="User Reports"
-	>
-		<ReportGrid
-			containerId={TAB_CONTAINER_IDS['user-reports'] ?? ''}
-			reportType="userReports"
-			handleLoadMoreReports={() => handleLoadUserReports(false)}
-			loadingReports={userReportsLoading}
-		/>
-	</TabItem>
-	<TabItem
-		onclick={() => handleTabClick('post-reports')}
-		open={currentTab === 'post-reports'}
-		title="Post Reports"
-	>
-		<ReportGrid
-			containerId={TAB_CONTAINER_IDS['post-reports'] ?? ''}
-			reportType="postReports"
-			handleLoadMoreReports={() => handleLoadPostReports(false)}
-			loadingReports={postReportsLoading}
-		/>
-	</TabItem>
-	<TabItem
-		onclick={() => handleTabClick('post-collection-reports')}
-		open={currentTab === 'post-collection-reports'}
-		title="Post Collection Reports"
-	>
-		<ReportGrid
-			containerId={TAB_CONTAINER_IDS['post-collection-reports'] ?? ''}
-			reportType="postCollectionReports"
-			handleLoadMoreReports={() => handleLoadCollectionReports(false)}
-			loadingReports={postCollectionReportsLoading}
-		/>
-	</TabItem>
-	{#if $user && isModerationRole($user.role)}
-		<TabItem
-			onclick={() => handleTabClick('moderator-list')}
-			open={currentTab === 'moderator-list'}
-			disabled={!isModerationRole($user.role)}
-			title="Moderator List"
-		>
-			{#if moderatorsLoading}
-				<Spinner size="12" />
-			{:else}
-				<ModList containerId={TAB_CONTAINER_IDS['moderator-list'] ?? ''} />
-			{/if}
-		</TabItem>
-	{/if}
-</Tabs>
-
 {#if currentTab === ''}
 	<div
-		class="mt-6 p-5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-center w-3/4 m-auto"
+		class="mt-10 p-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-center max-w-2xl mx-auto shadow-sm"
 	>
-		<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-			Welcome to the Dexbooru Moderation Dashboard!
-		</h2>
-		<p class="text-gray-600 dark:text-gray-300 mt-2">
-			Select a tab above to start moderating posts, users, and collections.
+		<div class="mb-6 flex justify-center">
+			<div class="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-full">
+				<ExclamationCircleSolid class="w-10 h-10 text-primary-600 dark:text-primary-500" />
+			</div>
+		</div>
+		<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Moderation Dashboard</h2>
+		<p class="text-gray-600 dark:text-gray-400 mt-3 mb-8">
+			Welcome to the moderation dashboard. Please select a category below to view and manage active
+			reports or pending posts.
 		</p>
+
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+			<Button
+				color="alternative"
+				class="h-16 text-lg"
+				onclick={() => handleTabClick('post-decisions')}
+			>
+				Post Decisions
+			</Button>
+			<Button
+				color="alternative"
+				class="h-16 text-lg"
+				onclick={() => handleTabClick('user-reports')}
+			>
+				User Reports
+			</Button>
+			<Button
+				color="alternative"
+				class="h-16 text-lg"
+				onclick={() => handleTabClick('post-reports')}
+			>
+				Post Reports
+			</Button>
+			<Button
+				color="alternative"
+				class="h-16 text-lg"
+				onclick={() => handleTabClick('post-collection-reports')}
+			>
+				Collection Reports
+			</Button>
+			{#if $user && isModerationRole($user.role)}
+				<Button
+					color="alternative"
+					class="h-16 text-lg"
+					onclick={() => handleTabClick('moderator-list')}
+				>
+					Moderator List
+				</Button>
+			{/if}
+		</div>
 	</div>
+{:else}
+	<Tabs class="mt-5" tabStyle="underline">
+		<TabItem
+			onclick={() => handleTabClick('post-decisions')}
+			open={currentTab === 'post-decisions'}
+			title="Post Decisions"
+		>
+			<PostModerationGrid
+				containerId={TAB_CONTAINER_IDS['post-decisions'] ?? ''}
+				handleLoadMorePosts={() => handleLoadPendingPosts(false)}
+				loadingPosts={pendingPostsLoading}
+			/>
+		</TabItem>
+		<TabItem
+			onclick={() => handleTabClick('user-reports')}
+			open={currentTab === 'user-reports'}
+			title="User Reports"
+		>
+			<ReportGrid
+				containerId={TAB_CONTAINER_IDS['user-reports'] ?? ''}
+				reportType="userReports"
+				handleLoadMoreReports={() => handleLoadUserReports(false)}
+				loadingReports={userReportsLoading}
+			/>
+		</TabItem>
+		<TabItem
+			onclick={() => handleTabClick('post-reports')}
+			open={currentTab === 'post-reports'}
+			title="Post Reports"
+		>
+			<ReportGrid
+				containerId={TAB_CONTAINER_IDS['post-reports'] ?? ''}
+				reportType="postReports"
+				handleLoadMoreReports={() => handleLoadPostReports(false)}
+				loadingReports={postReportsLoading}
+			/>
+		</TabItem>
+		<TabItem
+			onclick={() => handleTabClick('post-collection-reports')}
+			open={currentTab === 'post-collection-reports'}
+			title="Post Collection Reports"
+		>
+			<ReportGrid
+				containerId={TAB_CONTAINER_IDS['post-collection-reports'] ?? ''}
+				reportType="postCollectionReports"
+				handleLoadMoreReports={() => handleLoadCollectionReports(false)}
+				loadingReports={postCollectionReportsLoading}
+			/>
+		</TabItem>
+		{#if $user && isModerationRole($user.role)}
+			<TabItem
+				onclick={() => handleTabClick('moderator-list')}
+				open={currentTab === 'moderator-list'}
+				disabled={!isModerationRole($user.role)}
+				title="Moderator List"
+			>
+				{#if moderatorsLoading}
+					<Spinner size="12" />
+				{:else}
+					<ModList containerId={TAB_CONTAINER_IDS['moderator-list'] ?? ''} />
+				{/if}
+			</TabItem>
+		{/if}
+	</Tabs>
 {/if}

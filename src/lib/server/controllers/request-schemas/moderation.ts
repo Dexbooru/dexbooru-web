@@ -10,3 +10,20 @@ export const ModerationReviewStatusSchema = z.enum([
 	'NOT_REVIEWED',
 	'IN_REVIEW',
 ]);
+
+export const PostModerationStatusSchema = z.enum(['PENDING', 'APPROVED', 'REJECTED']);
+
+export const GetPendingPostsSchema = {
+	urlSearchParams: z.object({
+		pageNumber: z.coerce.number().default(0),
+	}),
+} satisfies TRequestSchema;
+
+export const UpdatePostModerationStatusSchema = {
+	pathParams: z.object({
+		postId: z.string().uuid(),
+	}),
+	body: z.object({
+		status: PostModerationStatusSchema,
+	}),
+} satisfies TRequestSchema;

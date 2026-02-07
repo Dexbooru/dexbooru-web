@@ -21,6 +21,7 @@ export const EMPTY_POST: TPost = {
 	authorId: '',
 	description: '',
 	imageUrls: [],
+	imageHashes: [],
 	imageHeights: [],
 	imageWidths: [],
 	artists: [],

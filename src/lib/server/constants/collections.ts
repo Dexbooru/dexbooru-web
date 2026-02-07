@@ -8,6 +8,7 @@ export const PUBLIC_POST_COLLECTION_SELECTORS: Prisma.PostCollectionSelect<Defau
 	thumbnailImageUrls: true,
 	authorId: true,
 	isNsfw: true,
+	moderationStatus: true,
 	createdAt: true,
 	updatedAt: true,
 	author: {

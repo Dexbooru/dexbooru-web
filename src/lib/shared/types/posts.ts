@@ -1,4 +1,10 @@
-import type { Post, PostSourceType, Prisma, UserRole } from '$generated/prisma/client';
+import type {
+	Post,
+	PostModerationStatus,
+	PostSourceType,
+	Prisma,
+	UserRole,
+} from '$generated/prisma/client';
 import type { DefaultArgs } from '@prisma/client/runtime/client';
 import type { TComment } from './comments';
 
@@ -64,9 +70,12 @@ export type TPost = Post & {
 	}[];
 	artistString: string;
 	commentCount: number;
+	moderationStatus: PostModerationStatus;
 	comments: TComment[];
 	sources: TPostSource[];
 };
+
+export type TPostDuplicate = Pick<TPost, 'id' | 'imageUrls' | 'description'>;
 
 export type TPostSourceSelector = Prisma.PostSourceSelect<DefaultArgs>;
 export type TPostSelector = Prisma.PostSelect<DefaultArgs>;

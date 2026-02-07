@@ -6,6 +6,9 @@
 	import CommentsContainer from '../../comments/CommentsContainer.svelte';
 	import PostImageMetadata from './PostImageMetadata.svelte';
 	import PostMetadata from './PostMetadata.svelte';
+	import Alert from 'flowbite-svelte/Alert.svelte';
+	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
+	import { isModerationRole } from '$lib/shared/helpers/auth/role';
 
 	type Props = {
 		post: TPost;
@@ -25,9 +28,35 @@
 
 	const user = getAuthenticatedUser();
 	const commentTree = getCommentTree();
+
+	const showModerationAlert = $derived.by(() => {
+		if (post.moderationStatus === 'APPROVED') return false;
+		if (!$user) return false;
+		return isModerationRole($user.role) || $user.id === post.author?.id;
+	});
 </script>
 
 <div class="space-y-5">
+	{#if showModerationAlert}
+		{#if post.moderationStatus === 'REJECTED'}
+			<Alert color="red" class="mb-4">
+				<div class="flex items-center gap-2">
+					<ExclamationCircleSolid class="w-5 h-5" />
+					<span class="font-medium"
+						>This post has been rejected by the moderation team and is not visible to the public.</span
+					>
+				</div>
+			</Alert>
+		{:else if post.moderationStatus === 'PENDING'}
+			<Alert color="yellow" class="mb-4">
+				<div class="flex items-center gap-2">
+					<ExclamationCircleSolid class="w-5 h-5" />
+					<span class="font-medium">This post is currently pending moderation review.</span>
+				</div>
+			</Alert>
+		{/if}
+	{/if}
+
 	<section class="space-y-2">
 		<PostImageMetadata {hasLikedPost} {post} />
 	</section>

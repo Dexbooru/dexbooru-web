@@ -67,6 +67,7 @@ export async function findPostsByTagName(
 ): Promise<TPost[]> {
 	const posts = await prisma.post.findMany({
 		where: {
+			moderationStatus: { in: ['PENDING', 'APPROVED'] },
 			tagString: {
 				contains: tagName,
 			},

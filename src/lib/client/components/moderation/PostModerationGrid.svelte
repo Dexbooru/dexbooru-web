@@ -1,36 +1,27 @@
 <script lang="ts">
-	import type { PostCollectionReport, PostReport, UserReport } from '$generated/prisma/browser';
+	import type { TPost } from '$lib/shared/types/posts';
 	import { getModerationPaginationData } from '$lib/client/helpers/context';
-	import { MAXIMUM_REPORTS_PER_PAGE } from '$lib/shared/constants/reports';
-	import { capitalize } from '$lib/shared/helpers/util';
+	import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import { onMount } from 'svelte';
-	import ReportCard from './ReportCard.svelte';
+	import PostModerationCard from './PostModerationCard.svelte';
 
 	type Props = {
-		reportType: 'postCollectionReports' | 'postReports' | 'userReports';
-		handleLoadMoreReports: () => void;
-		loadingReports?: boolean;
+		handleLoadMorePosts: () => void;
+		loadingPosts?: boolean;
 		containerId: string;
 	};
 
-	type TReport = PostReport | PostCollectionReport | UserReport;
-
-	let { reportType, handleLoadMoreReports, loadingReports = false, containerId }: Props = $props();
-	let reports = $state<TReport[]>([]);
+	let { handleLoadMorePosts, loadingPosts = false, containerId }: Props = $props();
+	let posts = $state<TPost[]>([]);
 
 	const moderationData = getModerationPaginationData();
 
 	const moderationDataUnsubscribe = moderationData.subscribe((data) => {
 		if (data) {
-			const upcomingReports = data[reportType] ?? [];
-			upcomingReports.sort((a, b) => {
-				return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-			});
-
-			reports = upcomingReports;
+			posts = data.pendingPosts ?? [];
 		}
 	});
 
@@ -41,17 +32,16 @@
 	});
 </script>
 
-{#if reports.length === 0 && !loadingReports}
+{#if posts.length === 0 && !loadingPosts}
 	<div
 		class="flex flex-col justify-center items-center py-20 text-center bg-gray-50 dark:bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700"
 	>
 		<div class="p-4 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
 			<ExclamationCircleSolid class="w-12 h-12 text-gray-400" />
 		</div>
-		<h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">No reports to display</h3>
+		<h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">No pending posts</h3>
 		<p class="text-gray-500 dark:text-gray-400 max-w-sm">
-			There are currently no {capitalize(reportType.replace('Reports', ''))} reports that match your
-			criteria.
+			All new posts have been reviewed. Great job!
 		</p>
 	</div>
 {:else}
@@ -59,20 +49,18 @@
 		<div
 			class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
 		>
-			{#each reports as report (report.id)}
-				<ReportCard {report} {reportType} />
+			{#each posts as post (post.id)}
+				<PostModerationCard {post} />
 			{/each}
 		</div>
 
-		{#if loadingReports}
+		{#if loadingPosts}
 			<div class="flex justify-center items-center py-8">
 				<Spinner class="w-10 h-10 text-primary-500" />
 			</div>
-		{:else if reports.length >= MAXIMUM_REPORTS_PER_PAGE}
+		{:else if posts.length >= MAXIMUM_POSTS_PER_PAGE}
 			<div class="flex justify-center pt-4">
-				<Button color="blue" onclick={handleLoadMoreReports} class="px-10">
-					Load more reports
-				</Button>
+				<Button color="blue" onclick={handleLoadMorePosts} class="px-10">Load more posts</Button>
 			</div>
 		{/if}
 	</section>

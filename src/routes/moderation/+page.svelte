@@ -10,9 +10,11 @@
 			postCollectionReportPageNumber: 0,
 			postReportPageNumber: 0,
 			userReportPageNumber: 0,
+			pendingPostsPageNumber: 0,
 			postCollectionReports: [],
 			postReports: [],
 			userReports: [],
+			pendingPosts: [],
 			moderators: [],
 		});
 	});

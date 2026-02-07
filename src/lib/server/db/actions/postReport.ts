@@ -60,3 +60,10 @@ export const deletePostReportByIds = async (postId: string, reportId: string) =>
 
 	return report;
 };
+
+export const updatePostReportStatus = async (reportId: string, status: ModerationReportStatus) => {
+	return await prisma.postReport.update({
+		where: { id: reportId },
+		data: { reviewStatus: status },
+	});
+};

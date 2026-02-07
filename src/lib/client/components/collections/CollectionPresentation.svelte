@@ -18,6 +18,7 @@
 	import Alert from 'flowbite-svelte/Alert.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Img from 'flowbite-svelte/Img.svelte';
+	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import { flip } from 'svelte/animate';
 	import PostCard from '../posts/card/PostCard.svelte';
 	import CollectionActions from './card/CollectionActions.svelte';
@@ -99,6 +100,17 @@
 		content={collection.author?.username ?? DELETED_ACCOUNT_HEADING}
 	/>
 </svelte:head>
+
+{#if collection.moderationStatus === 'FLAGGED'}
+	<Alert color="red" class="mb-4">
+		<div class="flex items-center gap-2">
+			<ExclamationCircleSolid class="w-5 h-5" />
+			<span class="font-medium"
+				>This collection has been flagged by the moderation team for content violations.</span
+			>
+		</div>
+	</Alert>
+{/if}
 
 {#if showResizeAlert && resizeRatios.length > 0}
 	<Alert class="p-4 gap-3 text-sm mb-4" color="yellow">

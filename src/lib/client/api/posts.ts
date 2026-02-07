@@ -19,3 +19,11 @@ export const likePost = async (postId: string, body: TLikePutBody): Promise<Resp
 		body: JSON.stringify(body),
 	});
 };
+
+export const checkDuplicatePosts = async (hashes: string[]): Promise<Response> => {
+	return await fetch('/api/posts/duplicates', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ hashes }),
+	});
+};

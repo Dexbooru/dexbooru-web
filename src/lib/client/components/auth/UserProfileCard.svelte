@@ -13,9 +13,11 @@
 	import type { TFriendStatus } from '$lib/shared/types/friends';
 	import type { TUser, TUserStatistics } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
+	import Alert from 'flowbite-svelte/Alert.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
+	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import OauthIcon from './OauthIcon.svelte';
 
 	type Props = {
@@ -73,6 +75,14 @@
 </script>
 
 <Card class="mx-4 sm:mx-auto p-4 sm:p-6" style="min-width: 300px; max-width: 550px;">
+	{#if targetUser.moderationStatus === 'FLAGGED'}
+		<Alert color="red" class="mb-4">
+			<div class="flex items-center gap-2">
+				<ExclamationCircleSolid class="w-5 h-5" />
+				<span class="font-medium">This account has been flagged by the moderation team.</span>
+			</div>
+		</Alert>
+	{/if}
 	<div class="flex flex-col items-center pb-4">
 		<Avatar size="lg" src={targetUser.profilePictureUrl} onerror={onImageError} />
 		<h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">

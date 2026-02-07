@@ -1,4 +1,4 @@
-import type { UserRole } from '$generated/prisma/client';
+import type { UserModerationStatus, UserRole } from '$generated/prisma/client';
 import { roundNumber } from '$lib/client/helpers/posts';
 import type { TUserSelector } from '$lib/server/types/users';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
@@ -326,6 +326,18 @@ export async function deleteUserById(userId: string): Promise<boolean> {
 	});
 
 	return deleteUserBatchResult.count > 0;
+}
+
+export async function updateUserModerationStatus(userId: string, status: UserModerationStatus) {
+	return await prisma.user.update({
+		where: {
+			id: userId,
+		},
+		data: {
+			moderationStatus: status,
+			updatedAt: new Date(),
+		},
+	});
 }
 
 export async function createUser(

@@ -1,4 +1,4 @@
-import type { Prisma } from '$generated/prisma/client';
+import type { PostModerationStatus, Prisma } from '$generated/prisma/client';
 import { PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
 import { MAXIMUM_SIMILAR_POSTS_PER_POST } from '$lib/shared/constants/posts';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
@@ -64,8 +64,14 @@ export async function findPostsByPage(
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
 	selectors?: TPostSelector,
+	moderationStatus?: PostModerationStatus[],
 ): Promise<TPost[]> {
 	const pagePosts = await prisma.post.findMany({
+		where: {
+			moderationStatus: moderationStatus
+				? { in: moderationStatus }
+				: { in: ['PENDING', 'APPROVED'] },
+		},
 		select: selectors,
 		skip: pageNumber * pageLimit,
 		take: pageLimit,
@@ -80,12 +86,16 @@ export async function findPostsByPage(
 export async function findPostByIdWithUpdatedViewCount(
 	postId: string,
 	selectors?: TPostSelector,
+	moderationStatus?: PostModerationStatus[],
 ): Promise<TPost | null> {
 	try {
 		const updatedPost = await prisma.post.update({
 			relationLoadStrategy: 'join',
 			where: {
 				id: postId,
+				moderationStatus: moderationStatus
+					? { in: moderationStatus }
+					: { in: ['PENDING', 'APPROVED'] },
 			},
 			data: {
 				views: {
@@ -103,11 +113,15 @@ export async function findPostByIdWithUpdatedViewCount(
 export async function findPostById(
 	postId: string,
 	selectors?: TPostSelector,
+	moderationStatus?: PostModerationStatus[],
 ): Promise<TPost | null> {
 	return (await prisma.post.findUnique({
 		relationLoadStrategy: 'join',
 		where: {
 			id: postId,
+			moderationStatus: moderationStatus
+				? { in: moderationStatus }
+				: { in: ['PENDING', 'APPROVED'] },
 		},
 		select: selectors,
 	})) as TPost | null;
@@ -120,9 +134,13 @@ export async function findPostsByAuthorId(
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
 	selectors?: TPostSelector,
+	moderationStatus?: PostModerationStatus[],
 ): Promise<TPost[]> {
 	const posts = await prisma.post.findMany({
 		where: {
+			moderationStatus: moderationStatus
+				? { in: moderationStatus }
+				: { in: ['PENDING', 'APPROVED'] },
 			OR: [
 				{
 					authorId,
@@ -186,6 +204,7 @@ export async function createPost(
 	imageUrls: string[],
 	imageWidths: number[],
 	imageHeights: number[],
+	imageHashes: string[],
 	authorId: string,
 ) {
 	const newPost = await prisma.post.create({
@@ -194,6 +213,7 @@ export async function createPost(
 			description,
 			authorId,
 			imageUrls,
+			imageHashes,
 			imageHeights,
 			imageWidths,
 			isNsfw,
@@ -227,6 +247,22 @@ export async function createPost(
 
 export async function findTotalPostCount() {
 	return await prisma.post.count();
+}
+
+export async function findDuplicatePosts(
+	hashes: string[],
+	limit: number,
+	selectors?: TPostSelector,
+) {
+	return await prisma.post.findMany({
+		where: {
+			imageHashes: {
+				hasSome: hashes,
+			},
+		},
+		select: selectors,
+		take: limit,
+	});
 }
 
 export async function findSimilarPosts(
@@ -263,6 +299,7 @@ export async function findSimilarPosts(
 
 	const similarPosts = (await prisma.post.findMany({
 		where: {
+			moderationStatus: { in: ['PENDING', 'APPROVED'] },
 			id: {
 				not: {
 					equals: postId,

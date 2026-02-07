@@ -60,3 +60,16 @@ export const deleteUserReportByIds = async (userId: string, reportId: string) =>
 
 	return report;
 };
+
+export const findUserReportById = async (reportId: string) => {
+	return await prisma.userReport.findUnique({
+		where: { id: reportId },
+	});
+};
+
+export const updateUserReportStatus = async (reportId: string, status: ModerationReportStatus) => {
+	return await prisma.userReport.update({
+		where: { id: reportId },
+		data: { reviewStatus: status },
+	});
+};

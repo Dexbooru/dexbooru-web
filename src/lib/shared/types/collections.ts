@@ -1,4 +1,4 @@
-import type { PostCollection } from '$generated/prisma/client';
+import type { CollectionModerationStatus, PostCollection } from '$generated/prisma/client';
 import type { TPost } from './posts';
 
 export type TCollectionPaginationData = {
@@ -19,6 +19,7 @@ export type TCollectionHiddenPageData = {
 
 export type TPostCollection = PostCollection & {
 	posts: TPost[];
+	moderationStatus: CollectionModerationStatus;
 	author: {
 		id: string;
 		username: string;

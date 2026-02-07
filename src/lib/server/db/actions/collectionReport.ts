@@ -66,3 +66,19 @@ export const deletePostCollectionReportByIds = async (
 
 	return report;
 };
+
+export const findPostCollectionReportById = async (reportId: string) => {
+	return await prisma.postCollectionReport.findUnique({
+		where: { id: reportId },
+	});
+};
+
+export const updatePostCollectionReportStatus = async (
+	reportId: string,
+	status: ModerationReportStatus,
+) => {
+	return await prisma.postCollectionReport.update({
+		where: { id: reportId },
+		data: { reviewStatus: status },
+	});
+};

@@ -7,6 +7,7 @@ export const PUBLIC_USER_SELECTORS: TUserSelector = {
 	email: true,
 	profilePictureUrl: true,
 	role: true,
+	moderationStatus: true,
 };
 
 export const JWT_USER_SELECTORS: TUserSelector = {

@@ -1,4 +1,4 @@
-import type { Prisma } from '$generated/prisma/client';
+import type { CollectionModerationStatus, Prisma } from '$generated/prisma/client';
 import { PUBLIC_POST_COLLECTION_SELECTORS } from '$lib/server/constants/collections';
 import { MAXIMUM_COLLECTIONS_PER_PAGE } from '$lib/shared/constants/collections';
 import type { TCollectionOrderByColumn, TPostCollection } from '$lib/shared/types/collections';
@@ -151,4 +151,19 @@ export async function removePostFromCollection(collectionId: string, postId: str
 	});
 
 	return updatedCollection;
+}
+
+export async function updateCollectionModerationStatus(
+	collectionId: string,
+	status: CollectionModerationStatus,
+) {
+	return await prisma.postCollection.update({
+		where: {
+			id: collectionId,
+		},
+		data: {
+			moderationStatus: status,
+			updatedAt: new Date(),
+		},
+	});
 }

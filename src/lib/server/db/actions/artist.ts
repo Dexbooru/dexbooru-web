@@ -50,7 +50,7 @@ export async function decrementArtistPostCount(artists: string[]) {
 }
 
 export async function incrementArtistPostCount(artists: string[]) {
-	await prisma.tag.updateMany({
+	await prisma.artist.updateMany({
 		where: {
 			name: {
 				in: artists,
@@ -74,6 +74,7 @@ export async function findPostsByArtistName(
 ): Promise<TPost[]> {
 	const posts = await prisma.post.findMany({
 		where: {
+			moderationStatus: { in: ['PENDING', 'APPROVED'] },
 			artistString: {
 				contains: artistName,
 			},

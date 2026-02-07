@@ -5,6 +5,7 @@ import {
 	deletePostReportByIds,
 	findPostReportsFromPostId,
 	findPostReportsViaPagination,
+	updatePostReportStatus,
 } from '../db/actions/postReport';
 import {
 	createErrorResponse,
@@ -19,7 +20,41 @@ import {
 	DeletePostReportSchema,
 	GetPostReportsSchema,
 	GetPostsReportsSchema,
+	UpdatePostReportStatusSchema,
 } from './request-schemas/postReports';
+
+export const handleUpdatePostReportStatus = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'api-route',
+		UpdatePostReportStatusSchema,
+		async (data) => {
+			const { reportId } = data.pathParams;
+			const { reviewStatus } = data.body;
+
+			try {
+				const moderationFailureResponse = await handleModerationRoleCheck(event, 'api-route');
+				if (moderationFailureResponse) return moderationFailureResponse;
+
+				const updatedReport = await updatePostReportStatus(reportId, reviewStatus);
+				return createSuccessResponse(
+					'api-route',
+					'Successfully updated the post report status.',
+					updatedReport,
+				);
+			} catch (error) {
+				logger.error(error);
+
+				return createErrorResponse(
+					'api-route',
+					500,
+					'An unexpected error occurred while updating the post report status.',
+				);
+			}
+		},
+		true,
+	);
+};
 
 export const handleDeletePostReport = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(

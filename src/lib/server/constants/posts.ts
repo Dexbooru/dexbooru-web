@@ -45,7 +45,7 @@ export const PAGE_SERVER_LOAD_POST_SELECTORS: TPostSelector = {
 	...PUBLIC_POST_SELECTORS,
 	sourceLink: false,
 	description: false,
-	moderationStatus: false,
+	moderationStatus: true,
 	likes: false,
 	views: false,
 	commentCount: false,
@@ -59,3 +59,5 @@ export const PAGE_SERVER_LOAD_POST_SELECTORS: TPostSelector = {
 	tags: false,
 	artists: false,
 };
+
+export const MAXIMUM_DUPLICATES_TO_SEARCH_ON_POST_UPLOAD = 2;
