@@ -4,11 +4,17 @@ enum PostCollectionReportCategory {
   OTHER
 }
 
+enum CollectionModerationStatus {
+  FLAGGED
+  UNFLAGGED
+}
+
 model PostCollection {
   id                 String                   @id @default(uuid())
   title              String                   @db.VarChar(150)
   description        String                   @db.VarChar(250)
   isNsfw             Boolean                  @default(false)
+  moderationStatus   CollectionModerationStatus @default(UNFLAGGED)
   thumbnailImageUrls String[]                 @default([])
   searchable         Unsupported("tsvector")?
   posts              Post[]
@@ -33,5 +39,7 @@ model PostCollectionReport {
   author           User?                        @relation(fields: [authorId], references: [id], onDelete: SetNull, name: "collections reported by")
   authorId         String?
 
-  @@index([id])
+  @@index([postCollectionId])
+  @@index([authorId])
+  @@index([reviewStatus, createdAt])
 }

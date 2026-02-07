@@ -4,6 +4,11 @@ enum UserRole {
   USER
 }
 
+enum UserModerationStatus {
+  FLAGGED
+  UNFLAGGED
+}
+
 enum UserReportCategory {
   NSFW_PROFILE_PICTURE
   INAPPROPRIATE_USERNAME
@@ -20,6 +25,7 @@ model User {
   profilePictureUrl          String
   password                   String
   role                       UserRole                  @default(USER)
+  moderationStatus           UserModerationStatus      @default(UNFLAGGED)
   superRolePromotionAt       DateTime?
   createdPosts               Post[]                    @relation(name: "created posts")
   likedPosts                 Post[]                    @relation(name: "liked posts")
@@ -52,5 +58,7 @@ model UserReport {
   author       User?                  @relation(fields: [authorId], references: [id], onDelete: SetNull, name: "users reported by")
   authorId     String?
 
-  @@index([id])
+  @@index([userId])
+  @@index([authorId])
+  @@index([reviewStatus, createdAt])
 }

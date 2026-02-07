@@ -136,6 +136,7 @@ const CreatePostSchema = {
 				},
 			),
 		uploadId: z.string().uuid().optional(),
+		ignoreDuplicates: BoolStrSchema.optional().default('false'),
 	}),
 } satisfies TRequestSchema;
 
@@ -159,7 +160,14 @@ const PostUpdateSchema = {
 	}),
 } satisfies TRequestSchema;
 
+const CheckDuplicatePostsSchema = {
+	body: z.object({
+		hashes: z.array(z.string()),
+	}),
+} satisfies TRequestSchema;
+
 export {
+	CheckDuplicatePostsSchema,
 	CreatePostSchema,
 	DeletePostSchema,
 	GetPostsByAuthorSchema,

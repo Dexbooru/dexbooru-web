@@ -32,6 +32,7 @@ model Post {
   views            Int                      @default(0)
   moderationStatus PostModerationStatus     @default(PENDING)
   imageUrls        String[]
+  imageHashes      String[]                 @default([])
   imageWidths      Int[]
   imageHeights     Int[]
   commentCount     Int                      @default(0)
@@ -49,6 +50,7 @@ model Post {
 
   @@index([id])
   @@index([authorId])
+  @@index([moderationStatus])
 }
 
 model PostSource {
@@ -74,5 +76,7 @@ model PostReport {
   author       User?                  @relation(fields: [authorId], references: [id], onDelete: SetNull, name: "posts reported by")
   authorId     String?
 
-  @@index([id])
+  @@index([postId])
+  @@index([authorId])
+  @@index([reviewStatus, createdAt])
 }

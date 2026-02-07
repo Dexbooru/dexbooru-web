@@ -7,10 +7,15 @@
 	import SourceLinkSection from '$lib/client/components/posts/upload/SourceLinkSection.svelte';
 	import UploadStatusModal from '$lib/client/components/posts/upload/UploadStatusModal.svelte';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { calculateHash } from '$lib/client/helpers/hashing';
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate } from '$lib/shared/helpers/labels';
+	import type { TPostDuplicate } from '$lib/shared/types/posts';
+	import { checkDuplicatePosts } from '$lib/client/api/posts';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { toast } from '@zerodevx/svelte-toast';
+	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
+	import Alert from 'flowbite-svelte/Alert.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
 	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
@@ -41,6 +46,25 @@
 	let loading = $state(false);
 	let statusMessage = $state('Uploading post... Please wait.');
 	let eventSource: EventSource | null = null;
+	let duplicates = $state<TPostDuplicate[]>([]);
+	let forceUpload = $state(false);
+
+	$effect(() => {
+		if (postImages.length > 0) {
+			const checkDuplicates = async () => {
+				const hashes = await Promise.all(postImages.map((img) => calculateHash(img.file)));
+				const response = await checkDuplicatePosts(hashes);
+				if (response.ok) {
+					const data = await response.json();
+					duplicates = data.data.duplicatePosts;
+				}
+			};
+			checkDuplicates();
+		} else {
+			duplicates = [];
+			forceUpload = false;
+		}
+	});
 
 	let uploadButtonDisabled = $derived.by(() => {
 		const isValidForm =
@@ -79,6 +103,7 @@
 
 		const uploadId = crypto.randomUUID();
 		formData.append('uploadId', uploadId);
+		formData.append('ignoreDuplicates', forceUpload.toString());
 
 		formData.delete('postPictures');
 		postImages.forEach(({ file }) => {
@@ -105,7 +130,12 @@
 
 			if (result.type === 'failure') {
 				const reason = result.data?.reason as string | undefined;
-				if (reason) {
+				const serverDuplicates = result.data?.duplicatePosts as TPostDuplicate[] | undefined;
+
+				if (serverDuplicates && serverDuplicates.length > 0) {
+					duplicates = serverDuplicates;
+					toast.push('Duplicates detected on server', FAILURE_TOAST_OPTIONS);
+				} else if (reason) {
 					toast.push(reason, FAILURE_TOAST_OPTIONS);
 				}
 			}
@@ -129,6 +159,41 @@
 <main class="flex justify-center px-4 sm:px-6 lg:px-8">
 	<Card size="lg" class="mt-3 mb-3 p-6 shadow-lg w-full max-w-3xl space-y-2">
 		<Heading class="mb-5 mt-2 text-center ">Upload a post!</Heading>
+
+		{#if duplicates.length > 0}
+			<Alert color="red" class="mb-4">
+				<div class="flex items-center gap-2">
+					<ExclamationCircleSolid class="w-5 h-5" />
+					<span class="font-medium"
+						>{duplicates.length} potential duplicate post{duplicates.length > 1 ? 's' : ''} detected!</span
+					>
+				</div>
+				<ul class="mt-2 ml-7 space-y-3">
+					{#each duplicates as duplicate}
+						<li class="flex items-center gap-3">
+							{#if duplicate.imageUrls?.[0]}
+								<img
+									src={duplicate.imageUrls[0]}
+									alt="Duplicate preview"
+									class="w-12 h-12 object-cover rounded border border-yellow-300"
+								/>
+							{/if}
+							<a
+								href="/posts/{duplicate.id}"
+								target="_blank"
+								class="underline hover:text-primary-600 text-sm"
+							>
+								{duplicate.description || `Post ID: ${duplicate.id.slice(0, 8)}`}
+							</a>
+						</li>
+					{/each}
+				</ul>
+				<div class="mt-4 ml-7 text-gray-500 dark:text-gray-600">
+					<Checkbox bind:checked={forceUpload}>I want to upload this anyway</Checkbox>
+				</div>
+			</Alert>
+		{/if}
+
 		<form
 			id="upload-form"
 			method="POST"
@@ -153,7 +218,7 @@
 				<RatingEstimate {estimatedPostRating} />
 			</section>
 
-			<Button disabled={uploadButtonDisabled} color="green" type="submit" class="!mt-5"
+			<Button disabled={uploadButtonDisabled} color="green" type="submit" class="mt-5!"
 				>Upload post</Button
 			>
 		</form>

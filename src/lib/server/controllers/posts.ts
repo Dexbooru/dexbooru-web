@@ -1,7 +1,9 @@
+import type { PostModerationStatus } from '$generated/prisma/client';
 import { uploadStatusEmitter } from '$lib/server/events/uploadStatus';
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { MAXIMUM_IMAGES_PER_POST } from '$lib/shared/constants/images';
 import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
+import { isModerationRole } from '$lib/shared/helpers/auth/role';
 import type {
 	TPost,
 	TPostOrderByColumn,
@@ -15,6 +17,7 @@ import { enqueueBatchUploadedPostImages } from '../aws/actions/sqs';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../constants/aws';
 import { PUBLIC_COMMENT_SELECTORS } from '../constants/comments';
 import {
+	MAXIMUM_DUPLICATES_TO_SEARCH_ON_POST_UPLOAD,
 	PAGE_SERVER_LOAD_POST_SELECTORS,
 	PUBLIC_POST_SELECTORS,
 	PUBLIC_POST_SOURCE_SELECTORS,
@@ -23,6 +26,7 @@ import { findPostsByArtistName } from '../db/actions/artist';
 import {
 	createPost,
 	deletePostById,
+	findDuplicatePosts,
 	findPostById,
 	findPostByIdWithUpdatedViewCount,
 	findPostsByAuthorId,
@@ -42,6 +46,7 @@ import {
 import {
 	base64ToFile,
 	flattenImageBuffers,
+	hashFile,
 	runPostImageTransformationPipelineInBatch,
 } from '../helpers/images';
 import { getSimilarPostsBySimilaritySearch, indexPostImages } from '../helpers/mlApi';
@@ -68,6 +73,7 @@ import {
 	getCacheKeyWithPostCategoryWithLabel,
 } from './cache-strategies/posts';
 import {
+	CheckDuplicatePostsSchema,
 	CreatePostSchema,
 	DeletePostSchema,
 	GetPostSchema,
@@ -91,6 +97,11 @@ const throwPostNotFoundError = (handlerType: TControllerHandlerVariant, postId: 
 };
 
 const uploadPostImages = async (postPictures: File[], isNsfw: boolean, uploadId?: string) => {
+	if (uploadId) {
+		uploadStatusEmitter.emit(uploadId, 'Hashing original files...');
+	}
+	const postImageHashes = await Promise.all(postPictures.map((file) => hashFile(file)));
+
 	if (uploadId) {
 		uploadStatusEmitter.emit(uploadId, 'Processing images...');
 	}
@@ -117,6 +128,7 @@ const uploadPostImages = async (postPictures: File[], isNsfw: boolean, uploadId?
 		postImageUrls,
 		postImageHeights,
 		postImageWidths,
+		postImageHashes,
 	};
 };
 
@@ -406,7 +418,16 @@ export const handleCreatePost = async (
 		handlerType,
 		CreatePostSchema,
 		async (data) => {
-			const { description, tags, artists, isNsfw, postPictures, sourceLink, uploadId } = data.form;
+			const {
+				description,
+				tags,
+				artists,
+				isNsfw,
+				postPictures,
+				sourceLink,
+				uploadId,
+				ignoreDuplicates,
+			} = data.form;
 			const errorData = {
 				sourceLink,
 				description,
@@ -420,12 +441,32 @@ export const handleCreatePost = async (
 			let newPostImageUrls: string[] = [];
 
 			try {
-				const { postImageUrls, postImageWidths, postImageHeights } = await uploadPostImages(
-					postPictures,
-					isNsfw,
-					uploadId,
-				);
+				const { postImageUrls, postImageWidths, postImageHeights, postImageHashes } =
+					await uploadPostImages(postPictures, isNsfw, uploadId);
 				newPostImageUrls = postImageUrls;
+
+				if (uploadId) {
+					uploadStatusEmitter.emit(uploadId, 'Checking for duplicates...');
+				}
+				const duplicatePosts = await findDuplicatePosts(
+					postImageHashes,
+					MAXIMUM_DUPLICATES_TO_SEARCH_ON_POST_UPLOAD,
+					{
+						id: true,
+						imageUrls: true,
+						description: true,
+					},
+				);
+
+				if (duplicatePosts.length > 0 && !ignoreDuplicates) {
+					if (newPostImageUrls.length > 0) {
+						deleteBatchFromBucket(AWS_POST_PICTURE_BUCKET_NAME, newPostImageUrls);
+					}
+					return createErrorResponse(handlerType, 409, 'Duplicate posts detected', {
+						...errorData,
+						duplicatePosts,
+					});
+				}
 
 				if (uploadId) {
 					uploadStatusEmitter.emit(uploadId, 'Adding to our collection...');
@@ -439,6 +480,7 @@ export const handleCreatePost = async (
 					postImageUrls,
 					postImageWidths,
 					postImageHeights,
+					postImageHashes,
 					user.id,
 				);
 				newPostId = newPost.id;
@@ -458,6 +500,7 @@ export const handleCreatePost = async (
 					invalidateCacheRemotely(
 						getCacheKeyForPostAuthor(newPost.author?.username ?? '', 0, 'createdAt', false),
 					);
+					invalidateCacheRemotely('pending-posts-0');
 
 					if (uploadId) {
 						uploadStatusEmitter.emit(uploadId, 'Redirecting to post...');
@@ -555,10 +598,30 @@ export const handleGetPost = async (
 					imageUrls: true,
 				};
 
-				const post =
+				const isModerator = user.id !== NULLABLE_USER.id && isModerationRole(user.role);
+
+				let post =
 					handlerType === 'api-route'
 						? await findPostById(postId, selectors)
 						: await findPostByIdWithUpdatedViewCount(postId, selectors);
+
+				if (!post && user.id !== NULLABLE_USER.id) {
+					const rejectedPost = await findPostById(postId, { authorId: true }, [
+						'PENDING',
+						'APPROVED',
+						'REJECTED',
+					]);
+					if (rejectedPost && (isModerator || rejectedPost.authorId === user.id)) {
+						post =
+							handlerType === 'api-route'
+								? await findPostById(postId, selectors, ['PENDING', 'APPROVED', 'REJECTED'])
+								: await findPostByIdWithUpdatedViewCount(postId, selectors, [
+										'PENDING',
+										'APPROVED',
+										'REJECTED',
+									]);
+					}
+				}
 
 				if (!post) {
 					cacheResponseRemotely(cacheKey, null, CACHE_TIME_INDIVIDUAL_POST_NOT_FOUND);
@@ -831,16 +894,25 @@ export const handleGetPosts = async (
 							selectors,
 						);
 						break;
-					case 'uploaded':
+					case 'uploaded': {
+						const targetUserId = userId ?? user.id;
+						const moderationStatuses: PostModerationStatus[] =
+							user.id !== NULLABLE_USER.id &&
+							(user.id === targetUserId || isModerationRole(user.role))
+								? ['PENDING', 'APPROVED', 'REJECTED']
+								: ['PENDING', 'APPROVED'];
+
 						posts = await findPostsByAuthorId(
 							pageNumber,
 							MAXIMUM_POSTS_PER_PAGE,
-							userId ?? user.id,
+							targetUserId,
 							orderBy as TPostOrderByColumn,
 							ascending,
 							selectors,
+							moderationStatuses,
 						);
 						break;
+					}
 				}
 
 				posts.forEach((post) => {
@@ -993,6 +1065,41 @@ export const handleLikePost = async (event: RequestEvent) => {
 					'api-route',
 					500,
 					'An unexpected error occured while liking the post',
+				);
+			}
+		},
+		true,
+	);
+};
+
+export const handleCheckForDuplicatePosts = async (
+	event: RequestEvent,
+	handlerType: TControllerHandlerVariant,
+) => {
+	return await validateAndHandleRequest(
+		event,
+		handlerType,
+		CheckDuplicatePostsSchema,
+		async (data) => {
+			const { hashes } = data.body;
+
+			try {
+				const duplicatePosts = await findDuplicatePosts(hashes, 1, {
+					id: true,
+					imageUrls: true,
+					description: true,
+				});
+
+				return createSuccessResponse(handlerType, 'Successfully checked for duplicate posts', {
+					duplicatePosts,
+				});
+			} catch (error) {
+				logger.error(error);
+
+				return createErrorResponse(
+					handlerType,
+					500,
+					'An unexpected error occurred while checking for duplicate posts',
 				);
 			}
 		},
