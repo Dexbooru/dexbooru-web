@@ -2,7 +2,6 @@
 	import { handleFriendRequest } from '$lib/client/api/friends';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getFriendData } from '$lib/client/helpers/context';
-	import { chatStore } from '$lib/client/stores/chat';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import type { TChatFriend, TFriendRequestAction } from '$lib/shared/types/friends';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -55,16 +54,6 @@
 
 					return currentFriendData;
 				});
-
-				chatStore.update((currentChatData) => {
-					currentChatData.friends.push({
-						id: friendRequest.id,
-						username: friendRequest.username,
-						profilePictureUrl: friendRequest.profilePictureUrl,
-					});
-
-					return currentChatData;
-				});
 			}
 		} else {
 			toast.push(
@@ -91,7 +80,7 @@
 			<li class="p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
 				<div class="flex items-center justify-between space-x-4">
 					<div class="flex items-center space-x-4">
-						<div class="flex-shrink-0">
+						<div class="shrink-0">
 							<Avatar
 								src={currentFriend.profilePictureUrl}
 								alt={`${currentFriend.username}'s profile`}
