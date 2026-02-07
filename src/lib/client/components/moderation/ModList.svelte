@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UserRole } from '$generated/prisma/browser';
+	import { UserRole } from '$generated/prisma/browser';
 	import { PROMOTE_USER_MODAL_NAME } from '$lib/client/constants/layout';
 	import {
 		getActiveModal,
@@ -166,18 +166,17 @@
 			/>
 			<Select
 				id="moderation-list-role-selector"
-				class="w-100"
+				class="w-100 ml-3"
 				onchange={handleRoleChange}
 				bind:value={filterRole}
-				oninput={(event) => console.log(event)}
 				items={[
-					{ name: 'Owner', value: 'OWNER' },
-					{ name: 'Moderator', value: 'MODERATOR' },
+					{ name: capitalize(UserRole.OWNER), value: UserRole.OWNER },
+					{ name: capitalize(UserRole.MODERATOR), value: UserRole.MODERATOR },
 				]}
 			/>
 			<Select
 				id="moderation-list-sorting-selector"
-				class="w-100"
+				class="w-100 ml-3"
 				onchange={handleSortingCriteriaChange}
 				bind:value={sortingCriteria}
 				items={[
