@@ -6,17 +6,17 @@
 	const attemptedQuery = page.url.searchParams.get('query') ?? '';
 </script>
 
-<main class="flex flex-col items-center justify-center p-4 mt-20">
+<main class="mt-20 flex flex-col items-center justify-center p-4">
 	<div
-		class="max-w-md w-full bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 text-center border border-red-300 dark:border-red-700"
+		class="w-full max-w-md rounded-lg border border-red-300 bg-white p-6 text-center shadow-md dark:border-red-700 dark:bg-gray-800"
 	>
-		<h1 class="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">Invalid Query</h1>
-		<p class="text-gray-700 dark:text-gray-300 mb-4">
+		<h1 class="mb-2 text-2xl font-bold text-red-600 dark:text-red-400">Invalid Query</h1>
+		<p class="mb-4 text-gray-700 dark:text-gray-300">
 			{errorMessage}
 		</p>
 		{#if attemptedQuery}
 			<div
-				class="text-sm text-gray-600 dark:text-gray-400 rounded-lg p-3 border border-red-200 dark:border-red-700"
+				class="rounded-lg border border-red-200 p-3 text-sm text-gray-600 dark:border-red-700 dark:text-gray-400"
 			>
 				<p>
 					<strong>Attempted Query:</strong>

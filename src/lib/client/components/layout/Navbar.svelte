@@ -20,22 +20,22 @@
 	const user = getAuthenticatedUser();
 </script>
 
-<Navbar id="app-navbar" class="sticky top-0 z-50 bg-white dark:bg-gray-900 rounded-none">
+<Navbar id="app-navbar" class="sticky top-0 z-50 rounded-none bg-white dark:bg-gray-900">
 	<div class="flex space-x-4">
 		<NavBrand href="/">
-			<Img src={ApplicationLogo} class="mr-3 h-6 sm:h-9 rounded-md" alt="Dexbooru Logo" />
-			<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
+			<Img src={ApplicationLogo} class="mr-3 h-6 rounded-md sm:h-9" alt="Dexbooru Logo" />
+			<span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white"
 				>Dexbooru</span
 			>
 		</NavBrand>
 		<GlobalSearchbar />
 	</div>
 
-	<div class="flex md:order-2 space-x-2">
+	<div class="flex space-x-2 md:order-2">
 		{#if $user}
 			<ProfileDropdown />
 		{:else}
-			<div class="hidden md:flex space-x-2">
+			<div class="hidden space-x-2 md:flex">
 				<Button href="/login" color="blue">Log in</Button>
 				<Button href="/register" color="green">Register</Button>
 			</div>

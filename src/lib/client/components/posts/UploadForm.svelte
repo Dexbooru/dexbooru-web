@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { getEstimatedPostRating } from '$lib/client/api/mlApi';
+	import { checkDuplicatePosts } from '$lib/client/api/posts';
 	import DescriptionSection from '$lib/client/components/posts/upload/DescriptionSection.svelte';
 	import LabelSection from '$lib/client/components/posts/upload/LabelSection.svelte';
 	import RatingEstimate from '$lib/client/components/posts/upload/RatingEstimate.svelte';
@@ -11,7 +12,6 @@
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate } from '$lib/shared/helpers/labels';
 	import type { TPostDuplicate } from '$lib/shared/types/posts';
-	import { checkDuplicatePosts } from '$lib/client/api/posts';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { toast } from '@zerodevx/svelte-toast';
 	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
@@ -157,31 +157,31 @@
 </script>
 
 <main class="flex justify-center px-4 sm:px-6 lg:px-8">
-	<Card size="lg" class="mt-3 mb-3 p-6 shadow-lg w-full max-w-3xl space-y-2">
-		<Heading class="mb-5 mt-2 text-center ">Upload a post!</Heading>
+	<Card size="lg" class="mt-3 mb-3 w-full max-w-3xl space-y-2 p-6 shadow-lg">
+		<Heading class="mt-2 mb-5 text-center ">Upload a post!</Heading>
 
 		{#if duplicates.length > 0}
 			<Alert color="red" class="mb-4">
 				<div class="flex items-center gap-2">
-					<ExclamationCircleSolid class="w-5 h-5" />
+					<ExclamationCircleSolid class="h-5 w-5" />
 					<span class="font-medium"
 						>{duplicates.length} potential duplicate post{duplicates.length > 1 ? 's' : ''} detected!</span
 					>
 				</div>
 				<ul class="mt-2 ml-7 space-y-3">
-					{#each duplicates as duplicate}
+					{#each duplicates as duplicate (duplicate.id)}
 						<li class="flex items-center gap-3">
 							{#if duplicate.imageUrls?.[0]}
 								<img
 									src={duplicate.imageUrls[0]}
 									alt="Duplicate preview"
-									class="w-12 h-12 object-cover rounded border border-yellow-300"
+									class="h-12 w-12 rounded border border-yellow-300 object-cover"
 								/>
 							{/if}
 							<a
 								href="/posts/{duplicate.id}"
 								target="_blank"
-								class="underline hover:text-primary-600 text-sm"
+								class="hover:text-primary-600 text-sm underline"
 							>
 								{duplicate.description || `Post ID: ${duplicate.id.slice(0, 8)}`}
 							</a>

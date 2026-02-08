@@ -10,6 +10,6 @@
 	<meta property="og:image" content={ApplicationLogo} />
 </svelte:head>
 
-<main class="flex justify-center items-center">
+<main class="flex items-center justify-center">
 	<ForgotPasswordForm />
 </main>

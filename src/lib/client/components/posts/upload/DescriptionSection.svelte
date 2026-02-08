@@ -13,7 +13,7 @@
 	let { description = $bindable() }: Props = $props();
 </script>
 
-<div class="space-y-2 w-full">
+<div class="w-full space-y-2">
 	<Label class="mb-1" for="description-textarea">
 		Please enter a description for your post (max {MAXIMUM_POST_DESCRIPTION_LENGTH} characters):
 	</Label>
@@ -27,12 +27,12 @@
 		required
 		class="w-full"
 	/>
-	<p class="leading-none dark:text-gray-400 text-right mt-2">
+	<p class="mt-2 text-right leading-none dark:text-gray-400">
 		{description.length}/{MAXIMUM_POST_DESCRIPTION_LENGTH}
 	</p>
 
 	<List class="dark:text-gray-400">
-		{#each SEPERATOR_CHARACTER_UI as message}
+		{#each SEPERATOR_CHARACTER_UI as message (message)}
 			<Li>{message}</Li>
 		{/each}
 	</List>

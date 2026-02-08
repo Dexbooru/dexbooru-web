@@ -108,7 +108,7 @@
 		placeholder="Enter a title"
 		bind:value={title}
 	/>
-	<p class="leading-none dark:text-gray-400 text-right mt-2">
+	<p class="mt-2 text-right leading-none dark:text-gray-400">
 		{title.length}/{MAXIMUM_COLLECTION_TITLE_LENGTH}
 	</p>
 
@@ -126,7 +126,7 @@
 		placeholder="Enter a description"
 		required
 	/>
-	<p class="leading-none dark:text-gray-400 text-right mt-2">
+	<p class="mt-2 text-right leading-none dark:text-gray-400">
 		{description.length}/{MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
 	</p>
 

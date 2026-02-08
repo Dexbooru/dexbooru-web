@@ -89,7 +89,7 @@
 	placement="top-center"
 	onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 >
-	<div class="flex relative">
+	<div class="relative flex">
 		<Searchbar
 			inputElementId={GLOBAL_SEARCH_INPUT_ELEMENT_ID}
 			isGlobal

@@ -86,12 +86,12 @@
 	};
 </script>
 
-<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0">
+<div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
 	<Button
 		disabled={postLikeLoading}
 		onclick={handleLikePost}
 		color="green"
-		class="flex items-center justify-center w-full sm:w-auto space-x-3"
+		class="flex w-full items-center justify-center space-x-3 sm:w-auto"
 	>
 		<HeartSolid color={hasLikedPost ? 'red' : 'inherit'} role="icon" style="bg-red" />
 		<span>
@@ -116,16 +116,16 @@
 		</Button>
 	{/if}
 
-	<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
-		<Button href="/collections/post/{postId}" class="w-full sm:w-auto space-x-2" color="blue">
+	<div class="flex flex-col justify-center space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+		<Button href="/collections/post/{postId}" class="w-full space-x-2 sm:w-auto" color="blue">
 			<span>View collections</span>
 		</Button>
 	</div>
 
-	<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
+	<div class="flex flex-col justify-center space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
 		<Button
 			onclick={() => handleModalOpen(REPORT_MODAL_NAME, { post })}
-			class="w-full sm:w-auto space-x-2"
+			class="w-full space-x-2 sm:w-auto"
 			color="yellow"
 		>
 			<span>Report post</span>
@@ -134,10 +134,10 @@
 	</div>
 
 	{#if $user && isModerationRole($user.role)}
-		<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
+		<div class="flex flex-col justify-center space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
 			<Button
 				onclick={() => handleModalOpen(REPORT_POST_LIST_MODAL_NAME, { post })}
-				class="w-full sm:w-auto space-x-2"
+				class="w-full space-x-2 sm:w-auto"
 				color="red"
 			>
 				<span>Show reports</span>
@@ -146,10 +146,10 @@
 	{/if}
 
 	{#if $user && ($user.id === author.id || $user.role === 'OWNER')}
-		<div class="flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0 justify-center">
+		<div class="flex flex-col justify-center space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
 			<Button
 				color="green"
-				class="w-full sm:w-auto space-x-2"
+				class="w-full space-x-2 sm:w-auto"
 				onclick={() =>
 					handleModalOpen(EDIT_POST_MODAL_NAME, {
 						post,
@@ -162,7 +162,7 @@
 				<PenSolid />
 			</Button>
 			<Button
-				class="w-full sm:w-auto space-x-2"
+				class="w-full space-x-2 sm:w-auto"
 				onclick={() => handleModalOpen(DELETE_POST_MODAL_NAME, { post })}
 				color="red"
 			>

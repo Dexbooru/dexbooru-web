@@ -24,7 +24,7 @@
 {#if Math.max((page.data.collections ?? []).length, $originalCollectionPage.length) > 0}
 	<div
 		class="grid grid-cols-1 {useNsfwPosts && 'place-items-left'} {!useNsfwPosts &&
-			'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'} gap-4 auto-rows-min"
+			'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'} auto-rows-min gap-4"
 	>
 		{#if $collectionPaginationData}
 			{#if (useNsfwPosts ? $nsfwCollectionPage : $collectionPage).length > 0}
@@ -33,13 +33,13 @@
 				{/each}
 			{/if}
 		{:else}
-			{#each Array((page.data.collections ?? []).length).fill(0) as _, i}
+			{#each Array((page.data.collections ?? []).length).fill(0) as _, _i (_i)}
 				<CardPlaceholder size="md" />
 			{/each}
 		{/if}
 	</div>
 {:else}
-	<div class="w-full h-full grid place-items-center">
+	<div class="grid h-full w-full place-items-center">
 		<p class="text-6xl dark:text-white">No collections found</p>
 		{#if (useNsfwPosts ? $nsfwCollectionPage : $collectionPage).length === 0}
 			<CollectionPaginator />

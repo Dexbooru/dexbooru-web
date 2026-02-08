@@ -67,11 +67,11 @@
 	<meta property="og:image" content={ApplicationLogo} />
 </svelte:head>
 
-<main class="flex flex-col items-center justify-center text-center mt-40">
-	<h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+<main class="mt-40 flex flex-col items-center justify-center text-center">
+	<h1 class="mb-6 text-4xl font-bold text-gray-900 md:text-5xl dark:text-gray-100">
 		Dexbooru - Anime/Manga Imageboard
 	</h1>
-	<form action="/search" method="GET" class="w-full flex flex-col items-center relative">
+	<form action="/search" method="GET" class="relative flex w-full flex-col items-center">
 		<Searchbar
 			width="50%"
 			required
@@ -85,7 +85,7 @@
 		/>
 		<SearchResultsDropdown results={labelSearchResults} />
 	</form>
-	<p class="text-md text-gray-700 dark:text-gray-300 mt-6">
+	<p class="text-md mt-6 text-gray-700 dark:text-gray-300">
 		Serving <span>{formatNumberWithCommas(postCount)} posts</span>,
 		<span>{formatNumberWithCommas(tagCount)} tags</span>,
 		<span>{formatNumberWithCommas(artistCount)} artists</span>,

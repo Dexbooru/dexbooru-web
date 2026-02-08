@@ -60,15 +60,15 @@
 			<h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
 				{title}
 			</h5>
-			<p class="mb-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">
+			<p class="mb-3 leading-tight font-normal text-gray-700 dark:text-gray-400">
 				{description}
 			</p>
-			<p class="mb-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">
+			<p class="mb-3 leading-tight font-normal text-gray-700 dark:text-gray-400">
 				{formatNumberWithCommas(collection.posts.length)} post(s)
 			</p>
-			<div class="space-x-2 flex align-middle flex-wrap mb-2">
+			<div class="mb-2 flex flex-wrap space-x-2 align-middle">
 				<a
-					class="inline-flex align-middle space-x-2"
+					class="inline-flex space-x-2 align-middle"
 					href={collection.authorId && `/profile/${collection.author.username}`}
 				>
 					<Avatar
@@ -85,9 +85,9 @@
 				</a>
 			</div>
 			<p class="text-base dark:text-white">Created Date</p>
-			<div class="space-x-2 flex align-middle flex-wrap">
+			<div class="flex flex-wrap space-x-2 align-middle">
 				<p class="text-md dark:text-white">
-					<span class="leading-none text-sm dark:text-gray-400"
+					<span class="text-sm leading-none dark:text-gray-400"
 						>{formatDate(collection.createdAt)}</span
 					>
 				</p>

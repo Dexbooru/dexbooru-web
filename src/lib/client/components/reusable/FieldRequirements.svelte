@@ -38,28 +38,28 @@
 </script>
 
 <button type="button" id={popoverButtonId}>
-	<QuestionCircleSolid class="w-4 h-4 ml-1.5" />
+	<QuestionCircleSolid class="ml-1.5 h-4 w-4" />
 	<span class="sr-only">Show requirements for {requirementsType}</span>
 </button>
 <Popover
 	triggeredBy="#{popoverButtonId}"
-	class="w-72 z-50 text-sm font-light text-gray-500 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
+	class="z-50 w-72 bg-white text-sm font-light text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
 	placement={requirementsPlacement}
 >
 	<P>Satisfied {requirementsType} requirements:</P>
 	<List>
-		{#each satisifedRequirements as satisifedRequirement}
+		{#each satisifedRequirements as satisifedRequirement (satisifedRequirement)}
 			<Li class="mt-2" icon>
-				<CheckCircleSolid class="w-4 h-4 mr-1 text-green-500 inline" />
+				<CheckCircleSolid class="mr-1 inline h-4 w-4 text-green-500" />
 				<p>{satisifedRequirement}</p>
 			</Li>
 		{/each}
 	</List>
 
 	<List>
-		{#each unsatisfiedRequirements as unsatisfiedRequirement}
+		{#each unsatisfiedRequirements as unsatisfiedRequirement (unsatisfiedRequirement)}
 			<Li class="mt-2" icon>
-				<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
+				<CloseCircleSolid class="me-2 h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
 
 				<p>{unsatisfiedRequirement}</p>
 			</Li>
@@ -68,23 +68,23 @@
 
 	{#if unsatisfiedRequirements.length === 0 && satisifedRequirements.length === 0}
 		{#if requirementsType === 'username'}
-			{#each Object.values(USERNAME_REQUIREMENTS) as requirement}
+			{#each Object.values(USERNAME_REQUIREMENTS) as requirement (requirement)}
 				<Li class="mt-2" icon>
-					<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
+					<CloseCircleSolid class="me-2 h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
 					{requirement}
 				</Li>
 			{/each}
 		{:else if requirementsType === 'email'}
-			{#each Object.values(EMAIL_REQUIREMENTS) as requirement}
+			{#each Object.values(EMAIL_REQUIREMENTS) as requirement (requirement)}
 				<Li class="mt-2" icon>
-					<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
+					<CloseCircleSolid class="me-2 h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
 					{requirement}
 				</Li>
 			{/each}
 		{:else if requirementsType === 'password'}
-			{#each Object.values(PASSWORD_REQUIREMENTS) as requirement}
+			{#each Object.values(PASSWORD_REQUIREMENTS) as requirement (requirement)}
 				<Li class="mt-2" icon>
-					<CloseCircleSolid class="w-3.5 h-3.5 me-2 text-gray-500 dark:text-gray-400" />
+					<CloseCircleSolid class="me-2 h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
 					{requirement}
 				</Li>
 			{/each}

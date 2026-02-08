@@ -37,19 +37,19 @@
 	<div role="group" class="relative" onmouseenter={() => (dropdownOpen = true)}>
 		<Button
 			id="navbar-profile-picture"
-			class="!p-1 flex space-x-4 bg-transparent hover:bg-gray-100 dark:bg-slate-700 dark:hover:bg-gray-700 text-gray-900 dark:text-white focus:ring-0"
+			class="flex space-x-4 bg-transparent !p-1 text-gray-900 hover:bg-gray-100 focus:ring-0 dark:bg-slate-700 dark:text-white dark:hover:bg-gray-700"
 		>
 			<Avatar
 				onerror={onImageError}
 				src={$user.profilePictureUrl ?? DefaultProfilePicture}
 				alt="profile of {$user.username}"
-				class="mr-2 hide-alt-text"
+				class="hide-alt-text mr-2"
 			/>
 			{$user.username}
 			<AngleDownOutline size="sm" class="!mr-2" />
 		</Button>
 
-		<Dropdown simple bind:isOpen={dropdownOpen} class="list-none w-44 bg-white dark:bg-gray-700">
+		<Dropdown simple bind:isOpen={dropdownOpen} class="w-44 list-none bg-white dark:bg-gray-700">
 			<DropdownItem href="/profile/{$user?.username}" class="text-gray-900 dark:text-white"
 				>Your Profile</DropdownItem
 			>

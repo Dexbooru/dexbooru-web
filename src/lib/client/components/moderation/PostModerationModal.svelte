@@ -39,7 +39,7 @@
 			} else {
 				toast.push('Failed to update post status', FAILURE_TOAST_OPTIONS);
 			}
-		} catch (error) {
+		} catch {
 			toast.push('An unexpected error occurred', FAILURE_TOAST_OPTIONS);
 		} finally {
 			loading = false;
@@ -48,15 +48,15 @@
 </script>
 
 <Modal title="Inspect Post" bind:open size="xl" outsideclose>
-	<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 		<div class="space-y-4">
-			<div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+			<div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
 				{#if imageUrls.length > 0}
 					{#each imageUrls as imageUrl (imageUrl)}
-						<img src={imageUrl} alt={post.description} class="w-full h-auto mb-2 last:mb-0" />
+						<img src={imageUrl} alt={post.description} class="mb-2 h-auto w-full last:mb-0" />
 					{/each}
 				{:else}
-					<div class="w-full h-64 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+					<div class="flex h-64 w-full items-center justify-center bg-gray-100 dark:bg-gray-800">
 						<span class="text-gray-500 dark:text-gray-400">No image available</span>
 					</div>
 				{/if}
@@ -65,7 +65,7 @@
 
 		<div class="space-y-6">
 			<div>
-				<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+				<h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">
 					{post.description || 'No description'}
 				</h3>
 				<div class="flex flex-wrap gap-2">
@@ -76,29 +76,29 @@
 
 			<div class="grid grid-cols-2 gap-4 text-sm">
 				<div>
-					<span class="block text-gray-500 dark:text-gray-400 font-medium">Author</span>
+					<span class="block font-medium text-gray-500 dark:text-gray-400">Author</span>
 					<span class="text-gray-900 dark:text-white">{post.author?.username || 'Unknown'}</span>
 				</div>
 				<div>
-					<span class="block text-gray-500 dark:text-gray-400 font-medium">Created At</span>
+					<span class="block font-medium text-gray-500 dark:text-gray-400">Created At</span>
 					<span class="text-gray-900 dark:text-white">{formatDate(new Date(post.createdAt))}</span>
 				</div>
 			</div>
 
 			{#if post.sourceLink}
 				<div>
-					<span class="block text-gray-500 dark:text-gray-400 font-medium mb-1">Source</span>
+					<span class="mb-1 block font-medium text-gray-500 dark:text-gray-400">Source</span>
 					<a
 						href={post.sourceLink}
 						target="_blank"
-						class="text-primary-600 hover:underline text-sm break-all"
+						class="text-primary-600 text-sm break-all hover:underline"
 					>
 						{post.sourceLink}
 					</a>
 				</div>
 			{/if}
 
-			<div class="pt-4 border-t border-gray-100 dark:border-gray-700">
+			<div class="border-t border-gray-100 pt-4 dark:border-gray-700">
 				<Button color="alternative" class="w-full" href="/posts/{post.id}" target="_blank">
 					View Post Page
 				</Button>
@@ -107,7 +107,7 @@
 	</div>
 
 	{#snippet footer()}
-		<div class="flex justify-end gap-3 w-full">
+		<div class="flex w-full justify-end gap-3">
 			<Button color="red" disabled={loading} onclick={() => handleAction('REJECTED')}>
 				Reject Post
 			</Button>

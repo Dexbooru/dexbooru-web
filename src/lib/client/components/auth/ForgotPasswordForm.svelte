@@ -13,14 +13,14 @@
 </script>
 
 <Card class="mt-20 p-5">
-	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
+	<h3 class="mb-5 text-center text-xl font-medium text-gray-900 dark:text-white">
 		Account Recovery
 	</h3>
-	<div class="flex-col space-y-1 mb-3">
-		<p class="text-sm text-left text-gray-600 dark:text-gray-400">
+	<div class="mb-3 flex-col space-y-1">
+		<p class="text-left text-sm text-gray-600 dark:text-gray-400">
 			Enter the email address associated with your Dexbooru account.
 		</p>
-		<p class="text-sm text-left text-gray-600 dark:text-gray-400">
+		<p class="text-left text-sm text-gray-600 dark:text-gray-400">
 			We will send a password recovery email to your inbox.
 		</p>
 	</div>

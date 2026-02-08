@@ -36,6 +36,7 @@
 
 	let commentCreating = $state(false);
 	let commentEditing = $state(false);
+	// svelte-ignore state_referenced_locally
 	let commentContent = $state(htmlToMarkdown(content));
 	let commentContentMarkdown = $state('');
 
@@ -78,7 +79,7 @@
 				return commentTree;
 			});
 
-			onCommentEdit && onCommentEdit();
+			onCommentEdit?.();
 			commentEditing = false;
 		} else {
 			toast.push('An error occured while editing your comment', FAILURE_TOAST_OPTIONS);
@@ -114,7 +115,7 @@
 				return commentTree;
 			});
 
-			onCommentCreate && onCommentCreate();
+			onCommentCreate?.();
 			commentContent = '';
 			commentContentMarkdown = '';
 		} else {
@@ -167,9 +168,10 @@
 		{/if}
 	</TabItem>
 	<TabItem title="Preview your markdown comment">
-		<div class="z-10 flex flex-col p-4 dark:bg-gray-700 dark:border-gray-600 text-left">
+		<div class="z-10 flex flex-col p-4 text-left dark:border-gray-600 dark:bg-gray-700">
 			{#if commentContentMarkdown.length > 0}
 				<p class="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html commentContentMarkdown}
 				</p>
 			{:else}

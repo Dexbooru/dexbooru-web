@@ -38,32 +38,32 @@
 		</TableHeadCell>
 	</TableHead>
 	<TableBody class="divide-y">
-		{#each collections ?? [] as collection}
+		{#each collections ?? [] as collection (collection.id)}
 			<TableBodyRow>
-				<TableBodyCell class="px-1 py-4 whitespace-wrap font-medium">
+				<TableBodyCell class="whitespace-wrap px-1 py-4 font-medium">
 					<HighlightedText query={$globalQuery} fullText={collection.title} />
 				</TableBodyCell>
-				<TableBodyCell class="px-1 py-4 whitespace-wrap font-medium">
+				<TableBodyCell class="whitespace-wrap px-1 py-4 font-medium">
 					<HighlightedText query={$globalQuery} fullText={collection.description} />
 				</TableBodyCell>
 				<TableBodyCell>{formatDate(new Date(collection.createdAt))}</TableBodyCell>
 				<TableBodyCell class="text-center">
 					<Avatar
-						class="ml-auto mr-auto"
+						class="mr-auto ml-auto"
 						src={collection.uploaderProfilePictureUrl}
 						alt="profile picture of {collection.uploaderName}"
 						onerror={onImageError}
 					/>
 					<a
 						href="/profile/{collection.uploaderName}"
-						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+						class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
 						>{collection.uploaderName}</a
 					>
 				</TableBodyCell>
 				<TableBodyCell>
 					<a
 						href="/collections/{collection.id}"
-						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+						class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
 						>View collection</a
 					>
 				</TableBodyCell>

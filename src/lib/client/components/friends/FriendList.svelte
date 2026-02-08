@@ -76,7 +76,7 @@
 
 {#if $friendData}
 	<ul class="divide-y divide-gray-200 dark:divide-gray-700">
-		{#each listType === 'friend' ? $friendData.friends : listType === 'sent-request' ? $friendData.sentFriendRequests : listType === 'received-request' ? $friendData.receivedFriendRequests : [] as currentFriend}
+		{#each listType === 'friend' ? $friendData.friends : listType === 'sent-request' ? $friendData.sentFriendRequests : listType === 'received-request' ? $friendData.receivedFriendRequests : [] as currentFriend (currentFriend.id)}
 			<li class="p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
 				<div class="flex items-center justify-between space-x-4">
 					<div class="flex items-center space-x-4">
@@ -84,19 +84,19 @@
 							<Avatar
 								src={currentFriend.profilePictureUrl}
 								alt={`${currentFriend.username}'s profile`}
-								class="w-10 h-10"
+								class="h-10 w-10"
 							/>
 						</div>
-						<div class="flex-1 min-w-0">
-							<p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+						<div class="min-w-0 flex-1">
+							<p class="truncate text-sm font-medium text-gray-900 dark:text-white">
 								{currentFriend.username}
 							</p>
 							{#if listType === 'friend'}
-								<p class="text-sm text-gray-500 dark:text-gray-400 truncate">
+								<p class="truncate text-sm text-gray-500 dark:text-gray-400">
 									ID: {currentFriend.id}
 								</p>
 							{:else}
-								<p class="text-sm text-gray-500 dark:text-gray-400 truncate">
+								<p class="truncate text-sm text-gray-500 dark:text-gray-400">
 									Sent at: {formatDate((currentFriend as TChatFriend & { sentAt: Date }).sentAt)}
 								</p>
 							{/if}

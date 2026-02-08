@@ -45,9 +45,9 @@
 	<div id="post-container-sidebar">
 		<PostPageSidebar {uniqueTags} {uniqueArtists} />
 	</div>
-	<div id="post-container-body" class="space-y-4 mb-5">
+	<div id="post-container-body" class="mb-5 space-y-4">
 		<div id="post-container-title" class="block space-y-3">
-			<h1 class="lg:text-4xl md:text-3xl sm:text-3xl text-lg dark:text-white">
+			<h1 class="text-lg sm:text-3xl md:text-3xl lg:text-4xl dark:text-white">
 				{postContainerTitle}
 			</h1>
 			<div class="flex flex-col space-y-2">
@@ -60,7 +60,7 @@
 								isOpen: true,
 							})}
 						color="blue"
-						class="w-full sm:w-[20rem] sm:mr-auto sm:ml-auto md:ml-0 md:mr-auto"
+						class="w-full sm:mr-auto sm:ml-auto sm:w-[20rem] md:mr-auto md:ml-0"
 					>
 						{#if getPageLabelType() === 'tag'}
 							<TagSolid class="mr-2" />

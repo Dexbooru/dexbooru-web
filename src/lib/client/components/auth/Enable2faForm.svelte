@@ -45,7 +45,7 @@
 </script>
 
 <Card class="p-6 sm:p-8">
-	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
+	<h3 class="mb-5 text-center text-xl font-medium text-gray-900 dark:text-white">
 		2FA
 		<br />
 		<span class="text-sm">(2-factor authentication)</span>
@@ -96,7 +96,7 @@
 
 		{#if totpUri.length > 0}
 			<div class="text-center">
-				<p class="text-sm mb-4 text-gray-700 dark:text-gray-300">
+				<p class="mb-4 text-sm text-gray-700 dark:text-gray-300">
 					Scan the QR code below with your authenticator app (e.g., Google Authenticator, Authy, or
 					Microsoft Authenticator) to set up 2FA.
 				</p>
@@ -106,17 +106,17 @@
 					<a
 						href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
 						target="_blank"
-						class="text-blue-600 dark:text-blue-400 underline ml-1">Google Authenticator</a
+						class="ml-1 text-blue-600 underline dark:text-blue-400">Google Authenticator</a
 					>,
 					<a
 						href="https://authy.com/"
 						target="_blank"
-						class="text-blue-600 dark:text-blue-400 underline ml-1">Authy</a
+						class="ml-1 text-blue-600 underline dark:text-blue-400">Authy</a
 					>,
 					<a
 						href="https://www.microsoft.com/en-us/account/authenticator"
 						target="_blank"
-						class="text-blue-600 dark:text-blue-400 underline ml-1">Microsoft Authenticator</a
+						class="ml-1 text-blue-600 underline dark:text-blue-400">Microsoft Authenticator</a
 					>
 				</p>
 			</div>

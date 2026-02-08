@@ -12,6 +12,7 @@
 	import TabItem from 'flowbite-svelte/TabItem.svelte';
 	import Tabs from 'flowbite-svelte/Tabs.svelte';
 	import { onMount } from 'svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 	import LabelEditForm from './LabelEditForm.svelte';
 	import LabelPresentation from './LabelPresentation.svelte';
 
@@ -21,7 +22,7 @@
 	let metadata = $state<Tag & Artist>();
 
 	const activeModal = getActiveModal();
-	const labelCache: Map<string, Tag & Artist> = new Map();
+	const labelCache = new SvelteMap<string, Tag & Artist>();
 
 	const fetchLabelMetadata = async () => {
 		if (!labelName || !labelType) return;
@@ -71,7 +72,7 @@
 	outsideclose
 >
 	{#if loadingLabelMetadata}
-		<Spinner class="ml-auto mr-auto block" size="10" />
+		<Spinner class="mr-auto ml-auto block" size="10" />
 	{/if}
 
 	<Tabs style="underline">

@@ -41,7 +41,7 @@ export const updateCollectionStores = (
 	const nsfwCollections: TPostCollection[] = [];
 	const displayCollections: TPostCollection[] = [];
 	for (const collection of updateCollectionPaginationData.collections) {
-		let canDisplayPost = false;
+		let canDisplayPost: boolean;
 
 		if (browseInSafeMode && collection.isNsfw) {
 			nsfwCollections.push(collection);

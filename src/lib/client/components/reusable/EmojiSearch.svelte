@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { COMMENT_CONTAINER_EMOJI_CHUNK_SIZE } from '$lib/client/constants/comments';
+	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { chunkArray } from '$lib/shared/helpers/util';
+	import { toast } from '@zerodevx/svelte-toast';
 	import FaceGrinSolid from 'flowbite-svelte-icons/FaceGrinSolid.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
@@ -38,8 +40,8 @@
 				string,
 				string,
 			][];
-		} catch (error) {
-			console.error('Failed to load emojis:', error);
+		} catch {
+			toast.push('An unexpected error occured while loading emojis!', FAILURE_TOAST_OPTIONS);
 		} finally {
 			loadingEmojis = false;
 		}
@@ -75,7 +77,7 @@
 <Dropdown
 	bind:isOpen={dropdownOpen}
 	placement="bottom"
-	class="ml-3 text-sm h-80 sm:w-3/4 md:w-1/2 lg:w-1/3 bg-gray-100 dark:bg-gray-900"
+	class="ml-3 h-80 bg-gray-100 text-sm sm:w-3/4 md:w-1/2 lg:w-1/3 dark:bg-gray-900"
 >
 	<DropdownHeader class="sticky top-0 bg-gray-100 dark:bg-gray-900">
 		<Search size="md" oninput={handleOnInput} />
@@ -89,7 +91,7 @@
 		<VirtualizedList listHeight={240} data={filteredEmojiChunks}>
 			{#snippet children(chunk)}
 				<div class="flex justify-between px-2 py-1">
-					{#each chunk as [string, string][] as [name, emoji]}
+					{#each chunk as [string, string][] as [name, emoji] (name)}
 						{@const emojiId = getEmojiId(name)}
 						<button
 							id={emojiId}
@@ -98,12 +100,12 @@
 						>
 							{emoji}
 						</button>
-						<Popover triggeredBy="#{emojiId}" class="w-auto text-sm font-light z-50">
+						<Popover triggeredBy="#{emojiId}" class="z-50 w-auto text-sm font-light">
 							{name}
 						</Popover>
 					{/each}
 					{#if (chunk as [string, string][]).length < COMMENT_CONTAINER_EMOJI_CHUNK_SIZE}
-						{#each Array(COMMENT_CONTAINER_EMOJI_CHUNK_SIZE - (chunk as [string, string][]).length) as _}
+						{#each Array(COMMENT_CONTAINER_EMOJI_CHUNK_SIZE - (chunk as [string, string][]).length) as _, i (i)}
 							<div class="w-10"></div>
 						{/each}
 					{/if}

@@ -16,7 +16,7 @@
 		<Spinner />
 	</div>
 {:then rating}
-	<div class="flex items-center space-x-2 !mt-5">
+	<div class="!mt-5 flex items-center space-x-2">
 		<span class="font-semibold text-gray-800 dark:text-gray-300">Estimated Rating:</span>
 		{#if rating}
 			<span class="text-sm text-gray-900 dark:text-gray-100"
@@ -30,7 +30,7 @@
 	</div>
 
 	{#if rating === 'q' || rating === 'e'}
-		<div class="mt-2 p-3 bg-yellow-100 text-yellow-800 rounded-md">
+		<div class="mt-2 rounded-md bg-yellow-100 p-3 text-yellow-800">
 			<strong>Recommendation:</strong> The provided tags are potentially rated as
 			{#if rating === 'q'}
 				{ESTIMATED_TAG_RATING_LABEL_MAP['q']}

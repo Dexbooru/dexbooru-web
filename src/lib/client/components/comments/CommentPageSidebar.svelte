@@ -18,11 +18,11 @@
 			<SidebarDropdownWrapper isOpen={true} label="Order by">
 				{#snippet icon()}
 					<OrderedListOutline
-						class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+						class="h-5 w-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
 					/>
 				{/snippet}
-				{#each Object.values(ORDER_BY_COMMENT_TRANSLATION_MAP) as orderOptions}
-					{#each orderOptions as { label, isActive, getHref }}
+				{#each Object.entries(ORDER_BY_COMMENT_TRANSLATION_MAP) as [column, orderOptions] (column)}
+					{#each orderOptions as { label, isActive, getHref } (label)}
 						<SidebarItem
 							href={getHref(commentsBaseUrl)}
 							{label}

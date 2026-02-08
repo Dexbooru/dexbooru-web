@@ -17,6 +17,6 @@
 	<title>2-factor authentication challenge</title>
 </svelte:head>
 
-<main class="flex justify-center items-center">
+<main class="flex items-center justify-center">
 	<TotpForm {form} {rememberMe} {username} />
 </main>

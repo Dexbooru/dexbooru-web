@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import type { PasswordRecoveryAttempt } from '$generated/prisma/browser';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getChangePasswordAuthRequirements } from '$lib/client/helpers/context';
@@ -41,11 +42,11 @@
 </script>
 
 <Card class="mt-20 p-5">
-	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
+	<h3 class="mb-5 text-center text-xl font-medium text-gray-900 dark:text-white">
 		Account Recovery
 	</h3>
-	<div class="flex-col space-y-1 mb-3">
-		<p class="text-sm text-left text-gray-600 dark:text-gray-400">
+	<div class="mb-3 flex-col space-y-1">
+		<p class="text-left text-sm text-gray-600 dark:text-gray-400">
 			Hey {passwordRecoveryAttempt.user.username}, you're almost there! Just enter your new password
 			below.
 		</p>
@@ -59,7 +60,7 @@
 				passwordUpdating = false;
 
 				if (result.type === 'success') {
-					goto('/login?passwordReset=true', { replaceState: true });
+					goto(resolve('/login?passwordReset=true'), { replaceState: true });
 				} else {
 					toast.push(
 						'An unexpected error occured while updating the password!',

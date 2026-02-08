@@ -20,8 +20,8 @@
 	/>
 </svelte:head>
 
-<main class="container mx-auto px-4 py-8 max-w-4xl">
-	<Heading tag="h1" class="mb-4 text-3xl md:text-4xl font-bold">Search Syntax Guide</Heading>
+<main class="container mx-auto max-w-4xl px-4 py-8">
+	<Heading tag="h1" class="mb-4 text-3xl font-bold md:text-4xl">Search Syntax Guide</Heading>
 	<P class="mb-6 text-lg text-gray-700 dark:text-gray-300">
 		Dexbooru supports a powerful search syntax that allows you to filter posts by various
 		properties, including tags, artists, uploader, statistics, and more. This guide will help you
@@ -35,7 +35,7 @@
 			spaces.
 		</P>
 		<div
-			class="bg-gray-100 dark:bg-gray-800 dark:text-gray-400 p-4 rounded-lg font-mono text-sm mb-4"
+			class="mb-4 rounded-lg bg-gray-100 p-4 font-mono text-sm dark:bg-gray-800 dark:text-gray-400"
 		>
 			naruto goku
 		</div>
@@ -116,7 +116,7 @@
 		<P class="mb-4 text-gray-600 dark:text-gray-400">
 			Operators allow you to refine your search, especially for numerical values and dates.
 		</P>
-		<List tag="ul" class="space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400 mb-6">
+		<List tag="ul" class="mb-6 list-inside list-disc space-y-1 text-gray-500 dark:text-gray-400">
 			<Li><code>=</code> : Equal to (default for strings)</Li>
 			<Li><code>!=</code> : Not equal to</Li>
 			<Li><code>&gt;</code> : Greater than</Li>
@@ -132,17 +132,17 @@
 			You can exclude results by prepending a minus sign (<code>-</code>) to any tag, artist, or
 			prefix filter.
 		</P>
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-			<div class="bg-gray-50 dark:bg-gray-800 p-4 rounded border dark:border-gray-700">
-				<p class="font-mono text-sm mb-2 dark:text-gray-300">-tag_name</p>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+			<div class="rounded border bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+				<p class="mb-2 font-mono text-sm dark:text-gray-300">-tag_name</p>
 				<p class="text-sm text-gray-500">Excludes posts with "tag_name"</p>
 			</div>
-			<div class="bg-gray-50 dark:bg-gray-800 p-4 rounded border dark:border-gray-700">
-				<p class="font-mono text-sm mb-2 dark:text-gray-300">-uploader:banned_user</p>
+			<div class="rounded border bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+				<p class="mb-2 font-mono text-sm dark:text-gray-300">-uploader:banned_user</p>
 				<p class="text-sm text-gray-500">Excludes posts uploaded by "banned_user"</p>
 			</div>
-			<div class="bg-gray-50 dark:bg-gray-800 p-4 rounded border dark:border-gray-700">
-				<p class="font-mono text-sm mb-2 dark:text-gray-300">-sourceTitle:Bleach</p>
+			<div class="rounded border bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+				<p class="mb-2 font-mono text-sm dark:text-gray-300">-sourceTitle:Bleach</p>
 				<p class="text-sm text-gray-500">Excludes posts from the source "Bleach"</p>
 			</div>
 		</div>
@@ -154,24 +154,24 @@
 			Combine multiple filters to find exactly what you want.
 		</P>
 		<div class="space-y-4">
-			<div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-				<p class="font-mono font-bold text-blue-600 dark:text-blue-400 mb-2">
+			<div class="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+				<p class="mb-2 font-mono font-bold text-blue-600 dark:text-blue-400">
 					landscape -portrait views:>5000
 				</p>
 				<p class="text-sm text-gray-600 dark:text-gray-400">
 					Finds posts tagged "landscape" but NOT "portrait" that have more than 5000 views.
 				</p>
 			</div>
-			<div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-				<p class="font-mono font-bold text-blue-600 dark:text-blue-400 mb-2">
+			<div class="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+				<p class="mb-2 font-mono font-bold text-blue-600 dark:text-blue-400">
 					uploader:tanny sourceTitle:Pokemon likes:>=100
 				</p>
 				<p class="text-sm text-gray-600 dark:text-gray-400">
 					Finds Pokemon posts uploaded by "tanny" with 100 or more likes.
 				</p>
 			</div>
-			<div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-				<p class="font-mono font-bold text-blue-600 dark:text-blue-400 mb-2">
+			<div class="rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+				<p class="mb-2 font-mono font-bold text-blue-600 dark:text-blue-400">
 					characterName:Luffy -sourceTitle:One_Piece
 				</p>
 				<p class="text-sm text-gray-600 dark:text-gray-400">

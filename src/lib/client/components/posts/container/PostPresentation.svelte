@@ -41,7 +41,7 @@
 		{#if post.moderationStatus === 'REJECTED'}
 			<Alert color="red" class="mb-4">
 				<div class="flex items-center gap-2">
-					<ExclamationCircleSolid class="w-5 h-5" />
+					<ExclamationCircleSolid class="h-5 w-5" />
 					<span class="font-medium"
 						>This post has been rejected by the moderation team and is not visible to the public.</span
 					>
@@ -50,7 +50,7 @@
 		{:else if post.moderationStatus === 'PENDING'}
 			<Alert color="yellow" class="mb-4">
 				<div class="flex items-center gap-2">
-					<ExclamationCircleSolid class="w-5 h-5" />
+					<ExclamationCircleSolid class="h-5 w-5" />
 					<span class="font-medium">This post is currently pending moderation review.</span>
 				</div>
 			</Alert>
@@ -69,7 +69,7 @@
 		<section class="space-y-2">
 			<p class="text-lg dark:text-white">Anime Info:</p>
 			<div class="flex flex-wrap gap-2">
-				{#each post.sources.filter((s) => s.sourceType === 'ANIME') as source}
+				{#each post.sources.filter((s) => s.sourceType === 'ANIME') as source (source.id)}
 					<a
 						href="/anime/{source.sourceTitle.toLowerCase().replaceAll(' ', '_')}"
 						class="text-blue-500 hover:underline"
@@ -86,7 +86,7 @@
 	{#if $user && $commentTree.getCount() < MAXIMUM_COMMENTS_PER_POST}
 		<CommentTextbox postId={post.id} />
 	{:else if $user}
-		<p class="text-gray-500 dark:text-gray-400 text-lg italic">
+		<p class="text-lg text-gray-500 italic dark:text-gray-400">
 			The maximum of {MAXIMUM_COMMENTS_PER_POST} comments has been reached. Sorry :((
 		</p>
 	{/if}

@@ -51,7 +51,7 @@
 </script>
 
 {#if $commentPaginationData}
-	<div id="pagination-container" class="flex m-3 space-x-3 justify-center">
+	<div id="pagination-container" class="m-3 flex justify-center space-x-3">
 		{#if noCommentsOnPage && !['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $commentPaginationData.pageNumber > 0}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}
@@ -59,9 +59,9 @@
 				<PaginationItem
 					href={previousPageUrl.href}
 					size="large"
-					class="flex items-center previous-page-link"
+					class="previous-page-link flex items-center"
 				>
-					<ArrowLeftOutline class="mr-2 w-5 h-5" />
+					<ArrowLeftOutline class="mr-2 h-5 w-5" />
 					Previous
 				</PaginationItem>
 			{/if}
@@ -70,10 +70,10 @@
 				<PaginationItem
 					href={nextPageUrl.href}
 					size="large"
-					class="flex items-center next-page-link"
+					class="next-page-link flex items-center"
 				>
 					Next
-					<ArrowRightOutline class="ml-2 w-5 h-5" />
+					<ArrowRightOutline class="ml-2 h-5 w-5" />
 				</PaginationItem>
 			{/if}
 		{/if}

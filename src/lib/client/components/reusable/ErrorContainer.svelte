@@ -22,13 +22,13 @@
 </svelte:head>
 
 <section
-	class="flex flex-col mt-20 items-center justify-center text-gray-900 dark:text-gray-100 px-4 sm:px-6 lg:px-8"
+	class="mt-20 flex flex-col items-center justify-center px-4 text-gray-900 sm:px-6 lg:px-8 dark:text-gray-100"
 >
 	{#if page.status === 404}
 		<Img
 			src={Image404}
 			alt="Error 404 Dexbooru Post"
-			class="w-40 h-40 md:w-64 md:h-64"
+			class="h-40 w-40 md:h-64 md:w-64"
 			width="200"
 			height="200"
 			style="aspect-ratio: 200 / 200; object-fit: cover;"
@@ -47,10 +47,10 @@
 			<p class="mt-2 text-lg text-gray-600 dark:text-gray-400">
 				Sorry, we dropped the magnifying glass and couldn't find the resource you were looking for!
 			</p>
-			<p class="mt-2 text-md text-gray-500 dark:text-gray-300">
+			<p class="text-md mt-2 text-gray-500 dark:text-gray-300">
 				You tried to visit the following route:
 			</p>
-			<code class="mt-1 p-2 rounded-md bg-gray-200 dark:bg-gray-800 text-sm font-mono"
+			<code class="mt-1 rounded-md bg-gray-200 p-2 font-mono text-sm dark:bg-gray-800"
 				>{page.url.pathname}
 			</code>
 		{/if}
@@ -60,7 +60,7 @@
 		<Img
 			src={Image404}
 			alt="Error 404 Dexbooru Post"
-			class="w-40 h-40 md:w-64 md:h-64"
+			class="h-40 w-40 md:h-64 md:w-64"
 			width="200"
 			height="200"
 			style="aspect-ratio: 200 / 200; object-fit: cover;"

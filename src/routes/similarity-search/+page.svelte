@@ -35,6 +35,11 @@
 		const target = event.target as HTMLInputElement;
 		if (target.files) {
 			const file = target.files[0];
+			if (!file) {
+				resetFileUploadState(target);
+				return;
+			}
+
 			if (!isFileImage(file)) {
 				toast.push('The provided file was not an image', FAILURE_TOAST_OPTIONS);
 				resetFileUploadState(target);
@@ -110,7 +115,7 @@
 				}
 			};
 		}}
-		class="max-w-md bg-white dark:bg-gray-800 rounded-lg space-y-4 mt-5"
+		class="mt-5 max-w-md space-y-4 rounded-lg bg-white dark:bg-gray-800"
 	>
 		<div class="mb-6 space-y-1">
 			<Label for="post-id-similarity-search" class="dark:text-gray-200 ">Post ID</Label>
@@ -121,7 +126,7 @@
 				id="post-id-similarity-search"
 				placeholder="Enter post ID"
 				size="md"
-				class="w-full dark:text-gray-200 dark:placeholder-gray-400 dark:bg-gray-700"
+				class="w-full dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
 			/>
 		</div>
 
@@ -134,7 +139,7 @@
 				id="image-url-similarity-search"
 				placeholder="Enter image URL"
 				size="md"
-				class="w-full dark:text-gray-200 dark:placeholder-gray-400 dark:bg-gray-700"
+				class="w-full dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
 			/>
 		</div>
 
@@ -144,7 +149,7 @@
 				onchange={onImageFileChange}
 				id="image-file"
 				accept={FILE_IMAGE_ACCEPT.join(',')}
-				class="w-full dark:text-gray-200 dark:placeholder-gray-400 dark:bg-gray-700"
+				class="w-full dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
 			/>
 			<Input name="imageFile" type="hidden" value={imageFile} />
 		</div>
@@ -168,23 +173,23 @@
 	{/if}
 
 	<section
-		class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6 ml-2 mr-2"
+		class="mt-6 mr-2 ml-2 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
 	>
 		{#if resultsLoading}
-			{#each Array(10) as _i}
+			{#each Array(10) as _i (_i)}
 				<ImagePlaceholder />
 			{/each}
 		{/if}
 
 		{#if similarityResults.length > 0}
-			{#each similarityResults as similarityResult}
-				<div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+			{#each similarityResults as similarityResult (similarityResult.post_id)}
+				<div class="rounded-lg bg-white p-4 dark:bg-gray-800">
 					<Img
 						src={similarityResult.image_url}
 						alt="similarity post result for {similarityResult.post_id}"
 						class="w-full object-contain"
 					/>
-					<p class="text-gray-600 dark:text-gray-400 mt-2">
+					<p class="mt-2 text-gray-600 dark:text-gray-400">
 						Similarity Distance: {similarityResult.distance.toFixed(3)}
 					</p>
 					<p class="text-gray-600 dark:text-gray-400">

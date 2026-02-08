@@ -14,9 +14,9 @@
 </script>
 
 <div class="flex flex-wrap gap-1">
-	{#each labels as label}
+	{#each labels as label (label.name)}
 		<div
-			class="text-center inline-flex items-center justify-center space-x-2 border rounded px-2 py-1 text-xs leading-none dark:text-gray-400"
+			class="inline-flex items-center justify-center space-x-2 rounded border px-2 py-1 text-center text-xs leading-none dark:text-gray-400"
 		>
 			<span>
 				{renderLabel(label.name, labelType, false)}

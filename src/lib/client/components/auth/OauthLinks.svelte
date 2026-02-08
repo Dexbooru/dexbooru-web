@@ -84,7 +84,7 @@
 {#if location === 'security-settings'}
 	<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Linked Accounts</h2>
 {:else}
-	<h2 class="text-lg text-center font-semibold text-gray-800 dark:text-gray-200">OR</h2>
+	<h2 class="text-center text-lg font-semibold text-gray-800 dark:text-gray-200">OR</h2>
 	<hr class="dark:text-gray-500" />
 {/if}
 
@@ -100,11 +100,11 @@
 	<div class="flex items-center justify-between space-x-2">
 		<div class="flex items-center space-x-3">
 			{#if platform === 'DISCORD'}
-				<DiscordSolid class="w-8 h-8 text-blue-600 dark:text-blue-400" />
+				<DiscordSolid class="h-8 w-8 text-blue-600 dark:text-blue-400" />
 			{:else if platform === 'GITHUB'}
-				<GithubSolid class="w-8 h-8 text-gray-800 dark:text-gray-200" />
+				<GithubSolid class="h-8 w-8 text-gray-800 dark:text-gray-200" />
 			{:else if platform === 'GOOGLE'}
-				<GoogleSolid class="w-8 h-8 text-red-600 dark:text-red-400" />
+				<GoogleSolid class="h-8 w-8 text-red-600 dark:text-red-400" />
 			{/if}
 
 			<div>
@@ -128,7 +128,7 @@
 				<Button href={authorizationUrl} size="sm" color="alternative">
 					{location === 'login' ? 'Sign in' : 'Link'}
 					{#if location === 'security-settings'}
-						<LinkOutline class="w-4 h-4 ml-2" />
+						<LinkOutline class="ml-2 h-4 w-4" />
 					{/if}
 				</Button>
 			{:else}
@@ -154,7 +154,7 @@
 	</div>
 {/snippet}
 
-<div class="space-y-10 mt-2">
+<div class="mt-2 space-y-10">
 	{@render LinkedAccountCell(
 		'DISCORD',
 		discordAccount,

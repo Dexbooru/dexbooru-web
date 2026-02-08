@@ -48,8 +48,8 @@
 		.filter((waifu) => waifu !== null);
 </script>
 
-<section class="flex mt-5">
-	{#each renderedWaifus as waifu}
-		<img src={waifu.src} alt={waifu.alt} class="w-8 h-8 md:w-12 md:h-12 lg:w-32 lg:h-32" />
+<section class="mt-5 flex">
+	{#each renderedWaifus as waifu, i (i)}
+		<img src={waifu.src} alt={waifu.alt} class="h-8 w-8 md:h-12 md:w-12 lg:h-32 lg:w-32" />
 	{/each}
 </section>

@@ -133,14 +133,14 @@
 </Label>
 
 {#if loadingPictures}
-	<Spinner class="block ml-auto mr-auto" size="10" />
+	<Spinner class="mr-auto ml-auto block" size="10" />
 {:else if images.length > 0}
-	<P size="2xl" class="text-center mt-5">Images Preview</P>
+	<P size="2xl" class="mt-5 text-center">Images Preview</P>
 	<div class="flex flex-wrap space-x-3">
-		{#each images as { imageBase64, file }}
+		{#each images as { imageBase64, file } (imageBase64)}
 			<Button
 				color="alternative"
-				class="w-[200px] h-[200px] bg-no-repeat bg-cover bg-center"
+				class="h-[200px] w-[200px] bg-cover bg-center bg-no-repeat"
 				style="background-image: url({imageBase64});"
 				onclick={() =>
 					activeModal.set({

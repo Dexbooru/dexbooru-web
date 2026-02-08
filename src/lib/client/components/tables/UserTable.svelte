@@ -40,14 +40,14 @@
 			<TableBodyRow>
 				<TableBodyCell class="text-center">
 					<Avatar
-						class="ml-auto mr-auto"
+						class="mr-auto ml-auto"
 						src={user.profilePictureUrl}
 						onerror={onImageError}
 						alt="profile picture of {user.username}"
 					/>
 					<a
 						href="/profile/{user.username}"
-						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+						class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
 					>
 						<HighlightedText query={$globalQuery} fullText={user.username} />
 					</a>
@@ -56,7 +56,7 @@
 				<TableBodyCell>
 					<a
 						href="/profile/{user.username}"
-						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+						class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
 						>View profile</a
 					>
 				</TableBodyCell>

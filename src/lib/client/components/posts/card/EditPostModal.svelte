@@ -156,7 +156,7 @@
 		placeholder="Enter a description"
 		required
 	/>
-	<p class="leading-none dark:text-gray-400 text-right mt-2">
+	<p class="mt-2 text-right leading-none dark:text-gray-400">
 		{description.length}/{MAXIMUM_POST_DESCRIPTION_LENGTH}
 	</p>
 
@@ -168,13 +168,13 @@
 		name="sourceLink"
 		placeholder="Enter the source link"
 		required
-		class="w-full p-2 border border-gray-300 rounded-md"
+		class="w-full rounded-md border border-gray-300 p-2"
 	/>
 
 	<Label class="mb-1" for="edit-post-images">Update the images in this post</Label>
 	<div class="space-y-2">
-		<p class="text-sm mb-5">{uniqueDeletedImagesCount} post image(s) marked for deletion</p>
-		{#each existingPostImageUrls as postImageUrl, index}
+		<p class="mb-5 text-sm">{uniqueDeletedImagesCount} post image(s) marked for deletion</p>
+		{#each existingPostImageUrls as postImageUrl, index (postImageUrl)}
 			<div class="flex items-center justify-between">
 				<Img
 					alt="editing {index + 1} in {post?.id ?? ''}"

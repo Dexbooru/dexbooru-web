@@ -55,7 +55,7 @@
 	</p>
 {/if}
 
-<p class="text-lg dark:text-white whitespace-pre-wrap break-all">
+<p class="text-lg break-all whitespace-pre-wrap dark:text-white">
 	Source link: <a
 		target="_blank"
 		referrerpolicy="no-referrer"
@@ -66,26 +66,26 @@
 </p>
 
 {#if post.sources.length > 0}
-	<p class="text-lg dark:text-white whitespace-pre-wrap">
+	<p class="text-lg whitespace-pre-wrap dark:text-white">
 		Character names: <span class="dark:text-gray-400"
 			>{post.sources.map((source) => source.characterName).join(', ')}</span
 		>
 	</p>
 
-	<p class="text-lg dark:text-white whitespace-pre-wrap">
+	<p class="text-lg whitespace-pre-wrap dark:text-white">
 		Source titles: <span class="dark:text-gray-400"
 			>{post.sources.map((source) => source.sourceTitle).join(', ')}</span
 		>
 	</p>
 
-	<p class="text-lg dark:text-white whitespace-pre-wrap">
+	<p class="text-lg whitespace-pre-wrap dark:text-white">
 		Source types: <span class="dark:text-gray-400"
 			>{post.sources.map((source) => source.sourceType).join(', ')}</span
 		>
 	</p>
 {/if}
 
-<p class="text-lg dark:text-white whitespace-pre-wrap">
+<p class="text-lg whitespace-pre-wrap dark:text-white">
 	Description: <br /><span class="dark:text-gray-400"
 		>{$updatedPost.description ?? post.description}</span
 	>
@@ -132,10 +132,10 @@
 						height="200"
 						alt={post.tagString + post.artistString}
 						src={post.imageUrls[0]}
-						class="w-[200px] h-[200px] object-contain rounded-lg transition-transform duration-200 hover:scale-105"
+						class="h-[200px] w-[200px] rounded-lg object-contain transition-transform duration-200 hover:scale-105"
 					/>
 				</a>
-				<span class="text-sm dark:text-gray-300 text-center mt-2">
+				<span class="mt-2 text-center text-sm dark:text-gray-300">
 					Similarity: {roundNumber(similarities[post.id], 2)}%
 				</span>
 			</div>

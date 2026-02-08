@@ -5,7 +5,7 @@ export const getFaviconFromUrl = (url: string) => {
 	try {
 		const domain = new URL(url).origin;
 		return `${domain}/favicon.ico`;
-	} catch (e) {
+	} catch {
 		return '/default-icon.ico';
 	}
 };

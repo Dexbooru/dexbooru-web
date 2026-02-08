@@ -15,7 +15,7 @@
 		<div
 			class="flex items-center text-base font-semibold text-gray-500 uppercase dark:text-gray-400"
 		>
-			<InfoCircleSolid class="w-5 h-5 me-2.5" />
+			<InfoCircleSolid class="me-2.5 h-5 w-5" />
 			New collection
 		</div>
 	{/snippet}

@@ -1,25 +1,26 @@
-import type {
-    Artist,
-    Comment,
-    Post,
-    PostCollection,
-    PostModerationStatus,
-    Tag,
-    User,
-    UserRole,
-} from '../../src/generated/prisma/client'
 import { faker } from '@faker-js/faker';
+import type {
+	Artist,
+	Comment,
+	Post,
+	PostCollection,
+	PostModerationStatus,
+	Tag,
+	User,
+	UserRole,
+} from '../../src/generated/prisma/client';
 
 const userFactory = (overrides: Partial<User> = {}): User => {
 	return {
 		id: faker.string.uuid(),
-		username: faker.internet.userName().substring(0, 12),
+		username: faker.internet.username().substring(0, 12),
 		createdAt: faker.date.past(),
 		updatedAt: faker.date.recent(),
 		email: faker.internet.email(),
 		profilePictureUrl: faker.image.avatar(),
 		password: faker.internet.password(),
 		role: 'USER' as UserRole,
+		moderationStatus: 'UNFLAGGED',
 		superRolePromotionAt: null,
 		...overrides,
 	};
@@ -50,6 +51,7 @@ const postFactory = (overrides: Partial<Post> = {}): Post => {
 		likes: faker.number.int(1000),
 		views: faker.number.int(10000),
 		moderationStatus: 'PENDING' as PostModerationStatus,
+		imageHashes: [],
 		imageUrls: [faker.image.url()],
 		imageWidths: [faker.number.int({ min: 200, max: 1200 })],
 		imageHeights: [faker.number.int({ min: 200, max: 1200 })],
@@ -66,8 +68,9 @@ const postCollectionFactory = (overrides: Partial<PostCollection> = {}): PostCol
 		id: faker.string.uuid(),
 		title: faker.lorem.words(3),
 		description: faker.lorem.sentence(),
+		moderationStatus: 'UNFLAGGED',
 		isNsfw: faker.datatype.boolean(),
-		thumbnailImageUrls: [faker.image.imageUrl()],
+		thumbnailImageUrls: [faker.image.url()],
 		createdAt: faker.date.past(),
 		updatedAt: faker.date.recent(),
 		authorId: faker.string.uuid(),
@@ -101,7 +104,7 @@ const artistFactory = (overrides: Partial<Artist> = {}): Artist => {
 };
 
 const socialMediaLinkFactory = (): string => {
-	const username = faker.internet.userName();
+	const username = faker.internet.username();
 	const platforms = [
 		`https://www.patreon.com/${username}`,
 		`https://www.instagram.com/${username}`,

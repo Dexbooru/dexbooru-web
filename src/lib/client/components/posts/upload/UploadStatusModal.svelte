@@ -13,7 +13,7 @@
 <Modal bind:open size="xs" dismissable={false} class="w-full">
 	<div class="flex flex-col items-center">
 		<Spinner size="12" />
-		<p class="mt-4 text-lg font-semibold text-gray-900 dark:text-white text-center">
+		<p class="mt-4 text-center text-lg font-semibold text-gray-900 dark:text-white">
 			{statusMessage}
 		</p>
 	</div>

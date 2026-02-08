@@ -59,7 +59,7 @@
 			onclose={handleLabelClose ? (event) => handleLabelClose(event) : undefined}
 			href={labelIsLink ? `/posts/${labelType}/${label}` : undefined}
 			large={labelsAreLarge}
-			class="ml-1 mr-1 mb-1"
+			class="mr-1 mb-1 ml-1"
 			rounded
 			color={labelColor}
 			>{renderLabel(label, labelType, onPostsViewPage)}
@@ -67,7 +67,7 @@
 	{/each}
 </div>
 {#if sliceLabels && labels.length > maximumLabelsLength}
-	<Button size="sm" class="ml-1 mr-1 mb-1" onclick={() => (showAllLabels = !showAllLabels)}
+	<Button size="sm" class="mr-1 mb-1 ml-1" onclick={() => (showAllLabels = !showAllLabels)}
 		>{showAllLabels ? 'Show less' : 'Show all'}
 	</Button>
 {/if}

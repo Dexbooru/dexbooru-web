@@ -41,7 +41,7 @@
 </script>
 
 <Card class="p-6 sm:p-8">
-	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
+	<h3 class="mb-5 text-center text-xl font-medium text-gray-900 dark:text-white">
 		Change Password
 	</h3>
 	<form

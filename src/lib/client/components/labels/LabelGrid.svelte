@@ -25,7 +25,7 @@
 	let finishedLabelPagination = $state(false);
 	let hasLoadedLabelsOnce = $state(false);
 	let labels: string[] = $state([]);
-	let labelCounts = $state(new SvelteMap<string, number>());
+	let labelCounts = new SvelteMap<string, number>();
 	let pageNumber = 0;
 	let selectedLabel = $state('');
 
@@ -36,7 +36,7 @@
 		loadingLabels = true;
 		if (!pressedLoadingMore) {
 			labels = [];
-			labelCounts = new SvelteMap<string, number>();
+			labelCounts.clear();
 			pageNumber = 0;
 			finishedLabelPagination = false;
 			selectedLabel = target.innerText;
@@ -72,27 +72,27 @@
 	};
 </script>
 
-<main class="flex flex-col grow justify-center m-7 space-y-5">
-	<h1 class="text-4xl dark:text-white text-center">
+<main class="m-7 flex grow flex-col justify-center space-y-5">
+	<h1 class="text-center text-4xl dark:text-white">
 		{labelType === 'tag' ? 'Tags' : 'Artists'} Index
 	</h1>
 	<div class="flex flex-wrap">
-		{#each CHAR_OPTIONS_LOWERCASE as option}
+		{#each CHAR_OPTIONS_LOWERCASE as option (option)}
 			<Button
 				disabled={loadingLabels}
 				onclick={(event: Event) => getLabelsOnCurrentPage(event, false)}
-				class="m-2 items-center justify-center  text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 focus-within:ring-gray-200 dark:focus-within:ring-gray-700 rounded-lg"
+				class="m-2 items-center justify-center  rounded-lg border border-gray-300 bg-white text-gray-900 focus-within:ring-gray-200 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-within:ring-gray-700 dark:hover:border-gray-600 dark:hover:bg-gray-700"
 				>{option}</Button
 			>
 		{/each}
 	</div>
 
-	<section class="grid gap-3 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
+	<section class="grid gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 		{#if hasLoadedLabelsOnce}
 			{#if labels.length > 0}
 				{#each labels as label (label)}
 					<a
-						class="text-center inline-flex justify-center space-x-2 border rounded p-2 leading-none dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+						class="inline-flex justify-center space-x-2 rounded border p-2 text-center leading-none hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
 						href="/posts/{labelType}/{encodeURIComponent(label)}"
 					>
 						<span class="mt-0.5"
@@ -112,19 +112,19 @@
 	</section>
 
 	{#if loadingLabels}
-		<Spinner class="ml-auto mr-auto" size="12" />
+		<Spinner class="mr-auto ml-auto" size="12" />
 	{/if}
 
 	{#if labels.length >= MAXIMUM_LABELS_PER_PAGE && !loadingLabels && hasLoadedLabelsOnce && !finishedLabelPagination}
 		<Button
-			class="lg:w-1/3 w-full ml-auto mr-auto"
+			class="mr-auto ml-auto w-full lg:w-1/3"
 			onclick={(event: Event) => getLabelsOnCurrentPage(event, true)}
 			color="blue">Load more {labelType}s</Button
 		>
 	{/if}
 
 	{#if !loadingLabels && hasLoadedLabelsOnce && labels.length === 0}
-		<p class="text-2xl dark:text-white text-center a">
+		<p class="a text-center text-2xl dark:text-white">
 			No {labelType}s were indexed that start with {selectedLabel}
 		</p>
 	{/if}

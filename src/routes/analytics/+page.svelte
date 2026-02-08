@@ -65,7 +65,7 @@
 		>
 			Analytics Dashboard
 		</Heading>
-		<p class="text-gray-500 dark:text-gray-400 sm:text-xl">
+		<p class="text-gray-500 sm:text-xl dark:text-gray-400">
 			Insights into the most popular content on Dexbooru.
 		</p>
 	</div>
@@ -73,14 +73,14 @@
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 		<Card class="w-full max-w-none p-6 lg:p-8">
 			<div class="mb-8 flex items-center justify-center">
-				<h5 class="text-2xl font-bold leading-none text-gray-900 dark:text-white">
+				<h5 class="text-2xl leading-none font-bold text-gray-900 dark:text-white">
 					Top {TOP_K_LABEL_COUNT} Tags by post count
 				</h5>
 			</div>
 			{#if hasTagData}
 				<Chart options={tagOptions} class="py-6" />
 			{:else}
-				<div class="flex min-h-[300px] items-center justify-center">
+				<div class="flex min-h-75 items-center justify-center">
 					<p class="text-center text-gray-500 dark:text-gray-400">Not enough data available.</p>
 				</div>
 			{/if}
@@ -88,14 +88,14 @@
 
 		<Card class="w-full max-w-none p-6 lg:p-8">
 			<div class="mb-8 flex items-center justify-center">
-				<h5 class="text-2xl font-bold leading-none text-gray-900 dark:text-white">
+				<h5 class="text-2xl leading-none font-bold text-gray-900 dark:text-white">
 					Top {TOP_K_LABEL_COUNT} Artists by post count
 				</h5>
 			</div>
 			{#if hasArtistData}
 				<Chart options={artistOptions} class="py-6" />
 			{:else}
-				<div class="flex min-h-[300px] items-center justify-center">
+				<div class="flex min-h-75 items-center justify-center">
 					<p class="text-center text-gray-500 dark:text-gray-400">Not enough data available.</p>
 				</div>
 			{/if}
@@ -105,7 +105,7 @@
 	<div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
 		<Card class="w-full max-w-none p-6 lg:p-8">
 			<div class="mb-8 flex items-center justify-center">
-				<h5 class="text-2xl font-bold leading-none text-gray-900 dark:text-white">
+				<h5 class="text-2xl leading-none font-bold text-gray-900 dark:text-white">
 					Top {topLikedPosts.length} Most Liked Posts over the past {TOP_K_POST_LOOKBACK_HOURS} hour(s)
 				</h5>
 			</div>
@@ -120,9 +120,9 @@
 							<TableHeadCell>Link</TableHeadCell>
 						</TableHead>
 						<TableBody class="divide-y">
-							{#each topLikedPosts as post}
+							{#each topLikedPosts as post (post.id)}
 								<TableBodyRow>
-									<TableBodyCell class="min-w-[150px] whitespace-normal">
+									<TableBodyCell class="min-w-37.5 whitespace-normal">
 										{post.description.length > 50
 											? post.description.slice(0, 50) + '...'
 											: post.description}
@@ -143,7 +143,7 @@
 									<TableBodyCell>
 										<a
 											href="/posts/{post.id}"
-											class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+											class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
 											>View</a
 										>
 									</TableBodyCell>
@@ -153,7 +153,7 @@
 					</Table>
 				</div>
 			{:else}
-				<div class="flex min-h-[300px] items-center justify-center">
+				<div class="flex min-h-75 items-center justify-center">
 					<p class="text-center text-gray-500 dark:text-gray-400">Not enough data available.</p>
 				</div>
 			{/if}
@@ -161,7 +161,7 @@
 
 		<Card class="w-full max-w-none p-6 lg:p-8">
 			<div class="mb-8 flex items-center justify-center">
-				<h5 class="text-2xl font-bold leading-none text-gray-900 dark:text-white">
+				<h5 class="text-2xl leading-none font-bold text-gray-900 dark:text-white">
 					Top {topViewedPosts.length} Most Viewed Posts over the past {TOP_K_POST_LOOKBACK_HOURS} hour(s)
 				</h5>
 			</div>
@@ -176,7 +176,7 @@
 							<TableHeadCell>Link</TableHeadCell>
 						</TableHead>
 						<TableBody class="divide-y">
-							{#each topViewedPosts as post}
+							{#each topViewedPosts as post (post.id)}
 								<TableBodyRow>
 									<TableBodyCell class="min-w-[150px] whitespace-normal">
 										{post.description.length > 50
@@ -199,7 +199,7 @@
 									<TableBodyCell>
 										<a
 											href="/posts/{post.id}"
-											class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+											class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
 											>View</a
 										>
 									</TableBodyCell>

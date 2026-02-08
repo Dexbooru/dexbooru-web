@@ -69,6 +69,8 @@ export const handleUpdateLabelMetadata = async (
 					updatedLabelResource,
 				);
 			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,

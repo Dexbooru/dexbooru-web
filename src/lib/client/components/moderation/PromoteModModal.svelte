@@ -112,7 +112,7 @@
 		name="promotionUsername"
 		placeholder="Enter the username or user id"
 		required
-		class="w-full p-2 border border-gray-300 rounded-md"
+		class="w-full rounded-md border border-gray-300 p-2"
 	/>
 
 	<Label class="mb-1" for="new-role">Select the updated role:</Label>

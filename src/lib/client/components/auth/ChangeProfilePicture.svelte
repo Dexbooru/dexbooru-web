@@ -42,7 +42,7 @@
 </script>
 
 <Card class="p-6 sm:p-8">
-	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
+	<h3 class="mb-5 text-center text-xl font-medium text-gray-900 dark:text-white">
 		Change Profile Picture
 	</h3>
 	<form
@@ -73,7 +73,7 @@
 		class="flex flex-col space-y-3"
 	>
 		<ProfilePictureUpload bind:profilePictureFile isChangingProfilePicture />
-		<span class="dark:text-white text-center">------- OR -------</span>
+		<span class="text-center dark:text-white">------- OR -------</span>
 		<Checkbox onchange={onRemoveProfileCheckedChange} bind:checked={removeProfilePicture}
 			>Remove Profile Picture</Checkbox
 		>

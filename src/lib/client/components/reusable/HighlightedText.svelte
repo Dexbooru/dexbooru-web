@@ -13,7 +13,7 @@
 </script>
 
 <p>
-	{#each fullTextParts as { text, type }}
+	{#each fullTextParts as { text, type }, i (i)}
 		<span class={type === 'highlight' ? 'bg-yellow-400' : ''}>{text}</span>
 	{/each}
 </p>

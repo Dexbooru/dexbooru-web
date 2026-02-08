@@ -13,17 +13,17 @@
 </script>
 
 <div
-	class="p-2 flex justify-center space-x-3 border rounded-lg shadow-sm hover:shadow-md transition-shadow border-gray-300 dark:border-gray-600"
+	class="flex justify-center space-x-3 rounded-lg border border-gray-300 p-2 shadow-sm transition-shadow hover:shadow-md dark:border-gray-600"
 >
 	{#if linkedAccount.platform === 'DISCORD'}
-		<DiscordSolid class="w-8 h-8 text-blue-600 dark:text-blue-400" />
+		<DiscordSolid class="h-8 w-8 text-blue-600 dark:text-blue-400" />
 	{:else if linkedAccount.platform === 'GITHUB'}
-		<GithubSolid class="w-8 h-8 text-gray-800 dark:text-gray-200" />
+		<GithubSolid class="h-8 w-8 text-gray-800 dark:text-gray-200" />
 	{:else if linkedAccount.platform === 'GOOGLE'}
-		<GoogleSolid class="w-8 h-8 text-red-600 dark:text-red-400" />
+		<GoogleSolid class="h-8 w-8 text-red-600 dark:text-red-400" />
 	{/if}
 
-	<span class="text-md font-medium mt-1 text-gray-500 dark:text-gray-400">
+	<span class="text-md mt-1 font-medium text-gray-500 dark:text-gray-400">
 		{capitalize(linkedAccount.platform)}: {linkedAccount.platformUsername}
 	</span>
 </div>

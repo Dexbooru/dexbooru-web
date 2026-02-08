@@ -29,8 +29,8 @@
 
 	let userCollectionsLoading: boolean = $state(false);
 	let userCollectionsSaving: boolean = $state(false);
-	let originalSelectedSelections = $state<SvelteMap<string, 'add' | 'delete'>>(new SvelteMap());
-	let selectedCollections = $state<SvelteMap<string, 'add' | 'delete'>>(new SvelteMap());
+	let originalSelectedSelections = new SvelteMap<string, 'add' | 'delete'>();
+	let selectedCollections = new SvelteMap<string, 'add' | 'delete'>();
 	let currentPostId: string = $state('');
 	let currentPost: TPost = $state(EMPTY_POST);
 
@@ -78,7 +78,7 @@
 	const handleSave = async () => {
 		userCollectionsSaving = true;
 
-		const updatedCollectionMap = new Map<string, 'add' | 'delete'>();
+		const updatedCollectionMap = new SvelteMap<string, 'add' | 'delete'>();
 		for (const [collectionId, selectedAction] of selectedCollections.entries()) {
 			const originalAction = originalSelectedSelections.get(collectionId);
 			if (selectedAction !== originalAction) {
@@ -151,7 +151,7 @@
 	outsideclose
 	title="Add/remove this post from your collections"
 >
-	<div class="flex flex-wrap -mx-2">
+	<div class="-mx-2 flex flex-wrap">
 		{#if $userCollections.length === 0}
 			<p class="m-2">
 				<span>You haven't created any collections yet!</span>
@@ -171,9 +171,9 @@
 				<section class="flex flex-wrap gap-4">
 					{#each $userCollections as collection (collection.id)}
 						<div
-							class="border border-gray-200 rounded-lg p-4 dark:border-gray-700 h-full flex flex-col"
+							class="flex h-full flex-col rounded-lg border border-gray-200 p-4 dark:border-gray-700"
 						>
-							<div class="flex space-x-3 mb-2">
+							<div class="mb-2 flex space-x-3">
 								<h4 class="text-lg font-semibold text-gray-900 dark:text-white">
 									{collection.title.length <= COLLECTION_TITLE_UPDATE_MODAL_MAXIMUM_LENGTH
 										? collection.title
@@ -189,7 +189,7 @@
 									onchange={() => handleCollectionCheck(collection.id)}
 								/>
 							</div>
-							<p class="text-sm text-gray-600 dark:text-gray-400 flex-grow">
+							<p class="flex-grow text-sm text-gray-600 dark:text-gray-400">
 								{collection.posts.length} posts
 							</p>
 						</div>

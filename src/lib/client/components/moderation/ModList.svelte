@@ -131,8 +131,8 @@
 
 {#if $moderationData}
 	<section id={containerId}>
-		<div class="flex flex-wrap space-x-5 mb-5">
-			<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-1">
+		<div class="mb-5 flex flex-wrap space-x-5">
+			<h2 class="mt-1 text-lg font-semibold text-gray-800 dark:text-gray-200">
 				{formatNumberWithCommas(moderators.length)} moderators
 				{#if filterRole !== '' || sortingCriteria !== ''}
 					-
@@ -156,7 +156,7 @@
 			{/if}
 		</div>
 
-		<div class="flex flex-wrap mb-5 space-x-2">
+		<div class="mb-5 flex flex-wrap space-x-2">
 			<Searchbar
 				queryChangeHandler={handleQueryChange}
 				width="35%"
@@ -166,7 +166,7 @@
 			/>
 			<Select
 				id="moderation-list-role-selector"
-				class="w-100 ml-3"
+				class="ml-3 w-100"
 				onchange={handleRoleChange}
 				bind:value={filterRole}
 				items={[
@@ -176,7 +176,7 @@
 			/>
 			<Select
 				id="moderation-list-sorting-selector"
-				class="w-100 ml-3"
+				class="ml-3 w-100"
 				onchange={handleSortingCriteriaChange}
 				bind:value={sortingCriteria}
 				items={[
@@ -192,7 +192,7 @@
 				{#each moderators as moderator (moderator.id)}
 					<ListgroupItem
 						key={moderator.id}
-						class="text-base font-semibold gap-4 flex items-center py-3 hover:bg-gray-100 dark:hover:bg-gray-700 justify-between"
+						class="flex items-center justify-between gap-4 py-3 text-base font-semibold hover:bg-gray-100 dark:hover:bg-gray-700"
 					>
 						<div class="flex items-center gap-3">
 							<Avatar

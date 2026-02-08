@@ -38,16 +38,16 @@
 	});
 </script>
 
-<div class="flex items-center justify-center mt-40">
-	<div class="p-6 space-y-6 bg-white rounded-lg shadow-lg dark:bg-gray-900">
-		<h1 class="text-2xl font-semibold text-center text-gray-800 dark:text-gray-100">
+<div class="mt-40 flex items-center justify-center">
+	<div class="space-y-6 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900">
+		<h1 class="text-center text-2xl font-semibold text-gray-800 dark:text-gray-100">
 			{#if oauthProcessing}
 				Processing your third-party sign in from your {capitalize(applicationName)} account...
 				<Spinner />
 			{/if}
 		</h1>
 		{#if hasOauthError}
-			<p class="text-sm text-center text-gray-600 dark:text-gray-400">
+			<p class="text-center text-sm text-gray-600 dark:text-gray-400">
 				Please try again. Redirecting you to the login page...
 			</p>
 		{/if}

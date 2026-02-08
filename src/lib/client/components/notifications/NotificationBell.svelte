@@ -12,14 +12,14 @@
 
 <div
 	id="notification-bell"
-	class="cursor-pointer inline-flex mr-3 items-center text-sm font-medium text-center text-gray-500 hover:text-gray-900 focus:outline-none dark:hover:text-white dark:text-gray-400"
+	class="mr-3 inline-flex cursor-pointer items-center text-center text-sm font-medium text-gray-500 hover:text-gray-900 focus:outline-none dark:text-gray-400 dark:hover:text-white"
 >
-	<BellSolid class="w-5 h-5kj" />
+	<BellSolid class="h-5kj w-5" />
 
-	<div class="flex relative">
+	<div class="relative flex">
 		{#if notificationCount > 0}
 			<div
-				class="inline-flex relative -top-3 end-2 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 text-white"
+				class="relative end-2 -top-3 inline-flex h-4 w-4 rounded-full border-2 border-white bg-red-500 text-white dark:border-gray-900"
 			>
 				<Indicator color="blue" border size="xl" placement="top-right" class="text-xs font-bold"
 					>{normalizeCount(notificationCount || 0)}</Indicator

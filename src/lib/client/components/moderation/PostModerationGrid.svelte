@@ -34,20 +34,20 @@
 
 {#if posts.length === 0 && !loadingPosts}
 	<div
-		class="flex flex-col justify-center items-center py-20 text-center bg-gray-50 dark:bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700"
+		class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 py-20 text-center dark:border-gray-700 dark:bg-gray-800/30"
 	>
-		<div class="p-4 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-			<ExclamationCircleSolid class="w-12 h-12 text-gray-400" />
+		<div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-800">
+			<ExclamationCircleSolid class="h-12 w-12 text-gray-400" />
 		</div>
-		<h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">No pending posts</h3>
-		<p class="text-gray-500 dark:text-gray-400 max-w-sm">
+		<h3 class="mb-1 text-xl font-semibold text-gray-900 dark:text-white">No pending posts</h3>
+		<p class="max-w-sm text-gray-500 dark:text-gray-400">
 			All new posts have been reviewed. Great job!
 		</p>
 	</div>
 {:else}
 	<section id={containerId} class="space-y-8">
 		<div
-			class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
+			class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
 		>
 			{#each posts as post (post.id)}
 				<PostModerationCard {post} />
@@ -55,8 +55,8 @@
 		</div>
 
 		{#if loadingPosts}
-			<div class="flex justify-center items-center py-8">
-				<Spinner class="w-10 h-10 text-primary-500" />
+			<div class="flex items-center justify-center py-8">
+				<Spinner class="text-primary-500 h-10 w-10" />
 			</div>
 		{:else if posts.length >= MAXIMUM_POSTS_PER_PAGE}
 			<div class="flex justify-center pt-4">

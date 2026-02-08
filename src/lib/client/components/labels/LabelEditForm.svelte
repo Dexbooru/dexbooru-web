@@ -86,7 +86,7 @@
 {:else}
 	<div class="flex flex-col">
 		{#if labelType === 'tag'}
-			<Label class="space-y-2 mb-3">
+			<Label class="mb-3 space-y-2">
 				<span>Description:</span>
 				<Textarea
 					class="w-full"
@@ -98,7 +98,7 @@
 				/>
 			</Label>
 		{:else}
-			<Label class="space-y-2 mb-3">
+			<Label class="mb-3 space-y-2">
 				<span>Description:</span>
 				<Textarea
 					class="w-full"
@@ -109,8 +109,8 @@
 					placeholder="Enter a artist description here"
 				/>
 			</Label>
-			<Label class="space-y-2 mb-3">
-				<div class="flex justify-between !items-center">
+			<Label class="mb-3 space-y-2">
+				<div class="flex !items-center justify-between">
 					<span>Social media links:</span>
 					<Button
 						disabled={socialMediaLinks.length === MAXIMUM_ARTIST_SOCIAL_MEDIAS_LENGTH}
@@ -123,7 +123,7 @@
 				</div>
 
 				<ul class="!mt-5 block space-y-3">
-					{#each socialMediaLinks as link, index}
+					{#each socialMediaLinks as link, index (index)}
 						<li>
 							<div class="flex space-x-3">
 								<Input

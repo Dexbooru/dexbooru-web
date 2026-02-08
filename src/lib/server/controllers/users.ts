@@ -302,8 +302,6 @@ export const handleSendForgotPasswordEmail = async (event: RequestEvent) => {
 					'The password recovery email was sent successfully',
 				);
 			} catch (error) {
-				console.error(error);
-
 				logger.error(error);
 
 				return createErrorResponse(
@@ -451,6 +449,8 @@ export const handleUpdateUserInterfacePreferences = async (event: RequestEvent) 
 					{ data },
 				);
 			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -621,6 +621,8 @@ export const handleGetUser = async (
 				},
 			);
 		} catch (error) {
+			logger.error(error);
+
 			return createErrorResponse(
 				handlerType,
 				500,
@@ -686,6 +688,8 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 					},
 				);
 			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'form-action',
 					500,
@@ -1165,6 +1169,8 @@ export const handleGenerateUserTotpData = async (event: RequestEvent) => {
 					},
 				);
 			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,

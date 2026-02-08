@@ -32,18 +32,18 @@
 	});
 </script>
 
-<Card class="w-full max-w-md mt-20">
+<Card class="mt-20 w-full max-w-md">
 	<form class="flex flex-col space-y-6" method="POST">
-		<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">
+		<h3 class="text-center text-xl font-medium text-gray-900 dark:text-white">
 			Complete OTP Challenge
 		</h3>
-		<p class="text-sm text-center text-gray-500 dark:text-gray-300">
+		<p class="text-center text-sm text-gray-500 dark:text-gray-300">
 			Hello, <span class="font-semibold">{username}</span>! Please enter the
 			<strong>{TOTP_CODE_LENGTH}-digit code</strong> from your authenticator app to complete the authentication.
 		</p>
-		<p class="text-sm text-center text-gray-500 dark:text-gray-300">
-			You have <strong>{Math.floor(TOTP_CHALLENGE_EXPIRY_SECONDS / 60)} minutes</strong> to complete
-			the challenge. If the time expires, you'll need to log in again.
+		<p class="text-center text-sm text-gray-500 dark:text-gray-300">
+			You have <strong>{Math.floor(TOTP_CHALLENGE_EXPIRY_SECONDS / 60)} minutes</strong> to complete the
+			challenge. If the time expires, you'll need to log in again.
 		</p>
 
 		<Label class="space-y-2">

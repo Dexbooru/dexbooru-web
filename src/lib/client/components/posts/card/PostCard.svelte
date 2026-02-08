@@ -75,10 +75,10 @@
 		{#if isNsfw && $userPreferences.autoBlurNsfw && $activeModal.focusedModalName !== HIDDEN_POSTS_MODAL_NAME}
 			<Toast
 				dismissable={false}
-				class="w-full max-w-xs p-4 text-gray-500 bg-white shadow dark:text-gray-400 dark:bg-gray-700 gap-3 mt-2 mb-2"
+				class="mt-2 mb-2 w-full max-w-xs gap-3 bg-white p-4 text-gray-500 shadow dark:bg-gray-700 dark:text-gray-400"
 				contentClass="flex space-x-4 rtl:space-x-reverse divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-700"
 			>
-				<ExclamationCircleSolid class="w-5 h-5 text-primary-600 dark:text-primary-500" />
+				<ExclamationCircleSolid class="text-primary-600 dark:text-primary-500 h-5 w-5" />
 				<div class="ps-4 text-sm font-normal">This post is marked as NSFW!</div>
 			</Toast>
 		{/if}

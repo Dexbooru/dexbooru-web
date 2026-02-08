@@ -36,6 +36,7 @@
 		isOpen: boolean;
 	};
 
+	// eslint-disable-next-line no-useless-assignment
 	let { isOpen = $bindable() }: Props = $props();
 
 	let collectionCreating: boolean = $state(false);
@@ -169,7 +170,7 @@
 	class="mb-6"
 >
 	<div class="mb-6">
-		<Label for="title" class="block mb-2 "
+		<Label for="title" class="mb-2 block "
 			>Title (max of {MAXIMUM_COLLECTION_TITLE_LENGTH} characters):</Label
 		>
 		<Input
@@ -179,7 +180,7 @@
 			required
 			placeholder="Enter a title"
 		/>
-		<p class="leading-none dark:text-gray-400 text-right mt-2">
+		<p class="mt-2 text-right leading-none dark:text-gray-400">
 			{title.length}/{MAXIMUM_COLLECTION_TITLE_LENGTH}
 		</p>
 	</div>
@@ -195,7 +196,7 @@
 			bind:value={description}
 			class="w-full"
 		/>
-		<p class="leading-none dark:text-gray-400 text-right mt-2">
+		<p class="mt-2 text-right leading-none dark:text-gray-400">
 			{description.length}/{MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
 		</p>
 	</div>
@@ -221,7 +222,7 @@
 	{:else if thumbnailBase64.length > 0 && thumbnailFile !== undefined}
 		<Img
 			src={thumbnailBase64}
-			class="mt-3 mb-3 block object-cover m-auto !w-[{COLLECTION_THUMBNAIL_WIDTH}px] !h-[{COLLECTION_THUMBNAIL_HEIGHT}px]"
+			class="m-auto mt-3 mb-3 block object-cover !w-[{COLLECTION_THUMBNAIL_WIDTH}px] !h-[{COLLECTION_THUMBNAIL_HEIGHT}px]"
 			alt="collection thumbnial preview of {thumbnailFile?.name}"
 		/>
 	{/if}
@@ -231,6 +232,6 @@
 		type="submit"
 		class="w-full {thumbnailFile !== null && 'mt-5 mb-10'}"
 	>
-		<CalendarEditSolid class="w-3.5 h-3.5 me-2.5 text-white" /> Create collection
+		<CalendarEditSolid class="me-2.5 h-3.5 w-3.5 text-white" /> Create collection
 	</Button>
 </form>

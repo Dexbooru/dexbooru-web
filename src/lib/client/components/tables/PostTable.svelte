@@ -39,27 +39,27 @@
 	<TableBody class="divide-y">
 		{#each posts ?? [] as post (post.id)}
 			<TableBodyRow>
-				<TableBodyCell class="px-1 py-4 whitespace-wrap font-medium">
+				<TableBodyCell class="whitespace-wrap px-1 py-4 font-medium">
 					<HighlightedText query={$globalQuery} fullText={post.description} />
 				</TableBodyCell>
 				<TableBodyCell>{formatDate(new Date(post.createdAt))}</TableBodyCell>
 				<TableBodyCell class="text-center">
 					<Avatar
-						class="ml-auto mr-auto"
+						class="mr-auto ml-auto"
 						src={post.uploaderProfilePictureUrl}
 						alt="profile picture of {post.uploaderName}"
 						onerror={onImageError}
 					/>
 					<a
 						href="/profile/{post.uploaderName}"
-						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+						class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
 						>{post.uploaderName}</a
 					>
 				</TableBodyCell>
 				<TableBodyCell>
 					<a
 						href="/posts/{post.id}"
-						class="font-medium text-primary-600 hover:underline dark:text-primary-500">View post</a
+						class="text-primary-600 dark:text-primary-500 font-medium hover:underline">View post</a
 					>
 				</TableBodyCell>
 			</TableBodyRow>

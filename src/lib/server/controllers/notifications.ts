@@ -6,6 +6,7 @@ import {
 	validateAndHandleRequest,
 } from '../helpers/controllers';
 import type { TRequestSchema } from '../types/controllers';
+import logger from '../logging/logger';
 
 const GetNotificationsSchema = {} satisfies TRequestSchema;
 
@@ -25,6 +26,8 @@ export const handleGetNotifications = async (event: RequestEvent) => {
 					notificationData,
 				);
 			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,

@@ -9,6 +9,7 @@
 	import PlusOutline from 'flowbite-svelte-icons/PlusOutline.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import { onMount } from 'svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 	import CollectionCreateModal from '../CollectionCreateModal.svelte';
 	import CollectionPageSidebar from './CollectionPageSidebar.svelte';
 	import CollectionPaginator from './CollectionPaginator.svelte';
@@ -30,7 +31,7 @@
 	const collectionsUsername = page.params.username;
 
 	const collectionPageUnsubscribe = collectionPage.subscribe((collections) => {
-		const collectionAuthorMap = new Map<
+		const collectionAuthorMap = new SvelteMap<
 			string,
 			{ id: string; username: string; profilePictureUrl: string }
 		>();
@@ -53,15 +54,15 @@
 		<div id="collection-container-sidebar">
 			<CollectionPageSidebar {uniqueAuthors} />
 		</div>
-		<div id="collection-container-body" class="space-y-4 mb-5">
+		<div id="collection-container-body" class="mb-5 space-y-4">
 			<div id="collection-container-title" class="block space-y-3">
-				<h1 class="lg:text-4xl md:text-3xl sm:text-3xl text-lg dark:text-white">
+				<h1 class="text-lg sm:text-3xl md:text-3xl lg:text-4xl dark:text-white">
 					{collectionContainerTitle}
 				</h1>
 				{#if $user && (pathname === '/collections' || pathname === '/collections/created' || (pathname.includes('collections/users') && collectionsUsername === $user.username))}
 					<Button
 						onclick={() => (isCollectionCreateModalOpen = true)}
-						class="w-full sm:w-[20rem] sm:mr-auto sm:ml-auto md:ml-0 md:mr-auto"
+						class="w-full sm:mr-auto sm:ml-auto sm:w-[20rem] md:mr-auto md:ml-0"
 					>
 						Create collection
 						<PlusOutline class="ml-3" />

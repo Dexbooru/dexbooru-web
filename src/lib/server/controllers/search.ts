@@ -18,6 +18,7 @@ import {
 } from '../helpers/controllers';
 import QueryBuilder from '../helpers/search';
 import { cacheResponseRemotely, getRemoteResponseFromCache } from '../helpers/sessions';
+import logger from '../logging/logger';
 import type { TControllerHandlerVariant } from '../types/controllers';
 import {
 	CACHE_TIME_NO_RESULTS_SECONDS,
@@ -151,6 +152,8 @@ export const handleGetSearchResults = async (event: RequestEvent) => {
 					finalSearchResults,
 				);
 			} catch (error) {
+				logger.error(error);
+
 				return createErrorResponse(
 					'api-route',
 					500,

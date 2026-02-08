@@ -24,15 +24,15 @@
 
 <Dropdown
 	triggeredBy="#notification-bell"
-	class="w-full max-w-sm rounded divide-y divide-gray-100 shadow dark:bg-gray-800 dark:divide-gray-700"
+	class="w-full max-w-sm divide-y divide-gray-100 rounded shadow dark:divide-gray-700 dark:bg-gray-800"
 >
 	{#snippet header()}
-		<div class="text-center py-2 font-bold">Notifications ({notificationCount})</div>
+		<div class="py-2 text-center font-bold">Notifications ({notificationCount})</div>
 	{/snippet}
 	{#if notificationCount > 0}{:else}
-		<div class="p-4 text-center space-y-2 flex-col justify-center">
+		<div class="flex-col justify-center space-y-2 p-4 text-center">
 			<p>We have nothing for you at the moment!</p>
-			<BullhornSolid class="ml-auto mr-auto" />
+			<BullhornSolid class="mr-auto ml-auto" />
 		</div>
 	{/if}
 </Dropdown>

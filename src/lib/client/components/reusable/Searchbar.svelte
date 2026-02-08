@@ -66,8 +66,8 @@
 </script>
 
 <div class="relative {!isGlobal && 'mr-4'} {customClass} " style="width: {width}">
-	<div class="flex absolute inset-y-0 start-0 items-center ps-3 pointer-events-none">
-		<SearchOutline class="w-4 h-5 text-gray-500 dark:text-gray-400" />
+	<div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+		<SearchOutline class="z-30 h-5 w-4 text-gray-500 dark:text-gray-400" />
 	</div>
 	<Input
 		{autofocus}

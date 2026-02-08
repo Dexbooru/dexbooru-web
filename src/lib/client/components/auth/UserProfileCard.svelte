@@ -74,11 +74,11 @@
 	};
 </script>
 
-<Card class="mx-4 sm:mx-auto p-4 sm:p-6" style="min-width: 300px; max-width: 550px;">
+<Card class="mx-4 p-4 sm:mx-auto sm:p-6" style="min-width: 300px; max-width: 550px;">
 	{#if targetUser.moderationStatus === 'FLAGGED'}
 		<Alert color="red" class="mb-4">
 			<div class="flex items-center gap-2">
-				<ExclamationCircleSolid class="w-5 h-5" />
+				<ExclamationCircleSolid class="h-5 w-5" />
 				<span class="font-medium">This account has been flagged by the moderation team.</span>
 			</div>
 		</Alert>
@@ -107,7 +107,7 @@
 				<strong>{targetUser.email.toLocaleLowerCase()}</strong></span
 			>
 		{/if}
-		<hr class="border-0 h-px bg-gray-300 dark:bg-gray-600 my-2" />
+		<hr class="my-2 h-px border-0 bg-gray-300 dark:bg-gray-600" />
 
 		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Total posts:
@@ -130,7 +130,7 @@
 			<strong>{userStatistics.averageViews}</strong></span
 		>
 
-		<div class="flex flex-col mt-5 space-y-3">
+		<div class="mt-5 flex flex-col space-y-3">
 			{#if $user && $user.id !== targetUser.id}
 				<Button
 					color="yellow"
@@ -186,10 +186,10 @@
 		</div>
 
 		{#if linkedAccounts.length > 0}
-			<div class="flex flex-col mt-3 space-y-3">
+			<div class="mt-3 flex flex-col space-y-3">
 				<p class="text-gray-500 dark:text-gray-400">Connected social media platforms:</p>
 				<div class="flex flex-col space-y-4">
-					{#each linkedAccounts as linkedAccount}
+					{#each linkedAccounts as linkedAccount (linkedAccount.id)}
 						<OauthIcon {linkedAccount} />
 					{/each}
 				</div>

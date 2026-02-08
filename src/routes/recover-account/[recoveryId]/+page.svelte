@@ -13,6 +13,6 @@
 	<title>Password Recovery for {data.recoveryAttempt.user.username}</title>
 </svelte:head>
 
-<main class="flex justify-center items-center">
+<main class="flex items-center justify-center">
 	<RecoverAccountForm passwordRecoveryAttempt={data.recoveryAttempt} />
 </main>

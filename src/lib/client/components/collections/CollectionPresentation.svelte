@@ -104,7 +104,7 @@
 {#if collection.moderationStatus === 'FLAGGED'}
 	<Alert color="red" class="mb-4">
 		<div class="flex items-center gap-2">
-			<ExclamationCircleSolid class="w-5 h-5" />
+			<ExclamationCircleSolid class="h-5 w-5" />
 			<span class="font-medium"
 				>This collection has been flagged by the moderation team for content violations.</span
 			>
@@ -113,7 +113,7 @@
 {/if}
 
 {#if showResizeAlert && resizeRatios.length > 0}
-	<Alert class="p-4 gap-3 text-sm mb-4" color="yellow">
+	<Alert class="mb-4 gap-3 p-4 text-sm" color="yellow">
 		<span class="font-medium"
 			>Image resized to {resizeRatios[0]}% of original size for better viewing.</span
 		>
@@ -122,7 +122,7 @@
 {/if}
 
 <Img
-	class="whole-collection-image max-w-full h-auto rounded-lg shadow-lg mb-6"
+	class="whole-collection-image mb-6 h-auto max-w-full rounded-lg shadow-lg"
 	onerror={onImageError}
 	onload={onImageLoad}
 	src={originalThumbnail}
@@ -130,45 +130,45 @@
 	width={resizedImageDims.imageWidth > 0 ? resizedImageDims.imageWidth : undefined}
 	height={resizedImageDims.imageHeight > 0 ? resizedImageDims.imageHeight : undefined}
 />
-<div class="flex mb-6">
+<div class="mb-6 flex">
 	<CollectionActions onCollectionViewPage {collection} />
 </div>
 
 <section
-	class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-sm mb-8 border dark:border-gray-700"
+	class="mb-8 grid grid-cols-1 gap-4 rounded-xl border bg-gray-50 p-6 shadow-sm md:grid-cols-2 dark:border-gray-700 dark:bg-gray-800"
 >
 	<div class="space-y-1">
-		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+		<p class="text-sm font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
 			ID
 		</p>
-		<p class="text-lg font-medium dark:text-white break-all">{collection.id}</p>
+		<p class="text-lg font-medium break-all dark:text-white">{collection.id}</p>
 	</div>
 
 	<div class="space-y-1">
-		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+		<p class="text-sm font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
 			Uploaded at
 		</p>
 		<p class="text-lg font-medium dark:text-white">{formatDate(collection.createdAt)}</p>
 	</div>
 
 	<div class="space-y-1">
-		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+		<p class="text-sm font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
 			Last updated at
 		</p>
 		<p class="text-lg font-medium dark:text-white">{formatDate(collection.updatedAt)}</p>
 	</div>
 
 	<div class="space-y-1">
-		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+		<p class="text-sm font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
 			Author
 		</p>
 		<p class="text-lg font-medium dark:text-white">
 			{#if collection.author}
 				<a
-					class="hover:underline text-primary-600 dark:text-primary-500"
+					class="text-primary-600 dark:text-primary-500 hover:underline"
 					href="/profile/{collection.author.username}">{collection.author.username}</a
 				>
-				<span class="text-sm text-gray-400 ml-2">({collection.author.id})</span>
+				<span class="ml-2 text-sm text-gray-400">({collection.author.id})</span>
 			{:else}
 				{DELETED_ACCOUNT_HEADING}
 			{/if}
@@ -176,7 +176,7 @@
 	</div>
 
 	<div class="space-y-1">
-		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+		<p class="text-sm font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
 			Total posts
 		</p>
 		<p class="text-lg font-medium dark:text-white">
@@ -185,7 +185,7 @@
 	</div>
 
 	<div class="space-y-1">
-		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+		<p class="text-sm font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
 			Is NSFW?
 		</p>
 		<p class="text-lg font-medium dark:text-white">
@@ -196,21 +196,21 @@
 	</div>
 
 	<div class="space-y-1 md:col-span-2">
-		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+		<p class="text-sm font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
 			Title
 		</p>
-		<p id="collection-title" class="text-lg font-medium dark:text-white whitespace-pre-wrap">
+		<p id="collection-title" class="text-lg font-medium whitespace-pre-wrap dark:text-white">
 			{collection.title}
 		</p>
 	</div>
 
 	<div class="space-y-1 md:col-span-2">
-		<p class="text-sm text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+		<p class="text-sm font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
 			Description
 		</p>
 		<p
 			id="collection-description"
-			class="text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed"
+			class="text-base leading-relaxed whitespace-pre-wrap text-gray-700 dark:text-gray-300"
 		>
 			{collection.description}
 		</p>
@@ -218,19 +218,19 @@
 </section>
 
 {#if collection.posts.length > 0}
-	<h2 class="text-2xl font-bold dark:text-white mt-8 mb-6 flex items-center gap-3">
+	<h2 class="mt-8 mb-6 flex items-center gap-3 text-2xl font-bold dark:text-white">
 		Posts in this Collection
 		<span
-			class="text-sm font-normal text-gray-500 dark:text-gray-400 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full"
+			class="rounded-full bg-gray-100 px-3 py-1 text-sm font-normal text-gray-500 dark:bg-gray-800 dark:text-gray-400"
 		>
 			{collection.posts.length}
 		</span>
 	</h2>
-	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+	<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 		{#each collection.posts as post (post.id)}
 			<div
 				animate:flip={{ duration: POSTS_GRID_ANIMATION_DURATION_MS }}
-				class="flex justify-center w-full"
+				class="flex w-full justify-center"
 			>
 				<div class="w-full max-w-sm">
 					<PostCard {post} />

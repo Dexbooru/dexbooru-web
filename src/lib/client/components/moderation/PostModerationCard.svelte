@@ -40,7 +40,7 @@
 </script>
 
 <Card
-	class="w-full max-w-none shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col h-full overflow-hidden p-0"
+	class="flex h-full w-full max-w-none flex-col overflow-hidden p-0 shadow-md transition-shadow duration-200 hover:shadow-lg"
 >
 	<div class="relative h-48 w-full bg-gray-100 dark:bg-gray-800">
 		<img src={previewImageUrl} alt={post.description} class="h-full w-full object-cover" />
@@ -56,14 +56,14 @@
 		{/if}
 	</div>
 
-	<div class="p-4 flex flex-col grow">
-		<h3 class="text-lg font-bold text-gray-900 dark:text-white line-clamp-1 mb-2">
+	<div class="flex grow flex-col p-4">
+		<h3 class="mb-2 line-clamp-1 text-lg font-bold text-gray-900 dark:text-white">
 			{post.description || 'No description'}
 		</h3>
 
-		<div class="space-y-2 grow">
+		<div class="grow space-y-2">
 			<div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-				<ClockOutline class="w-4 h-4" />
+				<ClockOutline class="h-4 w-4" />
 				<span>{formatDate(new Date(post.createdAt))}</span>
 			</div>
 			<div class="text-sm text-gray-600 dark:text-gray-300">
@@ -72,14 +72,14 @@
 			</div>
 		</div>
 
-		<div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+		<div class="mt-4 border-t border-gray-100 pt-4 dark:border-gray-700">
 			<Button
 				size="sm"
-				class="w-full flex items-center justify-center gap-2"
+				class="flex w-full items-center justify-center gap-2"
 				color="alternative"
 				onclick={() => (isModalOpen = true)}
 			>
-				<SearchOutline class="w-4 h-4" />
+				<SearchOutline class="h-4 w-4" />
 				Inspect Post
 			</Button>
 		</div>

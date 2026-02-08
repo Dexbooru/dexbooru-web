@@ -31,11 +31,11 @@
 			>
 				{#snippet icon()}
 					<OrderedListOutline
-						class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+						class="h-5 w-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
 					/>
 				{/snippet}
-				{#each Object.values(ORDER_BY_TRANSLATION_MAP) as orderOptions}
-					{#each orderOptions as { label, isActive, getHref }}
+				{#each Object.entries(ORDER_BY_TRANSLATION_MAP) as [column, orderOptions] (column)}
+					{#each orderOptions as { label, isActive, getHref } (label)}
 						<SidebarItem
 							href={getHref(postsBaseUrl)}
 							{label}
@@ -47,7 +47,7 @@
 			<SidebarDropdownWrapper label="All Tags">
 				{#snippet icon()}
 					<TagSolid
-						class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+						class="h-5 w-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
 					/>
 				{/snippet}
 				<LabelContainer labelType="tag" labelsAreLarge labels={uniqueTags} />
@@ -55,7 +55,7 @@
 			<SidebarDropdownWrapper label="All Artists">
 				{#snippet icon()}
 					<PalleteSolid
-						class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+						class="h-5 w-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
 					/>
 				{/snippet}
 				<LabelContainer

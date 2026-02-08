@@ -105,7 +105,7 @@ export async function findPostByIdWithUpdatedViewCount(
 			select: selectors,
 		});
 		return updatedPost as TPost;
-	} catch (error) {
+	} catch {
 		return null;
 	}
 }
@@ -326,7 +326,7 @@ export async function findSimilarPosts(
 		similarityMap[similarPost.id] = jaccardSimilarity;
 	});
 
-	const filteredSimilarPosts = similarPosts.filter((post) => similarityMap[post.id] > 40);
+	const filteredSimilarPosts = similarPosts.filter((post) => similarityMap[post.id] || 0 > 40);
 	return {
 		posts: filteredSimilarPosts,
 		similarities: similarityMap,

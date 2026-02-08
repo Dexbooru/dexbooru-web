@@ -10,7 +10,7 @@
 	const { tags, artists } = post;
 </script>
 
-<div class="block space-y-2 ml-2 mt-2 mb-5">
+<div class="mt-2 mb-5 ml-2 block space-y-2">
 	<p class="text-base dark:text-white">Tags</p>
 	<LabelContainer labelColor="red" labelType="tag" labels={tags} sliceLabels />
 

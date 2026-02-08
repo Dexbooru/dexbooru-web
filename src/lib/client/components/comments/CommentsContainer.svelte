@@ -70,8 +70,8 @@
 		</section>
 	{/if}
 {:else if postCommentCount === 0}
-	<div class="flex justify-left p-2">
-		<p class="text-gray-500 dark:text-gray-400 text-lg italic">
+	<div class="justify-left flex p-2">
+		<p class="text-lg text-gray-500 italic dark:text-gray-400">
 			No comments found.
 			{#if $user}
 				Be the first to comment!

@@ -25,6 +25,6 @@
 </svelte:head>
 
 <main>
-	<h1 class="text-4xl m-4 dark:text-white">Friendships</h1>
+	<h1 class="m-4 text-4xl dark:text-white">Friendships</h1>
 	<FriendTabs />
 </main>

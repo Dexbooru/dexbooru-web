@@ -3,12 +3,12 @@
 	import { updateReportStatus } from '$lib/client/api/moderation';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getModerationPaginationData } from '$lib/client/helpers/context';
+	import { formatDate } from '$lib/shared/helpers/dates';
+	import { capitalize } from '$lib/shared/helpers/util';
 	import { toast } from '@zerodevx/svelte-toast';
+	import Badge from 'flowbite-svelte/Badge.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Modal from 'flowbite-svelte/Modal.svelte';
-	import Badge from 'flowbite-svelte/Badge.svelte';
-	import { capitalize } from '$lib/shared/helpers/util';
-	import { formatDate } from '$lib/shared/helpers/dates';
 
 	type TReport = PostReport | PostCollectionReport | UserReport;
 
@@ -48,7 +48,7 @@
 			} else {
 				toast.push('Failed to update report status', FAILURE_TOAST_OPTIONS);
 			}
-		} catch (error) {
+		} catch {
 			toast.push('An unexpected error occurred', FAILURE_TOAST_OPTIONS);
 		} finally {
 			loading = false;
@@ -78,9 +78,9 @@
 
 <Modal title="Inspect Report" bind:open size="md" outsideclose>
 	<div class="space-y-6">
-		<div class="flex justify-between items-start">
+		<div class="flex items-start justify-between">
 			<div>
-				<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">
+				<h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">
 					{capitalize(report.category.replaceAll('_', ' '))}
 				</h3>
 				<p class="text-sm text-gray-500 dark:text-gray-400">ID: {report.id}</p>
@@ -92,11 +92,11 @@
 
 		<div class="grid grid-cols-2 gap-4 text-sm">
 			<div>
-				<span class="block text-gray-500 dark:text-gray-400 font-medium">Created At</span>
+				<span class="block font-medium text-gray-500 dark:text-gray-400">Created At</span>
 				<span class="text-gray-900 dark:text-white">{formatDate(new Date(report.createdAt))}</span>
 			</div>
 			<div>
-				<span class="block text-gray-500 dark:text-gray-400 font-medium">Report Type</span>
+				<span class="block font-medium text-gray-500 dark:text-gray-400">Report Type</span>
 				<span class="text-gray-900 dark:text-white"
 					>{capitalize(reportType.replace('Reports', ''))}</span
 				>
@@ -104,17 +104,17 @@
 		</div>
 
 		<div>
-			<span class="block text-gray-500 dark:text-gray-400 font-medium mb-2">Description</span>
+			<span class="mb-2 block font-medium text-gray-500 dark:text-gray-400">Description</span>
 			<div
-				class="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-100 dark:border-gray-700 min-h-[100px]"
+				class="min-h-[100px] rounded-lg border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50"
 			>
-				<p class="italic text-gray-700 dark:text-gray-300 leading-relaxed">
+				<p class="leading-relaxed text-gray-700 italic dark:text-gray-300">
 					{report.description || 'No description provided'}
 				</p>
 			</div>
 		</div>
 
-		<div class="pt-4 border-t border-gray-100 dark:border-gray-700">
+		<div class="border-t border-gray-100 pt-4 dark:border-gray-700">
 			<Button color="alternative" class="w-full" href={getResourceLink()} target="_blank">
 				View Reported {capitalize(reportType.replace('Reports', '').replace('post', 'Post'))}
 			</Button>
@@ -122,7 +122,7 @@
 	</div>
 
 	{#snippet footer()}
-		<div class="flex flex-wrap gap-3 w-full justify-end">
+		<div class="flex w-full flex-wrap justify-end gap-3">
 			<Button
 				color="alternative"
 				size="sm"

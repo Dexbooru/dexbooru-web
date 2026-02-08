@@ -77,9 +77,7 @@
 
 	$effect(() => {
 		// Track dependencies
-		imageDimensions;
-		screenWidth;
-		screenHeight;
+		void { imageDimensions, screenWidth, screenHeight };
 		untrack(() => recomputeImageDimensions());
 	});
 
@@ -103,7 +101,7 @@
 	>
 {/if}
 {#if showResizeAlert && resizeRatios.length > 0}
-	<Alert class="p-4 gap-3 text-sm" color="yellow">
+	<Alert class="gap-3 p-4 text-sm" color="yellow">
 		<span class="font-medium"
 			>Resize notice! Check the table below to view original uploaded files for this image</span
 		>
@@ -114,10 +112,14 @@
 	</Alert>
 {/if}
 <div class="flex flex-col gap-3">
-	{#each Object.entries(imageUrls) as [index, imageUrl]}
+	{#each Object.entries(imageUrls) as [index, imageUrl] (imageUrl)}
 		<Img
-			width={transformedImageDimensions[Number(index)].imageWidth || undefined}
-			height={transformedImageDimensions[Number(index)].imageHeight || undefined}
+			width={transformedImageDimensions && imageUrls.length > 0
+				? transformedImageDimensions[Number(index)]?.imageWidth || undefined
+				: undefined}
+			height={transformedImageDimensions && imageUrls.length > 0
+				? transformedImageDimensions[Number(index)]?.imageHeight || undefined
+				: undefined}
 			class="whole-post-image {imagesScaledDown ? 'visible' : 'invisible'} block"
 			src={imageUrl}
 			alt={imagesAlt}

@@ -280,20 +280,20 @@
 
 {#if currentTab === ''}
 	<div
-		class="mt-10 p-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-center max-w-2xl mx-auto shadow-sm"
+		class="mx-auto mt-10 max-w-2xl rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800"
 	>
 		<div class="mb-6 flex justify-center">
-			<div class="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-full">
-				<ExclamationCircleSolid class="w-10 h-10 text-primary-600 dark:text-primary-500" />
+			<div class="bg-primary-100 dark:bg-primary-900/30 rounded-full p-3">
+				<ExclamationCircleSolid class="text-primary-600 dark:text-primary-500 h-10 w-10" />
 			</div>
 		</div>
 		<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Moderation Dashboard</h2>
-		<p class="text-gray-600 dark:text-gray-400 mt-3 mb-8">
+		<p class="mt-3 mb-8 text-gray-600 dark:text-gray-400">
 			Welcome to the moderation dashboard. Please select a category below to view and manage active
 			reports or pending posts.
 		</p>
 
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 			<Button
 				color="alternative"
 				class="h-16 text-lg"

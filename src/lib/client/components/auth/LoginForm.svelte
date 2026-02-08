@@ -46,9 +46,9 @@
 	});
 </script>
 
-<Card class="mt-4 mb-2 p-6 ml-3 mr-3 shadow-lg">
+<Card class="mt-4 mr-3 mb-2 ml-3 p-6 shadow-lg">
 	<form class="flex flex-col space-y-6" method="POST">
-		<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">
+		<h3 class="text-center text-xl font-medium text-gray-900 dark:text-white">
 			Login to Dexbooru!
 		</h3>
 		<Label class="space-y-2">
@@ -107,7 +107,7 @@
 			<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
 				Not registered? <a
 					href="/register"
-					class="text-primary-700 hover:underline dark:text-primary-500"
+					class="text-primary-700 dark:text-primary-500 hover:underline"
 				>
 					Create account
 				</a>
@@ -115,7 +115,7 @@
 			<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
 				Having trouble logging in? <a
 					href="/forgot-password"
-					class="text-primary-700 hover:underline dark:text-primary-500"
+					class="text-primary-700 dark:text-primary-500 hover:underline"
 				>
 					Forgot password
 				</a>

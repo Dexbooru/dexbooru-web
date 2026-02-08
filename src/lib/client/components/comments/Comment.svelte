@@ -89,11 +89,11 @@
 	});
 </script>
 
-<article class="p-2 mt-2 mb-2 text-base rounded-lg">
-	<div class="flex justify-between items-center mb-2">
+<article class="mt-2 mb-2 rounded-lg p-2 text-base">
+	<div class="mb-2 flex items-center justify-between">
 		<div class="flex flex-wrap items-center">
 			<p
-				class="inline-flex space-x-2 items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold"
+				class="mr-3 inline-flex items-center space-x-2 text-sm font-semibold text-gray-900 dark:text-white"
 			>
 				<Avatar
 					src={comment.author?.profilePictureUrl ?? undefined}
@@ -126,7 +126,7 @@
 
 	<div class="flex space-x-2">
 		{#if $user && $commentTree.getCount() < MAXIMUM_COMMENTS_PER_POST}
-			<div class="flex items-center mt-4 space-x-3">
+			<div class="mt-4 flex items-center space-x-3">
 				<Button class="flex space-x-2" color="green" onclick={handleReplyButtonClick}>
 					<MessagesSolid />
 					<span>{replyBoxOpen ? 'Hide reply' : 'Reply'}</span>
@@ -135,14 +135,14 @@
 		{/if}
 
 		{#if $user && (comment.author.id === $user.id || isModerationRole($user.role))}
-			<div class="flex items-center mt-4 space-x-3">
+			<div class="mt-4 flex items-center space-x-3">
 				<Button class="flex space-x-2" color="blue" onclick={handleEditButtonClick}>
 					<PenSolid />
 					<span>Edit</span></Button
 				>
 			</div>
 
-			<div class="flex items-center mt-4 space-x-3">
+			<div class="mt-4 flex items-center space-x-3">
 				<Button class="flex space-x-2" color="red" onclick={handleDeleteButtonClick}>
 					<TrashBinSolid />
 					<span>Delete</span></Button

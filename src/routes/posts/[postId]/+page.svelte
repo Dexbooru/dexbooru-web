@@ -97,7 +97,7 @@
 		<p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
 			We got your post into Dexbooru succesfully! It should show up in your uploaded posts that can
 			be found <a
-				class="inline-flex items-center text-primary-600 hover:underline"
+				class="text-primary-600 inline-flex items-center hover:underline"
 				href="/profile/posts/uploaded">here</a
 			>.
 		</p>

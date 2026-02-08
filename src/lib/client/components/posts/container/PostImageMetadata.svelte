@@ -111,8 +111,8 @@
 				<span class="sr-only">Download image</span>
 			</TableHeadCell>
 		</TableHead>
-		<TableBody class="divide-y w-1/2!">
-			{#each Object.keys($updatedPost).length > 0 && $updatedPost.imageUrls ? getPostImageMetadata($updatedPost) : imagesMetadata as { imageFileName, imageWidth, imageHeight, imageUrl }}
+		<TableBody class="w-1/2! divide-y">
+			{#each Object.keys($updatedPost).length > 0 && $updatedPost.imageUrls ? getPostImageMetadata($updatedPost) : imagesMetadata as { imageFileName, imageWidth, imageHeight, imageUrl } (imageUrl)}
 				{#if imageFileName.includes(ORIGINAL_IMAGE_SUFFIX) || (!imageFileName.includes(NSFW_PREVIEW_IMAGE_SUFFIX) && imageFileName.includes(PREVIEW_IMAGE_SUFFIX))}
 					<TableBodyRow>
 						<TableBodyCell>{imageFileName}</TableBodyCell>
@@ -122,7 +122,7 @@
 							<a
 								target="_blank"
 								href={imageUrl}
-								class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+								class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
 								>Download image</a
 							>
 						</TableBodyCell>

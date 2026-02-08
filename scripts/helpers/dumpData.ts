@@ -314,7 +314,8 @@ async function dumpData({
 			['Total users inserted', userWriteResult.count],
 			['Total comments inserted', commentWriteResult.count],
 		]);
-		console.log(table);
+
+		logger.info(table);
 	} catch (error) {
 		logger.error('Error during Dexbooru data dump:', error);
 		throw error;

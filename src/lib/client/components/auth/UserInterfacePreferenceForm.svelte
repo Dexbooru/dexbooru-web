@@ -37,7 +37,7 @@
 </script>
 
 <Card class="p-6 sm:p-8">
-	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">Interface</h3>
+	<h3 class="mb-5 text-center text-xl font-medium text-gray-900 dark:text-white">Interface</h3>
 	<form
 		use:enhance={() => {
 			interfacePreferenceChanging = true;
@@ -70,7 +70,7 @@
 		action="?/userInterfacePreferences"
 		class="flex flex-col space-y-4"
 	>
-		<Label class="space-y-2 mb-3">
+		<Label class="mb-3 space-y-2">
 			<span>Custom Site-wide CSS (max of {MAXIMUM_SITE_WIDE_CSS_LENGTH} characters)</span>
 			<Textarea
 				class="w-full"
@@ -84,7 +84,7 @@
 				Your CSS will be applied after each page on Dexbooru is fully loaded
 			</p>
 		</Label>
-		<Label class="space-y-2 mb-3">
+		<Label class="mb-3 space-y-2">
 			<span>Hide post metadata on your preview</span>
 			<Checkbox bind:checked={hidePostMetadataOnPreview} />
 			<input name="hidePostMetadataOnPreview" type="hidden" value={hidePostMetadataOnPreview} />
@@ -93,7 +93,7 @@
 				will be shown still.
 			</p>
 		</Label>
-		<Label class="space-y-2 mb-3">
+		<Label class="mb-3 space-y-2">
 			<span>Hide collection metadata on your preview</span>
 			<Checkbox bind:checked={hideCollectionMetadataOnPreview} />
 			<input

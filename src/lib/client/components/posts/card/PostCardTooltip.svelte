@@ -25,7 +25,7 @@
 	{placement}
 	offset={20}
 	triggeredBy="#{tooltipId}"
-	class="hidden w-max max-w-sm z-50 sm:block transition-all duration-300 ease-in-out"
+	class="z-50 hidden w-max max-w-sm transition-all duration-300 ease-in-out sm:block"
 >
 	<div class="flex flex-col gap-2 p-2">
 		{#if tags.length > 0}

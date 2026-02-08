@@ -27,11 +27,11 @@
 				<SidebarDropdownWrapper isOpen={$collectionPage.length > 0} label="Order by">
 					{#snippet icon()}
 						<OrderedListOutline
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+							class="h-5 w-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
 						/>
 					{/snippet}
-					{#each Object.values(ORDER_BY_TRANSLATION_MAP) as orderOptions}
-						{#each orderOptions as { label, isActive, getHref }}
+					{#each Object.entries(ORDER_BY_TRANSLATION_MAP) as [orderKey, orderOptions] (orderKey)}
+						{#each orderOptions as { label, isActive, getHref } (label + orderKey)}
 							<SidebarDropdownItem
 								href={getHref(collectionBaseUrl)}
 								{label}
@@ -47,11 +47,11 @@
 				<SidebarDropdownWrapper isOpen={uniqueAuthors.length > 0} label="All Authors">
 					{#snippet icon()}
 						<UserSolid
-							class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+							class="h-5 w-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
 						/>
 					{/snippet}
 
-					{#each uniqueAuthors as uniqueAuthor}
+					{#each uniqueAuthors as uniqueAuthor (uniqueAuthor.id)}
 						<SidebarDropdownItem
 							href="/profile/{uniqueAuthor.username}"
 							label={uniqueAuthor.username}

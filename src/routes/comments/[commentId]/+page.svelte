@@ -39,12 +39,12 @@
 	<div class="mb-6">
 		<a
 			href="/posts/{data.comment.postId}"
-			class="text-blue-600 hover:underline flex items-center gap-2 mb-2"
+			class="mb-2 flex items-center gap-2 text-blue-600 hover:underline"
 		>
 			&larr; Back to post
 		</a>
 		<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Comment Thread</h1>
-		<p class="text-gray-600 dark:text-gray-400 mt-1">
+		<p class="mt-1 text-gray-600 dark:text-gray-400">
 			On post: <span class="font-medium">{data.comment.post.description || 'Untitled'}</span>
 		</p>
 	</div>

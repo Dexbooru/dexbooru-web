@@ -35,7 +35,7 @@
 				<TableBodyCell>
 					<a
 						href="/posts/{labelType}/{label.name}"
-						class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+						class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
 						>Related posts</a
 					>
 				</TableBodyCell>

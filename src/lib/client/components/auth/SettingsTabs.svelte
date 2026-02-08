@@ -44,7 +44,7 @@
 	}
 </script>
 
-<Tabs style="pills" class="flex flex-wrap space-x-2 rtl:space-x-revers !p-3">
+<Tabs style="pills" class="rtl:space-x-revers flex flex-wrap space-x-2 !p-3">
 	<TabItem onclick={() => handleTabClick('personal')} open={currentTab === 'personal'}>
 		{#snippet titleSlot()}
 			<div class="flex items-center gap-2">
@@ -52,7 +52,7 @@
 				Personal
 			</div>
 		{/snippet}
-		<section class="flex flex-wrap gap-4 items-start">
+		<section class="flex flex-wrap items-start gap-4">
 			<ChangeUsernameForm />
 			<ChangePasswordForm />
 			<ChangeProfilePicture />
@@ -67,7 +67,7 @@
 			</div>
 		{/snippet}
 
-		<section class="flex flex-wrap gap-4 items-start">
+		<section class="flex flex-wrap items-start gap-4">
 			<PostPreferencesForm />
 			<UserInterfacePreferenceForm />
 		</section>
@@ -80,7 +80,7 @@
 			</div>
 		{/snippet}
 
-		<section class="flex flex-wrap gap-4 items-start">
+		<section class="flex flex-wrap items-start gap-4">
 			<Enable2faForm />
 			<OauthConnectForm {linkedAccounts} {...oauthAuthorizationLinks} />
 		</section>

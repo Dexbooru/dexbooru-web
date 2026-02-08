@@ -25,13 +25,13 @@
 
 {#if (tags?.length ?? 0) > 0 || (artists?.length ?? 0) > 0}
 	<div
-		class="absolute left-auto right-auto top-10 mt-2 w-1/2 min-w-[300px] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-md rounded-lg"
+		class="absolute top-10 right-auto left-auto mt-2 max-h-80 w-1/2 min-w-[300px] overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800"
 		in:slide
 		out:fade
 	>
 		{#if tags.length > 0}
 			<h2
-				class="text-left px-4 py-2 font-semibold text-gray-800 dark:text-gray-200 sticky top-0 bg-white dark:bg-gray-800 z-10"
+				class="sticky top-0 z-10 bg-white px-4 py-2 text-left font-semibold text-gray-800 dark:bg-gray-800 dark:text-gray-200"
 			>
 				Tags:
 			</h2>
@@ -40,9 +40,9 @@
 					<button
 						type="button"
 						onclick={() => onLabelClick(tag.name)}
-						class="flex space-x-2 items-center px-4 py-2 transition-all duration-150 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+						class="flex cursor-pointer items-center space-x-2 rounded-md px-4 py-2 transition-all duration-150 hover:bg-gray-100 dark:hover:bg-gray-700"
 					>
-						<TagSolid class="w-5 h-5 mr-2 text-gray-700 dark:text-gray-300" />
+						<TagSolid class="mr-2 h-5 w-5 text-gray-700 dark:text-gray-300" />
 						<span class="text-gray-900 dark:text-gray-100">{tag.name + ' '}</span>
 						<span class="text-gray-900 dark:text-gray-100">
 							[{formatNumberWithCommas(tag.postCount)}]</span
@@ -54,7 +54,7 @@
 
 		{#if artists.length > 0}
 			<h2
-				class="text-left px-4 py-2 font-semibold text-gray-800 dark:text-gray-200 sticky top-0 bg-white dark:bg-gray-800 z-10"
+				class="sticky top-0 z-10 bg-white px-4 py-2 text-left font-semibold text-gray-800 dark:bg-gray-800 dark:text-gray-200"
 			>
 				Artists:
 			</h2>
@@ -63,9 +63,9 @@
 					<button
 						type="button"
 						onclick={() => onLabelClick(artist.name)}
-						class="flex items-center px-4 py-2 transition-all duration-150 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+						class="flex cursor-pointer items-center rounded-md px-4 py-2 transition-all duration-150 hover:bg-gray-100 dark:hover:bg-gray-700"
 					>
-						<PalleteSolid class="w-5 h-5 mr-2 text-gray-700 dark:text-gray-300" />
+						<PalleteSolid class="mr-2 h-5 w-5 text-gray-700 dark:text-gray-300" />
 						<span class="text-gray-900 dark:text-gray-100">{artist.name + ' '}</span>
 						<span class="text-gray-900 dark:text-gray-100">
 							[{formatNumberWithCommas(artist.postCount)}]</span

@@ -18,38 +18,38 @@
 
 {#if metadata && labelType}
 	<div class=" text-gray-800 dark:text-gray-300">
-		<p class="font-semibold text-md">ID:</p>
-		<span class="block mb-4 text-sm text-gray-600 dark:text-gray-400">{metadata.id}</span>
+		<p class="text-md font-semibold">ID:</p>
+		<span class="mb-4 block text-sm text-gray-600 dark:text-gray-400">{metadata.id}</span>
 
-		<p class="font-semibold text-md">Description:</p>
-		<span class="block mb-4 text-sm text-gray-600 dark:text-gray-400">
+		<p class="text-md font-semibold">Description:</p>
+		<span class="mb-4 block text-sm text-gray-600 dark:text-gray-400">
 			{metadata.description || 'No description available.'}
 		</span>
 
-		<p class="font-semibold text-md">Created At:</p>
-		<span class="block mb-4 text-sm text-gray-600 dark:text-gray-400">
+		<p class="text-md font-semibold">Created At:</p>
+		<span class="mb-4 block text-sm text-gray-600 dark:text-gray-400">
 			{formatDate(new Date(metadata.createdAt))}
 		</span>
 
-		<p class="font-semibold text-md">Updated At:</p>
-		<span class="block mb-4 text-sm text-gray-600 dark:text-gray-400">
+		<p class="text-md font-semibold">Updated At:</p>
+		<span class="mb-4 block text-sm text-gray-600 dark:text-gray-400">
 			{formatDate(new Date(metadata.updatedAt))}
 		</span>
 
-		<p class="font-semibold text-md">Post Count:</p>
-		<span class="block mb-4 text-sm text-gray-600 dark:text-gray-400">
+		<p class="text-md font-semibold">Post Count:</p>
+		<span class="mb-4 block text-sm text-gray-600 dark:text-gray-400">
 			{formatNumberWithCommas(metadata.postCount)}
 		</span>
 
 		{#if labelType === 'artist'}
-			<p class="font-semibold text-md mb-2">Social Media Links:</p>
+			<p class="text-md mb-2 font-semibold">Social Media Links:</p>
 			{#if displayedSocialMediaLinks.length === 0}
 				<p class="text-sm text-gray-600 dark:text-gray-400">No social media links available.</p>
 			{:else}
-				<ul class="list-none mb-4">
-					{#each displayedSocialMediaLinks as link}
-						<li class="flex items-center gap-4 mb-2">
-							<Img src={getFaviconFromUrl(link)} alt="social-icon" class="w-4 h-4" />
+				<ul class="mb-4 list-none">
+					{#each displayedSocialMediaLinks as link (link)}
+						<li class="mb-2 flex items-center gap-4">
+							<Img src={getFaviconFromUrl(link)} alt="social-icon" class="h-4 w-4" />
 							<a
 								href={link}
 								target="_blank"

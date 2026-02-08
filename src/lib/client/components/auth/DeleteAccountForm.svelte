@@ -12,11 +12,11 @@
 </script>
 
 <Card class="p-6 sm:p-8">
-	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">
+	<h3 class="mb-5 text-center text-xl font-medium text-gray-900 dark:text-white">
 		DELETE YOUR ACCOUNT PERMANENTELY!
 	</h3>
 	<form method="POST" action="?/deleteAccount" class="flex flex-col space-y-2">
-		<Label class="space-y-2 mb-3">
+		<Label class="mb-3 space-y-2">
 			<span>Enter <em>{ACCOUNT_DELETION_CONFIRMATION_TEXT}</em> phrase below to proceed</span>
 			<Input
 				bind:value={confirmationText}

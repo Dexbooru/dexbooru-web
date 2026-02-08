@@ -62,7 +62,7 @@
 				disabled={$blacklistedPostPage.length === 0}
 				title="Blacklisted ({$blacklistedPostPage.length})"
 			>
-				<p class="text-base leading-relaxed text-gray-500 dark:text-gray-400 mb-2">
+				<p class="mb-2 text-base leading-relaxed text-gray-500 dark:text-gray-400">
 					<span class="text-red-600">Offending tags:</span>{offendingTags.size > 0
 						? ' ' + Array.from(offendingTags).join(', ')
 						: 'None found'}

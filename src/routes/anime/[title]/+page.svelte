@@ -14,32 +14,32 @@
 
 <div class="container mx-auto p-4">
 	{#if animeResults && animeResults.data && animeResults.data.length > 0}
-		<h1 class="mb-6 text-3xl font-bold text-center dark:text-white mt-4">
+		<h1 class="mt-4 mb-6 text-center text-3xl font-bold dark:text-white">
 			Search results for "{animeResults.transformedTitle}"
 		</h1>
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-			{#each animeResults.data as anime}
-				<Card class="max-w-sm h-full flex flex-col">
+		<div class="grid grid-cols-1 justify-items-center gap-6 md:grid-cols-2 lg:grid-cols-3">
+			{#each animeResults.data as anime (anime.url)}
+				<Card class="flex h-full max-w-sm flex-col">
 					<div class="h-64 overflow-hidden rounded-t-lg">
 						<Img
 							src={anime.images.webp.large_image_url || anime.images.jpg.large_image_url || ''}
 							alt={anime.title}
-							class="w-full h-full object-cover"
+							class="h-full w-full object-cover"
 						/>
 					</div>
-					<div class="p-5 flex flex-col grow">
+					<div class="flex grow flex-col p-5">
 						<h5
-							class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-2"
+							class="mb-2 line-clamp-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white"
 						>
 							{anime.title}
 						</h5>
 						<p
-							class="mb-3 font-normal text-gray-700 dark:text-gray-400 leading-tight text-sm grow line-clamp-4"
+							class="mb-3 line-clamp-4 grow text-sm leading-tight font-normal text-gray-700 dark:text-gray-400"
 						>
 							{anime.synopsis || 'No synopsis available.'}
 						</p>
-						<div class="flex flex-wrap gap-1 mb-4 mt-auto">
-							{#each anime.genres.slice(0, 3) as genre}
+						<div class="mt-auto mb-4 flex flex-wrap gap-1">
+							{#each anime.genres.slice(0, 3) as genre (genre.name)}
 								<Badge color="primary" class="text-xs">{genre.name}</Badge>
 							{/each}
 						</div>
@@ -47,11 +47,11 @@
 							href={anime.url}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="inline-flex items-center text-blue-600 hover:underline mt-2 font-medium"
+							class="mt-2 inline-flex items-center font-medium text-blue-600 hover:underline"
 						>
 							View on MyAnimeList
 							<svg
-								class="w-4 h-4 ml-2"
+								class="ml-2 h-4 w-4"
 								fill="currentColor"
 								viewBox="0 0 20 20"
 								xmlns="http://www.w3.org/2000/svg"
@@ -67,12 +67,12 @@
 			{/each}
 		</div>
 	{:else}
-		<div class="text-center mt-20">
+		<div class="mt-20 text-center">
 			<h2 class="text-2xl font-semibold dark:text-white">
 				No results found for "{data.title.replaceAll('_', ' ')}"
 			</h2>
 			<p class="mt-4 dark:text-gray-400">Try a different search term or check your spelling.</p>
-			<a href="/" class="text-blue-500 hover:underline mt-6 inline-block">Return Home</a>
+			<a href="/" class="mt-6 inline-block text-blue-500 hover:underline">Return Home</a>
 		</div>
 	{/if}
 </div>

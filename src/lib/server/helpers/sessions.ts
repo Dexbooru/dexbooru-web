@@ -53,7 +53,7 @@ export function getUserClaimsFromEncodedJWTToken(encodedJwtToken: string): TUser
 		return (
 			typeof decodedUserClaims === 'string' ? JSON.parse(decodedUserClaims) : decodedUserClaims
 		) as TUser;
-	} catch (error) {
+	} catch {
 		return null;
 	}
 }

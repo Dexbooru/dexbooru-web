@@ -43,7 +43,7 @@
 </script>
 
 <Card class="p-6 sm:p-8">
-	<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white mb-5">Posts</h3>
+	<h3 class="mb-5 text-center text-xl font-medium text-gray-900 dark:text-white">Posts</h3>
 	<form
 		use:enhance={() => {
 			preferencesChanging = true;
@@ -51,10 +51,8 @@
 				preferencesChanging = false;
 				if (result.type === 'success') {
 					toast.push('The post preferences were updated successfully!', SUCCESS_TOAST_OPTIONS);
-
-					// @ts-ignore
 					userPreferences.update((currentPreferences) => {
-						// @ts-ignore
+						// @ts-expect-error: The type of result.data.data is unknown, but we know it will be a partial of the user preferences
 						const updatedPreferences = { ...currentPreferences, ...result.data.data };
 						applyCustomSiteWideCss($user as TUser, updatedPreferences);
 
@@ -72,14 +70,14 @@
 		action="?/postPreferences"
 		class="flex flex-col space-y-4"
 	>
-		<Label class="space-y-2 mb-3">
+		<Label class="mb-3 space-y-2">
 			<span>Auto Blur NSFW Posts</span>
 			<Checkbox bind:checked={autoBlurNsfw} />
 			<input type="hidden" name="autoBlurNsfw" value={autoBlurNsfw} />
 			<p class="text-sm text-gray-500">Removes the automatic blur on posts marked as NSFW</p>
 		</Label>
 
-		<Label class="space-y-2 mb-3">
+		<Label class="mb-3 space-y-2">
 			<span>Browse in Safe Mode</span>
 			<Checkbox bind:checked={browseInSafeMode} />
 			<p class="text-sm text-gray-500">Safe mode hides NSFW marked posts automatically</p>
@@ -87,7 +85,7 @@
 		</Label>
 
 		<div class="flex flex-row flex-wrap">
-			<Label class="space-y-2 mb-3">
+			<Label class="mb-3 space-y-2">
 				<span>Blacklisted Tags (One per line with a max of {MAXIMUM_BLACKLISTED_TAGS})</span>
 				<Textarea
 					class="w-full"
@@ -101,7 +99,7 @@
 				</p>
 			</Label>
 
-			<Label class="space-y-2 mb-3">
+			<Label class="mb-3 space-y-2">
 				<span>Blacklisted Artists (One per line with a max of {MAXIMUM_BLACKLISTED_ARTISTS})</span>
 				<Textarea
 					class="w-full"

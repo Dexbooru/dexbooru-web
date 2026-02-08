@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
+	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { MAXIMUM_ARTIST_LENGTH, MAXIMUM_TAG_LENGTH } from '$lib/shared/constants/labels';
 	import { MAXIMUM_ARTISTS_PER_POST, MAXIMUM_TAGS_PER_POST } from '$lib/shared/constants/posts';
 	import { isLabelAppropriate, transformLabel } from '$lib/shared/helpers/labels';
@@ -18,15 +18,16 @@
 
 	let currentInput = $state('');
 
-	const maxLabels = type === 'tag' ? MAXIMUM_TAGS_PER_POST : MAXIMUM_ARTISTS_PER_POST;
-	const maxLabelLength = type === 'tag' ? MAXIMUM_TAG_LENGTH : MAXIMUM_ARTIST_LENGTH;
-	const labelColor = type === 'tag' ? 'red' : 'green';
-	const inputName = type === 'tag' ? 'tags' : 'artists';
-	const placeholder = type === 'tag' ? 'Enter a tag name' : 'Enter an artist name';
-	const labelText =
+	const maxLabels = $derived(type === 'tag' ? MAXIMUM_TAGS_PER_POST : MAXIMUM_ARTISTS_PER_POST);
+	const maxLabelLength = $derived(type === 'tag' ? MAXIMUM_TAG_LENGTH : MAXIMUM_ARTIST_LENGTH);
+	const labelColor = $derived(type === 'tag' ? 'red' : 'green');
+	const inputName = $derived(type === 'tag' ? 'tags' : 'artists');
+	const placeholder = $derived(type === 'tag' ? 'Enter a tag name' : 'Enter an artist name');
+	const labelText = $derived(
 		type === 'tag'
 			? `Please specify one or more tags (max of ${MAXIMUM_TAGS_PER_POST}):`
-			: `Please specify one or more artists (max of ${MAXIMUM_ARTISTS_PER_POST}):`;
+			: `Please specify one or more artists (max of ${MAXIMUM_ARTISTS_PER_POST}):`,
+	);
 
 	const addLabel = () => {
 		if (labels.length === maxLabels) {
@@ -66,7 +67,7 @@
 		const badgeDiv = target.closest('div');
 
 		if (badgeDiv) {
-			const removalLabel = badgeDiv.textContent?.split(' ')[0].trim() ?? '';
+			const removalLabel = (badgeDiv.textContent?.split(' ')[0] || '').trim() ?? '';
 			labels = labels.filter((l) => l !== removalLabel);
 		}
 	};
@@ -81,7 +82,7 @@
 
 <div class="w-full">
 	<Label for="{type}-input">{labelText}</Label>
-	<div class="flex flex-col sm:flex-row gap-2 mt-2">
+	<div class="mt-2 flex flex-col gap-2 sm:flex-row">
 		<Input
 			id="{type}-input"
 			onkeypress={handleKeypress}
@@ -99,10 +100,10 @@
 			onclick={addLabel}>Add</Button
 		>
 	</div>
-	<p class="leading-none dark:text-gray-400 text-right mt-2">
+	<p class="mt-2 text-right leading-none dark:text-gray-400">
 		{currentInput.length}/{maxLabelLength}
 	</p>
-	<div class="mt-2 max-h-32 overflow-y-auto w-full">
+	<div class="mt-2 max-h-32 w-full overflow-y-auto">
 		<LabelContainer
 			handleLabelClose={removeLabel}
 			labelIsDismissable

@@ -23,7 +23,7 @@
 
 	const getParsedCommentInfo = (comment: TComment) => {
 		const parsedContent = parseHtmlString(comment.content);
-		let parsedTitle = '';
+		let parsedTitle: string;
 
 		const authorHeading = page.url.pathname.includes('/comments/created')
 			? 'You'
@@ -91,16 +91,16 @@
 	<div id="comment-container-sidebar">
 		<CommentPageSidebar />
 	</div>
-	<div id="comment-container-body" class="space-y-4 mb-5">
+	<div id="comment-container-body" class="mb-5 space-y-4">
 		{#if $paginationData}
 			{#if page.data.comments?.length === 0}
-				<h1 class="p-4 mt-5 text-xl text-center text-black dark:text-white">
+				<h1 class="mt-5 p-4 text-center text-xl text-black dark:text-white">
 					No comments found on page {(page.data.pageNumber ?? 0) + 1}
 				</h1>
 			{:else}
-				<h1 class="text-4xl m-4 dark:text-white">{titleData.title}</h1>
+				<h1 class="m-4 text-4xl dark:text-white">{titleData.title}</h1>
 				<CommentPaginator />
-				{#each Object.entries(commentDateGroups) as [date, comments]}
+				{#each Object.entries(commentDateGroups) as [date, comments] (date)}
 					<Group
 						divClass="p-4 mb-4 bg-gray-50 dark:bg-gray-800 comment-date-group space-y-4 border-none"
 						date={`Comments made on: ${date}`}
@@ -123,9 +123,9 @@
 				{/each}
 			{/if}
 		{:else}
-			{#each Array(page.data.comments?.length ?? 0) as _}
+			{#each Array(page.data.comments?.length ?? 0) as _, i (i)}
 				<ListPlaceholder
-					class="p-4 h-60 space-y-4 w-full divide-y divide-gray-200 shadow animate-pulse dark:divide-gray-700 dark:border-gray-700"
+					class="h-60 w-full animate-pulse space-y-4 divide-y divide-gray-200 p-4 shadow dark:divide-gray-700 dark:border-gray-700"
 				/>
 			{/each}
 		{/if}

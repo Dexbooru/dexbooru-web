@@ -53,5 +53,5 @@
 {#if parsingProfilePicture}
 	<ImagePlaceholder />
 {:else if profilePictureFile && profilePictureBase64String}
-	<Avatar class="block ml-auto mr-auto" size="xl" src={profilePictureBase64String} />
+	<Avatar class="mr-auto ml-auto block" size="xl" src={profilePictureBase64String} />
 {/if}

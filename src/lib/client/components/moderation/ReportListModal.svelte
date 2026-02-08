@@ -102,13 +102,13 @@
 	onclose={handleModalClose}
 >
 	{#if reportsLoading}
-		<div class="flex justify-center items-center h-32">
+		<div class="flex h-32 items-center justify-center">
 			<div class="spinner spinner-primary"></div>
 		</div>
 	{/if}
 
 	{#if reports.length === 0 && !reportsLoading}
-		<div class="flex justify-center items-center h-32">
+		<div class="flex h-32 items-center justify-center">
 			<p class="text-center text-gray-500">No reports found</p>
 		</div>
 	{/if}
