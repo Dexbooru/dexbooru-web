@@ -562,6 +562,7 @@ export const handleGetUser = async (
 				updatedAt: true,
 				linkedAccounts: {
 					select: {
+						id: true,
 						platform: true,
 						platformUsername: true,
 						isPublic: true,
