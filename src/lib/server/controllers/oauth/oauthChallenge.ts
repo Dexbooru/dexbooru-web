@@ -1,0 +1,160 @@
+import type { UserAuthenticationSource } from '$generated/prisma/client';
+import { DEFAULT_PASSWORD_LENGTH } from '$lib/shared/constants/auth';
+import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
+import {
+	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
+	OAUTH_TEMPORARY_PASSWORD_EMAIL_SUBJECT,
+} from '../../constants/email';
+import { findUserFromPlatformNameAndId } from '../../db/actions/linkedAccount';
+import { createUserPreferences, findUserPreferences } from '../../db/actions/preference';
+import { createUser } from '../../db/actions/user';
+import { createErrorResponse, validateAndHandleRequest } from '../../helpers/controllers';
+import { buildOauthPasswordEmailTemplate, sendEmail } from '../../helpers/email';
+import {
+	DiscordOauthProvider,
+	GithubOauthProvider,
+	GoogleOauthProvider,
+	SkeletonOauthProvider,
+} from '../../helpers/oauth';
+import { generateRandomPassword, hashPassword } from '../../helpers/password';
+import { generateEncodedUserTokenFromRecord } from '../../helpers/sessions';
+import { createTotpChallenge } from '../../helpers/totp';
+import type { IOauthProvider } from '../../types/oauth';
+import { OauthCallbackSchema } from '../request-schemas/oauth';
+import { buildOauthProcessingUrl, handleAccountLink } from './helpers';
+
+export const handleOauthChallenge = async (event: RequestEvent) => {
+	return await validateAndHandleRequest(
+		event,
+		'page-server-load',
+		OauthCallbackSchema,
+		async (data) => {
+			const { state, code } = data.urlSearchParams;
+
+			try {
+				const matchingApplication = SkeletonOauthProvider.getApplicationFromState(state);
+				if (!matchingApplication) {
+					return createErrorResponse(
+						'page-server-load',
+						400,
+						'The provided state does not match any oauth application that is supported',
+					);
+				}
+
+				let authProvider: IOauthProvider;
+				let platformName: UserAuthenticationSource;
+				switch (matchingApplication) {
+					case 'discord':
+						authProvider = new DiscordOauthProvider(event);
+						platformName = 'DISCORD';
+						break;
+					case 'google':
+						authProvider = new GoogleOauthProvider(event);
+						platformName = 'GOOGLE';
+						break;
+					case 'github':
+						authProvider = new GithubOauthProvider(event);
+						platformName = 'GITHUB';
+						break;
+				}
+
+				const accessToken = await authProvider.getToken(code, state);
+				const oauthUserData = await authProvider.getUserData(accessToken);
+				const userIdFromState = SkeletonOauthProvider.extractUserIdFromState(state);
+
+				if (userIdFromState) {
+					await handleAccountLink(
+						userIdFromState,
+						platformName,
+						oauthUserData,
+						matchingApplication,
+					);
+
+					const encodedAuthToken = generateEncodedUserTokenFromRecord(
+						{ id: userIdFromState },
+						true,
+					);
+					const oauthProcessingUrl = buildOauthProcessingUrl({
+						token: encodedAuthToken,
+						applicationName: matchingApplication,
+						redirectTo: '/profile/settings?tab=security',
+					});
+
+					redirect(302, oauthProcessingUrl);
+				} else {
+					const matchingDbUser = await findUserFromPlatformNameAndId(
+						platformName,
+						oauthUserData.id,
+					);
+
+					if (matchingDbUser) {
+						await handleAccountLink(
+							matchingDbUser.id,
+							platformName,
+							oauthUserData,
+							matchingApplication,
+						);
+
+						const preferences = await findUserPreferences(matchingDbUser.id);
+						if (preferences.twoFactorAuthenticationEnabled) {
+							const ipAddress = event.getClientAddress();
+							const newTotpChallengeId = await createTotpChallenge(
+								matchingDbUser.username,
+								ipAddress,
+								true,
+							);
+							redirect(302, `/login/totp/${newTotpChallengeId}`);
+						}
+
+						const encodedAuthToken = generateEncodedUserTokenFromRecord(matchingDbUser, true);
+						const oauthProcessingUrl = buildOauthProcessingUrl({
+							token: encodedAuthToken,
+							applicationName: matchingApplication,
+							redirectTo: '/posts',
+						});
+
+						redirect(302, oauthProcessingUrl);
+					} else {
+						const temporaryPassword = generateRandomPassword(DEFAULT_PASSWORD_LENGTH);
+						const hashedTemporaryPassword = await hashPassword(temporaryPassword);
+
+						const newUser = await createUser(
+							SkeletonOauthProvider.constructPrimaryApplicationUsername(oauthUserData.username),
+							oauthUserData.email,
+							hashedTemporaryPassword,
+							oauthUserData.profilePictureUrl,
+						);
+
+						await createUserPreferences(newUser.id);
+						await handleAccountLink(newUser.id, platformName, oauthUserData, matchingApplication);
+
+						sendEmail({
+							sender: `Dexbooru <${DEXBOORU_NO_REPLY_EMAIL_ADDRESS}>`,
+							to: newUser.email,
+							subject: OAUTH_TEMPORARY_PASSWORD_EMAIL_SUBJECT,
+							html: buildOauthPasswordEmailTemplate(
+								newUser.username,
+								temporaryPassword,
+								matchingApplication,
+							),
+						});
+
+						const encodedAuthToken = generateEncodedUserTokenFromRecord(newUser, true);
+						const oauthProcessingUrl = buildOauthProcessingUrl({
+							token: encodedAuthToken,
+							applicationName: matchingApplication,
+							redirectTo: '/posts',
+						});
+
+						redirect(302, oauthProcessingUrl);
+					}
+				}
+			} catch (error) {
+				if (isRedirect(error)) throw error;
+
+				const errorMesssage = (error as Error).message;
+				redirect(302, '/login?oauthError=' + encodeURIComponent(errorMesssage));
+			}
+		},
+	);
+};
