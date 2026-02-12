@@ -39,9 +39,8 @@
 
 	let { data, children }: Props = $props();
 
-	$effect(() => {
-		initLayoutContexts(data);
-	});
+	// svelte-ignore state_referenced_locally
+	initLayoutContexts(data);
 
 	onMount(() => {
 		registerDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
