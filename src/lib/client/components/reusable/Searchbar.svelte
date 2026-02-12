@@ -32,13 +32,10 @@
 		queryChangeClear = null,
 	}: Props = $props();
 
-	const optionalProps: Record<string, string> = $state({});
-	if (inputElementId) {
-		optionalProps.id = inputElementId;
-	}
-	if (name) {
-		optionalProps.name = name;
-	}
+	const optionalProps = $derived({
+		...(inputElementId ? { id: inputElementId } : {}),
+		...(name ? { name: name } : {}),
+	});
 
 	const handleOnInput = (event: Event) => {
 		const inputTarget = event.target as HTMLInputElement;

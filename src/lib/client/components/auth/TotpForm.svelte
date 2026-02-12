@@ -17,7 +17,7 @@
 
 	let { form, username, rememberMe }: Props = $props();
 
-	let otpErrorReason = form?.reason ?? null;
+	let otpErrorReason = $derived(form?.reason ?? null);
 	let otpCode: string = $state('');
 	let otpFormButtonDisabled = $derived(otpCode.length !== TOTP_CODE_LENGTH);
 

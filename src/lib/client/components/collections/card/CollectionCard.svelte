@@ -17,24 +17,27 @@
 	};
 
 	let { collection }: Props = $props();
-	let title = $derived.by(() => {
+	const title = $derived.by(() => {
 		return collection.title.length > COLLECTION_TITLE_PREVIEW_LENGTH
 			? collection.title.slice(0, COLLECTION_TITLE_PREVIEW_LENGTH) + '...'
 			: collection.title;
 	});
-	let description = $derived.by(() => {
+	const description = $derived.by(() => {
 		return collection.description.length > COLLECTION_DESCRIPTION_PREVIEW_LENGTH
 			? collection.description.slice(0, COLLECTION_DESCRIPTION_PREVIEW_LENGTH) + '...'
 			: collection.description;
 	});
+	const nsfwThumbnail = $derived.by(
+		() => collection.thumbnailImageUrls.find((imageUrl) => imageUrl.includes('nsfw')) ?? '',
+	);
+	const originalThumbnail = $derived.by(
+		() =>
+			collection.thumbnailImageUrls.find(
+				(imageUrl) => imageUrl.includes('preview') && !imageUrl.includes('nsfw'),
+			) ?? '',
+	);
 
 	const userPreferences = getAuthenticatedUserPreferences();
-	const nsfwThumbnail =
-		collection.thumbnailImageUrls.find((imageUrl) => imageUrl.includes('nsfw')) ?? '';
-	const originalThumbnail =
-		collection.thumbnailImageUrls.find(
-			(imageUrl) => imageUrl.includes('preview') && !imageUrl.includes('nsfw'),
-		) ?? '';
 </script>
 
 {#if $userPreferences.hideCollectionMetadataOnPreview}

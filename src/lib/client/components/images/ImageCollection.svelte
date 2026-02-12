@@ -24,12 +24,12 @@
 	let screenWidth: number = $state(0);
 	let screenHeight: number = $state(0);
 	let imagesScaledDown = $state(false);
-	let transformedImageDimensions: { imageWidth: number; imageHeight: number }[] =
-		$state(imageDimensions);
 	let resizeRatios: string[] = $state([]);
 	let resizedImages: boolean = $state(false);
 	let showResizeAlert: boolean = $state(false);
 	let showOriginalImageSizes: boolean = $state(false);
+	let transformedImageDimensions: { imageWidth: number; imageHeight: number }[] =
+		$derived(imageDimensions);
 
 	const recomputeImageDimensions = () => {
 		if (screenWidth === 0 || screenHeight === 0) return;

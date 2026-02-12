@@ -40,7 +40,7 @@
 
 	const activeModal = getActiveModal();
 
-	const { modalName, reportCategories, apiFunction } = REPORT_MODAL_CONFIG[reportType];
+	const { modalName, reportCategories, apiFunction } = $derived(REPORT_MODAL_CONFIG[reportType]);
 
 	const modalStoreUnsubscribe = activeModal.subscribe((data) => {
 		if (data.focusedModalName === modalName) {

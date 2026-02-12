@@ -23,16 +23,16 @@
 
 	let { data }: Props = $props();
 
-	let { topArtists, topTags, topLikedPosts, topViewedPosts }: TAnalyticsData = data;
+	let { topArtists, topTags, topLikedPosts, topViewedPosts }: TAnalyticsData = $derived(data);
 
-	let tagOptions: ApexOptions = $state({
+	let tagOptions: ApexOptions = $derived({
 		...PIE_CHART_OPTIONS,
 		series: topTags.map((tag) => tag.postCount),
 		labels: topTags.map((tag) => tag.name),
 		colors: PIE_CHART_COLORS,
 	});
 
-	let artistOptions: ApexOptions = $state({
+	let artistOptions: ApexOptions = $derived({
 		...PIE_CHART_OPTIONS,
 		series: topArtists.map((artist) => artist.postCount),
 		labels: topArtists.map((artist) => artist.name),
@@ -178,7 +178,7 @@
 						<TableBody class="divide-y">
 							{#each topViewedPosts as post (post.id)}
 								<TableBodyRow>
-									<TableBodyCell class="min-w-[150px] whitespace-normal">
+									<TableBodyCell class="min-w-37.5 whitespace-normal">
 										{post.description.length > 50
 											? post.description.slice(0, 50) + '...'
 											: post.description}
@@ -209,7 +209,7 @@
 					</Table>
 				</div>
 			{:else}
-				<div class="flex min-h-[300px] items-center justify-center">
+				<div class="flex min-h-75 items-center justify-center">
 					<p class="text-center text-gray-500 dark:text-gray-400">Not enough data available.</p>
 				</div>
 			{/if}

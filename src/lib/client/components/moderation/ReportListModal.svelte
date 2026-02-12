@@ -26,10 +26,10 @@
 	let reports = $state<(PostReport | PostCollectionReport | UserReport)[]>([]);
 	let reportsLoading = $state(false);
 
-	const configKey = REPORT_TYPE_TO_MODAL_CONFIG_KEY[
-		reportType
-	] as keyof typeof REPORT_MODAL_LIST_CONFIG;
-	const { modalName, apiFunction } = REPORT_MODAL_LIST_CONFIG[configKey];
+	const configKey = $derived(
+		REPORT_TYPE_TO_MODAL_CONFIG_KEY[reportType] as keyof typeof REPORT_MODAL_LIST_CONFIG,
+	);
+	const { modalName, apiFunction } = $derived.by(() => REPORT_MODAL_LIST_CONFIG[configKey]);
 
 	const resetStates = () => {
 		entityId = '';

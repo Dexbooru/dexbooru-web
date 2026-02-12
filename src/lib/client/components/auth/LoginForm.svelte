@@ -26,9 +26,9 @@
 
 	let showPassword = $state(false);
 
-	const loginErrorReason: string | undefined = form?.reason;
+	const loginErrorReason: string | undefined = $derived(form?.reason);
 
-	let username: string = $state(form?.username || '');
+	let username: string = $derived(form?.username || '');
 	let password: string = $state('');
 	let rememberMe: boolean = $state(false);
 	let loginFormButtonDisabled = $derived.by(() => {

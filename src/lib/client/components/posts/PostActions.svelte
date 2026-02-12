@@ -42,7 +42,7 @@
 	const updatedPost = getUpdatedPost();
 
 	let postLikeLoading = $state(false);
-	let hasLikedPost = $state(likedPost);
+	let hasLikedPost = $derived(likedPost);
 
 	const handleModalOpen = (focusedModalName: string, data: unknown) => {
 		activeModal.set({

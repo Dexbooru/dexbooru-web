@@ -5,7 +5,7 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-	const animeResults = data.animeData;
+	const animeResults = $derived(data.animeData);
 </script>
 
 <svelte:head>

@@ -15,9 +15,9 @@
 	let { form }: Props = $props();
 
 	const registerFormRequirements = getRegisterFormAuthRequirements();
-	const registerErrorReason: string | undefined = form?.reason;
-	let username: string = $state(form?.username || '');
-	let email: string = $state(form?.email || '');
+	const registerErrorReason: string | undefined = $derived(form?.errorReason);
+	let username: string = $derived(form?.username || '');
+	let email: string = $derived(form?.email || '');
 	let password: string = $state('');
 	let confirmedPassword: string = $state('');
 	let registerButtonDisabled = $state(true);

@@ -34,10 +34,10 @@
 	let { form }: Props = $props();
 
 	let isNsfw: boolean = $state(false);
-	let tags: string[] = $state(form?.tags || []);
-	let artists: string[] = $state(form?.artists || []);
-	let description: string = $state(form?.description || '');
-	let sourceLink: string = $state(form?.sourceLink || '');
+	let tags: string[] = $derived(form?.tags || []);
+	let artists: string[] = $derived(form?.artists || []);
+	let description: string = $derived(form?.description || '');
+	let sourceLink: string = $derived(form?.sourceLink || '');
 	let postImages: {
 		imageBase64: string;
 		file: File;

@@ -28,8 +28,8 @@
 	let { labelType, metadata, updateMetadata }: Props = $props();
 
 	let labelEditing = $state(false);
-	let description = $state(metadata?.description ?? '');
-	let socialMediaLinks = $state<string[]>([...(metadata?.socialMediaLinks ?? [])]);
+	let description = $derived(metadata?.description ?? '');
+	let socialMediaLinks = $derived<string[]>([...(metadata?.socialMediaLinks ?? [])]);
 	let labelEditButtonDisabled = $derived.by(() => {
 		if (labelType === 'tag') {
 			return description.length > MAXIMUM_TAG_DESCRIPTION_LENGTH;
@@ -110,7 +110,7 @@
 				/>
 			</Label>
 			<Label class="mb-3 space-y-2">
-				<div class="flex !items-center justify-between">
+				<div class="flex items-center! justify-between">
 					<span>Social media links:</span>
 					<Button
 						disabled={socialMediaLinks.length === MAXIMUM_ARTIST_SOCIAL_MEDIAS_LENGTH}
@@ -122,7 +122,7 @@
 					</Button>
 				</div>
 
-				<ul class="!mt-5 block space-y-3">
+				<ul class="mt-5! block space-y-3">
 					{#each socialMediaLinks as link, index (index)}
 						<li>
 							<div class="flex space-x-3">

@@ -16,7 +16,7 @@
 	};
 
 	let { data }: Props = $props();
-	let { collectionCount, userCount, tagCount, artistCount, postCount } = data;
+	let { collectionCount, userCount, tagCount, artistCount, postCount } = $derived(data);
 
 	let labelSearchResults = $state<TAppSearchResult>({
 		tags: [],

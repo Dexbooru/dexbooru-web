@@ -26,12 +26,15 @@
 
 	let { post, onCollectionViewPage = false }: Props = $props();
 
-	const { id: postId, tags, artists, isNsfw } = post;
-	let imageUrls = $state(post.imageUrls);
+	const { id: postId, tags, artists, isNsfw } = $derived(post);
+	let imageUrls = $derived(post.imageUrls);
 
-	const imagesAlt = `${tags.map((tag) => tag.name).join(', ')} by ${artists
-		.map((artist) => artist.name)
-		.join(', ')}`;
+	const imagesAlt = $derived.by(
+		() =>
+			`${tags.map((tag) => tag.name).join(', ')} by ${artists
+				.map((artist) => artist.name)
+				.join(', ')}`,
+	);
 	const userPreferences = getAuthenticatedUserPreferences();
 	const activeModal = getActiveModal();
 

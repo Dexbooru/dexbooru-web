@@ -7,7 +7,7 @@
 	};
 
 	let { post }: Props = $props();
-	const { tags, artists } = post;
+	const { tags, artists } = $derived(post);
 </script>
 
 <div class="mt-2 mb-5 ml-2 block space-y-2">

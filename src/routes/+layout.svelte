@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { beforeNavigate, afterNavigate } from '$app/navigation';
+	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import DeleteCollectionConfirmationModal from '$lib/client/components/collections/card/DeleteCollectionConfirmationModal.svelte';
 	import EditCollectionModal from '$lib/client/components/collections/card/EditCollectionModal.svelte';
@@ -39,7 +39,9 @@
 
 	let { data, children }: Props = $props();
 
-	initLayoutContexts(data);
+	$effect(() => {
+		initLayoutContexts(data);
+	});
 
 	onMount(() => {
 		registerDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
@@ -68,7 +70,7 @@
 <div class="flex min-h-screen flex-col">
 	<!--- Main application layout -->
 	<Navbar />
-	<div class="flex-grow">
+	<div class="grow">
 		{@render children?.()}
 	</div>
 	{#if page.route.id === '/'}

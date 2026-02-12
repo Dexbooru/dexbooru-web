@@ -29,7 +29,7 @@
 
 	let linkedAccountsUpdating = $state(false);
 
-	let currentLinkedAccounts: LinkedUserAccount[] = $state(linkedAccounts);
+	let currentLinkedAccounts = $derived<LinkedUserAccount[]>(linkedAccounts);
 	let disconnectedAccounts = $state<UserAuthenticationSource[]>([]);
 
 	let discordAccount: LinkedUserAccount | undefined = $derived(
