@@ -1,9 +1,9 @@
+import type { RequestEvent } from '@sveltejs/kit';
 import prisma from '../../db/prisma';
 import { createSuccessResponse, validateAndHandleRequest } from '../../helpers/controllers';
 import { cacheResponseRemotely, getRemoteResponseFromCache } from '../../helpers/sessions';
 import type { TControllerHandlerVariant, TRequestSchema } from '../../types/controllers';
 import { CACHE_KEY, CACHE_TIME_SECONDS } from '../cache-strategies/general';
-import type { RequestEvent } from '@sveltejs/kit';
 
 export type TResourceCounts = {
 	postCount: number;
@@ -42,8 +42,6 @@ export const handleFetchResourceGenerics = async (
 					artistCount,
 					userCount,
 				};
-
-				console.log(responseData);
 
 				cacheResponseRemotely(CACHE_KEY, responseData, CACHE_TIME_SECONDS);
 			}

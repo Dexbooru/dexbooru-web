@@ -25,7 +25,7 @@
 
 {#if (tags?.length ?? 0) > 0 || (artists?.length ?? 0) > 0}
 	<div
-		class="absolute top-10 right-auto left-auto mt-2 max-h-80 w-1/2 min-w-[300px] overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800"
+		class="absolute top-10 right-0 left-0 z-50 mx-auto mt-2 max-h-80 w-full max-w-2xl overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800"
 		in:slide
 		out:fade
 	>

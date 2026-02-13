@@ -22,6 +22,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest run",
+		"test:coverage": "vitest run --coverage.enabled --coverage.provider=v8 --coverage.reporter=html",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write 'src/**/*.{ts,svelte}'",
 		"prepare": "husky install && svelte-kit sync"
@@ -49,6 +50,7 @@
 		"@types/turndown": "^5.0.6",
 		"@typescript-eslint/eslint-plugin": "^8.54.0",
 		"@typescript-eslint/parser": "^8.54.0",
+		"@vitest/coverage-v8": "^4.0.18",
 		"clsx": "^2.1.1",
 		"csv-reader": "^1.0.12",
 		"dotenv": "^17.2.4",

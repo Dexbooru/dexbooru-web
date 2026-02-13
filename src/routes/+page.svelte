@@ -67,13 +67,14 @@
 	<meta property="og:image" content={ApplicationLogo} />
 </svelte:head>
 
-<main class="mt-40 flex flex-col items-center justify-center text-center">
-	<h1 class="mb-6 text-4xl font-bold text-gray-900 md:text-5xl dark:text-gray-100">
+<main class="mt-20 flex flex-col items-center justify-center px-4 text-center md:mt-40">
+	<h1 class="mb-6 text-3xl font-bold text-gray-900 md:text-5xl dark:text-gray-100">
 		Dexbooru - Anime/Manga Imageboard
 	</h1>
 	<form action="/search" method="GET" class="relative flex w-full flex-col items-center">
 		<Searchbar
-			width="50%"
+			width="100%"
+			isGlobal
 			required
 			name="query"
 			autofocus
@@ -81,11 +82,11 @@
 			placeholder="example: tag1 -tag2 artist1 -artist2 uploader:bobby views:>1000 likes:<100"
 			queryInputHandler={handleSearchbarInput}
 			queryInputClear={() => (labelSearchResults = { tags: [], artists: [] })}
-			customClass="w-1/2 min-w-[300px]"
+			customClass="w-full max-w-2xl"
 		/>
 		<SearchResultsDropdown results={labelSearchResults} />
 	</form>
-	<p class="text-md mt-6 text-gray-700 dark:text-gray-300">
+	<p class="mt-6 text-sm text-gray-700 md:text-base dark:text-gray-300">
 		Serving <span>{formatNumberWithCommas(postCount)} posts</span>,
 		<span>{formatNumberWithCommas(tagCount)} tags</span>,
 		<span>{formatNumberWithCommas(artistCount)} artists</span>,
@@ -94,7 +95,7 @@
 	</p>
 	<a
 		href="/docs/search-syntax"
-		class="mt-4 text-sm text-blue-600 hover:underline dark:text-blue-400"
+		class="mt-4 text-xs text-blue-600 hover:underline md:text-sm dark:text-blue-400"
 	>
 		Need help searching? Check out our Search Syntax Guide
 	</a>

@@ -22,4 +22,7 @@ mock_data/
 # docker
 /docker/redis/data
 /docker/postgres/data
-/docker/localstack-*/data
+/docker/localstack-*/datacoverage/
+
+# testing
+coverage/
