@@ -4,6 +4,7 @@
 		getAuthenticatedUser,
 		getAuthenticatedUserNotifications,
 	} from '$lib/client/helpers/context';
+	import { clearPostDraft } from '$lib/client/helpers/drafts';
 	import DropdownDivider from 'flowbite-svelte/DropdownDivider.svelte';
 	import AngleDownOutline from 'flowbite-svelte-icons/AngleDownOutline.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
@@ -71,8 +72,10 @@
 				>Settings</DropdownItem
 			>
 			<DropdownDivider />
-			<DropdownItem href="/profile/logout" class="text-gray-900 dark:text-white"
-				>Sign out</DropdownItem
+			<DropdownItem
+				href="/profile/logout"
+				class="text-gray-900 dark:text-white"
+				onclick={clearPostDraft}>Sign out</DropdownItem
 			>
 		</Dropdown>
 	</div>

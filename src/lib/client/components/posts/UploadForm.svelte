@@ -21,7 +21,8 @@
 	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
 	import Heading from 'flowbite-svelte/Heading.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, untrack } from 'svelte';
+	import { savePostDraft, loadPostDraft, clearPostDraft } from '$lib/client/helpers/drafts';
 	import type { ActionData } from '../../../../routes/posts/upload/$types';
 	import PostPictureUpload from '../files/PostPictureUpload.svelte';
 
@@ -33,11 +34,13 @@
 
 	let { form }: Props = $props();
 
-	let isNsfw: boolean = $state(false);
-	let tags: string[] = $derived(form?.tags || []);
-	let artists: string[] = $derived(form?.artists || []);
-	let description: string = $derived(form?.description || '');
-	let sourceLink: string = $derived(form?.sourceLink || '');
+	let isNsfw = $state(false);
+	let tags = $state<string[]>([]);
+	let artists = $state<string[]>([]);
+	let description = $state('');
+	let sourceLink = $state('');
+	let hasLoaded = $state(false);
+
 	let postImages: {
 		imageBase64: string;
 		file: File;
@@ -50,21 +53,74 @@
 	let forceUpload = $state(false);
 
 	$effect(() => {
-		if (postImages.length > 0) {
-			const checkDuplicates = async () => {
+		const check = async () => {
+			if (postImages.length > 0) {
 				const hashes = await Promise.all(postImages.map((img) => calculateHash(img.file)));
 				const response = await checkDuplicatePosts(hashes);
 				if (response.ok) {
 					const data = await response.json();
-					duplicates = data.data.duplicatePosts;
+					untrack(() => {
+						duplicates = data.data.duplicatePosts;
+					});
 				}
-			};
-			checkDuplicates();
-		} else {
-			duplicates = [];
-			forceUpload = false;
+			} else {
+				untrack(() => {
+					duplicates = [];
+					forceUpload = false;
+				});
+			}
+		};
+		check();
+	});
+
+	$effect(() => {
+		if (form) {
+			untrack(() => {
+				isNsfw = form.isNsfw ?? false;
+				tags = form.tags || [];
+				artists = form.artists || [];
+				description = form.description || '';
+				sourceLink = form.sourceLink || '';
+			});
 		}
 	});
+
+	$effect(() => {
+		if (!hasLoaded) {
+			untrack(() => {
+				if (!form) {
+					const draft = loadPostDraft();
+					if (draft) {
+						isNsfw = draft.isNsfw;
+						tags = draft.tags;
+						artists = draft.artists;
+						description = draft.description;
+						sourceLink = draft.sourceLink;
+					}
+				}
+				hasLoaded = true;
+			});
+			return;
+		}
+
+		const currentDraft = { isNsfw, tags, artists, description, sourceLink };
+		const isEmpty =
+			!isNsfw &&
+			tags.length === 0 &&
+			artists.length === 0 &&
+			description === '' &&
+			sourceLink === '';
+
+		if (isEmpty) {
+			clearPostDraft();
+		} else {
+			savePostDraft(currentDraft);
+		}
+	});
+
+	const hasDraft = $derived(
+		isNsfw || tags.length > 0 || artists.length > 0 || description !== '' || sourceLink !== '',
+	);
 
 	let uploadButtonDisabled = $derived.by(() => {
 		const isValidForm =
@@ -138,6 +194,8 @@
 				} else if (reason) {
 					toast.push(reason, FAILURE_TOAST_OPTIONS);
 				}
+			} else if (result.type === 'redirect') {
+				clearPostDraft();
 			}
 			await update();
 		};
@@ -154,11 +212,29 @@
 			eventSource.close();
 		}
 	});
+
+	const handleClearDraft = () => {
+		clearPostDraft();
+		isNsfw = false;
+		tags = [];
+		artists = [];
+		description = '';
+		sourceLink = '';
+		postImages = [];
+	};
 </script>
 
 <main class="flex justify-center px-4 sm:px-6 lg:px-8">
 	<Card size="lg" class="mt-3 mb-3 w-full max-w-3xl space-y-2 p-6 shadow-lg">
-		<Heading class="mt-2 mb-5 text-center ">Upload a post!</Heading>
+		<div class="flex items-center justify-between">
+			<div class="w-1/4"></div>
+			<Heading class="mt-2 mb-5 text-center">Upload a post!</Heading>
+			<div class="flex w-1/4 justify-end">
+				{#if hasDraft}
+					<Button color="red" size="xs" onclick={handleClearDraft}>Clear Draft</Button>
+				{/if}
+			</div>
+		</div>
 
 		{#if duplicates.length > 0}
 			<Alert color="red" class="mb-4">
