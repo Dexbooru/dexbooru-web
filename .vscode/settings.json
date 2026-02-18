@@ -3,5 +3,13 @@
 	"editor.codeActionsOnSave": {
 		"source.organizeImports": "explicit"
 	},
-	"prisma.pinToPrisma6": false
+	"prisma.pinToPrisma6": false,
+	"search.exclude": {
+		"**/node_modules": true,
+		"**/bower_components": true,
+		"**/*.code-search": true,
+		".svelte-kit": true,
+		"dist": true,
+		"build": true,
+	}
 }

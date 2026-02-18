@@ -98,3 +98,11 @@ export type TPostSimilarityResponse = {
 	status: string;
 	results: TPostImageSimilarityResult[];
 };
+
+export type TPostDraft = {
+	isNsfw: boolean;
+	tags: string[];
+	artists: string[];
+	description: string;
+	sourceLink: string;
+};
