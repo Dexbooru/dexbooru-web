@@ -36,8 +36,12 @@ export const getCacheKeyWithPostCategory = (
 	pageNumber: number,
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
+	userId: string | null = null,
 ) => {
-	return `post-${category}-${pageNumber}-${orderBy}-${ascending}`;
+	if (userId === null) {
+		return `post-${category}-${pageNumber}-${orderBy}-${ascending}`;
+	}
+	return `post-${category}-${pageNumber}-${orderBy}-${ascending}-${userId}`;
 };
 
 export const CACHE_TIME_GENERAL_POSTS = 60;

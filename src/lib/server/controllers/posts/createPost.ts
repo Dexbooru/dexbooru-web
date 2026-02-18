@@ -1,22 +1,22 @@
 import { uploadStatusEmitter } from '$lib/server/events/uploadStatus';
+import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
+import { deleteBatchFromBucket } from '../../aws/actions/s3';
+import { enqueueBatchUploadedPostImages } from '../../aws/actions/sqs';
+import { AWS_POST_PICTURE_BUCKET_NAME } from '../../constants/aws';
+import { MAXIMUM_DUPLICATES_TO_SEARCH_ON_POST_UPLOAD } from '../../constants/posts';
 import { createPost, deletePostById, findDuplicatePosts } from '../../db/actions/post';
 import {
 	createErrorResponse,
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { deleteBatchFromBucket } from '../../aws/actions/s3';
-import { enqueueBatchUploadedPostImages } from '../../aws/actions/sqs';
-import { AWS_POST_PICTURE_BUCKET_NAME } from '../../constants/aws';
-import { MAXIMUM_DUPLICATES_TO_SEARCH_ON_POST_UPLOAD } from '../../constants/posts';
 import { indexPostImages } from '../../helpers/mlApi';
 import { invalidateCacheRemotely } from '../../helpers/sessions';
-import { getCacheKeyWithPostCategory, getCacheKeyForPostAuthor } from '../cache-strategies/posts';
-import { CreatePostSchema } from '../request-schemas/posts';
 import logger from '../../logging/logger';
-import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
 import type { TControllerHandlerVariant } from '../../types/controllers';
-import { uploadPostImages, createPostFormErrorData } from './helpers';
+import { getCacheKeyForPostAuthor, getCacheKeyWithPostCategory } from '../cache-strategies/posts';
+import { CreatePostSchema } from '../request-schemas/posts';
+import { createPostFormErrorData, uploadPostImages } from './helpers';
 
 export const handleCreatePost = async (
 	event: RequestEvent,
@@ -106,6 +106,9 @@ export const handleCreatePost = async (
 					indexPostImages(newPost.id, postImageUrls);
 
 					invalidateCacheRemotely(getCacheKeyWithPostCategory('general', 0, 'createdAt', false));
+					invalidateCacheRemotely(
+						getCacheKeyWithPostCategory('uploaded', 0, 'createdAt', false, event.locals.user.id),
+					);
 					invalidateCacheRemotely(
 						getCacheKeyForPostAuthor(newPost.author?.username ?? '', 0, 'createdAt', false),
 					);

@@ -1,4 +1,10 @@
 import type { PostModerationStatus } from '$generated/prisma/client';
+import { NULLABLE_USER } from '$lib/shared/constants/auth';
+import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
+import { isModerationRole } from '$lib/shared/helpers/auth/role';
+import type { TPost, TPostOrderByColumn, TPostPaginationData } from '$lib/shared/types/posts';
+import { redirect, type RequestEvent } from '@sveltejs/kit';
+import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../../constants/posts';
 import { findPostsByAuthorId, findPostsByPage } from '../../db/actions/post';
 import { findLikedPostsByAuthorId } from '../../db/actions/user';
 import {
@@ -7,24 +13,18 @@ import {
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
 import {
-	getRemoteResponseFromCache,
-	cacheResponseRemotely,
 	cacheMultipleToCollectionRemotely,
+	cacheResponseRemotely,
+	getRemoteResponseFromCache,
 } from '../../helpers/sessions';
-import {
-	getCacheKeyWithPostCategory,
-	getCacheKeyForIndividualPostKeys,
-	CACHE_TIME_GENERAL_POSTS,
-} from '../cache-strategies/posts';
-import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
-import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../../constants/posts';
-import { NULLABLE_USER } from '$lib/shared/constants/auth';
-import { isModerationRole } from '$lib/shared/helpers/auth/role';
-import { GetPostsSchema } from '../request-schemas/posts';
 import logger from '../../logging/logger';
-import { redirect, type RequestEvent } from '@sveltejs/kit';
 import type { TControllerHandlerVariant, TPostFetchCategory } from '../../types/controllers';
-import type { TPostPaginationData, TPostOrderByColumn, TPost } from '$lib/shared/types/posts';
+import {
+	CACHE_TIME_GENERAL_POSTS,
+	getCacheKeyForIndividualPostKeys,
+	getCacheKeyWithPostCategory,
+} from '../cache-strategies/posts';
+import { GetPostsSchema } from '../request-schemas/posts';
 
 export const handleGetPosts = async (
 	event: RequestEvent,
@@ -46,6 +46,8 @@ export const handleGetPosts = async (
 			orderBy as TPostOrderByColumn,
 			ascending,
 		);
+
+		let overrideUserId: string | null = null;
 
 		try {
 			let responseData: TPostPaginationData;
@@ -79,6 +81,7 @@ export const handleGetPosts = async (
 							ascending,
 							selectors,
 						);
+						overrideUserId = user.id;
 						break;
 					case 'uploaded': {
 						const targetUserId = userId ?? user.id;
@@ -97,6 +100,7 @@ export const handleGetPosts = async (
 							selectors,
 							moderationStatuses,
 						);
+						overrideUserId = targetUserId;
 						break;
 					}
 				}
@@ -113,7 +117,17 @@ export const handleGetPosts = async (
 					orderBy: orderBy as TPostOrderByColumn,
 				};
 
-				cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_GENERAL_POSTS);
+				const finalCacheKey = overrideUserId
+					? getCacheKeyWithPostCategory(
+							category,
+							pageNumber,
+							orderBy as TPostOrderByColumn,
+							ascending,
+							overrideUserId,
+						)
+					: cacheKey;
+
+				cacheResponseRemotely(finalCacheKey, responseData, CACHE_TIME_GENERAL_POSTS);
 				cacheMultipleToCollectionRemotely(
 					posts.map((post) => getCacheKeyForIndividualPostKeys(post.id)),
 					cacheKey,

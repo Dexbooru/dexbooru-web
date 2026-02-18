@@ -1,3 +1,4 @@
+import type { RequestEvent } from '@sveltejs/kit';
 import { findPostById, likePostById } from '../../db/actions/post';
 import {
 	createErrorResponse,
@@ -5,10 +6,12 @@ import {
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
 import { invalidateCacheRemotely } from '../../helpers/sessions';
-import { getCacheKeyForIndividualPost } from '../cache-strategies/posts';
-import { LikePostSchema } from '../request-schemas/posts';
 import logger from '../../logging/logger';
-import type { RequestEvent } from '@sveltejs/kit';
+import {
+	getCacheKeyForIndividualPost,
+	getCacheKeyWithPostCategory,
+} from '../cache-strategies/posts';
+import { LikePostSchema } from '../request-schemas/posts';
 
 export const handleLikePost = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -18,7 +21,14 @@ export const handleLikePost = async (event: RequestEvent) => {
 		async (data) => {
 			const postId = data.pathParams.postId;
 			const action = data.body.action;
-			const cacheKey = getCacheKeyForIndividualPost(postId);
+			const individualPostCacheKey = getCacheKeyForIndividualPost(postId);
+			const userLikedPostsCacheKey = getCacheKeyWithPostCategory(
+				'liked',
+				0,
+				'createdAt',
+				false,
+				event.locals.user.id,
+			);
 
 			try {
 				const post = await findPostById(postId, { likes: true });
@@ -39,7 +49,8 @@ export const handleLikePost = async (event: RequestEvent) => {
 					);
 				}
 
-				invalidateCacheRemotely(cacheKey);
+				invalidateCacheRemotely(individualPostCacheKey);
+				invalidateCacheRemotely(userLikedPostsCacheKey);
 
 				return createSuccessResponse(
 					'api-route',
