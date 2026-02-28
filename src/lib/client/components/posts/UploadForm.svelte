@@ -7,7 +7,8 @@
 	import RatingEstimate from '$lib/client/components/posts/upload/RatingEstimate.svelte';
 	import SourceLinkSection from '$lib/client/components/posts/upload/SourceLinkSection.svelte';
 	import UploadStatusModal from '$lib/client/components/posts/upload/UploadStatusModal.svelte';
-	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { clearPostDraft, loadPostDraft, savePostDraft } from '$lib/client/helpers/drafts';
 	import { calculateHash } from '$lib/client/helpers/hashing';
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate } from '$lib/shared/helpers/labels';
@@ -22,7 +23,6 @@
 	import Heading from 'flowbite-svelte/Heading.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
 	import { onDestroy, onMount, untrack } from 'svelte';
-	import { savePostDraft, loadPostDraft, clearPostDraft } from '$lib/client/helpers/drafts';
 	import type { ActionData } from '../../../../routes/posts/upload/$types';
 	import PostPictureUpload from '../files/PostPictureUpload.svelte';
 
@@ -205,6 +205,12 @@
 		if (form?.reason) {
 			toast.push(form.reason, FAILURE_TOAST_OPTIONS);
 		}
+
+		return () => {
+			if (hasDraft) {
+				toast.push('Post draft saved locally', SUCCESS_TOAST_OPTIONS);
+			}
+		};
 	});
 
 	onDestroy(() => {
