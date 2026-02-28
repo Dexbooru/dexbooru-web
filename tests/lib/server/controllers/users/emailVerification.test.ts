@@ -8,6 +8,8 @@ import {
 	mockControllerHelpers,
 	mockEmailVerificationActions,
 	mockEmailHelpers,
+	mockSessionHelpers,
+	mockCookieHelpers,
 } from '../../../../mocks';
 import { redirect } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
@@ -27,11 +29,20 @@ describe('email verification controllers', () => {
 
 	describe('handleVerifyEmail', () => {
 		it('should redirect to posts with emailVerified when token is valid', async () => {
+			const mockCookies = { set: vi.fn(), delete: vi.fn() };
+			const eventWithCookies = {
+				...mockEvent,
+				cookies: mockCookies,
+			} as unknown as RequestEvent;
+
+			mockSessionHelpers.generateEncodedUserTokenFromRecord.mockReturnValue('mock-session-token');
+			mockCookieHelpers.buildCookieOptions.mockReturnValue({ path: '/', maxAge: 123 });
 			mockEmailVerificationActions.getEmailVerificationToken.mockResolvedValue({
 				id: 'token-id',
 				userId: 'u1',
 				expiresAt: new Date(Date.now() + 10000),
 			});
+			mockUserActions.findUserById.mockResolvedValue({ id: 'u1' });
 			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
 				async (event, handlerType, schema, callback) => {
 					return await callback({ pathParams: { tokenId: 'token-id' } });
@@ -41,7 +52,7 @@ describe('email verification controllers', () => {
 				throw { status: 302, url: '/posts?emailVerified=true' };
 			});
 
-			await expect(handleVerifyEmail(mockEvent)).rejects.toEqual({
+			await expect(handleVerifyEmail(eventWithCookies)).rejects.toEqual({
 				status: 302,
 				url: '/posts?emailVerified=true',
 			});
@@ -49,6 +60,12 @@ describe('email verification controllers', () => {
 			expect(mockUserActions.updateEmailVerifiedByUserId).toHaveBeenCalledWith('u1', true);
 			expect(mockEmailVerificationActions.deleteEmailVerificationToken).toHaveBeenCalledWith(
 				'token-id',
+			);
+			expect(mockUserActions.findUserById).toHaveBeenCalledWith('u1', { id: true });
+			expect(mockCookies.set).toHaveBeenCalledWith(
+				'dexbooru-session',
+				expect.any(String),
+				expect.any(Object),
 			);
 			expect(redirect).toHaveBeenCalledWith(302, '/posts?emailVerified=true');
 		});

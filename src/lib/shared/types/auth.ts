@@ -50,5 +50,5 @@ export type TPasswordRequirements = Record<TPASSWORD_REQUIREMENT_ABV, string>;
 type TEMAIL_REQUIREMENT_ABV = 'length' | 'valid-email';
 export type TEmailRequirements = Record<TEMAIL_REQUIREMENT_ABV, string>;
 
-type TUSERNAME_REQUIREMENT_ABV = 'length' | 'spaces';
+type TUSERNAME_REQUIREMENT_ABV = 'length' | 'spaces' | 'html-chars';
 export type TUsernameRequirements = Record<TUSERNAME_REQUIREMENT_ABV, string>;

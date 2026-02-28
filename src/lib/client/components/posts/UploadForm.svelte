@@ -327,97 +327,105 @@
 </script>
 
 <main class="flex justify-center px-4 sm:px-6 lg:px-8" onpaste={handlePaste}>
-	<Card size="lg" class="mt-3 mb-3 w-full max-w-3xl space-y-2 p-6 shadow-lg">
-		<div class="flex items-center justify-between">
-			<div class="w-1/4"></div>
-			<Heading class="mt-2 mb-5 text-center">Upload a post!</Heading>
-			<div class="flex w-1/4 justify-end">
-				{#if hasDraft}
-					<Button color="red" size="xs" onclick={handleClearDraft}>Clear Draft</Button>
-				{/if}
-			</div>
-		</div>
-
-		{#if !isEmailVerified}
-			<Alert color="yellow" class="mb-4">
+	{#if !isEmailVerified}
+		<div
+			class="mt-12 flex w-full max-w-md flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+		>
+			<div class="flex flex-col items-center gap-3 text-center">
 				<div class="flex items-center gap-2">
-					<EnvelopeSolid class="h-5 w-5 shrink-0" />
-					<span>
-						You must verify your email before uploading posts.
-						<a
-							href="/profile/settings?tab=personal"
-							class="font-medium underline hover:no-underline"
-						>
-							Verify in Settings
-						</a>
-					</span>
-				</div>
-			</Alert>
-		{/if}
-
-		{#if duplicates.length > 0}
-			<Alert color="red" class="mb-4">
-				<div class="flex items-center gap-2">
-					<ExclamationCircleSolid class="h-5 w-5" />
-					<span class="font-medium"
-						>{duplicates.length} potential duplicate post{duplicates.length > 1 ? 's' : ''} detected!</span
+					<EnvelopeSolid class="h-6 w-6 shrink-0 text-gray-500 dark:text-gray-400" />
+					<span class="text-lg font-medium text-gray-900 dark:text-white"
+						>Email verification required</span
 					>
 				</div>
-				<ul class="mt-2 ml-7 space-y-3">
-					{#each duplicates as duplicate (duplicate.id)}
-						<li class="flex items-center gap-3">
-							{#if duplicate.imageUrls?.[0]}
-								<img
-									src={duplicate.imageUrls[0]}
-									alt="Duplicate preview"
-									class="h-12 w-12 rounded border border-yellow-300 object-cover"
-								/>
-							{/if}
-							<a
-								href="/posts/{duplicate.id}"
-								target="_blank"
-								class="hover:text-primary-600 text-sm underline"
-							>
-								{duplicate.description || `Post ID: ${duplicate.id.slice(0, 8)}`}
-							</a>
-						</li>
-					{/each}
-				</ul>
-				<div class="mt-4 ml-7 text-gray-500 dark:text-gray-600">
-					<Checkbox bind:checked={forceUpload}>I want to upload this anyway</Checkbox>
+				<p class="text-gray-600 dark:text-gray-400">
+					You must verify your email before uploading posts. Check your inbox for the verification
+					link we sent when you signed up.
+				</p>
+				<a
+					href="/profile/settings?tab=personal"
+					class="bg-primary-700 hover:bg-primary-800 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-white focus:ring-4 focus:outline-none"
+				>
+					Verify in Settings
+				</a>
+			</div>
+		</div>
+	{:else}
+		<Card size="lg" class="mt-3 mb-3 w-full max-w-3xl space-y-2 p-6 shadow-lg">
+			<div class="flex items-center justify-between">
+				<div class="w-1/4"></div>
+				<Heading class="mt-2 mb-5 text-center">Upload a post!</Heading>
+				<div class="flex w-1/4 justify-end">
+					{#if hasDraft}
+						<Button color="red" size="xs" onclick={handleClearDraft}>Clear Draft</Button>
+					{/if}
 				</div>
-			</Alert>
-		{/if}
+			</div>
 
-		<form
-			id="upload-form"
-			method="POST"
-			class="flex flex-col justify-center"
-			enctype="multipart/form-data"
-			use:enhance={handleSubmit}
-		>
-			<section class="space-y-2">
-				<DescriptionSection bind:description />
+			{#if duplicates.length > 0}
+				<Alert color="red" class="mb-4">
+					<div class="flex items-center gap-2">
+						<ExclamationCircleSolid class="h-5 w-5" />
+						<span class="font-medium"
+							>{duplicates.length} potential duplicate post{duplicates.length > 1 ? 's' : ''} detected!</span
+						>
+					</div>
+					<ul class="mt-2 ml-7 space-y-3">
+						{#each duplicates as duplicate (duplicate.id)}
+							<li class="flex items-center gap-3">
+								{#if duplicate.imageUrls?.[0]}
+									<img
+										src={duplicate.imageUrls[0]}
+										alt="Duplicate preview"
+										class="h-12 w-12 rounded border border-yellow-300 object-cover"
+									/>
+								{/if}
+								<a
+									href="/posts/{duplicate.id}"
+									target="_blank"
+									class="hover:text-primary-600 text-sm underline"
+								>
+									{duplicate.description || `Post ID: ${duplicate.id.slice(0, 8)}`}
+								</a>
+							</li>
+						{/each}
+					</ul>
+					<div class="mt-4 ml-7 text-gray-500 dark:text-gray-600">
+						<Checkbox bind:checked={forceUpload}>I want to upload this anyway</Checkbox>
+					</div>
+				</Alert>
+			{/if}
 
-				<LabelSection bind:labels={tags} type="tag" />
-
-				<LabelSection bind:labels={artists} type="artist" />
-
-				<SourceLinkSection bind:sourceLink />
-
-				<PostPictureUpload bind:loadingPictures={loadingPostPictures} bind:images={postImages} />
-
-				<Checkbox class="" bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
-				<Input type="hidden" name="isNsfw" value={isNsfw.toString()} />
-
-				<RatingEstimate {estimatedPostRating} />
-			</section>
-
-			<Button disabled={uploadButtonDisabled} color="green" type="submit" class="mt-5!"
-				>Upload post</Button
+			<form
+				id="upload-form"
+				method="POST"
+				class="flex flex-col justify-center"
+				enctype="multipart/form-data"
+				use:enhance={handleSubmit}
 			>
-		</form>
-	</Card>
+				<section class="space-y-2">
+					<DescriptionSection bind:description />
+
+					<LabelSection bind:labels={tags} type="tag" />
+
+					<LabelSection bind:labels={artists} type="artist" />
+
+					<SourceLinkSection bind:sourceLink />
+
+					<PostPictureUpload bind:loadingPictures={loadingPostPictures} bind:images={postImages} />
+
+					<Checkbox class="" bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
+					<Input type="hidden" name="isNsfw" value={isNsfw.toString()} />
+
+					<RatingEstimate {estimatedPostRating} />
+				</section>
+
+				<Button disabled={uploadButtonDisabled} color="green" type="submit" class="mt-5!"
+					>Upload post</Button
+				>
+			</form>
+		</Card>
+	{/if}
 
 	<UploadStatusModal bind:open={loading} {statusMessage} />
 </main>

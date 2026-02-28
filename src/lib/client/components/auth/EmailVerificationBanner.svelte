@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { NONEXISTENT_USER_ID } from '$lib/shared/constants/auth';
 	import Alert from 'flowbite-svelte/Alert.svelte';
 	import EnvelopeSolid from 'flowbite-svelte-icons/EnvelopeSolid.svelte';
+	import CloseOutline from 'flowbite-svelte-icons/CloseOutline.svelte';
 
 	type Props = {
 		emailVerified: boolean;
@@ -10,7 +12,23 @@
 
 	let { emailVerified, userId }: Props = $props();
 
-	const shouldShow = $derived(!emailVerified && userId !== NONEXISTENT_USER_ID);
+	const DISMISS_KEY = 'email-verification-banner-dismissed';
+	let dismissed = $state(false);
+
+	const shouldShow = $derived(!emailVerified && userId !== NONEXISTENT_USER_ID && !dismissed);
+
+	function dismiss() {
+		dismissed = true;
+		if (typeof sessionStorage !== 'undefined') {
+			sessionStorage.setItem(DISMISS_KEY, 'true');
+		}
+	}
+
+	onMount(() => {
+		if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(DISMISS_KEY) === 'true') {
+			dismissed = true;
+		}
+	});
 </script>
 
 {#if shouldShow}
@@ -25,6 +43,14 @@
 					</a>
 				</span>
 			</div>
+			<button
+				type="button"
+				onclick={dismiss}
+				aria-label="Dismiss"
+				class="shrink-0 rounded p-1 hover:bg-amber-200 dark:hover:bg-amber-800"
+			>
+				<CloseOutline class="h-5 w-5" />
+			</button>
 		</div>
 	</Alert>
 {/if}

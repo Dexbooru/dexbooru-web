@@ -1,25 +1,28 @@
-import { redirect, type RequestEvent } from '@sveltejs/kit';
-import {
-	deleteEmailVerificationToken,
-	getEmailVerificationToken,
-} from '../../db/actions/emailVerification';
-import { updateEmailVerifiedByUserId } from '../../db/actions/user';
-import {
-	createErrorResponse,
-	createSuccessResponse,
-	validateAndHandleRequest,
-} from '../../helpers/controllers';
-import { UserResendVerificationSchema, UserVerifyEmailSchema } from '../request-schemas/users';
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
+import { SESSION_ID_KEY } from '$lib/shared/constants/session';
+import { redirect, type RequestEvent } from '@sveltejs/kit';
+import type { SerializeOptions } from 'cookie';
 import {
 	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
 	DEXBOORU_SUPPORT_DISPLAY_NAME,
 	EMAIL_VERIFICATION_SUBJECT,
 } from '../../constants/email';
-import { findUserById } from '../../db/actions/user';
+import {
+	createEmailVerificationToken,
+	deleteEmailVerificationToken,
+	getEmailVerificationToken,
+} from '../../db/actions/emailVerification';
+import { findUserById, updateEmailVerifiedByUserId } from '../../db/actions/user';
+import {
+	createErrorResponse,
+	createSuccessResponse,
+	validateAndHandleRequest,
+} from '../../helpers/controllers';
+import { buildCookieOptions } from '../../helpers/cookies';
 import { buildEmailVerificationTemplate, sendEmail } from '../../helpers/email';
-import { createEmailVerificationToken } from '../../db/actions/emailVerification';
+import { generateEncodedUserTokenFromRecord } from '../../helpers/sessions';
 import logger from '../../logging/logger';
+import { UserResendVerificationSchema, UserVerifyEmailSchema } from '../request-schemas/users';
 
 export const handleVerifyEmail = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -46,6 +49,16 @@ export const handleVerifyEmail = async (event: RequestEvent) => {
 
 			await updateEmailVerifiedByUserId(token.userId, true);
 			await deleteEmailVerificationToken(tokenId);
+
+			const user = await findUserById(token.userId, { id: true });
+			if (user) {
+				const encodedAuthToken = generateEncodedUserTokenFromRecord(user, true);
+				event.cookies.set(
+					SESSION_ID_KEY,
+					encodedAuthToken,
+					buildCookieOptions(true) as SerializeOptions & { path: string },
+				);
+			}
 
 			redirect(302, '/posts?emailVerified=true');
 		},

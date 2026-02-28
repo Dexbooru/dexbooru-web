@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { afterNavigate, beforeNavigate } from '$app/navigation';
+	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import DeleteCollectionConfirmationModal from '$lib/client/components/collections/card/DeleteCollectionConfirmationModal.svelte';
 	import EditCollectionModal from '$lib/client/components/collections/card/EditCollectionModal.svelte';
@@ -18,12 +18,13 @@
 	import EditPostModal from '$lib/client/components/posts/card/EditPostModal.svelte';
 	import HiddenPostModal from '$lib/client/components/posts/container/HiddenPostModal.svelte';
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
-	import { TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
+	import { SUCCESS_TOAST_OPTIONS, TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
 	import { getActiveModal, initLayoutContexts } from '$lib/client/helpers/context';
 	import {
 		destroyDocumentEventListeners,
 		registerDocumentEventListeners,
 	} from '$lib/client/helpers/dom';
+	import { toast } from '@zerodevx/svelte-toast';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import NProgress from 'nprogress';
 	import 'nprogress/nprogress.css';
@@ -49,6 +50,15 @@
 		return () => {
 			destroyDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
 		};
+	});
+
+	$effect(() => {
+		if (page.url.searchParams.get('emailVerified') === 'true') {
+			toast.push('Email verified successfully!', SUCCESS_TOAST_OPTIONS);
+			const url = new URL(page.url);
+			url.searchParams.delete('emailVerified');
+			goto(url.pathname + url.search, { replaceState: true });
+		}
 	});
 
 	beforeNavigate(() => {
