@@ -19,7 +19,7 @@
 
 	type Props = {
 		maximumImagesAllowed?: number;
-		images?: { imageBase64: string; file: File }[];
+		images?: { id: string; imageBase64: string; file: File }[];
 		loadingPictures?: boolean;
 	};
 
@@ -102,7 +102,13 @@
 			return;
 		}
 
-		images = results;
+		const uniqueResults = results
+			.filter(
+				(img, index, self) => index === self.findIndex((t) => t.imageBase64 === img.imageBase64),
+			)
+			.map((img) => ({ ...img, id: crypto.randomUUID() }));
+
+		images = uniqueResults;
 		loadingPictures = false;
 	};
 
@@ -136,7 +142,7 @@
 {:else if images.length > 0}
 	<P size="2xl" class="mt-5 text-center">Images Preview</P>
 	<div class="flex flex-wrap space-x-3">
-		{#each images as { imageBase64, file } (imageBase64)}
+		{#each images as { id, imageBase64, file } (id)}
 			<Button
 				color="alternative"
 				class="h-[200px] w-[200px] bg-cover bg-center bg-no-repeat"

@@ -47,6 +47,7 @@
 	let hasLoaded = $state(false);
 
 	let postImages: {
+		id: string;
 		imageBase64: string;
 		file: File;
 	}[] = $state([]);
@@ -260,15 +261,6 @@
 
 		if (pastedFiles.length === 0) return;
 
-		const totalCount = postImages.length + pastedFiles.length;
-		if (totalCount > MAXIMUM_IMAGES_PER_POST) {
-			toast.push(
-				`Cannot upload more than ${MAXIMUM_IMAGES_PER_POST} files per post`,
-				FAILURE_TOAST_OPTIONS,
-			);
-			return;
-		}
-
 		for (const file of pastedFiles) {
 			if (file.size === 0) {
 				toast.push('At least one of the files contained empty data', FAILURE_TOAST_OPTIONS);
@@ -297,7 +289,30 @@
 		if (failedFiles.length > 0) {
 			toast.push(failedFiles.join(', '), FAILURE_TOAST_OPTIONS);
 		} else {
-			postImages = [...postImages, ...results];
+			const uniqueResults = results
+				.filter(
+					(img, index, self) => index === self.findIndex((t) => t.imageBase64 === img.imageBase64),
+				)
+				.filter((newImg) => !postImages.some((oldImg) => oldImg.imageBase64 === newImg.imageBase64))
+				.map((img) => ({ ...img, id: crypto.randomUUID() }));
+
+			if (uniqueResults.length === 0) {
+				toast.push('The images you are trying to paste are already added', FAILURE_TOAST_OPTIONS);
+				loadingPostPictures = false;
+				return;
+			}
+
+			const totalCount = postImages.length + uniqueResults.length;
+			if (totalCount > MAXIMUM_IMAGES_PER_POST) {
+				toast.push(
+					`Cannot upload more than ${MAXIMUM_IMAGES_PER_POST} files per post`,
+					FAILURE_TOAST_OPTIONS,
+				);
+				loadingPostPictures = false;
+				return;
+			}
+
+			postImages = [...postImages, ...uniqueResults];
 		}
 		loadingPostPictures = false;
 	};

@@ -106,7 +106,7 @@
 	let sourceLink: string = $state('');
 	let existingPostImageUrls: string[] = $state([]);
 	let editingPost: boolean = $state(false);
-	let newPostImages: { imageBase64: string; file: File }[] = $state([]);
+	let newPostImages: { id: string; imageBase64: string; file: File }[] = $state([]);
 	let deletionPostImageUrls: string[] = $state([]);
 	let loadingPostPictures: boolean = $state(false);
 	let editButtonDisabled = $derived.by(() => {
