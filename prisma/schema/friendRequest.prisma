@@ -7,5 +7,4 @@ model FriendRequest {
   receiverUserId String
 
   @@id([senderUserId, receiverUserId])
-  @@index([senderUserId, receiverUserId])
 }

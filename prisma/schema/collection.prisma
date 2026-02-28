@@ -24,7 +24,6 @@ model PostCollection {
   authorId           String?
   matchingReports    PostCollectionReport[]   @relation(name: "collection matching reports")
 
-  @@index([id])
   @@index([authorId])
 }
 

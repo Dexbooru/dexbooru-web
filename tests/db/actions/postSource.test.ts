@@ -13,39 +13,60 @@ describe('postSource actions', () => {
 	});
 
 	describe('getPostSourcesByPostId', () => {
-		it('should call prisma.postSource.findMany with correct arguments', async () => {
+		it('should call prisma.postSource.findMany with posts relation filter', async () => {
 			const postId = 'p1';
 			mockPrisma.postSource.findMany.mockResolvedValue([]);
 			await getPostSourcesByPostId(postId);
 			expect(mockPrisma.postSource.findMany).toHaveBeenCalledWith({
-				where: { postId },
+				where: {
+					posts: {
+						some: { id: postId },
+					},
+				},
 			});
 		});
 	});
 
 	describe('createPostSource', () => {
-		it('should call prisma.postSource.create with correct arguments', async () => {
+		it('should upsert PostSource and connect to post', async () => {
 			const postId = 'p1';
-			const characterName = 'char';
-			const sourceTitle = 'title';
+			const characterName = 'Char Name';
+			const sourceTitle = 'Source Title';
 			const sourceType = 'ANIME' as PostSourceType;
-			mockPrisma.postSource.create.mockResolvedValue({});
+			const mockPostSource = { id: 'ps1', sourceTitle: 'source_title', sourceType, characterName: 'char_name' };
+			mockPrisma.postSource.upsert.mockResolvedValue(mockPostSource);
+			mockPrisma.post.update.mockResolvedValue({});
 
 			await createPostSource(postId, characterName, sourceTitle, sourceType);
 
-			expect(mockPrisma.postSource.create).toHaveBeenCalledWith({
-				data: {
-					postId,
-					characterName,
-					sourceTitle,
+			expect(mockPrisma.postSource.upsert).toHaveBeenCalledWith({
+				where: {
+					sourceTitle_sourceType_characterName: {
+						sourceTitle: 'source_title',
+						sourceType,
+						characterName: 'char_name',
+					},
+				},
+				create: {
+					sourceTitle: 'source_title',
 					sourceType,
+					characterName: 'char_name',
+				},
+				update: {},
+			});
+			expect(mockPrisma.post.update).toHaveBeenCalledWith({
+				where: { id: postId },
+				data: {
+					sources: {
+						connect: { id: mockPostSource.id },
+					},
 				},
 			});
 		});
 	});
 
 	describe('createPostSources', () => {
-		it('should call prisma.postSource.createMany with transformed results', async () => {
+		it('should upsert PostSources and connect to posts for existing posts', async () => {
 			const results = [
 				{
 					postId: 'p1',
@@ -54,18 +75,51 @@ describe('postSource actions', () => {
 					sourceType: 'ANIME' as PostSourceType,
 				},
 			];
-			mockPrisma.postSource.createMany.mockResolvedValue({ count: 1 });
-
-			await createPostSources(results);
-
-			expect(mockPrisma.postSource.createMany).toHaveBeenCalledWith({
-				data: expect.arrayContaining([
-					expect.objectContaining({
-						characterName: 'char_name',
-					}),
-				]),
-				skipDuplicates: true,
+			mockPrisma.post.findMany.mockResolvedValue([{ id: 'p1' }]);
+			mockPrisma.$transaction.mockImplementation(async (fn) => {
+				if (typeof fn === 'function') {
+					const tx = {
+						postSource: {
+							upsert: vi.fn().mockResolvedValue({ id: 'ps1' }),
+						},
+						post: {
+							update: vi.fn().mockResolvedValue({}),
+						},
+					};
+					return fn(tx);
+				}
+				return 0;
 			});
+
+			const result = await createPostSources(results);
+
+			expect(mockPrisma.post.findMany).toHaveBeenCalledWith({
+				where: { id: { in: ['p1'] } },
+				select: { id: true },
+			});
+			expect(mockPrisma.$transaction).toHaveBeenCalled();
+			expect(result).toEqual({ count: 1 });
+		});
+
+		it('should skip results for non-existent posts and not run transaction', async () => {
+			const results = [
+				{
+					postId: 'non-existent-post-id',
+					characterName: 'Char Name',
+					sourceTitle: 'Source Title',
+					sourceType: 'ANIME' as PostSourceType,
+				},
+			];
+			mockPrisma.post.findMany.mockResolvedValue([]);
+
+			const result = await createPostSources(results);
+
+			expect(mockPrisma.post.findMany).toHaveBeenCalledWith({
+				where: { id: { in: ['non-existent-post-id'] } },
+				select: { id: true },
+			});
+			expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+			expect(result).toEqual({ count: 0 });
 		});
 	});
 });

@@ -149,7 +149,7 @@ describe('CommentTree', () => {
 		tree.addComment(c2);
 
 		const replies = tree.getReplies('root');
-		expect(replies.map((c) => c.id)).toEqual(['2', '1']); // Sorted by date desc
+		expect(replies.map((c) => c.id)).toEqual(['2', '1']);
 		expect(tree.getReplies('1')).toEqual([]);
 		expect(tree.getReplies('non-existent')).toEqual([]);
 	});

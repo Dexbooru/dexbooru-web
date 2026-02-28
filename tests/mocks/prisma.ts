@@ -95,6 +95,7 @@ export const mockPrisma = {
 		findMany: vi.fn(),
 		create: vi.fn(),
 		createMany: vi.fn(),
+		upsert: vi.fn(),
 	},
 	userPreference: {
 		findFirst: vi.fn(),

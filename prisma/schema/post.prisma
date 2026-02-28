@@ -48,7 +48,6 @@ model Post {
   matchingReports  PostReport[]             @relation(name: "post matching reports")
   sources          PostSource[]
 
-  @@index([id])
   @@index([authorId])
   @@index([moderationStatus])
   @@index([moderationStatus, createdAt(sort: Desc)])
@@ -58,14 +57,12 @@ model Post {
 
 model PostSource {
   id            String         @id @default(uuid())
-  post          Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId        String
   sourceType    PostSourceType
   sourceTitle   String         @db.VarChar(200)
   characterName String         @db.VarChar(200)
+  posts         Post[]
 
-  @@index([id])
-  @@index([postId])
+  @@unique([sourceTitle, sourceType, characterName])
 }
 
 model PostReport {
