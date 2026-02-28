@@ -124,7 +124,6 @@
 	>
 	<Fileupload
 		id="postPicturesInput"
-		required
 		name="postPictures"
 		accept={FILE_IMAGE_ACCEPT.join(',')}
 		multiple

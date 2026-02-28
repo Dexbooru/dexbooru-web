@@ -10,6 +10,11 @@
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { clearPostDraft, loadPostDraft, savePostDraft } from '$lib/client/helpers/drafts';
 	import { calculateHash } from '$lib/client/helpers/hashing';
+	import { filesToBase64Strings } from '$lib/client/helpers/images';
+	import {
+		MAXIMUM_IMAGES_PER_POST,
+		MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB,
+	} from '$lib/shared/constants/images';
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate } from '$lib/shared/helpers/labels';
 	import type { TPostDuplicate } from '$lib/shared/types/posts';
@@ -86,22 +91,7 @@
 	});
 
 	$effect(() => {
-		if (!hasLoaded) {
-			untrack(() => {
-				if (!form) {
-					const draft = loadPostDraft();
-					if (draft) {
-						isNsfw = draft.isNsfw;
-						tags = draft.tags;
-						artists = draft.artists;
-						description = draft.description;
-						sourceLink = draft.sourceLink;
-					}
-				}
-				hasLoaded = true;
-			});
-			return;
-		}
+		if (!hasLoaded) return;
 
 		const currentDraft = { isNsfw, tags, artists, description, sourceLink };
 		const isEmpty =
@@ -202,6 +192,24 @@
 	};
 
 	onMount(() => {
+		if (form) {
+			isNsfw = form.isNsfw ?? false;
+			tags = form.tags || [];
+			artists = form.artists || [];
+			description = form.description || '';
+			sourceLink = form.sourceLink || '';
+		} else {
+			const draft = loadPostDraft();
+			if (draft) {
+				isNsfw = draft.isNsfw;
+				tags = draft.tags;
+				artists = draft.artists;
+				description = draft.description;
+				sourceLink = draft.sourceLink;
+			}
+		}
+		hasLoaded = true;
+
 		if (form?.reason) {
 			toast.push(form.reason, FAILURE_TOAST_OPTIONS);
 		}
@@ -228,9 +236,74 @@
 		sourceLink = '';
 		postImages = [];
 	};
+
+	const handlePaste = async (event: ClipboardEvent) => {
+		const items = event.clipboardData?.items;
+		if (!items) return;
+
+		const pastedFiles: File[] = [];
+		for (let i = 0; i < items.length; i++) {
+			if (items[i]?.type.startsWith('image/')) {
+				const blob = items[i]?.getAsFile() ?? null;
+				if (blob) {
+					const file = new File(
+						[blob],
+						`pasted-image-${Date.now()}-${i}.${blob.type.split('/')[1]}`,
+						{
+							type: blob.type,
+						},
+					);
+					pastedFiles.push(file);
+				}
+			}
+		}
+
+		if (pastedFiles.length === 0) return;
+
+		const totalCount = postImages.length + pastedFiles.length;
+		if (totalCount > MAXIMUM_IMAGES_PER_POST) {
+			toast.push(
+				`Cannot upload more than ${MAXIMUM_IMAGES_PER_POST} files per post`,
+				FAILURE_TOAST_OPTIONS,
+			);
+			return;
+		}
+
+		for (const file of pastedFiles) {
+			if (file.size === 0) {
+				toast.push('At least one of the files contained empty data', FAILURE_TOAST_OPTIONS);
+				return;
+			}
+
+			if (!isFileImageSmall(file, 'post')) {
+				toast.push(
+					`At least one of the image files exceeded the maximum upload size of ${MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB} MB`,
+					FAILURE_TOAST_OPTIONS,
+				);
+				return;
+			}
+
+			if (!isFileImage(file)) {
+				toast.push(
+					'At least one of the image files was not a proper image format',
+					FAILURE_TOAST_OPTIONS,
+				);
+				return;
+			}
+		}
+
+		loadingPostPictures = true;
+		const { failedFiles, results } = await filesToBase64Strings(pastedFiles);
+		if (failedFiles.length > 0) {
+			toast.push(failedFiles.join(', '), FAILURE_TOAST_OPTIONS);
+		} else {
+			postImages = [...postImages, ...results];
+		}
+		loadingPostPictures = false;
+	};
 </script>
 
-<main class="flex justify-center px-4 sm:px-6 lg:px-8">
+<main class="flex justify-center px-4 sm:px-6 lg:px-8" onpaste={handlePaste}>
 	<Card size="lg" class="mt-3 mb-3 w-full max-w-3xl space-y-2 p-6 shadow-lg">
 		<div class="flex items-center justify-between">
 			<div class="w-1/4"></div>
