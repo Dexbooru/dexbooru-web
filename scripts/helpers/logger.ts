@@ -8,9 +8,11 @@ const buildLogger = (logLevel: TLogLevel) => {
 		format: winston.format.combine(
 			winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
 			winston.format.colorize({ all: true }),
-			winston.format.printf(
-				({ timestamp, level, message }) => `[${timestamp}] ${level}: ${message}`,
-			),
+			winston.format.printf(({ timestamp, level, message, ...meta }) => {
+				const metadataStr =
+					Object.keys(meta).length > 0 ? `\n${JSON.stringify(meta, null, 2)}` : '';
+				return `[${timestamp}] ${level}: ${message}${metadataStr}`;
+			}),
 		),
 		transports: [new winston.transports.Console()],
 	});

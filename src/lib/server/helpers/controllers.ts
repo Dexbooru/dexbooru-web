@@ -2,6 +2,7 @@ import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { error, fail, type RequestEvent } from '@sveltejs/kit';
 import type { z } from 'zod';
+import logger from '../logging/logger';
 import type {
 	TControllerHandlerVariant,
 	TInferRequestSchema,
@@ -58,6 +59,11 @@ const validatePart = <K extends keyof TRequestSchema>(
 	if (parseResult.success) {
 		return { success: true, data: parseResult.data };
 	}
+
+	logger.warn(`Request validation failed for part: ${key}`, {
+		errors: parseResult.error.issues,
+		data: data,
+	});
 
 	return {
 		success: false,
@@ -168,6 +174,11 @@ export const validateAndHandleRequest = async <T extends TRequestSchema>(
 
 	const validationResult = validateRequest(rawRequestData, requestSchema);
 	if (!validationResult.success) {
+		logger.warn(`Request validation for endpoint failed`, {
+			url: event.url.toString(),
+			handlerType,
+			errors: validationResult.errors,
+		});
 		return createErrorResponse(
 			handlerType,
 			400,

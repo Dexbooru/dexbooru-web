@@ -8,6 +8,7 @@ import {
 import { uploadBatchToBucket } from '../../aws/actions/s3';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../../constants/aws';
 import type { TControllerHandlerVariant } from '../../types/controllers';
+import logger from '../../logging/logger';
 
 export const throwPostNotFoundError = (handlerType: TControllerHandlerVariant, postId: string) => {
 	const errorResponse = createErrorResponse(
@@ -27,11 +28,13 @@ export const uploadPostImages = async (
 	if (uploadId) {
 		uploadStatusEmitter.emit(uploadId, 'Hashing original files...');
 	}
+	logger.info('Hashing post images...', { uploadId, count: postPictures.length });
 	const postImageHashes = await Promise.all(postPictures.map((file) => hashFile(file)));
 
 	if (uploadId) {
 		uploadStatusEmitter.emit(uploadId, 'Processing images...');
 	}
+	logger.info('Running image transformation pipeline...', { uploadId });
 	const postImageBufferMaps = await runPostImageTransformationPipelineInBatch(postPictures, isNsfw);
 	const {
 		fileObjectIds,
@@ -43,6 +46,11 @@ export const uploadPostImages = async (
 	if (uploadId) {
 		uploadStatusEmitter.emit(uploadId, 'Uploading images to server...');
 	}
+	logger.info('Uploading processed images to S3...', {
+		uploadId,
+		bucket: AWS_POST_PICTURE_BUCKET_NAME,
+		imageCount: postImageFileBuffers.length,
+	});
 	const postImageUrls = await uploadBatchToBucket(
 		AWS_POST_PICTURE_BUCKET_NAME,
 		'posts',
@@ -50,6 +58,7 @@ export const uploadPostImages = async (
 		'webp',
 		fileObjectIds,
 	);
+	logger.info('Successfully uploaded images to S3', { uploadId, urls: postImageUrls });
 
 	return {
 		postImageUrls,
