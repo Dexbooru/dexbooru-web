@@ -243,6 +243,14 @@ const UserForgotPasswordSchema = {
 	}),
 } satisfies TRequestSchema;
 
+const UserVerifyEmailSchema = {
+	pathParams: z.object({
+		tokenId: z.string().uuid(),
+	}),
+} satisfies TRequestSchema;
+
+const UserResendVerificationSchema = {} satisfies TRequestSchema;
+
 const UserGetPasswordRecoverySessionSchema = {
 	pathParams: z.object({
 		recoveryId: z.string(),
@@ -286,9 +294,11 @@ export {
 	UserDeleteSchema,
 	UserForgotPasswordSchema,
 	UserGetPasswordRecoverySessionSchema,
+	UserResendVerificationSchema,
 	UserGetTotpSchema,
 	UserOtpGenerateSchema,
 	UserProcessTotpSchema,
 	UserRoleUpdateSchema,
 	UserUpdatePasswordAccountRecoverySchema,
+	UserVerifyEmailSchema,
 };

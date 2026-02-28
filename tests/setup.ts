@@ -9,6 +9,7 @@ import './mocks/db/actions/user';
 import './mocks/db/actions/tag';
 import './mocks/db/actions/artist';
 import './mocks/db/actions/passwordRecoveryAttempt';
+import './mocks/db/actions/emailVerification';
 import './mocks/db/actions/preference';
 import './mocks/db/actions/friend';
 import './mocks/db/actions/linkedAccount';

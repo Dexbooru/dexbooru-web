@@ -1,6 +1,7 @@
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { redirect, type RequestEvent } from '@sveltejs/kit';
 import { findLinkedAccountsFromUserId } from '../../db/actions/linkedAccount';
+import { findUserById } from '../../db/actions/user';
 import { createSuccessResponse, validateAndHandleRequest } from '../../helpers/controllers';
 import {
 	DiscordOauthProvider,
@@ -14,7 +15,10 @@ export const handleGetUserSettings = async (event: RequestEvent) => {
 			redirect(302, '/');
 		}
 
-		const linkedAccounts = await findLinkedAccountsFromUserId(event.locals.user.id, true);
+		const [linkedAccounts, user] = await Promise.all([
+			findLinkedAccountsFromUserId(event.locals.user.id, true),
+			findUserById(event.locals.user.id, { emailVerified: true }),
+		]);
 
 		const googleAuthProvider = new GoogleOauthProvider(event);
 		const discordAuthProvider = new DiscordOauthProvider(event);
@@ -32,6 +36,7 @@ export const handleGetUserSettings = async (event: RequestEvent) => {
 			githubAuthorizationUrl,
 			googleAuthorizationUrl,
 			linkedAccounts,
+			emailVerified: user?.emailVerified ?? false,
 		});
 	});
 };

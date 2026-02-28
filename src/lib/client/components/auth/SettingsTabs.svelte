@@ -12,6 +12,7 @@
 	import ChangeProfilePicture from './ChangeProfilePicture.svelte';
 	import ChangeUsernameForm from './ChangeUsernameForm.svelte';
 	import DeleteAccountForm from './DeleteAccountForm.svelte';
+	import VerifyEmailForm from './VerifyEmailForm.svelte';
 	import Enable2faForm from './Enable2faForm.svelte';
 	import OauthConnectForm from './OauthConnectForm.svelte';
 	import PostPreferencesForm from './PostPreferencesForm.svelte';
@@ -19,6 +20,7 @@
 
 	type Props = {
 		linkedAccounts: LinkedUserAccount[];
+		emailVerified: boolean;
 		oauthAuthorizationLinks: {
 			discordAuthorizationUrl: string;
 			githubAuthorizationUrl: string;
@@ -26,7 +28,7 @@
 		};
 	};
 
-	let { oauthAuthorizationLinks, linkedAccounts }: Props = $props();
+	let { oauthAuthorizationLinks, linkedAccounts, emailVerified = true }: Props = $props();
 
 	let currentTab: string = $state('personal');
 
@@ -53,6 +55,7 @@
 			</div>
 		{/snippet}
 		<section class="flex flex-wrap items-start gap-4">
+			<VerifyEmailForm {emailVerified} />
 			<ChangeUsernameForm />
 			<ChangePasswordForm />
 			<ChangeProfilePicture />

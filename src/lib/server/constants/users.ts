@@ -5,6 +5,7 @@ export const PUBLIC_USER_SELECTORS: TUserSelector = {
 	username: true,
 	createdAt: true,
 	email: true,
+	emailVerified: true,
 	profilePictureUrl: true,
 	role: true,
 	moderationStatus: true,

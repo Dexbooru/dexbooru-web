@@ -1,16 +1,17 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Prisma } from '$generated/prisma/client';
+import type { PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
 import { handleCreatePost } from '$lib/server/controllers/posts/createPost';
+import { uploadPostImages } from '$lib/server/controllers/posts/helpers';
+import type { RequestEvent } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+	mockControllerHelpers,
 	mockPostActions,
 	mockS3Actions,
 	mockSQSActions,
-	mockControllerHelpers,
+	mockUserActions,
 } from '../../../../mocks';
-import { uploadPostImages } from '$lib/server/controllers/posts/helpers';
-import { redirect } from '@sveltejs/kit';
-import type { RequestEvent } from '@sveltejs/kit';
-import type { Prisma } from '$generated/prisma/client';
-import type { PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
 
 // We still need to mock the controller helper module because it's in the same directory as the controller
 // and we want to control its output
@@ -35,6 +36,45 @@ describe('handleCreatePost', () => {
 		vi.clearAllMocks();
 	});
 
+	it('should return 403 when user email is not verified', async () => {
+		const mockFormData = {
+			description: 'test desc',
+			tags: ['tag1'],
+			artists: ['artist1'],
+			isNsfw: false,
+			postPictures: [],
+			sourceLink: 'http://example.com',
+			uploadId: 'upload1',
+			ignoreDuplicates: false,
+		};
+
+		mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+			async (event, handlerType, schema, callback) => {
+				return await callback({ form: mockFormData });
+			},
+		);
+
+		mockUserActions.findUserById.mockResolvedValue({
+			id: 'u1',
+			emailVerified: false,
+		});
+
+		const result = (await handleCreatePost(mockEvent, 'api-route')) as Response;
+		expect(result.status).toBe(403);
+
+		expect(mockUserActions.findUserById).toHaveBeenCalledWith('u1', {
+			id: true,
+			emailVerified: true,
+		});
+		expect(mockPostActions.createPost).not.toHaveBeenCalled();
+		expect(mockControllerHelpers.createErrorResponse).toHaveBeenCalledWith(
+			'api-route',
+			403,
+			'You must verify your email before uploading posts',
+			undefined,
+		);
+	});
+
 	it('should successfully create a post in api-route handler', async () => {
 		const mockFormData = {
 			description: 'test desc',
@@ -52,6 +92,11 @@ describe('handleCreatePost', () => {
 				return await callback({ form: mockFormData });
 			},
 		);
+
+		mockUserActions.findUserById.mockResolvedValue({
+			id: 'u1',
+			emailVerified: true,
+		});
 
 		vi.mocked(uploadPostImages).mockResolvedValue({
 			postImageUrls: ['url1'],
@@ -92,6 +137,8 @@ describe('handleCreatePost', () => {
 			},
 		);
 
+		mockUserActions.findUserById.mockResolvedValue({ id: 'u1', emailVerified: true });
+
 		vi.mocked(uploadPostImages).mockResolvedValue({
 			postImageUrls: ['url1'],
 			postImageWidths: [100],
@@ -127,6 +174,8 @@ describe('handleCreatePost', () => {
 				return await callback({ form: mockFormData });
 			},
 		);
+
+		mockUserActions.findUserById.mockResolvedValue({ id: 'u1', emailVerified: true });
 
 		vi.mocked(uploadPostImages).mockResolvedValue({
 			postImageUrls: ['url1'],
@@ -168,6 +217,8 @@ describe('handleCreatePost', () => {
 			},
 		);
 
+		mockUserActions.findUserById.mockResolvedValue({ id: 'u1', emailVerified: true });
+
 		vi.mocked(uploadPostImages).mockResolvedValue({
 			postImageUrls: ['url1'],
 			postImageWidths: [100],
@@ -201,6 +252,8 @@ describe('handleCreatePost', () => {
 				return await callback({ form: mockFormData });
 			},
 		);
+
+		mockUserActions.findUserById.mockResolvedValue({ id: 'u1', emailVerified: true });
 
 		vi.mocked(uploadPostImages).mockResolvedValue({
 			postImageUrls: ['url1'],

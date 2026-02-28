@@ -8,6 +8,7 @@ export * from './db/actions/user';
 export * from './db/actions/tag';
 export * from './db/actions/artist';
 export * from './db/actions/passwordRecoveryAttempt';
+export * from './db/actions/emailVerification';
 export * from './db/actions/preference';
 export * from './db/actions/friend';
 export * from './db/actions/linkedAccount';

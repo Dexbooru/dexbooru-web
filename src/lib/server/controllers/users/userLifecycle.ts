@@ -3,6 +3,7 @@ import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
 import type { SerializeOptions } from 'cookie';
 import { uploadToBucket } from '../../aws/actions/s3';
 import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '../../constants/aws';
+import { createEmailVerificationToken } from '../../db/actions/emailVerification';
 import {
 	createUser,
 	deleteUserById,
@@ -19,6 +20,12 @@ import {
 import { doPasswordsMatch, hashPassword } from '../../helpers/password';
 import { generateEncodedUserTokenFromRecord } from '../../helpers/sessions';
 import logger from '../../logging/logger';
+import {
+	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
+	DEXBOORU_SUPPORT_DISPLAY_NAME,
+	EMAIL_VERIFICATION_SUBJECT,
+} from '../../constants/email';
+import { buildEmailVerificationTemplate, sendEmail } from '../../helpers/email';
 import { UserDeleteSchema, UserCreateSchema } from '../request-schemas/users';
 
 export const handleDeleteUser = async (event: RequestEvent) => {
@@ -113,6 +120,24 @@ export const handleCreateUser = async (event: RequestEvent) => {
 				buildCookieOptions(true) as SerializeOptions & { path: string },
 			);
 			await createUserPreferences(newUser.id);
+
+			try {
+				const verificationToken = await createEmailVerificationToken(newUser.id);
+				await sendEmail({
+					from: {
+						name: DEXBOORU_SUPPORT_DISPLAY_NAME,
+						address: DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
+					},
+					to: newUser.email,
+					subject: EMAIL_VERIFICATION_SUBJECT,
+					html: buildEmailVerificationTemplate(newUser.username, verificationToken.id),
+				});
+			} catch (emailError) {
+				logger.error('Failed to send verification email', {
+					error: emailError,
+					userId: newUser.id,
+				});
+			}
 
 			redirect(302, `/posts`);
 		} catch (error) {

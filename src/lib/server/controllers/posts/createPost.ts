@@ -5,6 +5,7 @@ import { enqueueBatchUploadedPostImages } from '../../aws/actions/sqs';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../../constants/aws';
 import { MAXIMUM_DUPLICATES_TO_SEARCH_ON_POST_UPLOAD } from '../../constants/posts';
 import { createPost, deletePostById, findDuplicatePosts } from '../../db/actions/post';
+import { findUserById } from '../../db/actions/user';
 import {
 	createErrorResponse,
 	createSuccessResponse,
@@ -45,6 +46,19 @@ export const handleCreatePost = async (
 				isNsfw,
 			};
 			const user = event.locals.user;
+
+			const userWithVerification = await findUserById(user.id, {
+				id: true,
+				emailVerified: true,
+			});
+			if (!userWithVerification?.emailVerified) {
+				return createErrorResponse(
+					handlerType,
+					403,
+					'You must verify your email before uploading posts',
+					createPostFormErrorData(errorData, 'You must verify your email before uploading posts'),
+				);
+			}
 
 			logger.info('Starting post creation process', {
 				author: user.username,

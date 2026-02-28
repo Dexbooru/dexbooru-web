@@ -8,11 +8,16 @@ import type { TAuthFieldRequirements } from '../../types/auth';
 export const getUsernameRequirements = (username: string): TAuthFieldRequirements => {
 	const satisfied: string[] = [];
 	const unsatisfied: string[] = [];
-	// Check for spaces in the username
 	const hasSpaces = username.includes(' ');
+	const hasHtmlSpecialChars = /[&<>"']/.test(username);
 
-	// Exclude spaces from the length count
 	const usernameLengthWithoutSpaces = username.replace(/\s/g, '').length;
+
+	if (hasHtmlSpecialChars) {
+		unsatisfied.push(USERNAME_REQUIREMENTS['html-chars']);
+	} else {
+		satisfied.push(USERNAME_REQUIREMENTS['html-chars']);
+	}
 
 	if (
 		usernameLengthWithoutSpaces < MINIMUM_USERNAME_LENGTH ||

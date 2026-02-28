@@ -1,9 +1,15 @@
 import { dev } from '$app/environment';
 import { APP_URL, SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_USERNAME } from '$env/static/private';
+import { escapeHtml } from '$lib/shared/helpers/html';
 import { capitalize } from '$lib/shared/helpers/util';
 import nodemailer from 'nodemailer';
 import type { MailOptions } from 'nodemailer/lib/json-transport';
-import { ACCOUNT_RECOVERY_EMAIL_TEMPLATE, OAUTH_PASSWORD_EMAIL_TEMPLATE } from '../constants/email';
+import {
+	ACCOUNT_RECOVERY_EMAIL_TEMPLATE,
+	EMAIL_VERIFICATION_TEMPLATE,
+	OAUTH_PASSWORD_EMAIL_TEMPLATE,
+} from '../constants/email';
+import { VERIFICATION_TOKEN_EXPIRY_HOURS } from '../constants/emailVerification';
 import { RECOVERY_ATTEMPT_EXPIRY_HOURS } from '../constants/passwordRecovery';
 
 const transporter = nodemailer.createTransport({
@@ -24,9 +30,9 @@ export const buildOauthPasswordEmailTemplate = (
 	currentPassword: string,
 	applicationName: string,
 ): string => {
-	return OAUTH_PASSWORD_EMAIL_TEMPLATE.replaceAll('{{username}}', username)
-		.replaceAll('{{password}}', currentPassword)
-		.replaceAll('{{applicationName}}', capitalize(applicationName));
+	return OAUTH_PASSWORD_EMAIL_TEMPLATE.replaceAll('{{username}}', escapeHtml(username))
+		.replaceAll('{{password}}', escapeHtml(currentPassword))
+		.replaceAll('{{applicationName}}', escapeHtml(capitalize(applicationName)));
 };
 
 export const buildPasswordRecoveryEmailTemplate = (
@@ -34,9 +40,16 @@ export const buildPasswordRecoveryEmailTemplate = (
 	publicAccountRecoveryId: string,
 ): string => {
 	const accountRecoveryLink = `${APP_URL}/recover-account/${publicAccountRecoveryId}`;
-	return ACCOUNT_RECOVERY_EMAIL_TEMPLATE.replaceAll('{{username}}', username)
+	return ACCOUNT_RECOVERY_EMAIL_TEMPLATE.replaceAll('{{username}}', escapeHtml(username))
 		.replaceAll('{{accountRecoveryLink}}', accountRecoveryLink)
 		.replaceAll('{{expiryHours}}', RECOVERY_ATTEMPT_EXPIRY_HOURS.toString());
+};
+
+export const buildEmailVerificationTemplate = (username: string, tokenId: string): string => {
+	const verificationLink = `${APP_URL}/verify-email/${tokenId}`;
+	return EMAIL_VERIFICATION_TEMPLATE.replaceAll('{{username}}', escapeHtml(username))
+		.replaceAll('{{verificationLink}}', verificationLink)
+		.replaceAll('{{expiryHours}}', VERIFICATION_TOKEN_EXPIRY_HOURS.toString());
 };
 
 export const sendEmail = async (mailOptions: MailOptions) => {

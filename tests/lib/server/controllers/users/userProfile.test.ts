@@ -9,6 +9,8 @@ import {
 	mockS3Actions,
 	mockImageHelpers,
 	mockPreferenceActions,
+	mockEmailVerificationActions,
+	mockEmailHelpers,
 } from '../../../../mocks';
 import { redirect } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
@@ -29,14 +31,21 @@ describe('user profile and lifecycle controllers', () => {
 	});
 
 	describe('handleCreateUser', () => {
-		it('should successfully create user', async () => {
+		it('should successfully create user and send verification email', async () => {
 			mockUserActions.findUserByNameOrEmail.mockResolvedValue(null);
 			mockImageHelpers.runDefaultProfilePictureTransformationPipeline.mockResolvedValue(
 				Buffer.from('pfp'),
 			);
 			mockS3Actions.uploadToBucket.mockResolvedValue('http://pfp-url');
 			mockPasswordHelpers.hashPassword.mockResolvedValue('hashed_pass');
-			mockUserActions.createUser.mockResolvedValue({ id: 'u2', username: 'newuser' } as TUser);
+			mockUserActions.createUser.mockResolvedValue({
+				id: 'u2',
+				username: 'newuser',
+				email: 'new@test.com',
+			} as TUser);
+			mockEmailVerificationActions.createEmailVerificationToken.mockResolvedValue({
+				id: 'token-id',
+			});
 			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
 				async (event, handlerType, schema, callback) => {
 					return await callback({
@@ -57,6 +66,8 @@ describe('user profile and lifecycle controllers', () => {
 
 			expect(mockUserActions.createUser).toHaveBeenCalled();
 			expect(mockPreferenceActions.createUserPreferences).toHaveBeenCalled();
+			expect(mockEmailVerificationActions.createEmailVerificationToken).toHaveBeenCalledWith('u2');
+			expect(mockEmailHelpers.sendEmail).toHaveBeenCalled();
 			expect(redirect).toHaveBeenCalledWith(302, '/posts');
 		});
 	});

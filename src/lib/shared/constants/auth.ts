@@ -11,6 +11,7 @@ export const MAXIMUM_USERNAME_LENGTH = 12;
 export const USERNAME_REQUIREMENTS: TUsernameRequirements = {
 	length: `The username must be between ${MINIMUM_USERNAME_LENGTH} and ${MAXIMUM_USERNAME_LENGTH} characters long`,
 	spaces: 'The username must not contain any leading, trailing or inline spaces',
+	'html-chars': 'The username must not contain HTML special characters (e.g. &, <, >, ", \')',
 };
 
 export const MINIMUM_EMAIL_LENGTH = 1;
@@ -47,6 +48,7 @@ export const NULLABLE_USER: TUser = {
 	profilePictureUrl: '',
 	username: '',
 	email: '',
+	emailVerified: false,
 	linkedAccounts: [],
 	moderationStatus: 'UNFLAGGED',
 	superRolePromotionAt: null,

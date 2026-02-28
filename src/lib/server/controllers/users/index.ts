@@ -1,5 +1,6 @@
 export * from './getUserSettings';
 export * from './accountRecovery';
+export * from './emailVerification';
 export * from './userData';
 export * from './preferences';
 export * from './authentication';

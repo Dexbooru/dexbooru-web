@@ -5,6 +5,7 @@ import {
 	findAllModerators,
 	findUserById,
 	getUserStatistics,
+	updateEmailVerifiedByUserId,
 	updateUserRoleById,
 } from '$lib/server/db/actions/user';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -83,7 +84,7 @@ describe('user actions', () => {
 	});
 
 	describe('createUser', () => {
-		it('should call prisma.user.create', async () => {
+		it('should call prisma.user.create with emailVerified false by default', async () => {
 			mockPrisma.user.create.mockResolvedValue({ id: 'u1' });
 			await createUser('user', 'email', 'pass', 'pfp');
 			expect(mockPrisma.user.create).toHaveBeenCalledWith({
@@ -92,7 +93,33 @@ describe('user actions', () => {
 					email: 'email',
 					password: 'pass',
 					profilePictureUrl: 'pfp',
+					emailVerified: false,
 				},
+			});
+		});
+
+		it('should call prisma.user.create with emailVerified true when passed', async () => {
+			mockPrisma.user.create.mockResolvedValue({ id: 'u1' });
+			await createUser('user', 'email', 'pass', 'pfp', true);
+			expect(mockPrisma.user.create).toHaveBeenCalledWith({
+				data: {
+					username: 'user',
+					email: 'email',
+					password: 'pass',
+					profilePictureUrl: 'pfp',
+					emailVerified: true,
+				},
+			});
+		});
+	});
+
+	describe('updateEmailVerifiedByUserId', () => {
+		it('should call prisma.user.update with emailVerified', async () => {
+			mockPrisma.user.update.mockResolvedValue({});
+			await updateEmailVerifiedByUserId('u1', true);
+			expect(mockPrisma.user.update).toHaveBeenCalledWith({
+				where: { id: 'u1' },
+				data: { emailVerified: true, updatedAt: expect.any(Date) },
 			});
 		});
 	});

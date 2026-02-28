@@ -345,6 +345,7 @@ export async function createUser(
 	email: string,
 	password: string,
 	profilePictureUrl: string,
+	emailVerified = false,
 ): Promise<TUser> {
 	const newUser = await prisma.user.create({
 		data: {
@@ -352,10 +353,18 @@ export async function createUser(
 			username,
 			password,
 			profilePictureUrl,
+			emailVerified,
 		},
 	});
 
 	return newUser as TUser;
+}
+
+export async function updateEmailVerifiedByUserId(userId: string, verified: boolean) {
+	return prisma.user.update({
+		where: { id: userId },
+		data: { emailVerified: verified, updatedAt: new Date() },
+	});
 }
 
 export async function findUserSelf(userId: string) {
