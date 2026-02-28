@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+vi.unmock('$lib/server/db/actions/artist');
+
 import { mockPrisma } from '../../mocks/prisma';
 import {
 	updateArtistMetadata,
@@ -119,10 +122,7 @@ describe('artist actions', () => {
 			expect(result).toEqual(mockArtists);
 			expect(mockPrisma.artist.findMany).toHaveBeenCalledWith({
 				where: {
-					OR: [
-						{ name: { startsWith: letter } },
-						{ name: { startsWith: letter.toLowerCase() } },
-					],
+					OR: [{ name: { startsWith: letter } }, { name: { startsWith: letter.toLowerCase() } }],
 				},
 				orderBy: { name: 'asc' },
 				skip: 0,

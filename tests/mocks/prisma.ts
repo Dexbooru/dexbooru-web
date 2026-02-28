@@ -107,3 +107,7 @@ export const mockPrisma = {
 	$executeRaw: vi.fn(),
 	$transaction: vi.fn(),
 };
+
+vi.mock('$lib/server/db/prisma', () => ({
+	default: mockPrisma,
+}));

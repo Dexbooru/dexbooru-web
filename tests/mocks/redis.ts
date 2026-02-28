@@ -4,8 +4,11 @@ export const mockRedis = {
 	get: vi.fn(),
 	set: vi.fn(),
 	del: vi.fn(),
-	sMembers: vi.fn(),
-	sAdd: vi.fn(),
-	connect: vi.fn(),
 	quit: vi.fn(),
+	on: vi.fn(),
+	connect: vi.fn(),
 };
+
+vi.mock('$lib/server/db/redis', () => ({
+	default: mockRedis,
+}));

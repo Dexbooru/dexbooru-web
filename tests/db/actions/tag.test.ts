@@ -8,6 +8,9 @@ import {
 } from '$lib/server/db/actions/tag';
 import type { TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.unmock('$lib/server/db/actions/tag');
+
 import { mockPrisma } from '../../mocks/prisma';
 
 describe('tag actions', () => {

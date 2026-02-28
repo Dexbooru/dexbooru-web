@@ -1,37 +1,39 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-@plugin "flowbite/plugin";
+@plugin 'flowbite/plugin';
 
-@source "../node_modules/flowbite-svelte";
-@source "../node_modules/flowbite-svelte-icons";
-@source "../node_modules/flowbite";
-@source "../node_modules/@flowbite-svelte-plugins/chart/dist";
+@source '../node_modules/flowbite-svelte';
+@source '../node_modules/flowbite-svelte-icons';
+@source '../node_modules/flowbite';
+@source '../node_modules/@flowbite-svelte-plugins/chart/dist';
 
 @theme {
-  --color-primary-50: #FFF5F2;
-  --color-primary-100: #FFF1EE;
-  --color-primary-200: #FFE4DE;
-  --color-primary-300: #FFD5CC;
-  --color-primary-400: #FFBCAD;
-  --color-primary-500: #FE795D;
-  --color-primary-600: #EF562F;
-  --color-primary-700: #EB4F27;
-  --color-primary-800: #CC4522;
-  --color-primary-900: #A5371B;
+	--color-primary-50: #fff5f2;
+	--color-primary-100: #fff1ee;
+	--color-primary-200: #ffe4de;
+	--color-primary-300: #ffd5cc;
+	--color-primary-400: #ffbcad;
+	--color-primary-500: #fe795d;
+	--color-primary-600: #ef562f;
+	--color-primary-700: #eb4f27;
+	--color-primary-800: #cc4522;
+	--color-primary-900: #a5371b;
 }
 
 @variant dark (&:where(.dark, .dark *));
 
 /* NProgress overrides */
 #nprogress .bar {
-  background: darkorange !important;
+	background: darkorange !important;
 }
 
 #nprogress .peg {
-  box-shadow: 0 0 10px darkorange, 0 0 5px darkorange !important;
+	box-shadow:
+		0 0 10px darkorange,
+		0 0 5px darkorange !important;
 }
 
 #nprogress .spinner-icon {
-  border-top-color: darkorange !important;
-  border-left-color: darkorange !important;
+	border-top-color: darkorange !important;
+	border-left-color: darkorange !important;
 }

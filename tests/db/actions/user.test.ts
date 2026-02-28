@@ -8,6 +8,9 @@ import {
 	updateUserRoleById,
 } from '$lib/server/db/actions/user';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.unmock('$lib/server/db/actions/user');
+
 import { mockPrisma } from '../../mocks/prisma';
 
 describe('user actions', () => {

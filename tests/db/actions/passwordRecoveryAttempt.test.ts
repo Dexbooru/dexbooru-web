@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+vi.unmock('$lib/server/db/actions/passwordRecoveryAttempt');
+
 import { mockPrisma } from '../../mocks/prisma';
 import {
 	createPasswordRecoveryAttempt,

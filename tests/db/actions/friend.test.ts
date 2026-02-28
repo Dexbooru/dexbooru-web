@@ -7,6 +7,9 @@ import {
 	findFriendsForUser,
 } from '$lib/server/db/actions/friend';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.unmock('$lib/server/db/actions/friend');
+
 import { mockPrisma } from '../../mocks/prisma';
 
 describe('friend actions', () => {

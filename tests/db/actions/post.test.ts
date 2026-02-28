@@ -1,4 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+vi.unmock('$lib/server/db/actions/post');
+vi.unmock('$lib/server/db/actions/tag');
+vi.unmock('$lib/server/db/actions/artist');
+
 import { mockPrisma } from '../../mocks/prisma';
 import {
 	hasUserLikedPost,
@@ -137,7 +142,18 @@ describe('post actions', () => {
 	describe('createPost', () => {
 		it('should call prisma.post.create and increment counts', async () => {
 			mockPrisma.post.create.mockResolvedValue({ id: 'new-p' });
-			await createPost('source', 'desc', false, ['t1'], ['a1'], ['url'], [100], [100], ['hash'], 'u1');
+			await createPost(
+				'source',
+				'desc',
+				false,
+				['t1'],
+				['a1'],
+				['url'],
+				[100],
+				[100],
+				['hash'],
+				'u1',
+			);
 
 			expect(mockPrisma.post.create).toHaveBeenCalled();
 			expect(mockPrisma.tag.updateMany).toHaveBeenCalled();
@@ -157,15 +173,17 @@ describe('post actions', () => {
 			]);
 			await findSimilarPosts('p1', 't1', 'a1');
 
-			expect(mockPrisma.post.findMany).toHaveBeenCalledWith(expect.objectContaining({
-				where: expect.objectContaining({
-					OR: expect.arrayContaining([
-						{ tagString: { contains: 't1' } },
-						{ artistString: { contains: 'a1' } },
-					]),
+			expect(mockPrisma.post.findMany).toHaveBeenCalledWith(
+				expect.objectContaining({
+					where: expect.objectContaining({
+						OR: expect.arrayContaining([
+							{ tagString: { contains: 't1' } },
+							{ artistString: { contains: 'a1' } },
+						]),
+					}),
+					take: 6,
 				}),
-				take: 6,
-			}));
+			);
 		});
 	});
 });

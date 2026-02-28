@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+vi.unmock('$lib/server/db/actions/preference');
+
 import { mockPrisma } from '../../mocks/prisma';
 import {
 	findUserPreferences,

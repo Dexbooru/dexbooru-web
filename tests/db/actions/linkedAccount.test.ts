@@ -7,6 +7,9 @@ import {
 	upsertAccountLink,
 } from '$lib/server/db/actions/linkedAccount';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.unmock('$lib/server/db/actions/linkedAccount');
+
 import { mockPrisma } from '../../mocks/prisma';
 
 describe('linkedAccount actions', () => {
