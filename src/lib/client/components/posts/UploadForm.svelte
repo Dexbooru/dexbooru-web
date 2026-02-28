@@ -117,7 +117,7 @@
 		isNsfw || tags.length > 0 || artists.length > 0 || description !== '' || sourceLink !== '',
 	);
 
-	const isEmailVerified = $derived($user?.emailVerified ?? true);
+	const isEmailVerified = $derived($user?.emailVerified ?? false);
 
 	let uploadButtonDisabled = $derived.by(() => {
 		const isValidForm =

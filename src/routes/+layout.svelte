@@ -54,7 +54,10 @@
 
 	$effect(() => {
 		if (page.url.searchParams.get('emailVerified') === 'true') {
-			toast.push('Email verified successfully!', SUCCESS_TOAST_OPTIONS);
+			const isActuallyVerified = data.user.emailVerified === true;
+			if (isActuallyVerified) {
+				toast.push('Email verified successfully!', SUCCESS_TOAST_OPTIONS);
+			}
 			const url = new URL(page.url);
 			url.searchParams.delete('emailVerified');
 			goto(url.pathname + url.search, { replaceState: true });

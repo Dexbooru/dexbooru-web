@@ -15,17 +15,23 @@
 	const DISMISS_KEY = 'email-verification-banner-dismissed';
 	let dismissed = $state(false);
 
+	const getDismissKey = () =>
+		userId === NONEXISTENT_USER_ID ? DISMISS_KEY : `${DISMISS_KEY}-${userId}`;
+
 	const shouldShow = $derived(!emailVerified && userId !== NONEXISTENT_USER_ID && !dismissed);
 
 	function dismiss() {
 		dismissed = true;
 		if (typeof sessionStorage !== 'undefined') {
-			sessionStorage.setItem(DISMISS_KEY, 'true');
+			sessionStorage.setItem(getDismissKey(), 'true');
 		}
 	}
 
 	onMount(() => {
-		if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(DISMISS_KEY) === 'true') {
+		if (
+			typeof sessionStorage !== 'undefined' &&
+			sessionStorage.getItem(getDismissKey()) === 'true'
+		) {
 			dismissed = true;
 		}
 	});
