@@ -122,6 +122,69 @@ const activeUsers = users.filter((u) => u.isActive && u.lastLogin > cutoffDate);
 
 ---
 
+## Unit Testing & Mocking
+
+### Testing Framework
+
+- **Vitest** - Fast, Vite-native testing framework
+- **Setup File** - `tests/setup.ts` configures global mocks and Vitest environment
+
+### Mocking Strategy
+
+The project uses a structured, reusable mocking system located in `tests/mocks/`. This allows for consistent behavior across different test suites and reduces boilerplate.
+
+#### Reusable Mocks Directory (`tests/mocks/`)
+
+Mocks are organized to mirror the `src/lib/server` structure:
+
+- **AWS Services**: `tests/mocks/aws/` (S3, SQS)
+- **Database Actions**: `tests/mocks/db/actions/` (Post, User, etc.)
+- **Core Helpers**: `tests/mocks/helpers/` (Controller helpers, Sessions)
+- **System Services**: `tests/mocks/logging/` (Logger), `tests/mocks/events/` (Upload Status)
+
+#### Using Reusable Mocks
+
+To use these mocks in your tests, import them from the central `tests/mocks/index.ts` or directly from their specific mock file.
+
+**Example usage in a controller test:**
+
+```typescript
+import { describe, it, expect, vi } from 'vitest';
+import { handleCreatePost } from '$lib/server/controllers/posts/createPost';
+import { mockPostActions, mockS3Actions, mockControllerHelpers } from '../../../../mocks';
+
+describe('handleCreatePost', () => {
+	it('should successfully create a post', async () => {
+		// Pre-configure mock behavior
+		mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+			async (event, handlerType, schema, callback) => {
+				return await callback({ form: mockData });
+			},
+		);
+
+		mockPostActions.createPost.mockResolvedValue({ id: 'new-id' });
+
+		const result = await handleCreatePost(mockEvent, 'api-route');
+
+		expect(mockPostActions.createPost).toHaveBeenCalled();
+		expect(result.status).toBe(201);
+	});
+});
+```
+
+#### Global Mocks
+
+Core platform features (SvelteKit `redirect`, `error`, `fail`) and essential services (Prisma, Redis, Logger) are globally mocked in `tests/setup.ts`. You can still override their behavior in individual tests using `vi.mocked()`.
+
+#### Mocking Gotchas & Best Practices
+
+- **Hoisting Issues:** Avoid calling `vi.mock` inside your test files for modules that are imported by other modules you are testing. Vitest hoists `vi.mock` calls, which can lead to "ReferenceError: Cannot access '**vi_import_x**' before initialization". **Prefer adding global mocks to `tests/setup.ts`**.
+- **Testing Real Implementations:** If you need to test the actual logic of a module that is globally mocked (e.g., a database action), you MUST call `vi.unmock('$lib/server/db/actions/yourModule')` at the very top of your test file (before any imports).
+- **Synchronized Mocks:** When adding new methods to repositories or helpers, ensure you update the corresponding mock object in `tests/mocks/`. This prevents `undefined` errors in tests that rely on those mocks.
+- **Explicit vs. Implicit:** Use the exported mock objects from `tests/mocks/` to configure specific behaviors in your tests. This keeps tests readable and prevents accidental side effects.
+
+---
+
 ## Development Workflow
 
 ### Running the Application
