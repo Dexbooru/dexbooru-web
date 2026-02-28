@@ -44,7 +44,6 @@ model User {
   postReportsSubmitted       PostReport[]              @relation(name: "posts reported by")
 
   @@index([id])
-  @@index([username])
 }
 
 model UserReport {

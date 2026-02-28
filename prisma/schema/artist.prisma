@@ -8,6 +8,4 @@ model Artist {
   searchable       Unsupported("tsvector")?
   postCount        Int                      @default(0)
   posts            Post[]
-
-  @@index([name])
 }

@@ -32,6 +32,7 @@ export type TAggregateOptions = {
 	batchDelay?: number;
 	postDelay?: number;
 	clean?: boolean;
+	useLocalData?: boolean;
 	logLevel?: TLogLevel;
 };
 
@@ -65,6 +66,23 @@ const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - 
 
 const ensureDir = async (dir: string) => {
 	await fs.mkdir(dir, { recursive: true });
+};
+
+const countPostsInLocalData = async (dir: string) => {
+	let total = 0;
+	try {
+		const entries = await fs.readdir(dir, { withFileTypes: true });
+		const files = entries
+			.filter((e) => e.isFile() && e.name.endsWith('.jsonl'))
+			.map((e) => path.join(dir, e.name));
+		for (const f of files) {
+			const content = await fs.readFile(f, 'utf-8');
+			total += content.split('\n').filter((line) => line.trim()).length;
+		}
+	} catch {
+		return 0;
+	}
+	return total;
 };
 
 const cleanOutputDir = async (
@@ -218,10 +236,17 @@ async function aggregateDanbooruPosts(options: TAggregateOptions = {}) {
 		batchDelay = DEFAULT_BATCH_DELAY,
 		postDelay = DEFAULT_POST_DELAY,
 		clean = true,
+		useLocalData = false,
 		logLevel = 'info',
 	} = options;
 
 	const logger = buildLogger(logLevel);
+
+	if (useLocalData) {
+		logger.info(`Using local data from ${outputDir}. Skipping fetch from Danbooru API.`);
+		const localCount = await countPostsInLocalData(outputDir);
+		return { totalWritten: localCount, outputDir };
+	}
 
 	const total = Math.max(1, Number(amount) || 1);
 	const batchSize = Math.max(1, Math.min(Number(rawBatchSize) || 1, total));

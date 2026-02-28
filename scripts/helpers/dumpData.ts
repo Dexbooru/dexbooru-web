@@ -116,10 +116,13 @@ const renderTable = (rows: Array<[string, string | number]>) => {
 async function dumpData({
 	dbClient: prismaClient,
 	logger,
+	outputDir,
 }: {
 	dbClient: PrismaClient;
 	logger: ReturnType<typeof buildLogger>;
+	outputDir?: string;
 }) {
+	const datasetDir = outputDir || DATASET_DIR;
 	try {
 		logger.info(`Deleting all records of: ${DELETION_MODELS.join(', ')} from the database`);
 
@@ -144,9 +147,9 @@ async function dumpData({
 
 		logger.debug(`Inserted ${userPreferenceWriteResult.count} user preferences into the database.`);
 
-		const files = getJsonlFiles(DATASET_DIR);
+		const files = getJsonlFiles(datasetDir);
 		if (files.length === 0) {
-			logger.error(`No .jsonl files found in ${DATASET_DIR}`);
+			logger.error(`No .jsonl files found in ${datasetDir}`);
 			return;
 		}
 

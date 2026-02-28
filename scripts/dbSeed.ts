@@ -27,7 +27,7 @@ async function main() {
 
 	const args = minimist(process.argv.slice(2), {
 		string: ['blacklistedTags', 'outputDir', 'logLevel'],
-		boolean: ['clean'],
+		boolean: ['clean', 'useLocalData'],
 		alias: {
 			amount: 'post-count',
 			batchSize: 'batch-size',
@@ -36,9 +36,11 @@ async function main() {
 			batchDelay: 'batch-delay',
 			postDelay: 'post-delay',
 			logLevel: 'log-level',
+			useLocalData: 'local-data',
 		},
 		default: {
 			clean: true,
+			useLocalData: false,
 		},
 	}) as TAggregateOptions;
 
@@ -56,6 +58,7 @@ async function main() {
 		await dumpData({
 			dbClient,
 			logger,
+			outputDir: aggregationResult.outputDir,
 		});
 
 		const ownerPassword = await hashPassword(OWNER_PASSWORD);

@@ -51,6 +51,9 @@ model Post {
   @@index([id])
   @@index([authorId])
   @@index([moderationStatus])
+  @@index([moderationStatus, createdAt(sort: Desc)])
+  @@index([moderationStatus, likes(sort: Desc)])
+  @@index([moderationStatus, commentCount(sort: Desc)])
 }
 
 model PostSource {
