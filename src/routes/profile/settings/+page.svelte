@@ -18,6 +18,7 @@
 <main>
 	<SettingsTabs
 		linkedAccounts={data.linkedAccounts}
+		emailVerified={data.emailVerified}
 		oauthAuthorizationLinks={{
 			discordAuthorizationUrl: data.discordAuthorizationUrl,
 			githubAuthorizationUrl: data.githubAuthorizationUrl,

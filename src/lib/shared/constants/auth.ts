@@ -47,6 +47,7 @@ export const NULLABLE_USER: TUser = {
 	profilePictureUrl: '',
 	username: '',
 	email: '',
+	emailVerified: false,
 	linkedAccounts: [],
 	moderationStatus: 'UNFLAGGED',
 	superRolePromotionAt: null,

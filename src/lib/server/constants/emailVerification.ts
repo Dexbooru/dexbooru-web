@@ -1,0 +1,1 @@
+export const VERIFICATION_TOKEN_EXPIRY_HOURS = 24;

@@ -8,6 +8,7 @@
 	import EditCommentModal from '$lib/client/components/comments/EditCommentModal.svelte';
 	import ImagePreviewModal from '$lib/client/components/images/ImagePreviewModal.svelte';
 	import LabelMetadataModal from '$lib/client/components/labels/LabelMetadataModal.svelte';
+	import EmailVerificationBanner from '$lib/client/components/auth/EmailVerificationBanner.svelte';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
 	import Navbar from '$lib/client/components/layout/Navbar.svelte';
 	import PromoteModModal from '$lib/client/components/moderation/PromoteModModal.svelte';
@@ -69,6 +70,7 @@
 <div class="flex min-h-screen flex-col">
 	<!--- Main application layout -->
 	<Navbar />
+	<EmailVerificationBanner emailVerified={data.user.emailVerified ?? false} userId={data.user.id} />
 	<div class="grow">
 		{@render children?.()}
 	</div>

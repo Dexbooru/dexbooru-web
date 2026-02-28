@@ -80,6 +80,11 @@ export const mockPrisma = {
 		findUnique: vi.fn(),
 		delete: vi.fn(),
 	},
+	emailVerificationToken: {
+		create: vi.fn(),
+		findUnique: vi.fn(),
+		delete: vi.fn(),
+	},
 	postReport: {
 		findMany: vi.fn(),
 		create: vi.fn(),

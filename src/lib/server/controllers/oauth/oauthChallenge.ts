@@ -123,6 +123,7 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 							oauthUserData.email,
 							hashedTemporaryPassword,
 							oauthUserData.profilePictureUrl,
+							true,
 						);
 
 						await createUserPreferences(newUser.id);

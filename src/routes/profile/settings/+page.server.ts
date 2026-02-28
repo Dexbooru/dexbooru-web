@@ -6,6 +6,7 @@ import {
 	handleChangeUsername,
 	handleDeleteUser,
 	handleGetUserSettings,
+	handleResendVerificationEmail,
 	handleToggleUserTwoFactorAuthentication,
 	handleUpdatePostPreferences,
 	handleUpdateUserInterfacePreferences,
@@ -44,6 +45,10 @@ const handleChangeLinkedAccounts: Action = async (event) => {
 	return await handleUpdateLinkedAccounts(event, 'form-action');
 };
 
+const handleResendVerification: Action = async (event) => {
+	return await handleResendVerificationEmail(event);
+};
+
 export const actions: Actions = {
 	deleteAccount: handleAccountDeletion,
 	username: handleAccountChangeUsername,
@@ -53,6 +58,7 @@ export const actions: Actions = {
 	userInterfacePreferences: handleChangeUserInterfacePreferences,
 	twoFactorAuthentication: handleChange2fa,
 	linkedAccounts: handleChangeLinkedAccounts,
+	resendVerification: handleResendVerification,
 };
 
 type TSettingsLoadData = {
@@ -60,6 +66,7 @@ type TSettingsLoadData = {
 	googleAuthorizationUrl: string;
 	discordAuthorizationUrl: string;
 	githubAuthorizationUrl: string;
+	emailVerified: boolean;
 };
 
 export const load: PageServerLoad = async (event) => {

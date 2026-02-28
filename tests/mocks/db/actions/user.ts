@@ -16,6 +16,7 @@ export const mockUserActions = {
 	updateUsernameByUserId: vi.fn(),
 	updateUserRoleById: vi.fn(),
 	updateUserRoleByUsername: vi.fn(),
+	updateEmailVerifiedByUserId: vi.fn(),
 };
 
 vi.mock('$lib/server/db/actions/user', () => mockUserActions);

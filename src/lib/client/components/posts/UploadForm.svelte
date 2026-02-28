@@ -8,6 +8,7 @@
 	import SourceLinkSection from '$lib/client/components/posts/upload/SourceLinkSection.svelte';
 	import UploadStatusModal from '$lib/client/components/posts/upload/UploadStatusModal.svelte';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { clearPostDraft, loadPostDraft, savePostDraft } from '$lib/client/helpers/drafts';
 	import { calculateHash } from '$lib/client/helpers/hashing';
 	import { filesToBase64Strings } from '$lib/client/helpers/images';
@@ -20,6 +21,7 @@
 	import type { TPostDuplicate } from '$lib/shared/types/posts';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { toast } from '@zerodevx/svelte-toast';
+	import EnvelopeSolid from 'flowbite-svelte-icons/EnvelopeSolid.svelte';
 	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import Alert from 'flowbite-svelte/Alert.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
@@ -39,12 +41,14 @@
 
 	let { form }: Props = $props();
 
+	const user = getAuthenticatedUser();
 	let isNsfw = $state(false);
 	let tags = $state<string[]>([]);
 	let artists = $state<string[]>([]);
 	let description = $state('');
 	let sourceLink = $state('');
 	let hasLoaded = $state(false);
+	let shouldShowDraftToast = true;
 
 	let postImages: {
 		id: string;
@@ -113,8 +117,11 @@
 		isNsfw || tags.length > 0 || artists.length > 0 || description !== '' || sourceLink !== '',
 	);
 
+	const isEmailVerified = $derived($user?.emailVerified ?? true);
+
 	let uploadButtonDisabled = $derived.by(() => {
 		const isValidForm =
+			isEmailVerified &&
 			!loadingPostPictures &&
 			description.length > 0 &&
 			sourceLink.length > 0 &&
@@ -186,6 +193,7 @@
 					toast.push(reason, FAILURE_TOAST_OPTIONS);
 				}
 			} else if (result.type === 'redirect') {
+				shouldShowDraftToast = false;
 				clearPostDraft();
 			}
 			await update();
@@ -216,7 +224,7 @@
 		}
 
 		return () => {
-			if (hasDraft) {
+			if (hasDraft && shouldShowDraftToast) {
 				toast.push('Post draft saved locally', SUCCESS_TOAST_OPTIONS);
 			}
 		};
@@ -329,6 +337,23 @@
 				{/if}
 			</div>
 		</div>
+
+		{#if !isEmailVerified}
+			<Alert color="yellow" class="mb-4">
+				<div class="flex items-center gap-2">
+					<EnvelopeSolid class="h-5 w-5 shrink-0" />
+					<span>
+						You must verify your email before uploading posts.
+						<a
+							href="/profile/settings?tab=personal"
+							class="font-medium underline hover:no-underline"
+						>
+							Verify in Settings
+						</a>
+					</span>
+				</div>
+			</Alert>
+		{/if}
 
 		{#if duplicates.length > 0}
 			<Alert color="red" class="mb-4">

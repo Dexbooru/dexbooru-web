@@ -21,6 +21,7 @@ model User {
   createdAt                  DateTime                  @default(now())
   updatedAt                  DateTime                  @default(now())
   email                      String                    @unique() @db.VarChar(254)
+  emailVerified              Boolean                    @default(false)
   searchable                 Unsupported("tsvector")?
   profilePictureUrl          String
   password                   String
@@ -35,6 +36,7 @@ model User {
   sentFriendRequests         FriendRequest[]           @relation(name: "friend requests sent")
   receivedFriendRequests     FriendRequest[]           @relation(name: "friend requests received")
   passwordRecoveryAttempts   PasswordRecoveryAttempt[]
+  emailVerificationTokens    EmailVerificationToken[]
   postCollections            PostCollection[]          @relation(name: "post collection author")
   preferences                UserPreference?           @relation(name: "user profile preferences")
   linkedAccounts             LinkedUserAccount[]
