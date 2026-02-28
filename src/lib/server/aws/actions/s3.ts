@@ -44,9 +44,9 @@ export const buildObjectUrl = (objectSource: TS3ObjectSource, objectId: string):
 	return `${baseUrl}/${objectId}`;
 };
 
-export const extractOjbectIdFromUrl = (objectUrl: string): string => {
+export const extractObjectIdFromUrl = (objectUrl: string): string => {
 	const urlSplit = objectUrl.split('/');
-	return urlSplit[urlSplit.length - 1];
+	return urlSplit[urlSplit.length - 1] ?? '';
 };
 
 export async function uploadToBucket(
@@ -74,7 +74,7 @@ export async function deleteFromBucket(
 	bucketName: string,
 	objectUrl: string,
 ): Promise<DeleteObjectCommandOutput> {
-	const objectId = extractOjbectIdFromUrl(objectUrl);
+	const objectId = extractObjectIdFromUrl(objectUrl);
 	const deleteParams = {
 		Bucket: bucketName,
 		Key: objectId,

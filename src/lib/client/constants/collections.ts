@@ -11,8 +11,8 @@ export const getLabelFromOrderby = (
 	orderBy: TCollectionOrderByColumn,
 	ascending: boolean,
 ): string | null => {
-	const item = ORDER_BY_TRANSLATION_MAP[orderBy][!ascending ? 0 : 1];
-	return item.label;
+	const item = ORDER_BY_TRANSLATION_MAP[orderBy]?.[!ascending ? 0 : 1];
+	return item?.label ?? null;
 };
 
 export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {

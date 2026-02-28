@@ -24,13 +24,8 @@
 	};
 
 	type SlideProps = {
-		Slide: Component;
+		Slide: Component<{ image: HTMLImgAttributes; class?: string }>;
 		index: number;
-	};
-
-	type SlideControlProps = {
-		Controls: Component;
-		Indicators: Component;
 	};
 
 	let {
@@ -66,17 +61,18 @@
 		}),
 	);
 
-	const downloadSlideImage = (slideIndex: number) => {
+	const downloadSlideImage = (slideIndex: number): HTMLImgAttributes => {
 		const image = imagesData[slideIndex];
+		if (!image) throw new Error('Carousel image index out of bounds');
 		if (image.src !== null) return image;
 
-		image.src = imageUrls[slideIndex];
+		image.src = imageUrls[slideIndex] ?? null;
 		return image;
 	};
 </script>
 
 {#if imageUrls.length > 0}
-	<Carousel images={imagesData} {slideDuration} transition={transitionFunction}>
+	<Carousel images={imagesData} {slideDuration} transition={transitionFunction ?? undefined}>
 		{#snippet slide({ Slide, index }: SlideProps)}
 			<a href={resourceHref}>
 				<Slide
@@ -86,13 +82,6 @@
 					image={downloadSlideImage(index)}
 				/>
 			</a>
-		{/snippet}
-
-		{#snippet children({ Controls, Indicators }: SlideControlProps)}
-			{#if imagesData.length > 1}
-				<Controls />
-				<Indicators />
-			{/if}
 		{/snippet}
 	</Carousel>
 {/if}

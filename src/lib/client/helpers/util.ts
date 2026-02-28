@@ -1,4 +1,5 @@
-type AnyFunction = (..._args: unknown[]) => unknown;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (..._args: any[]) => any;
 
 export function debounce<T extends AnyFunction>(
 	fn: T,

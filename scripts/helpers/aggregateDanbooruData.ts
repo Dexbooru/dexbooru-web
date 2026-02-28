@@ -3,10 +3,7 @@ import path from 'node:path';
 import winston from 'winston';
 import buildLogger, { TLogLevel } from './logger';
 
-type Fetch = (
-	_input: string,
-	_init?: unknown,
-) => Promise<{ ok: boolean; json(): Promise<unknown> }>;
+type Fetch = (_input: string, _init?: RequestInit) => Promise<Response>;
 const fetchFn: Fetch = globalThis.fetch.bind(globalThis);
 
 export type TDanbooruPost = {
@@ -38,9 +35,9 @@ export type TAggregateOptions = {
 	logLevel?: TLogLevel;
 };
 
-const DANBOORU_API_BASE_URL = 'https://testbooru.donmai.us';
+const DANBOORU_API_BASE_URL = 'https://danbooru.donmai.us';
 const MIN_POST_ID = 1;
-const MAX_POST_ID = 10002;
+const MAX_POST_ID = 10819640;
 const FORBIDDEN_TAG_CHARS = [';', ',', ':'];
 const MAXIMUM_TAG_LENGTH = 75;
 
@@ -85,7 +82,8 @@ const cleanOutputDir = async (
 			try {
 				await fs.unlink(f);
 			} catch (err) {
-				logger.error(`failed to delete ${f}: ${err?.message ?? String(err)}`);
+				const msg = err instanceof Error ? err.message : String(err);
+				logger.error(`failed to delete ${f}: ${msg}`);
 			}
 		}
 		return toDelete.length;
@@ -139,13 +137,23 @@ const fetchPost = async (postId: number, postDelay: number, logger: winston.Logg
 	const url = `${DANBOORU_API_BASE_URL}/posts/${postId}.json`;
 	try {
 		const r = await fetchFn(url);
-		if (r.ok) {
+		if (!r.ok) {
+			logger.error(`Danbooru API error for post ${postId}: ${r.status} ${r.statusText} (${url})`);
+			await sleep(postDelay);
+			return null;
+		}
+
+		try {
 			const data = (await r.json()) as TDanbooruApiResponse;
 			await sleep(postDelay);
 			return data;
+		} catch (jsonErr) {
+			const msg = jsonErr instanceof Error ? jsonErr.message : String(jsonErr);
+			logger.error(`Failed to parse JSON for post ${postId}: ${msg}`);
 		}
 	} catch (e) {
-		logger.error(`request failed for ${postId}: ${e?.message ?? String(e)}`);
+		const msg = e instanceof Error ? e.message : String(e);
+		logger.error(`Network request failed for post ${postId}: ${msg}`);
 	}
 	await sleep(postDelay);
 	return null;
@@ -175,13 +183,27 @@ const processBatchUntilFilled = async (
 		const need = Math.min(batchSize, targetCount - collected.length);
 		const ids = generateRandomPostIdsExcluding(need, seenIds);
 		ids.forEach((i) => seenIds.add(i));
-		const tasks = ids.map((i) => fetchPost(i, postDelay, logger));
-		const results = await Promise.allSettled(tasks);
-		for (const r of results) {
-			if (r.status === 'fulfilled' && r.value && typeof r.value === 'object') {
-				collected.push(processRawResponseData(r.value as TDanbooruApiResponse, forbiddenTags));
+
+		let batchSuccesses = 0;
+		for (const id of ids) {
+			try {
+				const result = await fetchPost(id, postDelay, logger);
+				if (result && typeof result === 'object') {
+					collected.push(processRawResponseData(result as TDanbooruApiResponse, forbiddenTags));
+					batchSuccesses++;
+				}
+			} catch (err) {
+				const msg = err instanceof Error ? err.message : String(err);
+				logger.error(`Task for post ${id} unexpectedly failed: ${msg}`);
 			}
 		}
+
+		if (batchSuccesses < need) {
+			logger.warn(
+				`Batch progress: ${batchSuccesses}/${need} successful. Collected ${collected.length}/${targetCount} total for this set.`,
+			);
+		}
+
 		if (collected.length < targetCount) await sleep(batchDelay);
 	}
 	return collected;
@@ -203,6 +225,8 @@ async function aggregateDanbooruPosts(options: TAggregateOptions = {}) {
 
 	const total = Math.max(1, Number(amount) || 1);
 	const batchSize = Math.max(1, Math.min(Number(rawBatchSize) || 1, total));
+	const bDelay = Math.max(0, Number(batchDelay) || 0);
+	const pDelay = Math.max(0, Number(postDelay) || 0);
 	const userForbidden = blacklistedTags
 		? String(blacklistedTags)
 				.split(',')
@@ -232,8 +256,8 @@ async function aggregateDanbooruPosts(options: TAggregateOptions = {}) {
 			batchSize,
 			forbiddenTags,
 			seenIds,
-			postDelay,
-			batchDelay,
+			pDelay,
+			bDelay,
 			logger,
 		);
 

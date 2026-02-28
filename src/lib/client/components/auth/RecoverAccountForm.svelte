@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import type { PasswordRecoveryAttempt } from '$generated/prisma/browser';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getChangePasswordAuthRequirements } from '$lib/client/helpers/context';
@@ -60,7 +59,7 @@
 				passwordUpdating = false;
 
 				if (result.type === 'success') {
-					goto(resolve('/login?passwordReset=true'), { replaceState: true });
+					goto('/login?passwordReset=true', { replaceState: true });
 				} else {
 					toast.push(
 						'An unexpected error occured while updating the password!',

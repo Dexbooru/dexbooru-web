@@ -60,11 +60,11 @@ describe('CommentTree', () => {
 		tree.addComment(comment2);
 
 		expect(tree.search('hello').length).toBe(1);
-		expect(tree.search('hello')[0].id).toBe('1');
+		expect(tree.search('hello')[0]!.id).toBe('1');
 		expect(tree.search('foo').length).toBe(1);
-		expect(tree.search('foo')[0].id).toBe('2');
+		expect(tree.search('foo')[0]!.id).toBe('2');
 		expect(tree.search('BAR').length).toBe(1);
-		expect(tree.search('BAR')[0].id).toBe('2');
+		expect(tree.search('BAR')[0]!.id).toBe('2');
 		expect(tree.search('xyz').length).toBe(0);
 	});
 
@@ -99,7 +99,7 @@ describe('CommentTree', () => {
 		const result = tree.editComment('1', 'New', newTime);
 		expect(result).toBe(true);
 
-		const stored = tree.getReplies('root')[0];
+		const stored = tree.getReplies('root')[0]!;
 		expect(stored.content).toBe('New');
 		expect(stored.updatedAt).toBe(newTime);
 

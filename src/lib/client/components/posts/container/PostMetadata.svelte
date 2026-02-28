@@ -136,7 +136,7 @@
 					/>
 				</a>
 				<span class="mt-2 text-center text-sm dark:text-gray-300">
-					Similarity: {roundNumber(similarities[post.id], 2)}%
+					Similarity: {roundNumber(similarities[post.id] ?? 0, 2)}%
 				</span>
 			</div>
 		{/each}

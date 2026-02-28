@@ -62,7 +62,7 @@
 		globalQuery.set(query);
 		currentSearchResults = query ? await fetchQueryResults(query) : null;
 		searchResultsLoading = false;
-	}, SEARCH_DEBOUNCE_TIMEOUT_MS) as (query: string) => void;
+	}, SEARCH_DEBOUNCE_TIMEOUT_MS);
 
 	onMount(() => {
 		const searchbarInput = document.getElementById(

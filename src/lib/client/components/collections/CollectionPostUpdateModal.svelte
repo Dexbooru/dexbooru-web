@@ -189,7 +189,7 @@
 									onchange={() => handleCollectionCheck(collection.id)}
 								/>
 							</div>
-							<p class="flex-grow text-sm text-gray-600 dark:text-gray-400">
+							<p class="grow text-sm text-gray-600 dark:text-gray-400">
 								{collection.posts.length} posts
 							</p>
 						</div>

@@ -21,10 +21,9 @@ export const getQueryParts = memoize(
 		let strIndex = 0;
 
 		while (strIndex < fullText.length) {
-			const [substringRangeStart, substringRangeEnd] =
-				substringRangeIndex < substringRanges.length
-					? substringRanges[substringRangeIndex]
-					: [-1, -1];
+			const [substringRangeStart, substringRangeEnd] = substringRanges[substringRangeIndex] ?? [
+				-1, -1,
+			];
 
 			if (strIndex === substringRangeStart) {
 				if (currentPart.length > 0) {

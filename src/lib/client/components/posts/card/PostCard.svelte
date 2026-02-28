@@ -17,7 +17,6 @@
 	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
 	import Toast from 'flowbite-svelte/Toast.svelte';
-	import { onMount } from 'svelte';
 
 	type Props = {
 		post: TPost;
@@ -27,20 +26,19 @@
 	let { post, onCollectionViewPage = false }: Props = $props();
 
 	const { id: postId, tags, artists, isNsfw } = $derived(post);
-	let imageUrls = $derived(post.imageUrls);
-
-	const imagesAlt = $derived.by(
-		() =>
-			`${tags.map((tag) => tag.name).join(', ')} by ${artists
-				.map((artist) => artist.name)
-				.join(', ')}`,
-	);
 	const userPreferences = getAuthenticatedUserPreferences();
 	const activeModal = getActiveModal();
 
-	const userPreferenceUnsubsribe = userPreferences.subscribe((data) => {
-		const blurImages = isNsfw && data.autoBlurNsfw;
-		imageUrls = imageUrls.filter((imageUrl) => {
+	const imagesAlt = $derived.by(() => {
+		return `${tags.map((tag) => tag.name).join(', ')} by ${artists
+			.map((artist) => artist.name)
+			.join(', ')}`;
+	});
+
+	const imageUrls = $derived.by(() => {
+		const blurImages = isNsfw && $userPreferences.autoBlurNsfw;
+
+		return post.imageUrls.filter((imageUrl) => {
 			if (
 				IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionBaseUrl) =>
 					imageUrl.includes(exclusionBaseUrl),
@@ -49,16 +47,14 @@
 				return true;
 			}
 
-			return blurImages
-				? imageUrl.endsWith(NSFW_PREVIEW_IMAGE_SUFFIX)
-				: imageUrl.endsWith(PREVIEW_IMAGE_SUFFIX) && !imageUrl.endsWith(NSFW_PREVIEW_IMAGE_SUFFIX);
-		});
-	});
+			if (blurImages) {
+				return imageUrl.endsWith(NSFW_PREVIEW_IMAGE_SUFFIX);
+			}
 
-	onMount(() => {
-		return () => {
-			userPreferenceUnsubsribe();
-		};
+			return (
+				imageUrl.endsWith(PREVIEW_IMAGE_SUFFIX) && !imageUrl.endsWith(NSFW_PREVIEW_IMAGE_SUFFIX)
+			);
+		});
 	});
 </script>
 

@@ -69,7 +69,7 @@
 		<section class="space-y-2">
 			<p class="text-lg dark:text-white">Anime Info:</p>
 			<div class="flex flex-wrap gap-2">
-				{#each post.sources.filter((s) => s.sourceType === 'ANIME') as source (source.id)}
+				{#each post.sources.filter((s) => s.sourceType === 'ANIME') as source (source.sourceTitle)}
 					<a
 						href="/anime/{source.sourceTitle.toLowerCase().replaceAll(' ', '_')}"
 						class="text-blue-500 hover:underline"

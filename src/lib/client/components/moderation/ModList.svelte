@@ -191,7 +191,6 @@
 			<Listgroup>
 				{#each moderators as moderator (moderator.id)}
 					<ListgroupItem
-						key={moderator.id}
 						class="flex items-center justify-between gap-4 py-3 text-base font-semibold hover:bg-gray-100 dark:hover:bg-gray-700"
 					>
 						<div class="flex items-center gap-3">

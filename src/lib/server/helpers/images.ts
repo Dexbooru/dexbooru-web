@@ -139,8 +139,7 @@ export function flattenImageBuffers(bufferMaps: TImageData[]) {
 	const imageHeights: number[] = [];
 	const imageHashes: string[] = [];
 
-	for (let i = 0; i < bufferMaps.length; i++) {
-		const bufferMap = bufferMaps[i];
+	for (const bufferMap of bufferMaps) {
 		const bufferMapObjectId = crypto.randomUUID();
 
 		if (bufferMap.buffers.original) {

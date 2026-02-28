@@ -150,11 +150,9 @@ class QueryBuilder {
 		const splitSize = queryPart.split(':').length;
 
 		if (splitSize === 2) {
-			const subQueryPartPortions = [
-				queryPart.slice(0, colonIndex),
-				queryPart.slice(colonIndex + 1),
-			];
-			const [wholePrefix, value] = subQueryPartPortions;
+			const wholePrefix = queryPart.slice(0, colonIndex);
+			const value = queryPart.slice(colonIndex + 1);
+
 			const isNegation = wholePrefix.charAt(0) === '-';
 			const prefix = (isNegation ? wholePrefix.slice(1) : wholePrefix) as TPrefix;
 

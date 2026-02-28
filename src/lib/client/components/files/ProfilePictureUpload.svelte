@@ -23,7 +23,7 @@
 		const target = event.target as HTMLInputElement;
 		const files = Array.from(target.files ?? []);
 		if (files.length === 1) {
-			profilePictureFile = files[0];
+			profilePictureFile = files[0] ?? null;
 
 			if (profilePictureFile) {
 				try {

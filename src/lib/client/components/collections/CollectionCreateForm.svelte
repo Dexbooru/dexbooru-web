@@ -110,8 +110,8 @@
 		}
 
 		thumbnailLoading = false;
-		thumbnailBase64 = results[0].imageBase64;
-		thumbnailFile = results[0].file;
+		thumbnailBase64 = results[0]?.imageBase64 ?? '';
+		thumbnailFile = results[0]?.file ?? null;
 	};
 </script>
 

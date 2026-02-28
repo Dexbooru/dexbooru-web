@@ -15,6 +15,7 @@
 	import TableBodyRow from 'flowbite-svelte/TableBodyRow.svelte';
 	import TableHead from 'flowbite-svelte/TableHead.svelte';
 	import TableHeadCell from 'flowbite-svelte/TableHeadCell.svelte';
+	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
 	type Props = {
@@ -23,6 +24,24 @@
 
 	let { data }: Props = $props();
 
+	let isDark = $state(false);
+
+	onMount(() => {
+		const checkDark = () => {
+			isDark = document.documentElement.classList.contains('dark');
+		};
+
+		checkDark();
+
+		const observer = new MutationObserver(checkDark);
+		observer.observe(document.documentElement, {
+			attributes: true,
+			attributeFilter: ['class'],
+		});
+
+		return () => observer.disconnect();
+	});
+
 	let { topArtists, topTags, topLikedPosts, topViewedPosts }: TAnalyticsData = $derived(data);
 
 	let tagOptions: ApexOptions = $derived({
@@ -30,6 +49,13 @@
 		series: topTags.map((tag) => tag.postCount),
 		labels: topTags.map((tag) => tag.name),
 		colors: PIE_CHART_COLORS,
+		chart: {
+			...PIE_CHART_OPTIONS.chart,
+			foreColor: isDark ? '#f9fafb' : '#374151',
+		},
+		theme: {
+			mode: isDark ? 'dark' : 'light',
+		},
 	});
 
 	let artistOptions: ApexOptions = $derived({
@@ -37,6 +63,13 @@
 		series: topArtists.map((artist) => artist.postCount),
 		labels: topArtists.map((artist) => artist.name),
 		colors: PIE_CHART_COLORS,
+		chart: {
+			...PIE_CHART_OPTIONS.chart,
+			foreColor: isDark ? '#f9fafb' : '#374151',
+		},
+		theme: {
+			mode: isDark ? 'dark' : 'light',
+		},
 	});
 
 	const hasTagData = $derived(topTags.length > 0 && topTags.some((tag) => tag.postCount > 0));

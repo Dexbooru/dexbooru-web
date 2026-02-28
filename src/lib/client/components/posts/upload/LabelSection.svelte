@@ -62,14 +62,8 @@
 		currentInput = '';
 	};
 
-	const removeLabel = (event: CustomEvent<unknown> & { explicitOriginalTarget: Element }) => {
-		const target = event.explicitOriginalTarget as Element;
-		const badgeDiv = target.closest('div');
-
-		if (badgeDiv) {
-			const removalLabel = (badgeDiv.textContent?.split(' ')[0] || '').trim() ?? '';
-			labels = labels.filter((l) => l !== removalLabel);
-		}
+	const removeLabel = (_event: Event, removalLabel: string) => {
+		labels = labels.filter((l) => l !== removalLabel);
 	};
 
 	const handleKeypress = (event: KeyboardEvent) => {

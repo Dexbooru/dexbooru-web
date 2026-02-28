@@ -3,6 +3,8 @@ import type { ApexOptions } from 'apexcharts';
 const PIE_CHART_OPTIONS: ApexOptions = {
 	chart: {
 		type: 'pie',
+		width: '100%',
+		background: 'transparent',
 		toolbar: {
 			show: false,
 		},
@@ -23,10 +25,10 @@ const PIE_CHART_OPTIONS: ApexOptions = {
 	},
 	responsive: [
 		{
-			breakpoint: 480,
+			breakpoint: 768,
 			options: {
 				chart: {
-					width: 200,
+					width: '100%',
 				},
 				legend: {
 					position: 'bottom',

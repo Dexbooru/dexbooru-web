@@ -36,8 +36,8 @@ export const getLabelFromOrderby = (
 	orderBy: TCommentOrderByColumn,
 	ascending: boolean,
 ): string | null => {
-	const item = ORDER_BY_COMMENT_TRANSLATION_MAP[orderBy][!ascending ? 0 : 1];
-	return item.label;
+	const item = ORDER_BY_COMMENT_TRANSLATION_MAP[orderBy]?.[!ascending ? 0 : 1];
+	return item?.label ?? null;
 };
 
 export const ORDER_BY_COMMENT_TRANSLATION_MAP: TCommentOrderByTranslationMap = {

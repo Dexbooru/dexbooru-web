@@ -61,7 +61,7 @@
 	</TabItem>
 	<TabItem onclick={() => handleTabClick('preferences')} open={currentTab === 'preferences'}>
 		{#snippet titleSlot()}
-			<div slot="title" class="flex items-center gap-2">
+			<div class="flex items-center gap-2">
 				<GridSolid size="md" />
 				Preferences
 			</div>
@@ -74,7 +74,7 @@
 	</TabItem>
 	<TabItem open={currentTab === 'security'} onclick={() => handleTabClick('security')}>
 		{#snippet titleSlot()}
-			<div slot="title" class="flex items-center gap-2">
+			<div class="flex items-center gap-2">
 				<LockSolid size="md" />
 				Security
 			</div>

@@ -1,5 +1,5 @@
-import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
+import 'dotenv/config';
 import minimist from 'minimist';
 import { PrismaClient, UserRole } from '../src/generated/prisma/client';
 import { hashPassword } from '../src/lib/server/helpers/password';
@@ -22,17 +22,23 @@ async function main() {
 	const adapter = new PrismaPg({
 		connectionString: process.env.DATABASE_URL,
 	});
-	const dbClient = new PrismaClient({ adapter});
+	const dbClient = new PrismaClient({ adapter });
 	await dbClient.$connect();
 
 	const args = minimist(process.argv.slice(2), {
+		string: ['blacklistedTags', 'outputDir', 'logLevel'],
+		boolean: ['clean'],
 		alias: {
+			amount: 'post-count',
 			batchSize: 'batch-size',
 			blacklistedTags: 'blacklisted-tags',
 			outputDir: 'output-dir',
 			batchDelay: 'batch-delay',
 			postDelay: 'post-delay',
 			logLevel: 'log-level',
+		},
+		default: {
+			clean: true,
 		},
 	}) as TAggregateOptions;
 

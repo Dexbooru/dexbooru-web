@@ -19,7 +19,7 @@
 
 	let { uniqueTags = [], uniqueArtists = [] }: Props = $props();
 
-	const postsBaseUrl = page.url.origin + page.url.pathname;
+	const postsBaseUrl = $derived(page.url.origin + page.url.pathname);
 </script>
 
 <Sidebar position="static">

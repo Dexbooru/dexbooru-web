@@ -26,9 +26,7 @@
 	triggeredBy="#notification-bell"
 	class="w-full max-w-sm divide-y divide-gray-100 rounded shadow dark:divide-gray-700 dark:bg-gray-800"
 >
-	{#snippet header()}
-		<div class="py-2 text-center font-bold">Notifications ({notificationCount})</div>
-	{/snippet}
+	<div class="py-2 text-center font-bold">Notifications ({notificationCount})</div>
 	{#if notificationCount > 0}{:else}
 		<div class="flex-col justify-center space-y-2 p-4 text-center">
 			<p>We have nothing for you at the moment!</p>

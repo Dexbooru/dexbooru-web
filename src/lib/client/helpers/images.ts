@@ -6,18 +6,18 @@ type TImageDism = { imageWidth: number; imageHeight: number };
 export const computeDownScaledImageRatios = (dimsA: TImageDism[], dimsB: TImageDism[]) => {
 	const ratios: number[] = [];
 
-	for (let i = 0; i < dimsA.length; i++) {
-		const { imageWidth: imageWidthA, imageHeight: imageHeightA } = dimsA[i];
-		const { imageWidth: imageWidthB, imageHeight: imageHeightB } = dimsB[i];
+	dimsA.forEach((dimA, i) => {
+		const { imageWidth: imageWidthA, imageHeight: imageHeightA } = dimA;
+		const dimB = dimsB[i];
 
-		if (!imageWidthB || !imageHeightB || imageWidthB === 0 || imageHeightB === 0) {
+		if (!dimB || !dimB.imageWidth || !dimB.imageHeight) {
 			ratios.push(100);
-			continue;
+			return;
 		}
 
-		const ratio = (imageWidthA * imageHeightA) / (imageWidthB * imageHeightB);
+		const ratio = (imageWidthA * imageHeightA) / (dimB.imageWidth * dimB.imageHeight);
 		ratios.push(Math.floor(ratio * 100));
-	}
+	});
 
 	return ratios;
 };
@@ -87,19 +87,11 @@ export async function filesToBase64Strings(
 
 	const failedFiles: string[] = [];
 	const results: { imageBase64: string; file: File }[] = [];
-	for (let i = 0; i < imageTransformationResults.length; i++) {
-		if (imageTransformationResults[i].status === 'rejected') {
-			const convertedImageTransformationResult = imageTransformationResults[i] as {
-				reason: Error;
-				status: string;
-			};
-			failedFiles.push(convertedImageTransformationResult.reason.message ?? '');
+	for (const result of imageTransformationResults) {
+		if (result.status === 'rejected') {
+			failedFiles.push((result.reason as Error)?.message ?? '');
 		} else {
-			const convertedImageTransformationResult = imageTransformationResults[i] as {
-				value: { imageBase64: string; file: File };
-				status: string;
-			};
-			results.push(convertedImageTransformationResult.value);
+			results.push(result.value as { imageBase64: string; file: File });
 		}
 	}
 

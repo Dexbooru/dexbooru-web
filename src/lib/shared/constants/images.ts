@@ -1,5 +1,9 @@
 // this array exists only as a "lazy" flag to prevent seeded danbooru images from getting filtered in the UI in dev mode
-export const IMAGE_FILTER_EXCLUSION_BASE_URLS = ['https://testbooru-cdn.donmai.us'];
+export const IMAGE_FILTER_EXCLUSION_BASE_URLS = [
+	'https://testbooru-cdn.donmai.us',
+	'https://danbooru.donmai.us',
+	'https://cdn.donmai.us',
+];
 
 export const ORIGINAL_IMAGE_SUFFIX = '_original';
 export const PREVIEW_IMAGE_SUFFIX = '_preview';

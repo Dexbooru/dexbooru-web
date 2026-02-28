@@ -21,6 +21,7 @@
 					_event: Event & {
 						currentTarget: EventTarget & HTMLDivElement;
 					},
+					label: string,
 			  ) => void)
 			| null;
 	};
@@ -56,7 +57,7 @@
 	{#each processedLabels as label (label)}
 		<Badge
 			dismissable={labelIsDismissable}
-			onclose={handleLabelClose ? (event) => handleLabelClose(event) : undefined}
+			onclose={handleLabelClose ? (event) => handleLabelClose(event, label) : undefined}
 			href={labelIsLink ? `/posts/${labelType}/${label}` : undefined}
 			large={labelsAreLarge}
 			class="mr-1 mb-1 ml-1"

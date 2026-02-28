@@ -26,7 +26,7 @@
 
 	const getImageId = (imageUrl: string) => {
 		const imageUrlParts = imageUrl.split('_');
-		return imageUrlParts[0];
+		return imageUrlParts[0] ?? '';
 	};
 
 	const getUniqueImageGroupCount = (imageUrls: string[]) => {
