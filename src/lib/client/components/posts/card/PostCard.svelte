@@ -1,4 +1,5 @@
 <script lang="ts">
+	import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
 	import ImageCarousel from '$lib/client/components/images/ImageCarousel.svelte';
 	import PostCardBody from '$lib/client/components/posts/card/PostCardBody.svelte';
 	import PostCardTooltip from '$lib/client/components/posts/card/PostCardTooltip.svelte';
@@ -11,6 +12,9 @@
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
 		NSFW_PREVIEW_IMAGE_SUFFIX,
+		POST_CAROUSEL_IMAGE_CLASS_NAME,
+		POST_PICTURE_PREVIEW_HEIGHT,
+		POST_PICTURE_PREVIEW_WIDTH,
 		PREVIEW_IMAGE_SUFFIX,
 	} from '$lib/shared/constants/images';
 	import type { TPost } from '$lib/shared/types/posts';
@@ -56,18 +60,40 @@
 			);
 		});
 	});
+
+	const showCarousel = $derived(imageUrls.length > 1);
 </script>
 
 {#if $userPreferences.hidePostMetadataOnPreview && !onCollectionViewPage}
 	<PostCardTooltip {artists} {tags}>
-		<ImageCarousel
-			resourceType="posts"
-			resourceHref="/posts/{postId}"
-			{imageUrls}
-			{imagesAlt}
-			slideDuration={POST_CARD_CAROUSEL_SLIDE_DURATION}
-			transitionFunction={POST_CARD_CAROUSEL_TRANSITION_FUNCTION}
-		/>
+		{#if showCarousel}
+			<ImageCarousel
+				resourceType="posts"
+				resourceHref="/posts/{postId}"
+				{imageUrls}
+				{imagesAlt}
+				slideDuration={POST_CARD_CAROUSEL_SLIDE_DURATION}
+				transitionFunction={POST_CARD_CAROUSEL_TRANSITION_FUNCTION}
+			/>
+		{:else if imageUrls.length === 1}
+			<a href="/posts/{postId}">
+				<img
+					src={imageUrls[0]}
+					alt={imagesAlt}
+					width={POST_PICTURE_PREVIEW_WIDTH}
+					height={POST_PICTURE_PREVIEW_HEIGHT}
+					loading="lazy"
+					class="object-contain {POST_CAROUSEL_IMAGE_CLASS_NAME}"
+					style="transition: opacity 0.5s; opacity: 0;"
+					onload={(e) => {
+						(e.target as HTMLImageElement).style.opacity = '1.0';
+					}}
+					onerror={(e) => {
+						(e.target as HTMLImageElement).src = DefaultPostPicture;
+					}}
+				/>
+			</a>
+		{/if}
 	</PostCardTooltip>
 {:else}
 	<Card class="self-start">
@@ -82,14 +108,34 @@
 			</Toast>
 		{/if}
 
-		<ImageCarousel
-			resourceType="posts"
-			resourceHref="/posts/{postId}"
-			{imageUrls}
-			{imagesAlt}
-			slideDuration={POST_CARD_CAROUSEL_SLIDE_DURATION}
-			transitionFunction={POST_CARD_CAROUSEL_TRANSITION_FUNCTION}
-		/>
+		{#if showCarousel}
+			<ImageCarousel
+				resourceType="posts"
+				resourceHref="/posts/{postId}"
+				{imageUrls}
+				{imagesAlt}
+				slideDuration={POST_CARD_CAROUSEL_SLIDE_DURATION}
+				transitionFunction={POST_CARD_CAROUSEL_TRANSITION_FUNCTION}
+			/>
+		{:else if imageUrls.length === 1}
+			<a href="/posts/{postId}">
+				<img
+					src={imageUrls[0]}
+					alt={imagesAlt}
+					width={POST_PICTURE_PREVIEW_WIDTH}
+					height={POST_PICTURE_PREVIEW_HEIGHT}
+					loading="lazy"
+					class="object-contain {POST_CAROUSEL_IMAGE_CLASS_NAME}"
+					style="transition: opacity 0.5s; opacity: 0;"
+					onload={(e) => {
+						(e.target as HTMLImageElement).style.opacity = '1.0';
+					}}
+					onerror={(e) => {
+						(e.target as HTMLImageElement).src = DefaultPostPicture;
+					}}
+				/>
+			</a>
+		{/if}
 		<PostCardBody {post} />
 	</Card>
 {/if}

@@ -73,10 +73,13 @@ export const handleDeleteUser = async (event: RequestEvent) => {
 };
 
 export const handleCreateUser = async (event: RequestEvent) => {
+	logger.info('Registration request received');
+
 	return await validateAndHandleRequest(event, 'form-action', UserCreateSchema, async (data) => {
 		const { email, username, password, confirmedPassword, profilePicture } = data.form;
 
 		if (password !== confirmedPassword) {
+			logger.warn('Registration failed: password mismatch', { username, email });
 			return createErrorResponse('form-action', 400, 'Invalid registration data', {
 				email,
 				username,
@@ -85,8 +88,13 @@ export const handleCreateUser = async (event: RequestEvent) => {
 		}
 
 		try {
+			logger.info('Checking for existing user', { username, email });
 			const user = await findUserByNameOrEmail(email, username);
 			if (user) {
+				logger.warn('Registration failed: username or email already exists', {
+					username,
+					email,
+				});
 				return createErrorResponse('form-action', 409, 'Invalid registration data', {
 					email,
 					username,
@@ -98,11 +106,14 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			let finalProfilePictureBuffer: Buffer;
 
 			if (profilePicture instanceof globalThis.File && profilePicture.size > 0) {
+				logger.info('Processing custom profile picture', { username });
 				finalProfilePictureBuffer = await runProfileImageTransformationPipeline(profilePicture);
 			} else {
+				logger.info('Generating default profile picture', { username });
 				finalProfilePictureBuffer = await runDefaultProfilePictureTransformationPipeline(username);
 			}
 
+			logger.info('Uploading profile picture to S3', { username });
 			const profilePictureObjectUrl = await uploadToBucket(
 				AWS_PROFILE_PICTURE_BUCKET_NAME,
 				'profile_pictures',
@@ -110,18 +121,24 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			);
 			finalProfilePictureUrl = profilePictureObjectUrl;
 
+			logger.info('Creating user account', { username, email });
 			const hashedPassword = await hashPassword(password);
 
 			const newUser = await createUser(username, email, hashedPassword, finalProfilePictureUrl);
+			logger.info('User created successfully', { userId: newUser.id, username: newUser.username });
+
 			const encodedAuthToken = generateEncodedUserTokenFromRecord(newUser, true);
 			event.cookies.set(
 				SESSION_ID_KEY,
 				encodedAuthToken,
 				buildCookieOptions(true) as SerializeOptions & { path: string },
 			);
+
+			logger.info('Creating user preferences', { userId: newUser.id });
 			await createUserPreferences(newUser.id);
 
 			try {
+				logger.info('Sending verification email', { userId: newUser.id, email: newUser.email });
 				const verificationToken = await createEmailVerificationToken(newUser.id);
 				await sendEmail({
 					from: {
@@ -132,6 +149,7 @@ export const handleCreateUser = async (event: RequestEvent) => {
 					subject: EMAIL_VERIFICATION_SUBJECT,
 					html: buildEmailVerificationTemplate(newUser.username, verificationToken.id),
 				});
+				logger.info('Verification email sent successfully', { userId: newUser.id });
 			} catch (emailError) {
 				logger.error('Failed to send verification email', {
 					error: emailError,
@@ -139,11 +157,16 @@ export const handleCreateUser = async (event: RequestEvent) => {
 				});
 			}
 
+			logger.info('Registration completed, redirecting to posts', { userId: newUser.id });
 			redirect(302, `/posts`);
 		} catch (error) {
 			if (isRedirect(error)) throw error;
 
-			logger.error('after the redirect', error);
+			logger.error('Unexpected error during user registration', {
+				error,
+				username,
+				email,
+			});
 			return createErrorResponse(
 				'form-action',
 				500,

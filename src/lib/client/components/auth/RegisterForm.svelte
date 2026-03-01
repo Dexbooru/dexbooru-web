@@ -15,12 +15,19 @@
 	let { form }: Props = $props();
 
 	const registerFormRequirements = getRegisterFormAuthRequirements();
-	const registerErrorReason: string | undefined = $derived(form?.errorReason);
-	let username: string = $derived(form?.username || '');
-	let email: string = $derived(form?.email || '');
-	let password: string = $state('');
-	let confirmedPassword: string = $state('');
+	const registerErrorReason: string | undefined = $derived(form?.reason);
+	let username = $state('');
+	let email = $state('');
+	let password = $state('');
+	let confirmedPassword = $state('');
 	let registerButtonDisabled = $state(true);
+
+	$effect(() => {
+		const formUsername = form?.username;
+		const formEmail = form?.email;
+		if (formUsername !== undefined) username = formUsername;
+		if (formEmail !== undefined) email = formEmail;
+	});
 
 	const registerFormAuthRequirementsUnsubscribe = registerFormRequirements.subscribe((data) => {
 		const disabledCheck =

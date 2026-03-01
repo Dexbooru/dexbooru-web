@@ -42,6 +42,13 @@
 	let showPassword = $state(false);
 	let showConfirmedPassword = $state(false);
 
+	$effect(() => {
+		if (inputFieldType === 'username') onUsernameChange();
+		else if (inputFieldType === 'email') onEmailChange();
+		else if (inputFieldType === 'password') onPasswordChange();
+		else if (inputFieldType === 'password-confirm') onConfirmedPasswordChange();
+	});
+
 	const onUsernameChange = () => {
 		const { satisfied, unsatisfied } = getUsernameRequirements(input);
 		satisfiedRequirements = satisfied;
