@@ -17,10 +17,11 @@ const applyFormatterFunction = (message: unknown) => {
 	return message;
 };
 
-const formatData = winston.format.printf(({ message, level, timestamp }) => {
+const formatData = winston.format.printf(({ message, level, timestamp, ...meta }) => {
 	const formattedMessage = applyFormatterFunction(message);
+	const stringifiedMeta = Object.keys(meta).length ? `\n${JSON.stringify(meta, null, 2)}` : '';
 
-	return `${timestamp} ${level}: ${formattedMessage}`;
+	return `${timestamp} ${level}: ${formattedMessage}${stringifiedMeta}`;
 });
 
 export default formatData;

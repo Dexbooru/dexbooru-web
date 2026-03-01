@@ -3,6 +3,8 @@ import formatData from './formatters';
 
 const loggerOptions: winston.LoggerOptions = {
 	format: winston.format.combine(
+		winston.format.errors({ stack: true }),
+		winston.format.splat(),
 		winston.format.colorize(),
 		winston.format.timestamp(),
 		winston.format.simple(),
