@@ -6,10 +6,10 @@
 
 */
 -- DropForeignKey
-ALTER TABLE "PostSource" DROP CONSTRAINT "PostSource_postId_fkey";
+ALTER TABLE "PostSource" DROP CONSTRAINT IF EXISTS "PostSource_postId_fkey";
 
 -- DropIndex
-DROP INDEX "PostSource_postId_idx";
+DROP INDEX IF EXISTS "PostSource_postId_idx";
 
 -- AlterTable
 ALTER TABLE "PostSource" DROP COLUMN "postId";
