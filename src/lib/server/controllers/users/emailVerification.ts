@@ -81,6 +81,7 @@ export const handleResendVerificationEmail = async (event: RequestEvent) => {
 			}
 
 			const dbUser = await findUserById(user.id, {
+				id: true,
 				emailVerified: true,
 				email: true,
 				username: true,
