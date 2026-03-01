@@ -6,6 +6,8 @@
 	import ImagePlaceholder from 'flowbite-svelte/ImagePlaceholder.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
 
+	import ProfilePictureCropModal from './ProfilePictureCropModal.svelte';
+
 	type Props = {
 		isChangingProfilePicture?: boolean;
 		profilePictureFile?: File | null;
@@ -15,19 +17,30 @@
 
 	let profilePictureBase64String: string | null = $state(null);
 	let parsingProfilePicture = $state(false);
+	let cropModalOpen = $state(false);
+
+	const inputId = $derived(
+		isChangingProfilePicture ? 'newProfilePictureInput' : 'profilePictureInput',
+	);
+	const inputName = $derived(isChangingProfilePicture ? 'newProfilePicture' : 'profilePicture');
 
 	const onProfilePictureChange = async (event: Event) => {
 		profilePictureFile = null;
+		profilePictureBase64String = null;
 		parsingProfilePicture = true;
 
 		const target = event.target as HTMLInputElement;
 		const files = Array.from(target.files ?? []);
 		if (files.length === 1) {
-			profilePictureFile = files[0] ?? null;
+			const file = files[0] ?? null;
 
-			if (profilePictureFile) {
+			if (file) {
 				try {
-					profilePictureBase64String = await fileToBase64String(profilePictureFile);
+					const base64 = await fileToBase64String(file);
+					if (base64) {
+						profilePictureBase64String = base64;
+						cropModalOpen = true;
+					}
 				} catch {
 					profilePictureBase64String = null;
 				}
@@ -36,22 +49,56 @@
 
 		parsingProfilePicture = false;
 	};
+
+	function setFileInput(file: File) {
+		const input = document.getElementById(inputId) as HTMLInputElement | null;
+		if (input) {
+			const dataTransfer = new DataTransfer();
+			dataTransfer.items.add(file);
+			input.files = dataTransfer.files;
+		}
+	}
+
+	function clearFileInput() {
+		const input = document.getElementById(inputId) as HTMLInputElement | null;
+		if (input) {
+			input.value = '';
+		}
+	}
+
+	async function handleCropConfirm(croppedFile: File) {
+		profilePictureFile = croppedFile;
+		setFileInput(croppedFile);
+		profilePictureBase64String = await fileToBase64String(croppedFile);
+		cropModalOpen = false;
+	}
+
+	function handleCropCancel() {
+		cropModalOpen = false;
+		profilePictureBase64String = null;
+		profilePictureFile = null;
+		clearFileInput();
+	}
 </script>
 
 <Label style="margin-top: 0px;" class="space-y-2">
 	<span>Upload a profile picture{isChangingProfilePicture ? '' : ' (optional)'}</span>
 	<br />
 	<span>The maximum size allowed is: {MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB} MB</span>
-	<Fileupload
-		id={isChangingProfilePicture ? 'newProfilePictureInput' : 'profilePictureInput'}
-		name={isChangingProfilePicture ? 'newProfilePicture' : 'profilePicture'}
-		accept="image/*"
-		onchange={onProfilePictureChange}
-	/>
+	<Fileupload id={inputId} name={inputName} accept="image/*" onchange={onProfilePictureChange} />
 </Label>
 
 {#if parsingProfilePicture}
 	<ImagePlaceholder />
 {:else if profilePictureFile && profilePictureBase64String}
 	<Avatar class="mr-auto ml-auto block" size="xl" src={profilePictureBase64String} />
+{/if}
+
+{#if profilePictureBase64String && cropModalOpen}
+	<ProfilePictureCropModal
+		bind:open={cropModalOpen}
+		imageSrc={profilePictureBase64String}
+		onConfirm={handleCropConfirm}
+		onCancel={handleCropCancel}
+	/>
 {/if}
