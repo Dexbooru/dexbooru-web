@@ -1,9 +1,10 @@
 import { dev } from '$app/environment';
+import { DOMAIN as APP_DOMAIN } from '$env/static/private';
 import type { SerializeOptions } from 'cookie';
 
 type CookieOptions = Pick<
 	SerializeOptions,
-	'path' | 'sameSite' | 'secure' | 'maxAge' | 'httpOnly'
+	'path' | 'sameSite' | 'secure' | 'maxAge' | 'httpOnly' | 'domain'
 > & {
 	sameSite: 'strict' | 'lax' | 'none'; // Explicitly define sameSite as a literal type
 };
@@ -15,6 +16,7 @@ export const SESSION_JWT_EXPIRES_IN_SUPER_AGE = 60 * 60 * 24 * 21;
 export const SESSION_JWT_API_ENDPOINT_AGE = 60 * 2;
 
 export const SESSION_ID_COOKIE_OPTIONS: CookieOptions = {
+	...(!dev && { domain: APP_DOMAIN }),
 	path: '/',
 	sameSite: 'strict',
 	secure: !dev,
