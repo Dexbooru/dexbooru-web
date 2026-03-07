@@ -12,6 +12,7 @@ import {
 	getCacheKeyWithPostCategory,
 } from '../cache-strategies/posts';
 import { LikePostSchema } from '../request-schemas/posts';
+import newPostLikePublisher, { NewPostLikePublisher } from '../../rabbitmq/publishers/newPostLike';
 
 export const handleLikePost = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -31,7 +32,7 @@ export const handleLikePost = async (event: RequestEvent) => {
 			);
 
 			try {
-				const post = await findPostById(postId, { likes: true });
+				const post = await findPostById(postId, { likes: true, authorId: true });
 				if (!post) {
 					return createErrorResponse(
 						'api-route',
@@ -47,6 +48,19 @@ export const handleLikePost = async (event: RequestEvent) => {
 						500,
 						'An unexpected error occured while liking the post',
 					);
+				}
+
+				if (action === 'like' && post.authorId && post.authorId !== event.locals.user.id) {
+					const routingKey = NewPostLikePublisher.buildRoutingKey(post.authorId);
+					newPostLikePublisher
+						.publish(routingKey, {
+							postId,
+							postAuthorId: post.authorId,
+							likerUserId: event.locals.user.id,
+							totalLikes: (post.likes ?? 0) + 1,
+							wasRead: false,
+						})
+						.catch((err) => logger.error('Failed to publish new post like event', err));
 				}
 
 				invalidateCacheRemotely(individualPostCacheKey);

@@ -5,7 +5,11 @@ describe('notification actions', () => {
 	describe('getUserNotificationsFromId', () => {
 		it('should return default notification data', async () => {
 			const result = await getUserNotificationsFromId('u1');
-			expect(result).toEqual({ todo: 0 });
+			expect(result).toEqual({
+				newPostLikes: [],
+				newPostComments: [],
+				newFriendInvites: [],
+			});
 		});
 	});
 });

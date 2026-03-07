@@ -43,7 +43,6 @@ export const handleGetComment = async (
 				PUBLIC_COMMENT_SELECTORS,
 			)) as TComment[];
 
-			// Filter to get thread: target comment + all descendants
 			const thread: TComment[] = [];
 			const queue = [commentId];
 			const commentMap = new Map(allPostComments.map((c) => [c.id, c]));

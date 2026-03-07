@@ -1,6 +1,6 @@
 import { MAXIMUM_COMMENTS_PER_POST } from '$lib/shared/constants/posts';
 import type { RequestEvent } from '@sveltejs/kit';
-import { createComment } from '../../db/actions/comment';
+import { createComment, findCommentById } from '../../db/actions/comment';
 import { findPostById } from '../../db/actions/post';
 import {
 	createErrorResponse,
@@ -14,6 +14,9 @@ import {
 	getCacheKeyWithPostCategory,
 } from '../cache-strategies/posts';
 import { CreateCommentSchema } from '../request-schemas/comments';
+import newPostCommentPublisher, {
+	NewPostCommentPublisher,
+} from '../../rabbitmq/publishers/newPostComment';
 
 export const handleCreatePostComment = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -27,6 +30,7 @@ export const handleCreatePostComment = async (event: RequestEvent) => {
 			try {
 				const post = await findPostById(postId, {
 					commentCount: true,
+					authorId: true,
 				});
 				if (!post) {
 					return createErrorResponse(
@@ -51,6 +55,29 @@ export const handleCreatePostComment = async (event: RequestEvent) => {
 					parentCommentId,
 				);
 				const { id: newCommentId } = newComment;
+
+				if (post.authorId) {
+					let parentCommentAuthorId: string | null = null;
+					if (parentCommentId) {
+						const parentComment = await findCommentById(parentCommentId, {
+							authorId: true,
+						});
+						parentCommentAuthorId = parentComment?.authorId ?? null;
+					}
+
+					const routingKey = NewPostCommentPublisher.buildRoutingKey(post.authorId);
+					newPostCommentPublisher
+						.publish(routingKey, {
+							postId,
+							postAuthorId: post.authorId,
+							commentAuthorId: event.locals.user.id,
+							commentContent: content,
+							parentCommentId: parentCommentId ?? null,
+							parentCommentAuthorId,
+							wasRead: false,
+						})
+						.catch((err) => logger.error('Failed to publish new post comment event', err));
+				}
 
 				const postCacheKey = getCacheKeyForIndividualPost(postId);
 				invalidateCacheRemotely(postCacheKey);

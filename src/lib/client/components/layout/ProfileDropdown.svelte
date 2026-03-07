@@ -1,38 +1,46 @@
 <script lang="ts">
 	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
-	import {
-		getAuthenticatedUser,
-		getAuthenticatedUserNotifications,
-	} from '$lib/client/helpers/context';
+	import { getAuthenticatedUser } from '$lib/client/helpers/context';
 	import { clearPostDraft } from '$lib/client/helpers/drafts';
+	import { notificationStore } from '$lib/client/notifications/notificationStore';
+	import { authenticateNotificationSession } from '$lib/client/api/notificationApi';
 	import DropdownDivider from 'flowbite-svelte/DropdownDivider.svelte';
 	import AngleDownOutline from 'flowbite-svelte-icons/AngleDownOutline.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
 	import DropdownItem from 'flowbite-svelte/DropdownItem.svelte';
-	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import NotificationBell from '../notifications/NotificationBell.svelte';
 	import NotificationList from '../notifications/NotificationList.svelte';
+	import { onMount, onDestroy } from 'svelte';
 
-	let notificationCount: number = $state(0);
 	let dropdownOpen: boolean = $state(false);
 
 	const user = getAuthenticatedUser();
-	const notifications = getAuthenticatedUserNotifications();
 
 	const onImageError = (event: Event) => {
 		const target = event.target as HTMLImageElement;
 		target.src = DefaultProfilePicture;
 	};
+
+	onMount(async () => {
+		try {
+			await authenticateNotificationSession();
+		} catch {
+			// Auth to notifications service failed; continue without realtime
+		}
+
+		notificationStore.fetchInitialNotifications();
+		notificationStore.connect();
+	});
+
+	onDestroy(() => {
+		notificationStore.disconnect();
+	});
 </script>
 
-{#if $notifications}
-	<NotificationBell {notificationCount} />
-	<NotificationList {notificationCount} />
-{:else}
-	<Spinner size="8" class="mt-3 mr-4" />
-{/if}
+<NotificationBell />
+<NotificationList />
 
 {#if $user}
 	<div role="group" class="relative" onmouseenter={() => (dropdownOpen = true)}>

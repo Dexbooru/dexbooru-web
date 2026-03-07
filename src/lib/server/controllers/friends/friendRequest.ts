@@ -8,6 +8,9 @@ import {
 } from '../../helpers/controllers';
 import logger from '../../logging/logger';
 import { DeleteFriendRequestSchema } from '../request-schemas/friends';
+import friendInvitePublisher, {
+	FriendInvitePublisher,
+} from '../../rabbitmq/publishers/friendInvite';
 
 export const handleFriendRequest = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -40,6 +43,16 @@ export const handleFriendRequest = async (event: RequestEvent) => {
 
 				if (requestAction === 'accept') {
 					await createFriend(user.id, senderUser.id);
+
+					const routingKey = FriendInvitePublisher.buildRoutingKey(senderUser.id, 'ACCEPTED');
+					friendInvitePublisher
+						.publish(routingKey, {
+							senderUserId: user.id,
+							receiverUserId: senderUser.id,
+							sentAt: new Date(),
+							status: 'ACCEPTED' as const,
+						})
+						.catch((err) => logger.error('Failed to publish friend invite ACCEPTED event', err));
 				}
 
 				return createSuccessResponse(

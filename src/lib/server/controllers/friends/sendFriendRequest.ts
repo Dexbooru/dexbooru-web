@@ -8,6 +8,9 @@ import {
 } from '../../helpers/controllers';
 import logger from '../../logging/logger';
 import { CreateFriendRequestSchema } from '../request-schemas/friends';
+import friendInvitePublisher, {
+	FriendInvitePublisher,
+} from '../../rabbitmq/publishers/friendInvite';
 
 export const handleSendFriendRequest = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -37,6 +40,12 @@ export const handleSendFriendRequest = async (event: RequestEvent) => {
 				}
 
 				const newFriendRequest = await createFriendRequest(user.id, receiverUser.id);
+
+				const routingKey = FriendInvitePublisher.buildRoutingKey(receiverUser.id, 'SENT');
+				friendInvitePublisher
+					.publish(routingKey, { ...newFriendRequest, status: 'SENT' as const })
+					.catch((err) => logger.error('Failed to publish friend invite SENT event', err));
+
 				return createSuccessResponse(
 					'api-route',
 					`Successfully sent the friend request to ${receiverUsername}`,
