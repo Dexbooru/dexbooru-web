@@ -9,6 +9,7 @@ export const mockSessionHelpers = {
 	cacheMultipleToCollectionRemotely: vi.fn(),
 	generateEncodedUserTokenFromRecord: vi.fn(),
 	cacheResponse: vi.fn(),
+	getUserClaimsFromEncodedJWTToken: vi.fn().mockReturnValue(null),
 };
 
 vi.mock('$lib/server/helpers/sessions', () => mockSessionHelpers);

@@ -90,26 +90,26 @@ const parseKeyValueStore = (store: FormData | URLSearchParams): Record<string, u
 	return parsedObject;
 };
 
-const parseRequestBodies = async (event: RequestEvent, isFormContentType: string | undefined) => {
-	let formData: FormData;
-	let body: unknown;
-
-	try {
-		formData = isFormContentType ? await event.request.formData() : new FormData();
-	} catch {
-		formData = new FormData();
+const parseRequestBodies = async (event: RequestEvent, shouldParseAsForm: boolean) => {
+	// Request body can only be consumed once. Reading with formData() or json() consumes the stream.
+	// Calling both would cause the second call to fail or return empty data.
+	if (shouldParseAsForm) {
+		let formData: FormData;
+		try {
+			formData = await event.request.formData();
+		} catch {
+			formData = new FormData();
+		}
+		return { formData, body: {} as unknown };
 	}
 
+	let body: unknown;
 	try {
-		body = await event.request.json().catch(() => {});
+		body = await event.request.json().catch(() => ({}));
 	} catch {
 		body = {};
 	}
-
-	return {
-		formData,
-		body,
-	};
+	return { formData: new FormData(), body };
 };
 
 const validateRequest = <T extends TRequestSchema>(
@@ -160,11 +160,21 @@ export const validateAndHandleRequest = async <T extends TRequestSchema>(
 	}
 
 	const requestContentType = event.request.headers.get('Content-Type') ?? '';
+	const contentTypeLower = requestContentType.trim().toLowerCase();
+	const isJsonContentType = contentTypeLower.includes('application/json');
 	const isFormContentType = formContentTypes.find((formContentType) =>
-		requestContentType.trim().toLocaleLowerCase().includes(formContentType),
+		contentTypeLower.includes(formContentType),
 	);
 
-	const { formData, body } = await parseRequestBodies(event, isFormContentType);
+	// When Content-Type is missing or ambiguous, assume form data for POST/PUT/PATCH.
+	// Proxies (nginx, load balancers) sometimes strip Content-Type from form submissions,
+	// causing multipart body to be misparsed as JSON and yielding undefined form fields.
+	const method = event.request.method.toUpperCase();
+	const assumeFormWhenAmbiguous = !isJsonContentType && ['POST', 'PUT', 'PATCH'].includes(method);
+
+	const shouldParseAsForm = Boolean(isFormContentType || assumeFormWhenAmbiguous);
+
+	const { formData, body } = await parseRequestBodies(event, shouldParseAsForm);
 	const rawRequestData: TRequestData = {
 		form: formData,
 		urlSearchParams: event.url.searchParams,
