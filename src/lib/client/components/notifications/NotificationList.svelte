@@ -7,11 +7,20 @@
 		getNotificationLink,
 		onAvatarError,
 	} from '$lib/client/notifications/notificationHelpers';
+	import { convert as htmlToText } from 'html-to-text';
 	import Dropdown from 'flowbite-svelte/Dropdown.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import BullhornSolid from 'flowbite-svelte-icons/BullhornSolid.svelte';
 
 	const MAX_VISIBLE = 10;
+
+	function stripCommentPreview(html: string): string {
+		try {
+			return htmlToText(html, { wordwrap: false }).slice(0, 120);
+		} catch {
+			return html.replace(/<[^>]*>/g, '').slice(0, 120);
+		}
+	}
 
 	const notifications = notificationStore.notifications;
 	const unreadCount = notificationStore.unreadCount;
@@ -56,7 +65,7 @@
 						</p>
 						{#if notification.type === 'new_post_comment' && notification.commentContent}
 							<p class="truncate text-xs text-gray-500 dark:text-gray-400">
-								"{notification.commentContent}"
+								"{stripCommentPreview(notification.commentContent)}"
 							</p>
 						{/if}
 					</div>

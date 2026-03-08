@@ -10,19 +10,19 @@
 	import { getAuthenticatedUser, getModerationPaginationData } from '$lib/client/helpers/context';
 	import { isModerationRole } from '$lib/shared/helpers/auth/role';
 	import type { TApiResponse } from '$lib/shared/types/api';
+	import type { TPost } from '$lib/shared/types/posts';
 	import type { TUser } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
+	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Spinner from 'flowbite-svelte/Spinner.svelte';
-	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import TabItem from 'flowbite-svelte/TabItem.svelte';
 	import Tabs from 'flowbite-svelte/Tabs.svelte';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import ModList from './ModList.svelte';
-	import ReportGrid from './ReportGrid.svelte';
 	import PostModerationGrid from './PostModerationGrid.svelte';
-	import type { TPost } from '$lib/shared/types/posts';
+	import ReportGrid from './ReportGrid.svelte';
 
 	type TTabName =
 		| 'user-reports'
@@ -280,7 +280,7 @@
 
 {#if currentTab === ''}
 	<div
-		class="mx-auto mt-10 max-w-2xl rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800"
+		class="m-2 mx-auto mt-10 max-w-2xl rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800"
 	>
 		<div class="mb-6 flex justify-center">
 			<div class="bg-primary-100 dark:bg-primary-900/30 rounded-full p-3">
@@ -334,67 +334,72 @@
 		</div>
 	</div>
 {:else}
-	<Tabs class="mt-5" tabStyle="underline">
-		<TabItem
-			onclick={() => handleTabClick('post-decisions')}
-			open={currentTab === 'post-decisions'}
-			title="Post Decisions"
+	<div class="moderation-tabs-scroll mt-5 overflow-x-auto">
+		<Tabs
+			class="moderation-tabs-list inline-flex w-min flex-nowrap gap-x-3 pb-1 sm:gap-x-2"
+			tabStyle="underline"
 		>
-			<PostModerationGrid
-				containerId={TAB_CONTAINER_IDS['post-decisions'] ?? ''}
-				handleLoadMorePosts={() => handleLoadPendingPosts(false)}
-				loadingPosts={pendingPostsLoading}
-			/>
-		</TabItem>
-		<TabItem
-			onclick={() => handleTabClick('user-reports')}
-			open={currentTab === 'user-reports'}
-			title="User Reports"
-		>
-			<ReportGrid
-				containerId={TAB_CONTAINER_IDS['user-reports'] ?? ''}
-				reportType="userReports"
-				handleLoadMoreReports={() => handleLoadUserReports(false)}
-				loadingReports={userReportsLoading}
-			/>
-		</TabItem>
-		<TabItem
-			onclick={() => handleTabClick('post-reports')}
-			open={currentTab === 'post-reports'}
-			title="Post Reports"
-		>
-			<ReportGrid
-				containerId={TAB_CONTAINER_IDS['post-reports'] ?? ''}
-				reportType="postReports"
-				handleLoadMoreReports={() => handleLoadPostReports(false)}
-				loadingReports={postReportsLoading}
-			/>
-		</TabItem>
-		<TabItem
-			onclick={() => handleTabClick('post-collection-reports')}
-			open={currentTab === 'post-collection-reports'}
-			title="Post Collection Reports"
-		>
-			<ReportGrid
-				containerId={TAB_CONTAINER_IDS['post-collection-reports'] ?? ''}
-				reportType="postCollectionReports"
-				handleLoadMoreReports={() => handleLoadCollectionReports(false)}
-				loadingReports={postCollectionReportsLoading}
-			/>
-		</TabItem>
-		{#if $user && isModerationRole($user.role)}
 			<TabItem
-				onclick={() => handleTabClick('moderator-list')}
-				open={currentTab === 'moderator-list'}
-				disabled={!isModerationRole($user.role)}
-				title="Moderator List"
+				onclick={() => handleTabClick('post-decisions')}
+				open={currentTab === 'post-decisions'}
+				title="Post Decisions"
 			>
-				{#if moderatorsLoading}
-					<Spinner size="12" />
-				{:else}
-					<ModList containerId={TAB_CONTAINER_IDS['moderator-list'] ?? ''} />
-				{/if}
+				<PostModerationGrid
+					containerId={TAB_CONTAINER_IDS['post-decisions'] ?? ''}
+					handleLoadMorePosts={() => handleLoadPendingPosts(false)}
+					loadingPosts={pendingPostsLoading}
+				/>
 			</TabItem>
-		{/if}
-	</Tabs>
+			<TabItem
+				onclick={() => handleTabClick('user-reports')}
+				open={currentTab === 'user-reports'}
+				title="User Reports"
+			>
+				<ReportGrid
+					containerId={TAB_CONTAINER_IDS['user-reports'] ?? ''}
+					reportType="userReports"
+					handleLoadMoreReports={() => handleLoadUserReports(false)}
+					loadingReports={userReportsLoading}
+				/>
+			</TabItem>
+			<TabItem
+				onclick={() => handleTabClick('post-reports')}
+				open={currentTab === 'post-reports'}
+				title="Post Reports"
+			>
+				<ReportGrid
+					containerId={TAB_CONTAINER_IDS['post-reports'] ?? ''}
+					reportType="postReports"
+					handleLoadMoreReports={() => handleLoadPostReports(false)}
+					loadingReports={postReportsLoading}
+				/>
+			</TabItem>
+			<TabItem
+				onclick={() => handleTabClick('post-collection-reports')}
+				open={currentTab === 'post-collection-reports'}
+				title="Post Collection Reports"
+			>
+				<ReportGrid
+					containerId={TAB_CONTAINER_IDS['post-collection-reports'] ?? ''}
+					reportType="postCollectionReports"
+					handleLoadMoreReports={() => handleLoadCollectionReports(false)}
+					loadingReports={postCollectionReportsLoading}
+				/>
+			</TabItem>
+			{#if $user && isModerationRole($user.role)}
+				<TabItem
+					onclick={() => handleTabClick('moderator-list')}
+					open={currentTab === 'moderator-list'}
+					disabled={!isModerationRole($user.role)}
+					title="Moderator List"
+				>
+					{#if moderatorsLoading}
+						<Spinner size="12" />
+					{:else}
+						<ModList containerId={TAB_CONTAINER_IDS['moderator-list'] ?? ''} />
+					{/if}
+				</TabItem>
+			{/if}
+		</Tabs>
+	</div>
 {/if}

@@ -4,6 +4,7 @@ export type TFriendInviteStatus = 'SENT' | 'ACCEPTED';
 
 export type TNewPostLikeNotification = {
 	_id: string;
+	createdAt: string;
 	type: 'new_post_like';
 	postId: string;
 	postAuthorId: string;
@@ -16,6 +17,7 @@ export type TNewPostLikeNotification = {
 
 export type TNewPostCommentNotification = {
 	_id: string;
+	createdAt: string;
 	type: 'new_post_comment';
 	postId: string;
 	postAuthorId: string;
@@ -30,6 +32,7 @@ export type TNewPostCommentNotification = {
 
 export type TFriendInviteNotification = {
 	_id: string;
+	createdAt: string;
 	type: 'friend_invite';
 	senderUserId: string;
 	senderUsername?: string;

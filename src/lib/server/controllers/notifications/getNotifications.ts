@@ -1,38 +1,17 @@
+import type { TUserNotifications } from '$lib/shared/types/notifcations';
 import type { RequestEvent } from '@sveltejs/kit';
+import {
+	DEXBOORU_NOTIFICATIONS_API_URL,
+	DEXBOORU_NOTIFICATIONS_SESSION_COOKIE_KEY,
+} from '../../constants/notifications';
 import {
 	createErrorResponse,
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import type { TRequestSchema } from '../../types/controllers';
-import logger from '../../logging/logger';
-import {
-	DEXBOORU_NOTIFICATIONS_API_URL,
-	DEXBOORU_NOTIFICATIONS_SESSION_COOKIE_KEY,
-} from '../../constants/notifications';
 import { enrichUserNotifications } from '../../helpers/notifications/enrichNotifications';
-import type { TUserNotifications } from '$lib/shared/types/notifcations';
-import { z } from 'zod';
-
-export const GetNotificationsSchema = {
-	urlSearchParams: z.object({
-		page: z
-			.string()
-			.optional()
-			.default('1')
-			.transform((val) => parseInt(val, 10))
-			.refine((val) => !isNaN(val) && val >= 1, { message: 'Page must be at least 1' }),
-		limit: z
-			.string()
-			.optional()
-			.default('20')
-			.transform((val) => parseInt(val, 10))
-			.refine((val) => !isNaN(val) && val > 0 && val <= 100, {
-				message: 'Limit must be between 1 and 100',
-			}),
-		read: z.enum(['true', 'false']).optional(),
-	}),
-} satisfies TRequestSchema;
+import logger from '../../logging/logger';
+import { GetNotificationsSchema } from '../request-schemas/notifications';
 
 export const handleGetNotifications = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(

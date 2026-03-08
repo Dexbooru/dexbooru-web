@@ -37,3 +37,7 @@
 	border-top-color: darkorange !important;
 	border-left-color: darkorange !important;
 }
+
+.moderation-tabs-list li {
+	flex-shrink: 0;
+}
