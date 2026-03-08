@@ -18,6 +18,7 @@ mockControllerHelpers.validateAndHandleRequest.mockImplementation(realValidateAn
 mockControllerHelpers.createErrorResponse.mockImplementation(realCreateErrorResponse);
 mockControllerHelpers.createSuccessResponse.mockImplementation(realCreateSuccessResponse);
 
+import type { TRequestSchema } from '$lib/server/types/controllers';
 import {
 	isRequestEvent,
 	populateAuthenticatedUser,
@@ -145,11 +146,11 @@ describe('controllers', () => {
 	});
 
 	describe('validateAndHandleRequest', () => {
-		const formSchema = z.object({
+		const formSchema = {
 			form: z.object({
 				name: z.string().min(1),
 			}),
-		});
+		} satisfies TRequestSchema;
 
 		it('returns 401 when protected and user not authenticated', async () => {
 			const request = {

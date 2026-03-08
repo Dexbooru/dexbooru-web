@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
 	import { MAXIMUM_COMMENTS_PER_POST } from '$lib/shared/constants/posts';
+	import { isModerationRole } from '$lib/shared/helpers/auth/role';
 	import type { TPost } from '$lib/shared/types/posts';
+	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
+	import Alert from 'flowbite-svelte/Alert.svelte';
 	import CommentTextbox from '../../comments/CommentTextbox.svelte';
 	import CommentsContainer from '../../comments/CommentsContainer.svelte';
 	import PostImageMetadata from './PostImageMetadata.svelte';
 	import PostMetadata from './PostMetadata.svelte';
-	import Alert from 'flowbite-svelte/Alert.svelte';
-	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
-	import { isModerationRole } from '$lib/shared/helpers/auth/role';
 
 	type Props = {
 		post: TPost;
@@ -69,7 +69,7 @@
 		<section class="space-y-2">
 			<p class="text-lg dark:text-white">Anime Info:</p>
 			<div class="flex flex-wrap gap-2">
-				{#each post.sources.filter((s) => s.sourceType === 'ANIME') as source (source.sourceTitle)}
+				{#each post.sources.filter((s) => s.sourceType === 'ANIME') as source (source.id)}
 					<a
 						href="/anime/{source.sourceTitle.toLowerCase().replaceAll(' ', '_')}"
 						class="text-blue-500 hover:underline"

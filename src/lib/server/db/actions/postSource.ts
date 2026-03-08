@@ -1,6 +1,6 @@
 import type { PostSourceType } from '$generated/prisma/client';
 import { transformLabel } from '$lib/shared/helpers/labels';
-import type { TPostSource } from '$lib/shared/types/posts';
+import type { TPostSourceInput } from '$lib/shared/types/posts';
 import logger from '../../logging/logger';
 import prisma from '../prisma';
 
@@ -52,7 +52,7 @@ export const createPostSource = async (
 	return postSource;
 };
 
-export const createPostSources = async (results: TPostSource[]) => {
+export const createPostSources = async (results: TPostSourceInput[]) => {
 	const uniquePostIds = [...new Set(results.map((r) => r.postId))];
 	const existingPosts = await prisma.post.findMany({
 		where: { id: { in: uniquePostIds } },

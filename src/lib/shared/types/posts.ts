@@ -15,11 +15,14 @@ export type TLikePutBody = {
 };
 
 export type TPostSource = {
+	id: string;
 	postId: string;
 	sourceTitle: string;
 	sourceType: PostSourceType;
 	characterName: string;
 };
+
+export type TPostSourceInput = Omit<TPostSource, 'id'>;
 
 export type TUpdatePostBody = {
 	description: string;
