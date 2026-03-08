@@ -21,15 +21,17 @@ export const load: PageServerLoad = async (event) => {
 		redirect(302, '/');
 	}
 
+	const redirectTo = event.url.searchParams.get('redirectTo') ?? '/';
+
 	const googleAuthProvider = new GoogleOauthProvider(event);
 	const discordAuthProvider = new DiscordOauthProvider(event);
 	const githubAuthProvider = new GithubOauthProvider(event);
 
 	const [googleAuthorizationUrl, discordAuthorizationUrl, githubAuthorizationUrl] =
 		await Promise.all([
-			googleAuthProvider.getAuthorizationUrl(),
-			discordAuthProvider.getAuthorizationUrl(),
-			githubAuthProvider.getAuthorizationUrl(),
+			googleAuthProvider.getAuthorizationUrl(redirectTo),
+			discordAuthProvider.getAuthorizationUrl(redirectTo),
+			githubAuthProvider.getAuthorizationUrl(redirectTo),
 		]);
 
 	return {

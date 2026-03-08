@@ -2,6 +2,12 @@ import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { error, fail, type RequestEvent } from '@sveltejs/kit';
 import type { z } from 'zod';
+import {
+	VALID_APPLICATION_REQUEST_TYPES,
+	VALID_FORM_APPLICATION_TYPES,
+	VALID_REQUEST_EVENT_KEYS,
+	VALID_REQUEST_TYPES,
+} from '../constants/controllers';
 import logger from '../logging/logger';
 import type {
 	TControllerHandlerVariant,
@@ -12,11 +18,6 @@ import type {
 	TValidationResult,
 } from '../types/controllers';
 import { getUserClaimsFromEncodedJWTToken } from './sessions';
-
-const parts: (keyof TRequestSchema)[] = ['form', 'urlSearchParams', 'pathParams', 'body'];
-const formContentTypes = ['multipart/form-data', 'application/x-www-form-urlencoded'];
-
-const VALID_REQUEST_EVENT_KEYS = ['locals', 'params', 'getClientAddress', 'request', 'url'];
 
 export const isRequestEvent = (object: unknown) => {
 	if (object === null || object === undefined) return false;
@@ -42,6 +43,12 @@ export const populateAuthenticatedUser = (event: RequestEvent) => {
 	}
 
 	return false;
+};
+
+const isMediaSupportedByServer = (contentType: string): boolean => {
+	return VALID_APPLICATION_REQUEST_TYPES.some((validRequestType) => {
+		return contentType.includes(validRequestType) || validRequestType.includes(contentType);
+	});
 };
 
 const validatePart = <K extends keyof TRequestSchema>(
@@ -121,7 +128,7 @@ const validateRequest = <T extends TRequestSchema>(
 	const result: Partial<TInferRequestSchema<T>> = {};
 	const errors: TValidationError[] = [];
 
-	for (const part of parts) {
+	for (const part of VALID_REQUEST_TYPES) {
 		const partSchema = requestSchema[part];
 		const partData =
 			part === 'form' || part === 'urlSearchParams'
@@ -161,17 +168,19 @@ export const validateAndHandleRequest = async <T extends TRequestSchema>(
 		);
 	}
 
-	const requestContentType = event.request.headers.get('Content-Type') ?? '';
-	const contentTypeLower = requestContentType.trim().toLowerCase();
-	const isJsonContentType = contentTypeLower.includes('application/json');
-	const isFormContentType = formContentTypes.find((formContentType) =>
-		contentTypeLower.includes(formContentType),
+	const requestContentType = (event.request.headers.get('Content-Type') ?? '').trim().toLowerCase();
+	if (!isMediaSupportedByServer(requestContentType)) {
+		return createErrorResponse(
+			handlerType,
+			415,
+			'The following application type is not supported by the server',
+		);
+	}
+
+	const isFormContentType = VALID_FORM_APPLICATION_TYPES.find((formContentType) =>
+		requestContentType.includes(formContentType),
 	);
-
-	const method = event.request.method.toUpperCase();
-	const assumeFormWhenAmbiguous = !isJsonContentType && ['POST', 'PUT', 'PATCH'].includes(method);
-
-	const shouldParseAsForm = Boolean(isFormContentType || assumeFormWhenAmbiguous);
+	const shouldParseAsForm = Boolean(isFormContentType);
 
 	const { formData, body } = await parseRequestBodies(event, shouldParseAsForm);
 	const rawRequestData: TRequestData = {
@@ -188,6 +197,7 @@ export const validateAndHandleRequest = async <T extends TRequestSchema>(
 			handlerType,
 			errors: validationResult.errors,
 		});
+
 		return createErrorResponse(
 			handlerType,
 			400,

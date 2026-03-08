@@ -88,6 +88,7 @@
 			<Checkbox bind:checked={rememberMe}>Remember me</Checkbox>
 			<Input type="hidden" name="rememberMe" value={rememberMe.toString()} />
 		</div>
+		<Input type="hidden" name="redirectTo" value={page.url.searchParams.get('redirectTo') ?? ''} />
 		<Button disabled={loginFormButtonDisabled} type="submit" class="w-full">Log in</Button>
 
 		<OauthLinks

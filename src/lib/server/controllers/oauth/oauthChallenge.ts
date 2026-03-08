@@ -9,6 +9,7 @@ import { findUserFromPlatformNameAndId } from '../../db/actions/linkedAccount';
 import { createUserPreferences, findUserPreferences } from '../../db/actions/preference';
 import { createUser } from '../../db/actions/user';
 import { createErrorResponse, validateAndHandleRequest } from '../../helpers/controllers';
+import { getSafeRedirectTo } from '../../helpers/redirect';
 import { buildOauthPasswordEmailTemplate, sendEmail } from '../../helpers/email';
 import {
 	DiscordOauthProvider,
@@ -58,6 +59,7 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 						break;
 				}
 
+				const storedRedirectTo = await authProvider.validateAuthState(state);
 				const accessToken = await authProvider.getToken(code, state);
 				const oauthUserData = await authProvider.getUserData(accessToken);
 				const userIdFromState = SkeletonOauthProvider.extractUserIdFromState(state);
@@ -110,7 +112,7 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 						const oauthProcessingUrl = buildOauthProcessingUrl({
 							token: encodedAuthToken,
 							applicationName: matchingApplication,
-							redirectTo: '/posts',
+							redirectTo: getSafeRedirectTo(storedRedirectTo, '/posts'),
 						});
 
 						redirect(302, oauthProcessingUrl);
@@ -144,7 +146,7 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 						const oauthProcessingUrl = buildOauthProcessingUrl({
 							token: encodedAuthToken,
 							applicationName: matchingApplication,
-							redirectTo: '/posts',
+							redirectTo: getSafeRedirectTo(storedRedirectTo, '/posts'),
 						});
 
 						redirect(302, oauthProcessingUrl);

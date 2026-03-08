@@ -25,6 +25,7 @@ const usernamePasswordFormSchema = z.object({
 	username: z.string().trim().min(1, 'The username cannot be empty'),
 	password: z.string().min(1, 'The password cannot be empty'),
 	rememberMe: BoolStrSchema,
+	redirectTo: z.string().optional(),
 });
 const usernamePasswordEndpointSchmea = z.object({
 	username: z.string().trim().min(1, 'The username cannot be empty'),

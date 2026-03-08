@@ -20,6 +20,8 @@
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { SUCCESS_TOAST_OPTIONS, TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
 	import { getActiveModal, initLayoutContexts } from '$lib/client/helpers/context';
+	import { setAuthenticatedUserForFetch } from '$lib/client/stores/authenticatedUserForFetch';
+	import '$lib/client/fetchWrapper';
 	import {
 		destroyDocumentEventListeners,
 		registerDocumentEventListeners,
@@ -43,6 +45,10 @@
 
 	// svelte-ignore state_referenced_locally
 	initLayoutContexts(data);
+
+	$effect(() => {
+		setAuthenticatedUserForFetch(data.user);
+	});
 
 	onMount(() => {
 		registerDocumentEventListeners(data.user, data.userPreferences, getActiveModal());

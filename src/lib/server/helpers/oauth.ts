@@ -72,11 +72,16 @@ export class SkeletonOauthProvider {
 			: undefined;
 	}
 
-	async validateAuthState(stateKey: string) {
+	async validateAuthState(stateKey: string): Promise<string> {
 		const value = await redis.get(stateKey);
 		if (!value) {
 			throw new Error('Invalid state provided in url parameter');
 		}
+		return value;
+	}
+
+	protected deleteStateByKey(stateKey: string): void {
+		redis.del(stateKey);
 	}
 
 	deleteAuthState() {
@@ -84,9 +89,9 @@ export class SkeletonOauthProvider {
 		redis.del(stateKey);
 	}
 
-	async storeAuthState(): Promise<string> {
+	async storeAuthState(redirectTo?: string): Promise<string> {
 		const stateKey = this.constructKey();
-		await redis.set(stateKey, 'true');
+		await redis.set(stateKey, redirectTo ?? '/');
 
 		return stateKey;
 	}
@@ -120,8 +125,8 @@ export class GoogleOauthProvider extends SkeletonOauthProvider implements IOauth
 		return (await response.json()) as TGoogleUserResponse;
 	}
 
-	async getAuthorizationUrl(): Promise<string> {
-		const computedState = await this.storeAuthState();
+	async getAuthorizationUrl(redirectTo?: string): Promise<string> {
+		const computedState = await this.storeAuthState(redirectTo);
 		const authorizationParams: TOuth2AuthorizationParams = {
 			state: computedState,
 			response_type: GoogleOauthProvider.responseType,
@@ -135,6 +140,7 @@ export class GoogleOauthProvider extends SkeletonOauthProvider implements IOauth
 
 	async getToken(code: string, state: string): Promise<string> {
 		await this.validateAuthState(state);
+		this.deleteStateByKey(state);
 
 		const requestBody: TOauthTokenExchangeParams = {
 			client_id: OAUTH_GOOGLE_CLIENT_ID,
@@ -215,8 +221,8 @@ export class DiscordOauthProvider extends SkeletonOauthProvider implements IOaut
 		return `${DiscordOauthProvider.avatarCdnUrl}/${userId}/${avatarHash}.${imageExtension}`;
 	}
 
-	async getAuthorizationUrl(): Promise<string> {
-		const computedState = await this.storeAuthState();
+	async getAuthorizationUrl(redirectTo?: string): Promise<string> {
+		const computedState = await this.storeAuthState(redirectTo);
 		const authorizationParams: TOuth2AuthorizationParams = {
 			state: computedState,
 			client_id: OAUTH_DISCORD_CLIENT_ID,
@@ -230,6 +236,7 @@ export class DiscordOauthProvider extends SkeletonOauthProvider implements IOaut
 
 	async getToken(code: string, state: string): Promise<string> {
 		await this.validateAuthState(state);
+		this.deleteStateByKey(state);
 
 		const requestData: TOauthTokenExchangeParams = {
 			client_id: OAUTH_DISCORD_CLIENT_ID,
@@ -303,8 +310,8 @@ export class GithubOauthProvider extends SkeletonOauthProvider implements IOauth
 		super(event, GithubOauthProvider.applicationSource);
 	}
 
-	async getAuthorizationUrl(): Promise<string> {
-		const computedState = await this.storeAuthState();
+	async getAuthorizationUrl(redirectTo?: string): Promise<string> {
+		const computedState = await this.storeAuthState(redirectTo);
 		const authorizationParams: TOuth2AuthorizationParams = {
 			client_id: OAUTH_GITHUB_CLIENT_ID,
 			redirect_uri: CALLBACK_ENDPOINT,
@@ -363,6 +370,7 @@ export class GithubOauthProvider extends SkeletonOauthProvider implements IOauth
 
 	async getToken(code: string, state: string): Promise<string> {
 		await this.validateAuthState(state);
+		this.deleteStateByKey(state);
 
 		const requestBody: Omit<TOauthTokenExchangeParams, 'grant_type'> = {
 			client_id: OAUTH_GITHUB_CLIENT_ID,

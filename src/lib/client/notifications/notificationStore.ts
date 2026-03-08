@@ -7,6 +7,7 @@ import { markNotificationsAsRead, type TMarkAsReadRequest } from '$lib/client/ap
 const notifications = writable<TRealtimeNotification[]>([]);
 const connectionState = writable<ConnectionState>(ConnectionState.Disconnected);
 const initialLoaded = writable(false);
+const authenticationFailed = writable(false);
 
 const unreadCount = derived(
 	notifications,
@@ -65,11 +66,15 @@ function initialize(): void {
 		onStateChange: (state) => {
 			connectionState.set(state);
 		},
+		onAuthenticationFailed: () => {
+			authenticationFailed.set(true);
+		},
 	});
 }
 
 function connect(): void {
 	initialize();
+	authenticationFailed.set(false);
 	client?.connect();
 }
 
@@ -134,6 +139,7 @@ function reset(): void {
 	notifications.set([]);
 	connectionState.set(ConnectionState.Disconnected);
 	initialLoaded.set(false);
+	authenticationFailed.set(false);
 }
 
 export const notificationStore = {
@@ -141,6 +147,7 @@ export const notificationStore = {
 	unreadCount,
 	connectionState,
 	initialLoaded,
+	authenticationFailed,
 	connect,
 	disconnect,
 	fetchInitialNotifications,

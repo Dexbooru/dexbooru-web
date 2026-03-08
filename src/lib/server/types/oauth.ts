@@ -1,8 +1,9 @@
 export interface IOauthProvider {
-	getAuthorizationUrl(): Promise<string>;
+	getAuthorizationUrl(redirectTo?: string): Promise<string>;
 	getIdentity<T>(_token: string): Promise<T>;
 	getToken(_code: string, _state: string): Promise<string>;
 	getUserData(_token: string): Promise<TSimplifiedUserResponse>;
+	validateAuthState(stateKey: string): Promise<string>;
 }
 
 export type TOauthApplication = 'google' | 'github' | 'discord';

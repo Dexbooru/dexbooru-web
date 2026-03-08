@@ -9,6 +9,7 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
+import { getSafeRedirectTo } from '../../helpers/redirect';
 import { buildCookieOptions } from '../../helpers/cookies';
 import { doPasswordsMatch } from '../../helpers/password';
 import { generateEncodedUserTokenFromRecord } from '../../helpers/sessions';
@@ -64,6 +65,8 @@ export const handleUserAuthFlowValidate = async (event: RequestEvent) => {
 
 export const handleUserAuthFlowForm = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(event, 'form-action', UserAuthFormSchema, async (data) => {
+		const rawRedirectTo =
+			data.form.redirectTo ?? event.url.searchParams.get('redirectTo') ?? undefined;
 		const { username, password, rememberMe } = data.form;
 		const errorData = {
 			username,
@@ -94,7 +97,8 @@ export const handleUserAuthFlowForm = async (event: RequestEvent) => {
 				encodedAuthToken,
 				buildCookieOptions(rememberMe) as SerializeOptions & { path: string },
 			);
-			redirect(302, `/posts`);
+			const redirectTo = getSafeRedirectTo(rawRedirectTo, '/posts');
+			redirect(302, redirectTo);
 		} catch (error) {
 			if (isRedirect(error)) throw error;
 			return createErrorResponse(

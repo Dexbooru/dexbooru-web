@@ -1,4 +1,4 @@
-import type { TRealtimeNotification, TNotificationType } from '$lib/shared/types/notifcations';
+import type { TNotificationType, TRealtimeNotification } from '$lib/shared/types/notifcations';
 
 export enum ConnectionState {
 	Disconnected = 'disconnected',
@@ -9,6 +9,15 @@ export enum ConnectionState {
 export type NotificationEventHandler = (notification: TRealtimeNotification) => void;
 export type ConnectionStateHandler = (state: ConnectionState) => void;
 export type ErrorHandler = (error: Event) => void;
+export type AuthenticationFailedHandler = () => void;
+
+const FATAL_CLOSE_CODES = new Set([
+	1008, // Policy violation (often used for auth rejection)
+	4001,
+	4003, // Private use: Unauthorized, Forbidden
+	4401,
+	4403, // Private use: Unauthorized, Forbidden
+]);
 
 export class NotificationWebSocketClient {
 	private static readonly INITIAL_RECONNECT_DELAY_MS = 1000;
@@ -20,11 +29,13 @@ export class NotificationWebSocketClient {
 	private reconnectDelay: number = NotificationWebSocketClient.INITIAL_RECONNECT_DELAY_MS;
 	private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 	private intentionalClose = false;
+	private fatalClose = false;
 
 	private _connectionState: ConnectionState = ConnectionState.Disconnected;
 	private onMessageHandler: NotificationEventHandler | null;
 	private onStateChangeHandler: ConnectionStateHandler | null;
 	private onErrorHandler: ErrorHandler | null;
+	private onAuthenticationFailedHandler: AuthenticationFailedHandler | null;
 
 	constructor(
 		baseUrl: string,
@@ -32,12 +43,14 @@ export class NotificationWebSocketClient {
 			onMessage?: NotificationEventHandler;
 			onStateChange?: ConnectionStateHandler;
 			onError?: ErrorHandler;
+			onAuthenticationFailed?: AuthenticationFailedHandler;
 		},
 	) {
 		this.baseUrl = baseUrl.replace(/^http/, 'ws');
 		this.onMessageHandler = options?.onMessage ?? null;
 		this.onStateChangeHandler = options?.onStateChange ?? null;
 		this.onErrorHandler = options?.onError ?? null;
+		this.onAuthenticationFailedHandler = options?.onAuthenticationFailed ?? null;
 	}
 
 	get connectionState(): ConnectionState {
@@ -58,6 +71,7 @@ export class NotificationWebSocketClient {
 		}
 
 		this.intentionalClose = false;
+		this.fatalClose = false;
 		this.setConnectionState(ConnectionState.Connecting);
 
 		const wsUrl = `${this.baseUrl}/events`;
@@ -84,6 +98,7 @@ export class NotificationWebSocketClient {
 	public reconnect(): void {
 		this.disconnect();
 		this.intentionalClose = false;
+		this.fatalClose = false;
 		this.reconnectDelay = NotificationWebSocketClient.INITIAL_RECONNECT_DELAY_MS;
 		this.connect();
 	}
@@ -97,11 +112,16 @@ export class NotificationWebSocketClient {
 		this.setConnectionState(ConnectionState.Connected);
 	}
 
-	private handleClose(): void {
+	private handleClose(event: CloseEvent): void {
 		this.socket = null;
 		this.setConnectionState(ConnectionState.Disconnected);
 
-		if (!this.intentionalClose) {
+		if (FATAL_CLOSE_CODES.has(event.code)) {
+			this.fatalClose = true;
+			this.onAuthenticationFailedHandler?.();
+			return;
+		}
+		if (!this.intentionalClose && !this.fatalClose) {
 			this.scheduleReconnect();
 		}
 	}
