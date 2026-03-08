@@ -86,6 +86,20 @@ const GetPostsWithArtistNameSchema = {
 	urlSearchParams: PostPaginationSchema,
 } satisfies TRequestSchema;
 
+const GetPostsWithCharacterNameSchema = {
+	pathParams: z.object({
+		name: z.string().min(1, 'The character name needs to be at least one character long'),
+	}),
+	urlSearchParams: PostPaginationSchema,
+} satisfies TRequestSchema;
+
+const GetPostsWithSourceTitleSchema = {
+	pathParams: z.object({
+		name: z.string().min(1, 'The source name needs to be at least one character long'),
+	}),
+	urlSearchParams: PostPaginationSchema,
+} satisfies TRequestSchema;
+
 const CreatePostSchema = {
 	form: z.object({
 		sourceLink: z.string().url(),
@@ -174,6 +188,8 @@ export {
 	GetPostSchema,
 	GetPostsSchema,
 	GetPostsWithArtistNameSchema,
+	GetPostsWithCharacterNameSchema,
+	GetPostsWithSourceTitleSchema,
 	GetPostsWithTagNameSchema,
 	GetSimilarPostsSchema,
 	LikePostSchema,

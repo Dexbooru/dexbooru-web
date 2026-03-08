@@ -1,6 +1,11 @@
 import type { PostSourceType } from '$generated/prisma/client';
 import { transformLabel } from '$lib/shared/helpers/labels';
-import type { TPostSourceInput } from '$lib/shared/types/posts';
+import type {
+	TPost,
+	TPostOrderByColumn,
+	TPostSelector,
+	TPostSourceInput,
+} from '$lib/shared/types/posts';
 import logger from '../../logging/logger';
 import prisma from '../prisma';
 
@@ -122,3 +127,57 @@ export const createPostSources = async (results: TPostSourceInput[]) => {
 
 	return { count };
 };
+
+export async function findPostsByCharacterName(
+	characterName: string,
+	pageNumber: number,
+	pageLimit: number,
+	orderBy: TPostOrderByColumn,
+	ascending: boolean,
+	selectors?: TPostSelector,
+): Promise<TPost[]> {
+	const transformedName = transformLabel(characterName);
+	const posts = await prisma.post.findMany({
+		where: {
+			moderationStatus: { in: ['PENDING', 'APPROVED'] },
+			sources: {
+				some: { characterName: transformedName },
+			},
+		},
+		orderBy: {
+			[orderBy]: ascending ? 'asc' : 'desc',
+		},
+		skip: pageNumber * pageLimit,
+		take: pageLimit,
+		select: selectors,
+	});
+
+	return posts as TPost[];
+}
+
+export async function findPostsBySourceTitle(
+	sourceTitle: string,
+	pageNumber: number,
+	pageLimit: number,
+	orderBy: TPostOrderByColumn,
+	ascending: boolean,
+	selectors?: TPostSelector,
+): Promise<TPost[]> {
+	const transformedTitle = transformLabel(sourceTitle);
+	const posts = await prisma.post.findMany({
+		where: {
+			moderationStatus: { in: ['PENDING', 'APPROVED'] },
+			sources: {
+				some: { sourceTitle: transformedTitle },
+			},
+		},
+		orderBy: {
+			[orderBy]: ascending ? 'asc' : 'desc',
+		},
+		skip: pageNumber * pageLimit,
+		take: pageLimit,
+		select: selectors,
+	});
+
+	return posts as TPost[];
+}

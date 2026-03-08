@@ -1,17 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { handleGetPost } from '$lib/server/controllers/posts/getPost';
-import { handleGetPosts } from '$lib/server/controllers/posts/getPosts';
-import { handleGetPostsByAuthor } from '$lib/server/controllers/posts/getPostsByAuthor';
-import { handleGetPostsWithArtistName } from '$lib/server/controllers/posts/getPostsWithArtistName';
-import { handleGetPostsWithTagName } from '$lib/server/controllers/posts/getPostsWithTagName';
 import {
 	mockPostActions,
 	mockControllerHelpers,
 	mockSessionHelpers,
 	mockUserActions,
 	mockArtistActions,
+	mockPostSourceActions,
 	mockTagActions,
 } from '../../../../mocks';
+import { handleGetPost } from '$lib/server/controllers/posts/getPost';
+import { handleGetPosts } from '$lib/server/controllers/posts/getPosts';
+import { handleGetPostsByAuthor } from '$lib/server/controllers/posts/getPostsByAuthor';
+import { handleGetPostsWithArtistName } from '$lib/server/controllers/posts/getPostsWithArtistName';
+import { handleGetPostsWithCharacterName } from '$lib/server/controllers/posts/getPostsWithCharacterName';
+import { handleGetPostsWithSourceTitle } from '$lib/server/controllers/posts/getPostsWithSourceTitle';
+import { handleGetPostsWithTagName } from '$lib/server/controllers/posts/getPostsWithTagName';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { Prisma } from '$generated/prisma/client';
 
@@ -196,6 +199,60 @@ describe('post retrieval controllers', () => {
 
 			expect(mockTagActions.findPostsByTagName).toHaveBeenCalledWith(
 				'tag1',
+				0,
+				expect.any(Number),
+				'createdAt',
+				false,
+				expect.any(Object),
+			);
+		});
+	});
+
+	describe('handleGetPostsWithCharacterName', () => {
+		it('should fetch posts by character name', async () => {
+			const mockPosts = [{ id: 'p1', tagString: 't1', artistString: 'a1' } as TPostBase];
+			mockSessionHelpers.getRemoteResponseFromCache.mockResolvedValue(null);
+			mockPostSourceActions.findPostsByCharacterName.mockResolvedValue(mockPosts);
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (event, handlerType, schema, callback) => {
+					return await callback({
+						pathParams: { name: 'goku' },
+						urlSearchParams: { pageNumber: 0, orderBy: 'createdAt', ascending: false },
+					});
+				},
+			);
+
+			await handleGetPostsWithCharacterName(mockEvent, 'api-route');
+
+			expect(mockPostSourceActions.findPostsByCharacterName).toHaveBeenCalledWith(
+				'goku',
+				0,
+				expect.any(Number),
+				'createdAt',
+				false,
+				expect.any(Object),
+			);
+		});
+	});
+
+	describe('handleGetPostsWithSourceTitle', () => {
+		it('should fetch posts by source title', async () => {
+			const mockPosts = [{ id: 'p1', tagString: 't1', artistString: 'a1' } as TPostBase];
+			mockSessionHelpers.getRemoteResponseFromCache.mockResolvedValue(null);
+			mockPostSourceActions.findPostsBySourceTitle.mockResolvedValue(mockPosts);
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (event, handlerType, schema, callback) => {
+					return await callback({
+						pathParams: { name: 'dragon_ball' },
+						urlSearchParams: { pageNumber: 0, orderBy: 'createdAt', ascending: false },
+					});
+				},
+			);
+
+			await handleGetPostsWithSourceTitle(mockEvent, 'api-route');
+
+			expect(mockPostSourceActions.findPostsBySourceTitle).toHaveBeenCalledWith(
+				'dragon_ball',
 				0,
 				expect.any(Number),
 				'createdAt',

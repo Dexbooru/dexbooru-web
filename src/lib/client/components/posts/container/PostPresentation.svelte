@@ -34,6 +34,12 @@
 		if (!$user) return false;
 		return isModerationRole($user.role) || $user.id === post.author?.id;
 	});
+
+	const uniqueAnimeSources = $derived.by(() => {
+		return post.sources
+			.filter((s) => s.sourceType === 'ANIME')
+			.filter((s, index, self) => index === self.findIndex((t) => t.sourceTitle === s.sourceTitle));
+	});
 </script>
 
 <div class="space-y-5">
@@ -69,7 +75,13 @@
 		<section class="space-y-2">
 			<p class="text-lg dark:text-white">Anime Info:</p>
 			<div class="flex flex-wrap gap-2">
-				{#each post.sources.filter((s) => s.sourceType === 'ANIME') as source (source.id)}
+				{#each uniqueAnimeSources as source (source.id)}
+					<a
+						href="/posts/source/{encodeURIComponent(source.sourceTitle)}"
+						class="text-blue-500 hover:underline"
+					>
+						Posts from "{source.sourceTitle}"
+					</a>
 					<a
 						href="/anime/{source.sourceTitle.toLowerCase().replaceAll(' ', '_')}"
 						class="text-blue-500 hover:underline"

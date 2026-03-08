@@ -10,7 +10,7 @@ export const getCacheKeyForIndividualPost = (postId: string) => {
 };
 
 export const getCacheKeyWithPostCategoryWithLabel = (
-	type: 'artist' | 'tag',
+	type: 'artist' | 'tag' | 'character' | 'source',
 	name: string,
 	pageNumber: number,
 	orderBy: TPostOrderByColumn,
@@ -19,7 +19,13 @@ export const getCacheKeyWithPostCategoryWithLabel = (
 	if (type === 'artist') {
 		return `artist-${name}-${pageNumber}-${orderBy}-${ascending}`;
 	}
-	return `post-tag-${name}-${pageNumber}-${orderBy}-${ascending}`;
+	if (type === 'tag') {
+		return `post-tag-${name}-${pageNumber}-${orderBy}-${ascending}`;
+	}
+	if (type === 'character') {
+		return `character-${name}-${pageNumber}-${orderBy}-${ascending}`;
+	}
+	return `source-${name}-${pageNumber}-${orderBy}-${ascending}`;
 };
 
 export const getCacheKeyForPostAuthor = (
@@ -47,5 +53,7 @@ export const getCacheKeyWithPostCategory = (
 export const CACHE_TIME_GENERAL_POSTS = 60;
 export const CACHE_TIME_TAG_POSTS = 60;
 export const CACHE_TIME_ARTIST_POSTS = 120;
+export const CACHE_TIME_CHARACTER_POSTS = 120;
+export const CACHE_TIME_SOURCE_POSTS = 120;
 export const CACHE_TIME_INDIVIDUAL_POST_FOUND = 120;
 export const CACHE_TIME_INDIVIDUAL_POST_NOT_FOUND = CACHE_TIME_INDIVIDUAL_POST_FOUND * 5;

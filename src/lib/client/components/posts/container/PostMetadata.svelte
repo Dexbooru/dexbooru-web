@@ -66,21 +66,32 @@
 </p>
 
 {#if post.sources.length > 0}
+	{@const uniqueCharacterNames = [...new Set(post.sources.map((s) => s.characterName))]}
 	<p class="text-lg whitespace-pre-wrap dark:text-white">
-		Character names: <span class="dark:text-gray-400"
-			>{post.sources.map((source) => source.characterName).join(', ')}</span
-		>
+		Character names: <span class="dark:text-gray-400">
+			{#each uniqueCharacterNames as characterName, i (characterName)}
+				<a class="underline" href="/posts/character/{encodeURIComponent(characterName)}"
+					>{capitalize(characterName)}</a
+				>{#if i < uniqueCharacterNames.length - 1},
+				{/if}
+			{/each}
+		</span>
 	</p>
 
+	{@const uniqueSourceTitles = [...new Set(post.sources.map((s) => s.sourceTitle))]}
 	<p class="text-lg whitespace-pre-wrap dark:text-white">
-		Source titles: <span class="dark:text-gray-400"
-			>{post.sources.map((source) => source.sourceTitle).join(', ')}</span
-		>
+		Source titles: <span class="dark:text-gray-400">
+			{#each uniqueSourceTitles as sourceTitle, i (sourceTitle)}
+				<a class="underline" href="/posts/source/{encodeURIComponent(sourceTitle)}">{sourceTitle}</a
+				>{#if i < uniqueSourceTitles.length - 1},
+				{/if}
+			{/each}
+		</span>
 	</p>
 
 	<p class="text-lg whitespace-pre-wrap dark:text-white">
 		Source types: <span class="dark:text-gray-400"
-			>{post.sources.map((source) => source.sourceType).join(', ')}</span
+			>{capitalize(post.sources.map((source) => source.sourceType).join(', '))}</span
 		>
 	</p>
 {/if}

@@ -4,6 +4,8 @@ export * from './getPostsByAuthor';
 export * from './createPost';
 export * from './getPost';
 export * from './getPostsWithArtistName';
+export * from './getPostsWithCharacterName';
+export * from './getPostsWithSourceTitle';
 export * from './getPostsWithTagName';
 export * from './getPosts';
 export * from './deletePost';
