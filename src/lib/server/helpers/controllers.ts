@@ -91,13 +91,13 @@ const parseKeyValueStore = (store: FormData | URLSearchParams): Record<string, u
 };
 
 const parseRequestBodies = async (event: RequestEvent, shouldParseAsForm: boolean) => {
-	// Request body can only be consumed once. Reading with formData() or json() consumes the stream.
-	// Calling both would cause the second call to fail or return empty data.
 	if (shouldParseAsForm) {
 		let formData: FormData;
 		try {
 			formData = await event.request.formData();
-		} catch {
+		} catch (formError) {
+			logger.error('An form parsing error occured:', formError);
+
 			formData = new FormData();
 		}
 		return { formData, body: {} as unknown };
@@ -166,9 +166,6 @@ export const validateAndHandleRequest = async <T extends TRequestSchema>(
 		contentTypeLower.includes(formContentType),
 	);
 
-	// When Content-Type is missing or ambiguous, assume form data for POST/PUT/PATCH.
-	// Proxies (nginx, load balancers) sometimes strip Content-Type from form submissions,
-	// causing multipart body to be misparsed as JSON and yielding undefined form fields.
 	const method = event.request.method.toUpperCase();
 	const assumeFormWhenAmbiguous = !isJsonContentType && ['POST', 'PUT', 'PATCH'].includes(method);
 
@@ -181,6 +178,8 @@ export const validateAndHandleRequest = async <T extends TRequestSchema>(
 		pathParams: event.params,
 		body: body,
 	};
+
+	logger.warn('raw request data:', rawRequestData);
 
 	const validationResult = validateRequest(rawRequestData, requestSchema);
 	if (!validationResult.success) {
