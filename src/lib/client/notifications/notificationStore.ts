@@ -3,6 +3,18 @@ import { ConnectionState, NotificationWebSocketClient } from './NotificationWebS
 import type { TRealtimeNotification, TUserNotifications } from '$lib/shared/types/notifcations';
 import { DEXBOORU_NOTIFICATIONS_API_API_URL } from '$lib/client/constants/notificationApi';
 import { markNotificationsAsRead, type TMarkAsReadRequest } from '$lib/client/api/notificationApi';
+import newNotificationSoundUrl from '$lib/client/assets/sounds/new_notification.ogg';
+
+const NOTIFICATION_SOUND_COOLDOWN_MS = 200;
+let lastNotificationSoundPlayedAt = 0;
+
+function playNewNotificationSound(): void {
+	const now = Date.now();
+	if (now - lastNotificationSoundPlayedAt < NOTIFICATION_SOUND_COOLDOWN_MS) return;
+	lastNotificationSoundPlayedAt = now;
+	const audio = new Audio(newNotificationSoundUrl);
+	audio.play().catch(() => {});
+}
 
 const notifications = writable<TRealtimeNotification[]>([]);
 const connectionState = writable<ConnectionState>(ConnectionState.Disconnected);
@@ -48,11 +60,14 @@ async function enrichAndAdd(raw: TRealtimeNotification): Promise<void> {
 		if (response.ok) {
 			const data = (await response.json()) as { notifications: TRealtimeNotification[] };
 			notifications.update((list) => deduplicatedPrepend(data.notifications, list));
+			playNewNotificationSound();
 		} else {
 			notifications.update((list) => deduplicatedPrepend([withId], list));
+			playNewNotificationSound();
 		}
 	} catch {
 		notifications.update((list) => deduplicatedPrepend([withId], list));
+		playNewNotificationSound();
 	}
 }
 
