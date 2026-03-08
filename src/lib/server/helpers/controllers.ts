@@ -96,7 +96,7 @@ const parseRequestBodies = async (event: RequestEvent, shouldParseAsForm: boolea
 		try {
 			formData = await event.request.formData();
 		} catch (formError) {
-			logger.error('An form parsing error occured:', formError);
+			logger.error('A form parsing error occured:', formError);
 
 			formData = new FormData();
 		}
@@ -106,7 +106,9 @@ const parseRequestBodies = async (event: RequestEvent, shouldParseAsForm: boolea
 	let body: unknown;
 	try {
 		body = await event.request.json().catch(() => ({}));
-	} catch {
+	} catch (jsonError) {
+		logger.error('A JSON parsing error occured', jsonError);
+
 		body = {};
 	}
 	return { formData: new FormData(), body };
@@ -178,8 +180,6 @@ export const validateAndHandleRequest = async <T extends TRequestSchema>(
 		pathParams: event.params,
 		body: body,
 	};
-
-	logger.warn('raw request data:', rawRequestData);
 
 	const validationResult = validateRequest(rawRequestData, requestSchema);
 	if (!validationResult.success) {
