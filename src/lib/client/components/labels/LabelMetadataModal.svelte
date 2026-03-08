@@ -68,14 +68,14 @@
 	title="Metadata for the {labelType} called: {labelName}"
 	open={$activeModal.isOpen && $activeModal.focusedModalName === LABEL_METADATA_MODAL_NAME}
 	onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
-	size="xs"
+	size="sm"
 	outsideclose
 >
 	{#if loadingLabelMetadata}
 		<Spinner class="mr-auto ml-auto block" size="10" />
 	{/if}
 
-	<Tabs style="underline">
+	<Tabs class="m-0" style="underline">
 		<TabItem open title="Details">
 			<LabelPresentation {labelType} {metadata} />
 		</TabItem>

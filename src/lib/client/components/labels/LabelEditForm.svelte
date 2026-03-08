@@ -14,7 +14,9 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import PlusOutline from 'flowbite-svelte-icons/PlusOutline.svelte';
 	import TrashBinSolid from 'flowbite-svelte-icons/TrashBinSolid.svelte';
+	import UndoOutline from 'flowbite-svelte-icons/UndoOutline.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
+	import Helper from 'flowbite-svelte/Helper.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
 	import Textarea from 'flowbite-svelte/Textarea.svelte';
@@ -28,124 +30,140 @@
 	let { labelType, metadata, updateMetadata }: Props = $props();
 
 	let labelEditing = $state(false);
-	let description = $derived(metadata?.description ?? '');
-	let socialMediaLinks = $derived<string[]>([...(metadata?.socialMediaLinks ?? [])]);
+	let description = $state('');
+	let socialMediaLinks = $state<{ id: string; url: string }[]>([]);
+
+	const user = getAuthenticatedUser();
+
+	const resetForm = () => {
+		description = metadata?.description ?? '';
+		socialMediaLinks = (metadata?.socialMediaLinks ?? []).map((url) => ({
+			id: crypto.randomUUID(),
+			url,
+		}));
+	};
+
+	$effect(() => {
+		resetForm();
+	});
+
+	let isDirty = $derived.by(() => {
+		const descriptionChanged = description !== (metadata?.description ?? '');
+		const originalLinks = metadata?.socialMediaLinks ?? [];
+		const currentUrls = socialMediaLinks.map((l) => l.url);
+
+		const linksChanged =
+			currentUrls.length !== originalLinks.length ||
+			currentUrls.some((url, i) => url !== originalLinks[i]);
+
+		return descriptionChanged || (labelType === 'artist' && linksChanged);
+	});
+
 	let labelEditButtonDisabled = $derived.by(() => {
-		if (labelType === 'tag') {
-			return description.length > MAXIMUM_TAG_DESCRIPTION_LENGTH;
-		}
-		return !(
-			socialMediaLinks.length <= MAXIMUM_ARTIST_SOCIAL_MEDIAS_LENGTH &&
-			socialMediaLinks.every(
-				(socialMediaLink) =>
-					URL_REGEX.test(socialMediaLink) &&
-					socialMediaLink.length > 0 &&
-					socialMediaLink.length <= MAXIMUM_ARTIST_SOCIAL_MEDIA_LENGTH,
+		if (!isDirty) return true;
+		if (labelType === 'tag') return description.length > MAXIMUM_TAG_DESCRIPTION_LENGTH;
+
+		return (
+			socialMediaLinks.length > MAXIMUM_ARTIST_SOCIAL_MEDIAS_LENGTH ||
+			!socialMediaLinks.every(
+				(link) =>
+					URL_REGEX.test(link.url) &&
+					link.url.length > 0 &&
+					link.url.length <= MAXIMUM_ARTIST_SOCIAL_MEDIA_LENGTH,
 			)
 		);
 	});
 
-	const user = getAuthenticatedUser();
-
-	const handleSocialMediaInput = (event: Event, index: number) => {
-		const target = event.target as HTMLInputElement;
-		const socialMediaLink = target.value.toLocaleLowerCase().trim();
-		if (socialMediaLink.length === 0 || socialMediaLinks.includes(socialMediaLink)) return;
-		socialMediaLinks[index] = socialMediaLink;
-	};
-
 	const editLabel = async () => {
-		if (!$user) return;
-
+		if (!$user || !labelType || !metadata) return;
 		labelEditing = true;
 
-		const response = await updateLabelMetadata(labelType!, metadata!.name, {
+		const response = await updateLabelMetadata(labelType, metadata.name, {
 			description,
-			socialMediaLinks,
+			socialMediaLinks: socialMediaLinks.map((l) => l.url.trim().toLowerCase()),
 		});
+
 		if (response.ok) {
 			const responseData: TApiResponse<Tag & Artist> = await response.json();
-			description = responseData.data.description ?? '';
-			socialMediaLinks = responseData.data.socialMediaLinks;
 			updateMetadata(responseData.data);
-
 			toast.push(`The ${labelType} metadata has been updated successfully`, SUCCESS_TOAST_OPTIONS);
 		} else {
-			toast.push(
-				`An unexpected error occured while updating the ${labelType} metadata`,
-				FAILURE_TOAST_OPTIONS,
-			);
+			toast.push(`An error occurred updating ${labelType} metadata`, FAILURE_TOAST_OPTIONS);
 		}
-
 		labelEditing = false;
 	};
 </script>
 
 {#if $user === null}
-	<p class=" text-red-500">You must be logged in to edit the metadata of a label.</p>
+	<p class="text-sm font-medium text-red-500">You must be logged in to edit metadata.</p>
 {:else}
-	<div class="flex flex-col">
-		{#if labelType === 'tag'}
-			<Label class="mb-3 space-y-2">
-				<span>Description:</span>
-				<Textarea
-					class="w-full"
-					bind:value={description}
-					maxlength={MAXIMUM_TAG_DESCRIPTION_LENGTH}
-					rows={3}
-					name="tag-description"
-					placeholder="Enter a tag description here"
-				/>
-			</Label>
-		{:else}
-			<Label class="mb-3 space-y-2">
-				<span>Description:</span>
-				<Textarea
-					class="w-full"
-					bind:value={description}
-					maxlength={MAXIMUM_ARTIST_DESCRIPTION_LENGTH}
-					rows={3}
-					name="artist-description"
-					placeholder="Enter a artist description here"
-				/>
-			</Label>
-			<Label class="mb-3 space-y-2">
-				<div class="flex items-center! justify-between">
-					<span>Social media links:</span>
+	<div class="flex flex-col gap-4">
+		<Label class="space-y-2">
+			<span>Description:</span>
+			<Textarea
+				class="w-full"
+				bind:value={description}
+				maxlength={labelType === 'tag'
+					? MAXIMUM_TAG_DESCRIPTION_LENGTH
+					: MAXIMUM_ARTIST_DESCRIPTION_LENGTH}
+				rows={3}
+				placeholder="Enter a description..."
+			/>
+		</Label>
+
+		{#if labelType === 'artist'}
+			<div class="space-y-3">
+				<div class="flex items-center justify-between">
+					<span class="text-sm font-medium">Social Media Links:</span>
 					<Button
-						disabled={socialMediaLinks.length === MAXIMUM_ARTIST_SOCIAL_MEDIAS_LENGTH}
-						onclick={() => socialMediaLinks.push('')}
+						disabled={socialMediaLinks.length >= MAXIMUM_ARTIST_SOCIAL_MEDIAS_LENGTH}
+						onclick={() => socialMediaLinks.push({ id: crypto.randomUUID(), url: '' })}
 						color="blue"
+						pill
 						size="xs"
 					>
-						<PlusOutline />
+						<PlusOutline class="h-4 w-4" />
 					</Button>
 				</div>
 
-				<ul class="mt-5! block space-y-3">
-					{#each socialMediaLinks as link, index (index)}
-						<li>
-							<div class="flex space-x-3">
+				<ul class="space-y-2">
+					{#each socialMediaLinks as link (link.id)}
+						{@const isValid = link.url === '' || URL_REGEX.test(link.url)}
+						<li class="flex flex-col gap-1">
+							<div class="flex gap-2">
 								<Input
+									class="flex-1"
+									bind:value={link.url}
+									color={isValid ? 'default' : 'red'}
 									maxlength={MAXIMUM_ARTIST_SOCIAL_MEDIA_LENGTH}
-									value={link}
-									oninput={(event) => handleSocialMediaInput(event, index)}
 									type="url"
-									name="social-media-link-{index}"
-									placeholder="Enter a social media link here"
+									placeholder="https://..."
 								/>
-								<Button onclick={() => socialMediaLinks.splice(index, 1)} color="red" size="xs">
-									<TrashBinSolid />
+								<Button
+									onclick={() =>
+										(socialMediaLinks = socialMediaLinks.filter((l) => l.id !== link.id))}
+									color="red"
+									size="xs"
+								>
+									<TrashBinSolid class="h-4 w-4" />
 								</Button>
 							</div>
+							{#if !isValid}
+								<Helper class="mt-1" color="red">Please enter a valid URL.</Helper>
+							{/if}
 						</li>
 					{/each}
 				</ul>
-			</Label>
+			</div>
 		{/if}
 
-		<Button onclick={editLabel} disabled={labelEditing || labelEditButtonDisabled}>
-			Edit {labelType}
-		</Button>
+		<div class="flex gap-2 pt-2">
+			<Button class="flex-1" onclick={editLabel} disabled={labelEditing || labelEditButtonDisabled}>
+				Save {labelType}
+			</Button>
+			<Button outline color="alternative" onclick={resetForm} disabled={labelEditing || !isDirty}>
+				<UndoOutline class="mr-2 h-4 w-4" /> Reset
+			</Button>
+		</div>
 	</div>
 {/if}

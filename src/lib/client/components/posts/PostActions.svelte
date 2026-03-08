@@ -86,12 +86,12 @@
 	};
 </script>
 
-<div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+<div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap">
 	<Button
 		disabled={postLikeLoading}
 		onclick={handleLikePost}
 		color="green"
-		class="flex w-full items-center justify-center space-x-3 sm:w-auto"
+		class="flex w-full items-center justify-center space-x-3 lg:w-auto"
 	>
 		<HeartSolid color={hasLikedPost ? 'red' : 'inherit'} role="icon" style="bg-red" />
 		<span>
@@ -110,46 +110,40 @@
 					focusedModalName: COLLECTIONS_MODAL_NAME,
 					modalData: { post },
 				})}
-			class="w-full sm:w-auto"
+			class="w-full lg:w-auto"
 		>
 			Add/remove from collections
 		</Button>
 	{/if}
 
-	<div class="flex flex-col justify-center space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
-		<Button href="/collections/post/{postId}" class="w-full space-x-2 sm:w-auto" color="blue">
-			<span>View collections</span>
-		</Button>
-	</div>
+	<Button href="/collections/post/{postId}" class="w-full space-x-2 lg:w-auto" color="blue">
+		<span>View collections</span>
+	</Button>
 
-	<div class="flex flex-col justify-center space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
-		<Button
-			onclick={() => handleModalOpen(REPORT_MODAL_NAME, { post })}
-			class="w-full space-x-2 sm:w-auto"
-			color="yellow"
-		>
-			<span>Report post</span>
-			<ExclamationCircleSolid />
-		</Button>
-	</div>
+	<Button
+		onclick={() => handleModalOpen(REPORT_MODAL_NAME, { post })}
+		class="w-full space-x-2 lg:w-auto"
+		color="yellow"
+	>
+		<span>Report post</span>
+		<ExclamationCircleSolid />
+	</Button>
 
 	{#if $user && isModerationRole($user.role)}
-		<div class="flex flex-col justify-center space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
-			<Button
-				onclick={() => handleModalOpen(REPORT_POST_LIST_MODAL_NAME, { post })}
-				class="w-full space-x-2 sm:w-auto"
-				color="red"
-			>
-				<span>Show reports</span>
-			</Button>
-		</div>
+		<Button
+			onclick={() => handleModalOpen(REPORT_POST_LIST_MODAL_NAME, { post })}
+			class="w-full space-x-2 lg:w-auto"
+			color="red"
+		>
+			<span>Show reports</span>
+		</Button>
 	{/if}
 
 	{#if $user && ($user.id === author.id || $user.role === 'OWNER')}
-		<div class="flex flex-col justify-center space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+		<div class="flex w-full flex-col gap-3 lg:w-auto lg:flex-row">
 			<Button
 				color="green"
-				class="w-full space-x-2 sm:w-auto"
+				class="w-full space-x-2 lg:w-auto"
 				onclick={() =>
 					handleModalOpen(EDIT_POST_MODAL_NAME, {
 						post,
@@ -162,7 +156,7 @@
 				<PenSolid />
 			</Button>
 			<Button
-				class="w-full space-x-2 sm:w-auto"
+				class="w-full space-x-2 lg:w-auto"
 				onclick={() => handleModalOpen(DELETE_POST_MODAL_NAME, { post })}
 				color="red"
 			>

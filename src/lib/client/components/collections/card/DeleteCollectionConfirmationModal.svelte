@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 	import { deleteCollection } from '$lib/client/api/collections';
-	import { INDIVIDUAL_COLLECTION_PATH_REGEX } from '$lib/client/constants/collections';
 	import { DELETE_COLLECTION_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import {
@@ -39,8 +37,9 @@
 		}
 	});
 
-	const updateCollections = (previousCollections: TPostCollection[]) =>
-		previousCollections.filter((collection) => collection.id !== collectionId);
+	const updateCollections = (previousCollections: TPostCollection[]) => {
+		return previousCollections.filter((collection) => collection.id !== collectionId);
+	};
 
 	const handleDeleteCollection = async () => {
 		collectionDeletionLoading = true;
@@ -54,14 +53,10 @@
 				focusedModalName: null,
 			});
 
-			const pagePath = page.url.pathname;
-			if (INDIVIDUAL_COLLECTION_PATH_REGEX.test(pagePath)) {
-				goto('/collections');
-				return;
-			}
 			collectionsPage.update(updateCollections);
 			originalCollectionsPage.update(updateCollections);
 			userCollections.update(updateCollections);
+
 			collectionPagination.update((paginationData) => {
 				if (!paginationData) return null;
 
@@ -70,6 +65,8 @@
 					posts: paginationData.collections.filter((collection) => collection.id !== collectionId),
 				};
 			});
+
+			goto('/collections');
 		} else {
 			toast.push('There was an error while deleting the post!', FAILURE_TOAST_OPTIONS);
 		}

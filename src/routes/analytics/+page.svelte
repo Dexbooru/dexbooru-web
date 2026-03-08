@@ -44,32 +44,36 @@
 
 	let { topArtists, topTags, topLikedPosts, topViewedPosts }: TAnalyticsData = $derived(data);
 
-	let tagOptions: ApexOptions = $derived({
-		...PIE_CHART_OPTIONS,
-		series: topTags.map((tag) => tag.postCount),
-		labels: topTags.map((tag) => tag.name),
-		colors: PIE_CHART_COLORS,
+	let darkThemeOverrides: Partial<ApexOptions> = $derived({
 		chart: {
 			...PIE_CHART_OPTIONS.chart,
 			foreColor: isDark ? '#f9fafb' : '#374151',
+		},
+		legend: {
+			...PIE_CHART_OPTIONS.legend,
+			labels: {
+				colors: isDark ? '#f9fafb' : '#374151',
+			},
 		},
 		theme: {
 			mode: isDark ? 'dark' : 'light',
 		},
 	});
 
+	let tagOptions: ApexOptions = $derived({
+		...PIE_CHART_OPTIONS,
+		...darkThemeOverrides,
+		series: topTags.map((tag) => tag.postCount),
+		labels: topTags.map((tag) => tag.name),
+		colors: PIE_CHART_COLORS,
+	});
+
 	let artistOptions: ApexOptions = $derived({
 		...PIE_CHART_OPTIONS,
+		...darkThemeOverrides,
 		series: topArtists.map((artist) => artist.postCount),
 		labels: topArtists.map((artist) => artist.name),
 		colors: PIE_CHART_COLORS,
-		chart: {
-			...PIE_CHART_OPTIONS.chart,
-			foreColor: isDark ? '#f9fafb' : '#374151',
-		},
-		theme: {
-			mode: isDark ? 'dark' : 'light',
-		},
 	});
 
 	const hasTagData = $derived(topTags.length > 0 && topTags.some((tag) => tag.postCount > 0));
@@ -111,7 +115,9 @@
 				</h5>
 			</div>
 			{#if hasTagData}
-				<Chart options={tagOptions} class="py-6" />
+				{#key isDark}
+					<Chart options={tagOptions} class="py-6" />
+				{/key}
 			{:else}
 				<div class="flex min-h-75 items-center justify-center">
 					<p class="text-center text-gray-500 dark:text-gray-400">Not enough data available.</p>
@@ -126,7 +132,9 @@
 				</h5>
 			</div>
 			{#if hasArtistData}
-				<Chart options={artistOptions} class="py-6" />
+				{#key isDark}
+					<Chart options={artistOptions} class="py-6" />
+				{/key}
 			{:else}
 				<div class="flex min-h-75 items-center justify-center">
 					<p class="text-center text-gray-500 dark:text-gray-400">Not enough data available.</p>
@@ -249,3 +257,15 @@
 		</Card>
 	</div>
 </div>
+
+<style>
+	:global(.dark .apexcharts-legend-text) {
+		color: #f9fafb !important;
+	}
+
+	:global(.dark .apexcharts-text),
+	:global(.dark .apexcharts-datalabel),
+	:global(.dark .apexcharts-tooltip-text) {
+		fill: #f9fafb !important;
+	}
+</style>

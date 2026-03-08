@@ -43,32 +43,34 @@
 </script>
 
 {#if $commentTree.getCount() > 0}
-	<div class="mb-4 ml-2">
-		<Searchbar
-			placeholder="Search comments..."
-			queryInputHandler={handleSearchInput}
-			queryInputClear={clearSearch}
-			width="100%"
-		/>
-	</div>
+	<div class="w-full min-w-0 overflow-x-auto">
+		<div class="mb-4 ml-2">
+			<Searchbar
+				placeholder="Search comments..."
+				queryInputHandler={handleSearchInput}
+				queryInputClear={clearSearch}
+				width="100%"
+			/>
+		</div>
 
-	{#if searchQuery.length > 0}
-		<section class="ml-2">
-			{#if searchResults.length > 0}
-				{#each searchResults as comment (comment.id)}
-					<Comment {comment} showReplies={false} />
+		{#if searchQuery.length > 0}
+			<section class="ml-2">
+				{#if searchResults.length > 0}
+					{#each searchResults as comment (comment.id)}
+						<Comment {comment} showReplies={false} />
+					{/each}
+				{:else}
+					<p class="text-gray-500 italic">No comments found matching "{searchQuery}"</p>
+				{/if}
+			</section>
+		{:else}
+			<section class="ml-2">
+				{#each $commentTree.getReplies('root') ?? [] as comment (comment.id)}
+					<Comment {comment} />
 				{/each}
-			{:else}
-				<p class="text-gray-500 italic">No comments found matching "{searchQuery}"</p>
-			{/if}
-		</section>
-	{:else}
-		<section class="ml-2">
-			{#each $commentTree.getReplies('root') ?? [] as comment (comment.id)}
-				<Comment {comment} />
-			{/each}
-		</section>
-	{/if}
+			</section>
+		{/if}
+	</div>
 {:else if postCommentCount === 0}
 	<div class="justify-left flex p-2">
 		<p class="text-lg text-gray-500 italic dark:text-gray-400">
