@@ -1,17 +1,25 @@
 import type { Prisma } from '$generated/prisma/client';
 import type { PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
 import { handleCreatePost } from '$lib/server/controllers/posts/createPost';
+import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
 import { uploadPostImages } from '$lib/server/controllers/posts/helpers';
 import type { RequestEvent } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	mockControllerHelpers,
+	mockNewPostVectorTargetPublish,
 	mockPostActions,
 	mockS3Actions,
 	mockSQSActions,
 	mockUserActions,
 } from '../../../../mocks';
+import { mockMLApiHelpers } from '../../../../mocks/helpers/mlApi';
+import { mockSessionHelpers } from '../../../../mocks/helpers/sessions';
+import { NewPostVectorTargetPublisher } from '$lib/server/rabbitmq/publishers/newPostVectorTarget';
+
+/** Stored post URL that matches `ORIGINAL_IMAGE_SUFFIX` filtering (original-sized asset). */
+const ORIGINAL_TEST_IMAGE_URL = `https://cdn.example.com/key${ORIGINAL_IMAGE_SUFFIX}`;
 
 // We still need to mock the controller helper module because it's in the same directory as the controller
 // and we want to control its output
@@ -21,6 +29,22 @@ type TCreatedPost = Prisma.PostGetPayload<{ select: typeof PUBLIC_POST_SELECTORS
 type TDuplicatePost = Prisma.PostGetPayload<{
 	select: { id: true; imageUrls: true; description: true };
 }>;
+
+function buildSuccessfulCreatedPost(overrides: Partial<TCreatedPost> = {}): TCreatedPost {
+	const createdAt = new Date('2026-03-28T12:00:00.000Z');
+	return {
+		id: 'new-p1',
+		description: 'test desc',
+		imageUrls: [ORIGINAL_TEST_IMAGE_URL],
+		createdAt,
+		author: {
+			id: 'u1',
+			username: 'testuser',
+			profilePictureUrl: '',
+		},
+		...overrides,
+	} as TCreatedPost;
+}
 
 describe('handleCreatePost', () => {
 	const mockUser = { id: 'u1', username: 'testuser' };
@@ -67,6 +91,8 @@ describe('handleCreatePost', () => {
 			emailVerified: true,
 		});
 		expect(mockPostActions.createPost).not.toHaveBeenCalled();
+		expect(mockSQSActions.enqueueBatchUploadedPostImages).not.toHaveBeenCalled();
+		expect(mockNewPostVectorTargetPublish).not.toHaveBeenCalled();
 		expect(mockControllerHelpers.createErrorResponse).toHaveBeenCalledWith(
 			'api-route',
 			403,
@@ -106,15 +132,27 @@ describe('handleCreatePost', () => {
 		});
 
 		mockPostActions.findDuplicatePosts.mockResolvedValue([]);
-		mockPostActions.createPost.mockResolvedValue({
-			id: 'new-p1',
-			author: { username: 'testuser' },
-		} as TCreatedPost);
+		const created = buildSuccessfulCreatedPost();
+		mockPostActions.createPost.mockResolvedValue(created);
 
 		const result = (await handleCreatePost(mockEvent, 'api-route')) as Response;
 
 		expect(mockPostActions.createPost).toHaveBeenCalled();
-		expect(mockSQSActions.enqueueBatchUploadedPostImages).toHaveBeenCalled();
+		expect(mockSQSActions.enqueueBatchUploadedPostImages).toHaveBeenCalledWith(
+			expect.objectContaining({ id: 'new-p1', imageUrls: [ORIGINAL_TEST_IMAGE_URL] }),
+		);
+		expect(mockNewPostVectorTargetPublish).toHaveBeenCalledTimes(1);
+		expect(mockNewPostVectorTargetPublish).toHaveBeenCalledWith(
+			NewPostVectorTargetPublisher.ROUTING_KEY,
+			{
+				id: 'new-p1',
+				description: 'test desc',
+				imageUrls: [ORIGINAL_TEST_IMAGE_URL],
+				createdAt: created.createdAt,
+				authorId: 'u1',
+			},
+		);
+		expect(mockMLApiHelpers.indexPostImages).not.toHaveBeenCalled();
 		expect(result).toBeDefined();
 		expect(result.status).toBe(201);
 	});
@@ -154,6 +192,8 @@ describe('handleCreatePost', () => {
 
 		expect(mockS3Actions.deleteBatchFromBucket).toHaveBeenCalledWith(expect.any(String), ['url1']);
 		expect(mockPostActions.createPost).not.toHaveBeenCalled();
+		expect(mockSQSActions.enqueueBatchUploadedPostImages).not.toHaveBeenCalled();
+		expect(mockNewPostVectorTargetPublish).not.toHaveBeenCalled();
 		expect(result.status).toBe(409);
 	});
 
@@ -185,10 +225,8 @@ describe('handleCreatePost', () => {
 		});
 
 		mockPostActions.findDuplicatePosts.mockResolvedValue([]);
-		mockPostActions.createPost.mockResolvedValue({
-			id: 'new-p1',
-			author: { username: 'testuser' },
-		} as TCreatedPost);
+		const created = buildSuccessfulCreatedPost();
+		mockPostActions.createPost.mockResolvedValue(created);
 
 		vi.mocked(redirect).mockImplementation(() => {
 			throw { status: 302 };
@@ -197,6 +235,17 @@ describe('handleCreatePost', () => {
 		await expect(handleCreatePost(mockEvent, 'form-action')).rejects.toEqual({ status: 302 });
 
 		expect(redirect).toHaveBeenCalledWith(302, expect.stringContaining('/posts/new-p1'));
+		expect(mockSQSActions.enqueueBatchUploadedPostImages).toHaveBeenCalledWith(
+			expect.objectContaining({ id: 'new-p1' }),
+		);
+		expect(mockNewPostVectorTargetPublish).toHaveBeenCalledWith(
+			NewPostVectorTargetPublisher.ROUTING_KEY,
+			expect.objectContaining({ id: 'new-p1', authorId: 'u1' }),
+		);
+		expect(mockMLApiHelpers.indexPostImages).toHaveBeenCalledWith('new-p1', [
+			ORIGINAL_TEST_IMAGE_URL,
+		]);
+		expect(mockSessionHelpers.invalidateCacheRemotely).toHaveBeenCalled();
 	});
 
 	it('should rollback if an error occurs during post creation', async () => {
@@ -232,7 +281,49 @@ describe('handleCreatePost', () => {
 		const result = (await handleCreatePost(mockEvent, 'api-route')) as Response;
 
 		expect(mockS3Actions.deleteBatchFromBucket).toHaveBeenCalledWith(expect.any(String), ['url1']);
+		expect(mockNewPostVectorTargetPublish).not.toHaveBeenCalled();
 		expect(result.status).toBe(500);
+	});
+
+	it('should not publish to RabbitMQ when the created post has no author id', async () => {
+		const mockFormData = {
+			description: 'test desc',
+			tags: ['tag1'],
+			artists: ['artist1'],
+			isNsfw: false,
+			postPictures: [],
+			sourceLink: 'http://example.com',
+			uploadId: 'upload1',
+			ignoreDuplicates: false,
+		};
+
+		mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+			async (event, handlerType, schema, callback) => {
+				return await callback({ form: mockFormData });
+			},
+		);
+
+		mockUserActions.findUserById.mockResolvedValue({ id: 'u1', emailVerified: true });
+
+		vi.mocked(uploadPostImages).mockResolvedValue({
+			postImageUrls: ['url1'],
+			postImageWidths: [100],
+			postImageHeights: [100],
+			postImageHashes: ['hash1'],
+		});
+
+		mockPostActions.findDuplicatePosts.mockResolvedValue([]);
+		mockPostActions.createPost.mockResolvedValue(
+			buildSuccessfulCreatedPost({
+				author: { username: 'orphan', profilePictureUrl: '' } as TCreatedPost['author'],
+			}),
+		);
+
+		const result = (await handleCreatePost(mockEvent, 'api-route')) as Response;
+
+		expect(mockSQSActions.enqueueBatchUploadedPostImages).toHaveBeenCalled();
+		expect(mockNewPostVectorTargetPublish).not.toHaveBeenCalled();
+		expect(result.status).toBe(201);
 	});
 
 	it('should rollback post from DB and images from S3 if an error occurs after DB creation', async () => {
@@ -263,7 +354,7 @@ describe('handleCreatePost', () => {
 		});
 
 		mockPostActions.findDuplicatePosts.mockResolvedValue([]);
-		mockPostActions.createPost.mockResolvedValue({ id: 'new-p1' } as TCreatedPost);
+		mockPostActions.createPost.mockResolvedValue(buildSuccessfulCreatedPost());
 		mockSQSActions.enqueueBatchUploadedPostImages.mockImplementation(() => {
 			throw new Error('Queue error');
 		});
@@ -272,6 +363,7 @@ describe('handleCreatePost', () => {
 
 		expect(mockPostActions.deletePostById).toHaveBeenCalledWith('new-p1');
 		expect(mockS3Actions.deleteBatchFromBucket).toHaveBeenCalledWith(expect.any(String), ['url1']);
+		expect(mockNewPostVectorTargetPublish).not.toHaveBeenCalled();
 		expect(result.status).toBe(500);
 	});
 });

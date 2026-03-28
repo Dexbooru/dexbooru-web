@@ -84,23 +84,10 @@ export type TPostSourceSelector = Prisma.PostSourceSelect<DefaultArgs>;
 export type TPostSelector = Prisma.PostSelect<DefaultArgs>;
 export type TPostOrderByColumn = 'likes' | 'createdAt' | 'views' | 'commentCount' | 'updatedAt';
 
-export type TPostSimilarityBody = {
-	image_url?: string;
-	image_file?: string;
-	k?: number;
-	distance_threshold?: number;
-};
-
-export type TPostImageSimilarityResult = {
-	post_id: string;
-	distance: number;
-	image_url: string;
-};
-
-export type TPostSimilarityResponse = {
-	status: string;
-	results: TPostImageSimilarityResult[];
-};
+export type {
+	PostImageSimilarityResult,
+	PostImageSimilaritySearchResponse,
+} from './postImageSimilarity';
 
 export type TPostDraft = {
 	isNsfw: boolean;

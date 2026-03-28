@@ -3,6 +3,7 @@ export * from './redis';
 export * from './logging/logger';
 export * from './aws/s3';
 export * from './aws/sqs';
+export * from './rabbitmq/publishers/newPostVectorTarget';
 export * from './db/actions/post';
 export * from './db/actions/user';
 export * from './db/actions/tag';

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { getEstimatedPostRating } from '$lib/client/api/mlApi';
+	import { fetchTagRatingPredictionForTags } from '$lib/client/api/mlApi';
 	import { checkDuplicatePosts } from '$lib/client/api/posts';
 	import DescriptionSection from '$lib/client/components/posts/upload/DescriptionSection.svelte';
 	import LabelSection from '$lib/client/components/posts/upload/LabelSection.svelte';
@@ -18,6 +18,8 @@
 	} from '$lib/shared/constants/images';
 	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 	import { isLabelAppropriate } from '$lib/shared/helpers/labels';
+	import { isExplicitTagRating, isNsfwTagRating } from '$lib/shared/helpers/tagRating';
+	import type { TagRatingPredictionResponse } from '$lib/shared/types/tagRating';
 	import type { TPostDuplicate } from '$lib/shared/types/posts';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -36,8 +38,6 @@
 	type Props = {
 		form: ActionData;
 	};
-
-	type TEstimatedPostRating = 's' | 'q' | 'e';
 
 	let { form }: Props = $props();
 
@@ -61,6 +61,45 @@
 	let eventSource: EventSource | null = null;
 	let duplicates = $state<TPostDuplicate[]>([]);
 	let forceUpload = $state(false);
+
+	let tagRatingPrediction = $state<TagRatingPredictionResponse | null>(null);
+	let tagRatingLoading = $state(false);
+	let tagRatingSeq = 0;
+
+	const nsfwLockedByExplicitPrediction = $derived(
+		tagRatingPrediction !== null && isExplicitTagRating(tagRatingPrediction.predicted_class),
+	);
+
+	$effect(() => {
+		const snapshot = [...tags];
+		if (snapshot.length === 0) {
+			tagRatingPrediction = null;
+			tagRatingLoading = false;
+			return;
+		}
+
+		const ac = new AbortController();
+		const seq = ++tagRatingSeq;
+		tagRatingLoading = true;
+
+		void fetchTagRatingPredictionForTags(snapshot, { signal: ac.signal })
+			.then((data) => {
+				if (seq !== tagRatingSeq) return;
+				tagRatingPrediction = data;
+				if (data && isNsfwTagRating(data.predicted_class)) {
+					isNsfw = true;
+				}
+			})
+			.finally(() => {
+				if (seq === tagRatingSeq) {
+					tagRatingLoading = false;
+				}
+			});
+
+		return () => {
+			ac.abort();
+		};
+	});
 
 	$effect(() => {
 		const check = async () => {
@@ -86,7 +125,11 @@
 	$effect(() => {
 		if (form) {
 			untrack(() => {
-				isNsfw = form.isNsfw ?? false;
+				const explicitLocked =
+					tagRatingPrediction !== null && isExplicitTagRating(tagRatingPrediction.predicted_class);
+				if (!explicitLocked) {
+					isNsfw = form.isNsfw ?? false;
+				}
 				tags = form.tags || [];
 				artists = form.artists || [];
 				description = form.description || '';
@@ -135,20 +178,6 @@
 				(postImage) => !isFileImage(postImage.file) || !isFileImageSmall(postImage.file, 'post'),
 			);
 		return !isValidForm;
-	});
-
-	let estimatedPostRating: Promise<TEstimatedPostRating | null> = $derived.by(async () => {
-		if (tags.length === 0) {
-			return null;
-		}
-
-		const response = await getEstimatedPostRating(tags);
-		if (response.ok) {
-			const data = await response.json();
-			return data.predicted_rating as TEstimatedPostRating;
-		}
-
-		return null;
 	});
 
 	const handleSubmit: SubmitFunction = ({ formData }) => {
@@ -414,10 +443,17 @@
 
 					<PostPictureUpload bind:loadingPictures={loadingPostPictures} bind:images={postImages} />
 
-					<Checkbox class="" bind:checked={isNsfw}>Mark post as NSFW?</Checkbox>
+					<Checkbox class="" bind:checked={isNsfw} disabled={nsfwLockedByExplicitPrediction}>
+						Mark post as NSFW?
+					</Checkbox>
 					<Input type="hidden" name="isNsfw" value={isNsfw.toString()} />
 
-					<RatingEstimate {estimatedPostRating} />
+					<RatingEstimate
+						loading={tagRatingLoading}
+						prediction={tagRatingPrediction}
+						hasTags={tags.length > 0}
+						nsfwLockedByExplicit={nsfwLockedByExplicitPrediction}
+					/>
 				</section>
 
 				<Button disabled={uploadButtonDisabled} color="green" type="submit" class="mt-5!"

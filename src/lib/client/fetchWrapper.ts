@@ -4,7 +4,19 @@ import { toast } from '@zerodevx/svelte-toast';
 
 let installed = false;
 
+/** Bodies where the browser/fetch must set Content-Type (e.g. multipart boundary for FormData). */
+function bodySetsOwnContentType(body: BodyInit | null | undefined): boolean {
+	if (body == null) return false;
+	if (typeof FormData !== 'undefined' && body instanceof FormData) return true;
+	if (typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams) return true;
+	if (typeof Blob !== 'undefined' && body instanceof Blob) return true;
+	return false;
+}
+
 function ensureContentType(init: RequestInit): RequestInit {
+	if (bodySetsOwnContentType(init.body)) {
+		return init;
+	}
 	const headers = init?.headers;
 	if (headers == null) {
 		return { ...init, headers: { 'Content-Type': 'application/json' } };

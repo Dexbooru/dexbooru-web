@@ -4,6 +4,7 @@ import './mocks/redis';
 import './mocks/logging/logger';
 import './mocks/aws/s3';
 import './mocks/aws/sqs';
+import './mocks/rabbitmq/publishers/newPostVectorTarget';
 import './mocks/db/actions/post';
 import './mocks/db/actions/user';
 import './mocks/db/actions/tag';

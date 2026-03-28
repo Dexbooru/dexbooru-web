@@ -3,11 +3,7 @@ export const MAXIMUM_RENDERABLE_ARTISTS = 15;
 export const LABEL_CUT_THRESHOLD = 0.45;
 export const LABEL_CUT_LENGTH = 20;
 
-export const ESTIMATED_TAG_RATING_LABEL_MAP: Record<'q' | 'e' | 's', string> = {
-	q: 'Questionable',
-	e: 'Explicit',
-	s: 'Safe',
-};
+export { TAG_RATING_CLASS_LABELS } from '$lib/shared/constants/tagRating';
 
 export const CHAR_OPTIONS_DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 

@@ -4,7 +4,11 @@ import {
 	MAXIMUM_IMAGES_PER_POST,
 	MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB,
 } from '$lib/shared/constants/images';
-import { MAXIMUM_ARTISTS_PER_POST, MAXIMUM_TAGS_PER_POST } from '$lib/shared/constants/posts';
+import {
+	MAXIMUM_ARTISTS_PER_POST,
+	MAXIMUM_POST_DESCRIPTION_LENGTH,
+	MAXIMUM_TAGS_PER_POST,
+} from '$lib/shared/constants/posts';
 import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import { isLabelAppropriate, transformLabels } from '$lib/shared/helpers/labels';
 import { z } from 'zod';
@@ -159,6 +163,11 @@ const GetSimilarPostsSchema = {
 		postId: z.string().uuid().optional(),
 		imageUrl: z.string().url().optional(),
 		imageFile: z.string().optional(),
+		similarityDescription: z
+			.string()
+			.max(MAXIMUM_POST_DESCRIPTION_LENGTH)
+			.optional()
+			.transform((val) => (val && val.trim() ? val.trim() : undefined)),
 	}),
 } satisfies TRequestSchema;
 

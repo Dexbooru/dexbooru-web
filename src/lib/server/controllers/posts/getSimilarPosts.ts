@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import { findPostById } from '../../db/actions/post';
 import {
 	createErrorResponse,
@@ -5,10 +6,36 @@ import {
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
 import { getSimilarPostsBySimilaritySearch } from '../../helpers/mlApi';
-import type { TPostSimilarityBody, TPostSimilarityResponse } from '$lib/shared/types/posts';
+import { parseDexbooruMlErrorMessage } from '../../helpers/mlApiSimilarity';
+import { DEFAULT_POST_IMAGE_SIMILARITY_TOP_K } from '$lib/shared/constants/postImageSimilarity';
+import type { PostImageSimilaritySearchResponse } from '$lib/shared/types/postImageSimilarity';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { TControllerHandlerVariant } from '../../types/controllers';
 import { GetSimilarPostsSchema } from '../request-schemas/posts';
+
+function parseSimilarityImageDataUrl(dataUrl: string): {
+	bytes: Uint8Array;
+	contentType: string;
+	filename: string;
+} | null {
+	const match = /^data:([^;]+);base64,(.+)$/s.exec(dataUrl.trim());
+	if (!match) {
+		return null;
+	}
+	const mimePart = match[1];
+	const b64Part = match[2];
+	if (!mimePart || !b64Part) {
+		return null;
+	}
+	const contentType = mimePart.trim();
+	const buf = Buffer.from(b64Part, 'base64');
+	const ext = contentType.split('/')[1]?.split('+')[0] ?? 'bin';
+	return {
+		bytes: new Uint8Array(buf),
+		contentType,
+		filename: `similarity-upload.${ext}`,
+	};
+}
 
 export const handleGetSimilarPosts = async (
 	event: RequestEvent,
@@ -19,7 +46,7 @@ export const handleGetSimilarPosts = async (
 		handlerType,
 		GetSimilarPostsSchema,
 		async (data) => {
-			const { imageFile, imageUrl, postId } = data.form;
+			const { imageFile, imageUrl, postId, similarityDescription } = data.form;
 			const providedFields = [imageFile, imageUrl, postId].filter((field) => field).length;
 			if (providedFields !== 1) {
 				return createErrorResponse(
@@ -29,10 +56,24 @@ export const handleGetSimilarPosts = async (
 				);
 			}
 
-			const requestBody: TPostSimilarityBody = {
-				k: 10,
-				distance_threshold: 0.35,
-			};
+			const description = similarityDescription ?? undefined;
+			const topClosestMatchCount = DEFAULT_POST_IMAGE_SIMILARITY_TOP_K;
+
+			let mlRequest:
+				| {
+						kind: 'image_url';
+						imageUrl: string;
+						topClosestMatchCount: number;
+						description?: string;
+				  }
+				| {
+						kind: 'image_file';
+						imageBytes: Uint8Array;
+						filename: string;
+						contentType: string;
+						topClosestMatchCount: number;
+						description?: string;
+				  };
 
 			if (postId && postId.length > 0) {
 				const post = await findPostById(postId, { imageUrls: true });
@@ -44,31 +85,64 @@ export const handleGetSimilarPosts = async (
 					);
 				}
 
-				requestBody.image_url = post.imageUrls[0];
+				const firstUrl = post.imageUrls[0];
+				if (!firstUrl) {
+					return createErrorResponse(handlerType, 400, 'That post has no images to search from');
+				}
+
+				mlRequest = {
+					kind: 'image_url',
+					imageUrl: firstUrl,
+					topClosestMatchCount,
+					description,
+				};
 			} else if (imageUrl && imageUrl.length > 0) {
-				requestBody.image_url = imageUrl;
+				mlRequest = {
+					kind: 'image_url',
+					imageUrl,
+					topClosestMatchCount,
+					description,
+				};
 			} else if (imageFile && imageFile.length > 0) {
-				const imageFileParts = imageFile.split(',');
-				if (imageFileParts.length !== 2) {
+				const parsed = parseSimilarityImageDataUrl(imageFile);
+				if (!parsed) {
 					return createErrorResponse(
 						handlerType,
 						400,
-						'The provided image file was not in the correct base64 format',
+						'The provided image file was not in the correct base64 data URL format',
 					);
 				}
 
-				requestBody.image_file = imageFileParts[1];
+				mlRequest = {
+					kind: 'image_file',
+					imageBytes: parsed.bytes,
+					filename: parsed.filename,
+					contentType: parsed.contentType,
+					topClosestMatchCount,
+					description,
+				};
+			} else {
+				return createErrorResponse(
+					handlerType,
+					400,
+					'You must provide either an image file, an image url or a post id to get similar posts',
+				);
 			}
 
-			const response = await getSimilarPostsBySimilaritySearch(requestBody);
+			const response = await getSimilarPostsBySimilaritySearch(mlRequest);
+
 			if (!response.ok) {
-				return createErrorResponse(handlerType, 500, 'An error occurred while calling the ML api');
+				const message = await parseDexbooruMlErrorMessage(response);
+				const clientStatus =
+					response.status >= 400 && response.status < 500 ? response.status : 502;
+				return createErrorResponse(handlerType, clientStatus, message);
 			}
 
-			const responseData: TPostSimilarityResponse = await response.json();
-			const results = responseData.results;
+			const responseData = (await response.json()) as PostImageSimilaritySearchResponse;
 
-			return createSuccessResponse(handlerType, 'Successfully fetched similar posts', { results });
+			return createSuccessResponse(handlerType, 'Successfully fetched similar posts', {
+				results: responseData.results,
+			});
 		},
 		handlerType === 'api-route',
 	);

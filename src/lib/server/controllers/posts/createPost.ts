@@ -1,4 +1,5 @@
 import { uploadStatusEmitter } from '$lib/server/events/uploadStatus';
+import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
 import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
 import { deleteBatchFromBucket } from '../../aws/actions/s3';
 import { enqueueBatchUploadedPostImages } from '../../aws/actions/sqs';
@@ -14,6 +15,9 @@ import {
 import { indexPostImages } from '../../helpers/mlApi';
 import { invalidateCacheRemotely } from '../../helpers/sessions';
 import logger from '../../logging/logger';
+import newPostVectorTargetPublisher, {
+	NewPostVectorTargetPublisher,
+} from '../../rabbitmq/publishers/newPostVectorTarget';
 import type { TControllerHandlerVariant } from '../../types/controllers';
 import { getCacheKeyForPostAuthor, getCacheKeyWithPostCategory } from '../cache-strategies/posts';
 import { CreatePostSchema } from '../request-schemas/posts';
@@ -70,6 +74,7 @@ export const handleCreatePost = async (
 
 			let newPostId: string | null = null;
 			let newPostImageUrls: string[] = [];
+			let originalImageUrls: string[] = [];
 
 			try {
 				logger.info('Processing and uploading post images...', { uploadId });
@@ -134,11 +139,32 @@ export const handleCreatePost = async (
 				});
 
 				if (newPost) {
+					originalImageUrls = newPost.imageUrls.filter((imageUrl) =>
+						imageUrl.includes(ORIGINAL_IMAGE_SUFFIX),
+					);
+
 					logger.info('Enqueuing post images for SQS processing...', {
 						uploadId,
 						postId: newPostId,
 					});
 					enqueueBatchUploadedPostImages(newPost);
+
+					const authorId = newPost.author?.id;
+					if (authorId) {
+						newPostVectorTargetPublisher
+							.publish(NewPostVectorTargetPublisher.ROUTING_KEY, {
+								id: newPost.id,
+								description: newPost.description,
+								imageUrls: originalImageUrls,
+								createdAt: newPost.createdAt,
+								authorId,
+							})
+							.catch((err) => logger.error('Failed to publish new post vector-target event', err));
+					} else {
+						logger.warn('Skipping new post vector-target publish: post has no author id', {
+							postId: newPost.id,
+						});
+					}
 
 					if (uploadId) {
 						uploadStatusEmitter.emit(uploadId, 'Enqueing post images for classification...');
@@ -150,7 +176,10 @@ export const handleCreatePost = async (
 						uploadId,
 						postId: newPostId,
 					});
-					indexPostImages(newPost.id, postImageUrls);
+
+					void Promise.resolve(indexPostImages(newPost.id, originalImageUrls)).catch((err) =>
+						logger.error('Failed to index post images for ML', err),
+					);
 
 					invalidateCacheRemotely(getCacheKeyWithPostCategory('general', 0, 'createdAt', false));
 					invalidateCacheRemotely(
