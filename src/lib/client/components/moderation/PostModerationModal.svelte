@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { updatePostModerationStatus } from '$lib/client/api/moderation';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { getModerationPaginationData } from '$lib/client/helpers/context';
+	import { getAuthenticatedUser, getModerationPaginationData } from '$lib/client/helpers/context';
 	import { formatDate } from '$lib/shared/helpers/dates';
+	import { isOwnerRole } from '$lib/shared/helpers/auth/role';
 	import { capitalize } from '$lib/shared/helpers/util';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Badge from 'flowbite-svelte/Badge.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Modal from 'flowbite-svelte/Modal.svelte';
+	import OwnerAmendModerationModal from './OwnerAmendModerationModal.svelte';
 
 	type Props = {
 		post: TPost;
@@ -17,9 +19,35 @@
 
 	let { post, open = $bindable() }: Props = $props();
 	let loading = $state(false);
+	let ownerAmendOpen = $state(false);
 	let imageUrls = $derived<string[]>(post.imageUrls.slice(0, 1));
 
+	const user = getAuthenticatedUser();
 	const moderationData = getModerationPaginationData();
+
+	const handleOwnerAmendApplied = ({
+		resourceType,
+		status,
+	}: {
+		resourceType: 'post' | 'user' | 'postCollection';
+		status: string;
+	}) => {
+		if (resourceType !== 'post') return;
+		moderationData.update((data) => {
+			if (!data) return null;
+			if (status !== 'PENDING') {
+				return {
+					...data,
+					pendingPosts: data.pendingPosts.filter((p) => p.id !== post.id),
+				};
+			}
+			const without = data.pendingPosts.filter((p) => p.id !== post.id);
+			return {
+				...data,
+				pendingPosts: [{ ...post, moderationStatus: 'PENDING' }, ...without],
+			};
+		});
+	};
 
 	const handleAction = async (status: 'APPROVED' | 'REJECTED') => {
 		loading = true;
@@ -98,10 +126,15 @@
 				</div>
 			{/if}
 
-			<div class="border-t border-gray-100 pt-4 dark:border-gray-700">
+			<div class="space-y-2 border-t border-gray-100 pt-4 dark:border-gray-700">
 				<Button color="alternative" class="w-full" href="/posts/{post.id}" target="_blank">
 					View Post Page
 				</Button>
+				{#if $user && isOwnerRole($user.role)}
+					<Button color="blue" class="w-full" outline onclick={() => (ownerAmendOpen = true)}>
+						Set moderation status (owner)
+					</Button>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -117,3 +150,14 @@
 		</div>
 	{/snippet}
 </Modal>
+
+{#if $user && isOwnerRole($user.role)}
+	<OwnerAmendModerationModal
+		bind:open={ownerAmendOpen}
+		resourceType="post"
+		resourceId={post.id}
+		initialModerationStatus={post.moderationStatus}
+		subtitle={post.description || 'Post'}
+		onApplied={handleOwnerAmendApplied}
+	/>
+{/if}

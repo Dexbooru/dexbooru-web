@@ -1,4 +1,6 @@
+import { isModerationRole } from '$lib/shared/helpers/auth/role';
 import { updatePost } from '../../db/actions/post';
+import { findUserById } from '../../db/actions/user';
 import {
 	createErrorResponse,
 	createSuccessResponse,
@@ -8,7 +10,6 @@ import { invalidateCacheRemotely } from '../../helpers/sessions';
 import logger from '../../logging/logger';
 import { UpdatePostModerationStatusSchema } from '../request-schemas/moderation';
 import { getCacheKeyForPendingPosts } from '../cache-strategies/moderation';
-import { handleModerationRoleCheck } from '../reports';
 import type { RequestEvent } from '@sveltejs/kit';
 
 export const handleUpdatePostModerationStatus = async (event: RequestEvent) => {
@@ -21,8 +22,24 @@ export const handleUpdatePostModerationStatus = async (event: RequestEvent) => {
 			const { status } = data.body;
 
 			try {
-				const moderationFailureResponse = await handleModerationRoleCheck(event, 'api-route');
-				if (moderationFailureResponse) return moderationFailureResponse;
+				const user = await findUserById(event.locals.user.id, { role: true });
+				if (!user) {
+					return createErrorResponse('api-route', 404, 'This user does not exist.');
+				}
+				if (!isModerationRole(user.role)) {
+					return createErrorResponse(
+						'api-route',
+						403,
+						'You do not have permission to update post moderation status.',
+					);
+				}
+				if (status === 'PENDING' && user.role !== 'OWNER') {
+					return createErrorResponse(
+						'api-route',
+						403,
+						'Only the site owner can set a post back to pending moderation.',
+					);
+				}
 
 				const updatedPost = await updatePost(postId, {
 					moderationStatus: status,

@@ -2,13 +2,15 @@
 	import type { PostCollectionReport, PostReport, UserReport } from '$generated/prisma/browser';
 	import { updateReportStatus } from '$lib/client/api/moderation';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { getModerationPaginationData } from '$lib/client/helpers/context';
+	import { getAuthenticatedUser, getModerationPaginationData } from '$lib/client/helpers/context';
+	import { isOwnerRole } from '$lib/shared/helpers/auth/role';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import { capitalize } from '$lib/shared/helpers/util';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Badge from 'flowbite-svelte/Badge.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Modal from 'flowbite-svelte/Modal.svelte';
+	import OwnerAmendModerationModal from './OwnerAmendModerationModal.svelte';
 
 	type TReport = PostReport | PostCollectionReport | UserReport;
 
@@ -20,8 +22,36 @@
 
 	let { report, reportType, open = $bindable() }: Props = $props();
 	let loading = $state(false);
+	let ownerAmendOpen = $state(false);
 
+	const user = getAuthenticatedUser();
 	const moderationData = getModerationPaginationData();
+
+	type OwnerAmendTarget = {
+		resourceType: 'post' | 'user' | 'postCollection';
+		resourceId: string;
+		subtitle: string;
+	};
+
+	const ownerAmendTarget = $derived.by((): OwnerAmendTarget | null => {
+		if (reportType === 'postReports') {
+			const postId = (report as PostReport).postId;
+			if (!postId) return null;
+			return { resourceType: 'post', resourceId: postId, subtitle: 'Reported post' };
+		}
+		if (reportType === 'userReports') {
+			const userId = (report as UserReport).userId;
+			if (!userId) return null;
+			return { resourceType: 'user', resourceId: userId, subtitle: 'Reported user account' };
+		}
+		const collectionId = (report as PostCollectionReport).postCollectionId;
+		if (!collectionId) return null;
+		return {
+			resourceType: 'postCollection',
+			resourceId: collectionId,
+			subtitle: 'Reported collection',
+		};
+	});
 
 	const handleAction = async (status: 'ACCEPTED' | 'REJECTED' | 'IN_REVIEW') => {
 		loading = true;
@@ -114,10 +144,15 @@
 			</div>
 		</div>
 
-		<div class="border-t border-gray-100 pt-4 dark:border-gray-700">
+		<div class="space-y-2 border-t border-gray-100 pt-4 dark:border-gray-700">
 			<Button color="alternative" class="w-full" href={getResourceLink()} target="_blank">
 				View Reported {capitalize(reportType.replace('Reports', '').replace('post', 'Post'))}
 			</Button>
+			{#if $user && isOwnerRole($user.role) && ownerAmendTarget}
+				<Button color="blue" class="w-full" outline onclick={() => (ownerAmendOpen = true)}>
+					Amend resource moderation (owner)
+				</Button>
+			{/if}
 		</div>
 	</div>
 
@@ -140,3 +175,13 @@
 		</div>
 	{/snippet}
 </Modal>
+
+{#if $user && isOwnerRole($user.role) && ownerAmendTarget}
+	{@const amendTarget = ownerAmendTarget}
+	<OwnerAmendModerationModal
+		bind:open={ownerAmendOpen}
+		resourceType={amendTarget.resourceType}
+		resourceId={amendTarget.resourceId}
+		subtitle={amendTarget.subtitle}
+	/>
+{/if}

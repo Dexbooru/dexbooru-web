@@ -27,3 +27,33 @@ export const UpdatePostModerationStatusSchema = {
 		status: PostModerationStatusSchema,
 	}),
 } satisfies TRequestSchema;
+
+export const UserModerationStatusSchema = z.enum(['FLAGGED', 'UNFLAGGED']);
+export const CollectionModerationStatusSchema = z.enum(['FLAGGED', 'UNFLAGGED']);
+
+export const OwnerResourceModerationStatusGetSchema = {
+	urlSearchParams: z.object({
+		resourceType: z.enum(['post', 'user', 'postCollection']),
+		resourceId: z.string().uuid(),
+	}),
+} satisfies TRequestSchema;
+
+export const OwnerAmendResourceModerationSchema = {
+	body: z.discriminatedUnion('resourceType', [
+		z.object({
+			resourceType: z.literal('post'),
+			resourceId: z.string().uuid(),
+			status: PostModerationStatusSchema,
+		}),
+		z.object({
+			resourceType: z.literal('user'),
+			resourceId: z.string().uuid(),
+			status: UserModerationStatusSchema,
+		}),
+		z.object({
+			resourceType: z.literal('postCollection'),
+			resourceId: z.string().uuid(),
+			status: CollectionModerationStatusSchema,
+		}),
+	]),
+} satisfies TRequestSchema;

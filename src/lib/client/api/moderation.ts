@@ -1,5 +1,15 @@
-import type { ModerationReportStatus, PostModerationStatus } from '$generated/prisma/browser';
+import type {
+	CollectionModerationStatus,
+	ModerationReportStatus,
+	PostModerationStatus,
+	UserModerationStatus,
+} from '$generated/prisma/browser';
 import { getApiAuthHeaders } from '../helpers/auth';
+
+export type TOwnerAmendResourceModerationBody =
+	| { resourceType: 'post'; resourceId: string; status: PostModerationStatus }
+	| { resourceType: 'user'; resourceId: string; status: UserModerationStatus }
+	| { resourceType: 'postCollection'; resourceId: string; status: CollectionModerationStatus };
 
 export const getModerators = async () => {
 	return await fetch('/api/moderators', {
@@ -23,6 +33,30 @@ export const updatePostModerationStatus = async (postId: string, status: PostMod
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({ status }),
+	});
+};
+
+const OWNER_RESOURCE_MODERATION_STATUS_URL = '/api/moderation/owner/resource-moderation-status';
+
+export const getOwnerResourceModerationStatus = async (
+	resourceType: 'post' | 'user' | 'postCollection',
+	resourceId: string,
+) => {
+	const params = new URLSearchParams({ resourceType, resourceId });
+	return await fetch(`${OWNER_RESOURCE_MODERATION_STATUS_URL}?${params}`, {
+		method: 'GET',
+		headers: getApiAuthHeaders(),
+	});
+};
+
+export const ownerAmendResourceModeration = async (body: TOwnerAmendResourceModerationBody) => {
+	return await fetch(OWNER_RESOURCE_MODERATION_STATUS_URL, {
+		method: 'PATCH',
+		headers: {
+			...getApiAuthHeaders(),
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(body),
 	});
 };
 

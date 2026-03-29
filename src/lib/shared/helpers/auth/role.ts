@@ -7,3 +7,5 @@ export const isModerationRole = (role: $Enums.UserRole) => {
 
 	return false;
 };
+
+export const isOwnerRole = (role: $Enums.UserRole) => role === 'OWNER';

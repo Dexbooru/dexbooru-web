@@ -100,27 +100,29 @@
 </script>
 
 <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap">
-	{#key likeShakeGeneration}
-		<div
-			class="like-shake-host w-full lg:w-auto"
-			class:like-shake-host--active={likeShakeGeneration > 0}
-		>
-			<Button
-				disabled={postLikeLoading}
-				onclick={handleLikePost}
-				color="green"
-				class="flex w-full items-center justify-center space-x-3 lg:w-auto"
+	{#if post.moderationStatus !== 'REJECTED'}
+		{#key likeShakeGeneration}
+			<div
+				class="like-shake-host w-full lg:w-auto"
+				class:like-shake-host--active={likeShakeGeneration > 0}
 			>
-				<HeartSolid color={hasLikedPost ? 'red' : 'inherit'} role="icon" style="bg-red" />
-				<span>
-					{normalizeCount(likes)}
-					{#if $user}
-						- Like post
-					{/if}
-				</span>
-			</Button>
-		</div>
-	{/key}
+				<Button
+					disabled={postLikeLoading}
+					onclick={handleLikePost}
+					color="green"
+					class="flex w-full items-center justify-center space-x-3 lg:w-auto"
+				>
+					<HeartSolid color={hasLikedPost ? 'red' : 'inherit'} role="icon" style="bg-red" />
+					<span>
+						{normalizeCount(likes)}
+						{#if $user}
+							- Like post
+						{/if}
+					</span>
+				</Button>
+			</div>
+		{/key}
+	{/if}
 
 	{#if $user}
 		<Button
@@ -149,7 +151,7 @@
 		<ExclamationCircleSolid />
 	</Button>
 
-	{#if $user && isModerationRole($user.role)}
+	{#if $user && isModerationRole($user.role) && post.moderationStatus !== 'REJECTED'}
 		<Button
 			onclick={() => handleModalOpen(REPORT_POST_LIST_MODAL_NAME, { post })}
 			class="w-full space-x-2 lg:w-auto"

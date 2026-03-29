@@ -1,5 +1,6 @@
+import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { isModerationRole } from '$lib/shared/helpers/auth/role';
-import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
+import { type RequestEvent } from '@sveltejs/kit';
 import { findUserById } from '../../db/actions/user';
 import {
 	createErrorResponse,
@@ -16,19 +17,29 @@ export const handleGetModerationDashboard = async (event: RequestEvent) => {
 		GetModerationDashboardSchema,
 		async (_) => {
 			try {
+				if (event.locals.user.id === NULLABLE_USER.id) {
+					return createErrorResponse(
+						'page-server-load',
+						401,
+						'You must be signed in to access the moderation dashboard.',
+					);
+				}
+
 				const user = await findUserById(event.locals.user.id, { role: true });
-				if (!user || !isModerationRole(user?.role)) {
-					redirect(302, '/');
+				if (!user || !isModerationRole(user.role)) {
+					return createErrorResponse(
+						'page-server-load',
+						403,
+						'You do not have permission to access this page. Moderator or site owner access is required.',
+					);
 				}
 
 				return createSuccessResponse(
 					'page-server-load',
 					'Moderation dashboard loaded successfully',
 				);
-			} catch (error) {
-				if (isRedirect(error)) throw error;
-
-				logger.error(error);
+			} catch (err) {
+				logger.error(err);
 
 				return createErrorResponse(
 					'page-server-load',
@@ -37,6 +48,6 @@ export const handleGetModerationDashboard = async (event: RequestEvent) => {
 				);
 			}
 		},
-		true,
+		false,
 	);
 };
