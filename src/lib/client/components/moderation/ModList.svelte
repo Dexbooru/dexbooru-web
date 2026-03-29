@@ -131,8 +131,8 @@
 
 {#if $moderationData}
 	<section id={containerId}>
-		<div class="mb-5 flex flex-wrap space-x-5">
-			<h2 class="mt-1 text-lg font-semibold text-gray-800 dark:text-gray-200">
+		<div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+			<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
 				{formatNumberWithCommas(moderators.length)} moderators
 				{#if filterRole !== '' || sortingCriteria !== ''}
 					-
@@ -149,6 +149,7 @@
 			</h2>
 			{#if $user && $user.role === 'OWNER'}
 				<Button
+					class="w-full sm:w-auto"
 					onclick={() =>
 						activeModal.set({ isOpen: true, focusedModalName: PROMOTE_USER_MODAL_NAME })}
 					color="green">Update user roles</Button
@@ -156,17 +157,17 @@
 			{/if}
 		</div>
 
-		<div class="mb-5 flex flex-wrap space-x-2">
+		<div class="mb-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
 			<Searchbar
 				queryChangeHandler={handleQueryChange}
-				width="35%"
-				customClass="!mr-0"
+				width="100%"
+				customClass="!mr-0 sm:!w-[35%]"
 				inputElementId="moderator-list-searchbar"
 				placeholder="Search a moderator by id, username or role"
 			/>
 			<Select
 				id="moderation-list-role-selector"
-				class="ml-3 w-100"
+				class="w-full sm:ml-0 sm:w-auto"
 				onchange={handleRoleChange}
 				bind:value={filterRole}
 				items={[
@@ -176,7 +177,7 @@
 			/>
 			<Select
 				id="moderation-list-sorting-selector"
-				class="ml-3 w-100"
+				class="w-full sm:ml-0 sm:w-auto"
 				onchange={handleSortingCriteriaChange}
 				bind:value={sortingCriteria}
 				items={[
@@ -184,36 +185,36 @@
 					{ name: 'Promotion Date', value: 'promotionDate' },
 				]}
 			/>
-			<Button onclick={resetFilters}>Reset list</Button>
+			<Button class="w-full sm:w-auto" onclick={resetFilters}>Reset list</Button>
 		</div>
 
 		{#if moderators.length > 0}
 			<Listgroup>
 				{#each moderators as moderator (moderator.id)}
 					<ListgroupItem
-						class="flex items-center justify-between gap-4 py-3 text-base font-semibold hover:bg-gray-100 dark:hover:bg-gray-700"
+						class="flex flex-col gap-3 py-3 text-base font-semibold hover:bg-gray-100 sm:flex-row sm:items-center sm:justify-between dark:hover:bg-gray-700"
 					>
-						<div class="flex items-center gap-3">
+						<div class="flex items-start gap-3">
 							<Avatar
 								src={moderator.profilePictureUrl}
 								size="sm"
 								alt={`${moderator.username}'s profile picture`}
 							/>
-							<div>
+							<div class="min-w-0">
 								<p>{moderator.username}</p>
-								<p class="ml-2 text-sm text-gray-500 dark:text-gray-400">ID: {moderator.id}</p>
-								<p class="ml-2 text-sm text-gray-500 dark:text-gray-400">
+								<p class="text-sm break-all text-gray-500 dark:text-gray-400">ID: {moderator.id}</p>
+								<p class="text-sm text-gray-500 dark:text-gray-400">
 									Role: {capitalize(moderator.role)}
 								</p>
 								{#if moderator.superRolePromotionAt !== null}
-									<p class="ml-2 text-sm text-gray-500 dark:text-gray-400">
+									<p class="text-sm text-gray-500 dark:text-gray-400">
 										Promoted At: {formatDate(new Date(moderator.superRolePromotionAt))}
 									</p>
 								{/if}
 							</div>
 						</div>
-						<a href={`/profile/${moderator.username}`}>
-							<Button color="blue" size="sm">View Profile</Button>
+						<a class="w-full sm:w-auto" href={`/profile/${moderator.username}`}>
+							<Button class="w-full sm:w-auto" color="blue" size="sm">View Profile</Button>
 						</a>
 					</ListgroupItem>
 				{/each}
