@@ -10,7 +10,7 @@ import {
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
 import { getSafeRedirectTo } from '../../helpers/redirect';
-import { buildCookieOptions } from '../../helpers/cookies';
+import { buildCookieOptions, clearSessionIdCookie } from '../../helpers/cookies';
 import { doPasswordsMatch } from '../../helpers/password';
 import { generateEncodedUserTokenFromRecord } from '../../helpers/sessions';
 import { createTotpChallenge } from '../../helpers/totp';
@@ -53,7 +53,7 @@ export const handleUserAuthFlowValidate = async (event: RequestEvent) => {
 			}
 
 			if (!isValidUser) {
-				event.cookies.delete(SESSION_ID_KEY, { path: '/' });
+				clearSessionIdCookie(event.cookies);
 				return error;
 			}
 

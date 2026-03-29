@@ -3,7 +3,7 @@ import { getUserNotificationsFromId } from '$lib/server/db/actions/notification'
 import { findUserPreferences } from '$lib/server/db/actions/preference';
 import { findUserById } from '$lib/server/db/actions/user';
 import { NULLABLE_USER, NULLABLE_USER_USER_PREFERENCES } from '$lib/shared/constants/auth';
-import { SESSION_ID_KEY } from '$lib/shared/constants/session';
+import { clearSessionIdCookie } from '$lib/server/helpers/cookies';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async (event) => {
@@ -15,10 +15,7 @@ export const load: LayoutServerLoad = async (event) => {
 			: ((await findUserById(locals.user.id, PUBLIC_USER_SELECTORS)) ?? NULLABLE_USER);
 
 	if (user.id === NULLABLE_USER.id) {
-		event.cookies.set(SESSION_ID_KEY, '', {
-			maxAge: 0,
-			path: '/',
-		});
+		clearSessionIdCookie(event.cookies);
 	}
 
 	const userPreferences =

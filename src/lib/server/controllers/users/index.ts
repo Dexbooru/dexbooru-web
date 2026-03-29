@@ -1,4 +1,5 @@
 export * from './getUserSettings';
+export * from './logout';
 export * from './accountRecovery';
 export * from './emailVerification';
 export * from './userData';

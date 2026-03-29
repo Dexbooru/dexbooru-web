@@ -12,7 +12,7 @@ import {
 } from '../../db/actions/user';
 import { createUserPreferences } from '../../db/actions/preference';
 import { createErrorResponse, validateAndHandleRequest } from '../../helpers/controllers';
-import { buildCookieOptions } from '../../helpers/cookies';
+import { buildCookieOptions, clearSessionIdCookie } from '../../helpers/cookies';
 import {
 	runDefaultProfilePictureTransformationPipeline,
 	runProfileImageTransformationPipeline,
@@ -56,7 +56,7 @@ export const handleDeleteUser = async (event: RequestEvent) => {
 				}
 
 				await deleteUserById(event.locals.user.id);
-				event.cookies.delete(SESSION_ID_KEY, { path: '/' });
+				clearSessionIdCookie(event.cookies);
 
 				redirect(302, '/posts');
 			} catch (error) {
