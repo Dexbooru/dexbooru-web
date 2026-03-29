@@ -11,7 +11,7 @@ export const POST: RequestHandler = async (request) => {
 	return response as ReturnType<RequestHandler>;
 };
 
-export const PUT: RequestHandler = async (request) => {
+export const PATCH: RequestHandler = async (request) => {
 	return (await handleUpdatePost(request)) as ReturnType<RequestHandler>;
 };
 

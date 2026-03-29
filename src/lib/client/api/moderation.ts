@@ -17,7 +17,7 @@ export const getPendingPosts = async (pageNumber: number) => {
 
 export const updatePostModerationStatus = async (postId: string, status: PostModerationStatus) => {
 	return await fetch(`/api/moderation/posts/${postId}/status`, {
-		method: 'PUT',
+		method: 'PATCH',
 		headers: {
 			...getApiAuthHeaders(),
 			'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ export const updateReportStatus = async (
 	};
 
 	return await fetch(`/api/moderation/reports/${typeMap[reportType]}/${reportId}/status`, {
-		method: 'PUT',
+		method: 'PATCH',
 		headers: {
 			...getApiAuthHeaders(),
 			'Content-Type': 'application/json',

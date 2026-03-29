@@ -9,7 +9,7 @@ export const GET: RequestHandler = async (request) => {
 	return (await handleGetCollection(request, 'api-route')) as ReturnType<RequestHandler>;
 };
 
-export const PUT: RequestHandler = async (request) => {
+export const PATCH: RequestHandler = async (request) => {
 	return (await handleUpdateCollection(request)) as ReturnType<RequestHandler>;
 };
 

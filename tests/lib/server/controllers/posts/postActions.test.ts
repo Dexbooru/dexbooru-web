@@ -3,7 +3,12 @@ import { handleDeletePost } from '$lib/server/controllers/posts/deletePost';
 import { handleLikePost } from '$lib/server/controllers/posts/likePost';
 import { handleUpdatePost } from '$lib/server/controllers/posts/updatePost';
 import { handleCheckForDuplicatePosts } from '$lib/server/controllers/posts/checkDuplicatePosts';
-import { mockPostActions, mockControllerHelpers, mockS3Actions } from '../../../../mocks';
+import {
+	mockPostActions,
+	mockControllerHelpers,
+	mockS3Actions,
+	mockSessionHelpers,
+} from '../../../../mocks';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { Prisma } from '$generated/prisma/client';
 
@@ -30,6 +35,7 @@ describe('post action controllers', () => {
 		request: {
 			headers: new Headers(),
 		},
+		getClientAddress: () => '127.0.0.1',
 	} as unknown as RequestEvent;
 
 	beforeEach(() => {
@@ -80,6 +86,7 @@ describe('post action controllers', () => {
 		it('should successfully like a post', async () => {
 			mockPostActions.findPostById.mockResolvedValue({ id: 'p1' } as TPostBase);
 			mockPostActions.likePostById.mockResolvedValue(true);
+			mockSessionHelpers.getRemoteAssociatedKeys.mockResolvedValue([]);
 			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
 				async (event, handlerType, schema, callback) => {
 					return await callback({ pathParams: { postId: 'p1' }, body: { action: 'like' } });

@@ -5,6 +5,6 @@ export const GET: RequestHandler = async (request) => {
 	return (await handleGetLabelMetadata(request, 'artist')) as ReturnType<RequestHandler>;
 };
 
-export const PUT: RequestHandler = async (request) => {
+export const PATCH: RequestHandler = async (request) => {
 	return (await handleUpdateLabelMetadata(request, 'artist')) as ReturnType<RequestHandler>;
 };

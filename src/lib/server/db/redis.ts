@@ -30,6 +30,9 @@ const mockRedisClient = {
 	sMembers: async () => [],
 	sAdd: async () => 1,
 	ping: async () => 'PONG',
+	incr: async () => 1,
+	pExpire: async () => true,
+	pTTL: async () => -1,
 } as unknown as RedisClient;
 
 const globalForRedis = globalThis as unknown as {

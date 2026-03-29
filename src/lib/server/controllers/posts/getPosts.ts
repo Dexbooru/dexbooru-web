@@ -40,14 +40,16 @@ export const handleGetPosts = async (
 			redirect(302, '/');
 		}
 
+		const cacheUserId =
+			category === 'liked' ? user.id : category === 'uploaded' ? (userId ?? user.id) : null;
+
 		const cacheKey = getCacheKeyWithPostCategory(
 			category,
 			pageNumber,
 			orderBy as TPostOrderByColumn,
 			ascending,
+			cacheUserId,
 		);
-
-		let overrideUserId: string | null = null;
 
 		try {
 			let responseData: TPostPaginationData;
@@ -81,7 +83,6 @@ export const handleGetPosts = async (
 							ascending,
 							selectors,
 						);
-						overrideUserId = user.id;
 						break;
 					case 'uploaded': {
 						const targetUserId = userId ?? user.id;
@@ -100,7 +101,6 @@ export const handleGetPosts = async (
 							selectors,
 							moderationStatuses,
 						);
-						overrideUserId = targetUserId;
 						break;
 					}
 				}
@@ -117,17 +117,7 @@ export const handleGetPosts = async (
 					orderBy: orderBy as TPostOrderByColumn,
 				};
 
-				const finalCacheKey = overrideUserId
-					? getCacheKeyWithPostCategory(
-							category,
-							pageNumber,
-							orderBy as TPostOrderByColumn,
-							ascending,
-							overrideUserId,
-						)
-					: cacheKey;
-
-				cacheResponseRemotely(finalCacheKey, responseData, CACHE_TIME_GENERAL_POSTS);
+				cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_GENERAL_POSTS);
 				cacheMultipleToCollectionRemotely(
 					posts.map((post) => getCacheKeyForIndividualPostKeys(post.id)),
 					cacheKey,

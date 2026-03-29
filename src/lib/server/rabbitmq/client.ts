@@ -1,5 +1,6 @@
-import { building, dev } from '$app/environment';
+import { dev } from '$app/environment';
 import { RABBITMQ_URL } from '$env/static/private';
+import { RABBITMQ_CONNECT } from '../constants/rabbitmq';
 import { Connection } from 'rabbitmq-client';
 
 const globalForRabbitMQ = globalThis as unknown as {
@@ -7,7 +8,7 @@ const globalForRabbitMQ = globalThis as unknown as {
 };
 
 const rabbitmq = (() => {
-	if (building) {
+	if (!RABBITMQ_CONNECT) {
 		return null as unknown as Connection;
 	}
 	if (globalForRabbitMQ.rabbitmq) {

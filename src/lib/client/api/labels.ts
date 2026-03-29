@@ -7,7 +7,7 @@ export const updateLabelMetadata = async (
 ) => {
 	const path = `/api/${labelType + 's'}/metadata/${labelName}`;
 	return await fetch(path, {
-		method: 'PUT',
+		method: 'PATCH',
 		headers: getApiAuthHeaders(),
 		body: JSON.stringify(body),
 	});

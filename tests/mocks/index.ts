@@ -4,6 +4,7 @@ export * from './logging/logger';
 export * from './aws/s3';
 export * from './aws/sqs';
 export * from './rabbitmq/publishers/newPostVectorTarget';
+export * from './rabbitmq/publishers/newPostLike';
 export * from './db/actions/post';
 export * from './db/actions/user';
 export * from './db/actions/tag';

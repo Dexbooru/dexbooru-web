@@ -20,3 +20,13 @@ export const FAILURE_TOAST_OPTIONS: SvelteToastOptions = {
 		'--toastBarBackground': '#cc0000',
 	},
 };
+
+/** Like action hit server rate limit (429) — smug copy, slightly longer read time */
+export const LIKE_RATE_LIMIT_TOAST_OPTIONS: SvelteToastOptions = {
+	duration: 4500,
+	theme: {
+		'--toastColor': 'mintcream',
+		'--toastBackground': '#9a3412',
+		'--toastBarBackground': '#7c2d12',
+	},
+};

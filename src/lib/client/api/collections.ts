@@ -10,7 +10,7 @@ import { getAuthenticatedUser } from '../helpers/context';
 
 export const editCollection = async (collectionId: string, body: TUpdateCollectionBody) => {
 	return await fetch(`/api/collection/${collectionId}`, {
-		method: 'PUT',
+		method: 'PATCH',
 		body: JSON.stringify(body),
 	});
 };
@@ -25,7 +25,7 @@ export const updatePostCollections = async (
 	};
 
 	return await fetch('/api/posts/collections', {
-		method: 'PUT',
+		method: 'PATCH',
 		body: JSON.stringify(body),
 	});
 };

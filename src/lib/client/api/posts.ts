@@ -8,7 +8,7 @@ export const deletePost = async (postId: string): Promise<Response> => {
 
 export const editPost = async (postId: string, body: TUpdatePostBody): Promise<Response> => {
 	return await fetch(`/api/post/${postId}`, {
-		method: 'PUT',
+		method: 'PATCH',
 		body: JSON.stringify(body),
 	});
 };

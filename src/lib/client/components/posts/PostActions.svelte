@@ -7,7 +7,11 @@
 		REPORT_MODAL_NAME,
 		REPORT_POST_LIST_MODAL_NAME,
 	} from '$lib/client/constants/layout';
-	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
+	import {
+		FAILURE_TOAST_OPTIONS,
+		LIKE_RATE_LIMIT_TOAST_OPTIONS,
+		SUCCESS_TOAST_OPTIONS,
+	} from '$lib/client/constants/toasts';
 	import {
 		getActiveModal,
 		getAuthenticatedUser,
@@ -43,6 +47,8 @@
 
 	let postLikeLoading = $state(false);
 	let hasLikedPost = $derived(likedPost);
+	/** Increments on each 429 so `{#key}` remounts and replay the shake animation */
+	let likeShakeGeneration = $state(0);
 
 	const handleModalOpen = (focusedModalName: string, data: unknown) => {
 		activeModal.set({
@@ -77,6 +83,13 @@
 				post.likes = likes;
 				return post;
 			});
+		} else if (response.status === 429) {
+			likeShakeGeneration += 1;
+			toast.push(
+				'Whoa, eager beaver — give the heart (and our server) a moment to breathe. Try again shortly.',
+				LIKE_RATE_LIMIT_TOAST_OPTIONS,
+			);
+			// Do not adjust `likes`, `updatedPost`, or liked state; server rejected the action.
 		} else {
 			toast.push(
 				`There was an error while ${hasLikedPost ? 'disliking' : 'liking'}  the post!`,
@@ -87,20 +100,27 @@
 </script>
 
 <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap">
-	<Button
-		disabled={postLikeLoading}
-		onclick={handleLikePost}
-		color="green"
-		class="flex w-full items-center justify-center space-x-3 lg:w-auto"
-	>
-		<HeartSolid color={hasLikedPost ? 'red' : 'inherit'} role="icon" style="bg-red" />
-		<span>
-			{normalizeCount(likes)}
-			{#if $user}
-				- Like post
-			{/if}
-		</span>
-	</Button>
+	{#key likeShakeGeneration}
+		<div
+			class="like-shake-host w-full lg:w-auto"
+			class:like-shake-host--active={likeShakeGeneration > 0}
+		>
+			<Button
+				disabled={postLikeLoading}
+				onclick={handleLikePost}
+				color="green"
+				class="flex w-full items-center justify-center space-x-3 lg:w-auto"
+			>
+				<HeartSolid color={hasLikedPost ? 'red' : 'inherit'} role="icon" style="bg-red" />
+				<span>
+					{normalizeCount(likes)}
+					{#if $user}
+						- Like post
+					{/if}
+				</span>
+			</Button>
+		</div>
+	{/key}
 
 	{#if $user}
 		<Button
@@ -166,3 +186,38 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	@keyframes like-button-shake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		15% {
+			transform: translateX(-9px);
+		}
+		30% {
+			transform: translateX(8px);
+		}
+		45% {
+			transform: translateX(-6px);
+		}
+		60% {
+			transform: translateX(5px);
+		}
+		75% {
+			transform: translateX(-3px);
+		}
+	}
+
+	.like-shake-host--active {
+		animation: like-button-shake 0.45s ease-in-out;
+		transform-origin: center;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.like-shake-host--active {
+			animation: none;
+		}
+	}
+</style>

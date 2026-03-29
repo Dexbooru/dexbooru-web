@@ -1,20 +1,43 @@
 import type { RequestEvent } from '@sveltejs/kit';
+import redis from '../../db/redis';
 import { findPostById, likePostById } from '../../db/actions/post';
+import { LIKE_POST_RATE_LIMIT, REDIS_RATE_LIMIT_KEY_POST_LIKE } from '../../constants/rateLimit';
 import {
 	createErrorResponse,
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { invalidateCacheRemotely } from '../../helpers/sessions';
+import {
+	getRemoteAssociatedKeys,
+	invalidateCacheRemotely,
+	invalidateMultipleCachesRemotely,
+} from '../../helpers/sessions';
 import logger from '../../logging/logger';
 import {
 	getCacheKeyForIndividualPost,
+	getCacheKeyForIndividualPostKeys,
 	getCacheKeyWithPostCategory,
 } from '../cache-strategies/posts';
 import { LikePostSchema } from '../request-schemas/posts';
 import newPostLikePublisher, { NewPostLikePublisher } from '../../rabbitmq/publishers/newPostLike';
+import {
+	consumeRateLimit,
+	rateLimitExceededApiResponse,
+	sanitizeClientAddressForRateLimitKey,
+} from '../../middleware/rateLimit';
 
 export const handleLikePost = async (event: RequestEvent) => {
+	const rateLimitResult = await consumeRateLimit(redis, {
+		keyPrefix: REDIS_RATE_LIMIT_KEY_POST_LIKE,
+		identifier: `${sanitizeClientAddressForRateLimitKey(event.getClientAddress())}:${
+			event.locals.user.id
+		}`,
+		rule: LIKE_POST_RATE_LIMIT,
+	});
+	if (!rateLimitResult.ok) {
+		return rateLimitExceededApiResponse(rateLimitResult.retryAfterSeconds);
+	}
+
 	return await validateAndHandleRequest(
 		event,
 		'api-route',
@@ -23,6 +46,7 @@ export const handleLikePost = async (event: RequestEvent) => {
 			const postId = data.pathParams.postId;
 			const action = data.body.action;
 			const individualPostCacheKey = getCacheKeyForIndividualPost(postId);
+			const postListAssociationKey = getCacheKeyForIndividualPostKeys(postId);
 			const userLikedPostsCacheKey = getCacheKeyWithPostCategory(
 				'liked',
 				0,
@@ -63,8 +87,13 @@ export const handleLikePost = async (event: RequestEvent) => {
 						.catch((err) => logger.error('Failed to publish new post like event', err));
 				}
 
-				invalidateCacheRemotely(individualPostCacheKey);
-				invalidateCacheRemotely(userLikedPostsCacheKey);
+				const listCacheKeysToInvalidate = await getRemoteAssociatedKeys(postListAssociationKey);
+				await Promise.all([
+					invalidateMultipleCachesRemotely(listCacheKeysToInvalidate),
+					invalidateCacheRemotely(postListAssociationKey),
+					invalidateCacheRemotely(individualPostCacheKey),
+					invalidateCacheRemotely(userLikedPostsCacheKey),
+				]);
 
 				return createSuccessResponse(
 					'api-route',

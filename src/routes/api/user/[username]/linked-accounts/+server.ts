@@ -8,6 +8,6 @@ export const GET: RequestHandler = async (request) => {
 	return (await handleGetUserLinkedAccounts(request)) as ReturnType<RequestHandler>;
 };
 
-export const PUT: RequestHandler = async (request) => {
+export const PATCH: RequestHandler = async (request) => {
 	return (await handleUpdateLinkedAccounts(request, 'api-route')) as ReturnType<RequestHandler>;
 };

@@ -3,7 +3,7 @@ import type { TCommentCreateBody } from '$lib/shared/types/comments';
 
 export const editComment = async (postId: string, commentId: string, updatedContnet: string) => {
 	return await fetch(`/api/post/${postId}/comments`, {
-		method: 'PUT',
+		method: 'PATCH',
 		body: JSON.stringify({
 			commentId,
 			content: updatedContnet,

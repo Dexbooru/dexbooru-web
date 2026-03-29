@@ -5,6 +5,6 @@ export const GET: RequestHandler = async (request) => {
 	return (await handleGetLabelMetadata(request, 'tag')) as ReturnType<RequestHandler>;
 };
 
-export const PUT: RequestHandler = async (request) => {
+export const PATCH: RequestHandler = async (request) => {
 	return (await handleUpdateLabelMetadata(request, 'tag')) as ReturnType<RequestHandler>;
 };

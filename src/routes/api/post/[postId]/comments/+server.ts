@@ -10,7 +10,7 @@ export const GET: RequestHandler = async (request) => {
 	return (await handleGetPostComments(request)) as ReturnType<RequestHandler>;
 };
 
-export const PUT: RequestHandler = async (request) => {
+export const PATCH: RequestHandler = async (request) => {
 	return (await handleUpdatePostComment(request)) as ReturnType<RequestHandler>;
 };
 
