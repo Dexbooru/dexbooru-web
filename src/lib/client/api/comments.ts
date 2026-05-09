@@ -34,6 +34,10 @@ export const getComments = async (
 	return await fetch(finalUrl);
 };
 
+export const getCommentChain = async (commentId: string): Promise<Response> => {
+	return await fetch(`/api/comments/${commentId}`);
+};
+
 export const createComment = async (postId: string, body: TCommentCreateBody) => {
 	return await fetch(`/api/post/${postId}/comments`, {
 		method: 'POST',

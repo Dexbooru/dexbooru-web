@@ -32,6 +32,42 @@ export async function findCommentById(commentId: string, selectors?: TCommentSel
 	});
 }
 
+export async function findCommentAncestorChain(commentId: string, selectors?: TCommentSelector) {
+	const lineage: string[] = [];
+	const visited = new Set<string>();
+	let currentCommentId: string | null = commentId;
+
+	while (currentCommentId) {
+		if (visited.has(currentCommentId)) break;
+		visited.add(currentCommentId);
+
+		const comment = await findCommentById(currentCommentId, {
+			id: true,
+			parentCommentId: true,
+		});
+		if (!comment) break;
+
+		lineage.push(comment.id);
+		currentCommentId = comment.parentCommentId;
+	}
+
+	if (lineage.length === 0) return [];
+
+	const reversedLineage = [...lineage].reverse();
+	const comments = await prisma.comment.findMany({
+		where: {
+			id: {
+				in: reversedLineage,
+			},
+		},
+		select: selectors,
+	});
+	const commentsById = new Map(comments.map((comment) => [comment.id, comment]));
+	return reversedLineage
+		.map((lineageCommentId) => commentsById.get(lineageCommentId))
+		.filter(Boolean);
+}
+
 export async function editCommentContentById(
 	commentId: string,
 	updatedContent: string,

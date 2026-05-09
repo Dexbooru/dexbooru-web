@@ -4,6 +4,14 @@ import type sanitize from 'sanitize-html';
 
 export const COMMENT_CONTAINER_EMOJI_CHUNK_SIZE = 6;
 
+/** Applied briefly after deep-link scroll so the highlight runs even when `:target` did not re-run the animation. */
+export const COMMENT_PERMALINK_FLASH_CLASS = 'comment-permalink-flash';
+
+export function getCommentPermalinkUrl(postId: string, commentId: string): string {
+	if (typeof window === 'undefined') return '';
+	return `${window.location.origin}/posts/${postId}#comment-${commentId}`;
+}
+
 export const MAXIMUM_COMMENT_REPLY_DEPTH_LOAD = 1;
 export const MAXIMUM_COMMENT_REPLY_DEPTH_ABSOLUTE = 10;
 

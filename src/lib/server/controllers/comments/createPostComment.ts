@@ -68,6 +68,7 @@ export const handleCreatePostComment = async (event: RequestEvent) => {
 					const routingKey = NewPostCommentPublisher.buildRoutingKey(post.authorId);
 					newPostCommentPublisher
 						.publish(routingKey, {
+							commentId: newCommentId,
 							postId,
 							postAuthorId: post.authorId,
 							commentAuthorId: event.locals.user.id,

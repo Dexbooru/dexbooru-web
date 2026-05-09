@@ -2,6 +2,7 @@ import { NOTIFICATION_EXCHANGE } from '../../constants/rabbitmq';
 import { BasePublisher } from '../basePublisher';
 
 export type TNewPostCommentMessage = {
+	commentId: string;
 	postId: string;
 	postAuthorId: string;
 	commentAuthorId: string;
@@ -20,6 +21,7 @@ export class NewPostCommentPublisher extends BasePublisher<TNewPostCommentMessag
 
 	public toMessageDto(data: TNewPostCommentMessage): TNewPostCommentMessage {
 		return {
+			commentId: data.commentId,
 			postId: data.postId,
 			postAuthorId: data.postAuthorId,
 			commentAuthorId: data.commentAuthorId,

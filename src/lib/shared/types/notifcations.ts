@@ -19,6 +19,7 @@ export type TNewPostCommentNotification = {
 	_id: string;
 	createdAt: string;
 	type: 'new_post_comment';
+	commentId: string;
 	postId: string;
 	postAuthorId: string;
 	commentAuthorId: string;

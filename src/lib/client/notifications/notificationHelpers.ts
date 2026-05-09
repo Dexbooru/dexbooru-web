@@ -41,7 +41,7 @@ export function getNotificationLink(notification: TRealtimeNotification): string
 		case 'new_post_like':
 			return `/posts/${notification.postId}`;
 		case 'new_post_comment':
-			return `/posts/${notification.postId}`;
+			return `/posts/${notification.postId}#comment-${notification.commentId}`;
 		case 'friend_invite':
 			return '/friends';
 	}

@@ -1,4 +1,11 @@
-import type { TCommentOrderByColumn } from '$lib/shared/types/comments';
+import type { TComment, TCommentOrderByColumn } from '$lib/shared/types/comments';
+
+/** JSON body from `GET /api/comments/{commentId}` success responses. */
+export type TCommentChainApiResponse = {
+	data?: {
+		commentChain?: TComment[];
+	};
+};
 
 interface TOrderByMapValue {
 	label: string;
