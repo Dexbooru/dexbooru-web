@@ -1,30 +1,7 @@
-/** Keys matched case-insensitively for request validation / debug logs. */
-const SENSITIVE_KEY_NORMALIZED = new Set([
-	'password',
-	'confirmedpassword',
-	'oldpassword',
-	'newpassword',
-	'confirmednewpassword',
-	'otpcode',
-	'email',
-	'token',
-	'tokenid',
-	'refreshtoken',
-	'accesstoken',
-	'authorization',
-	'secret',
-	'clientsecret',
-	'recoveryid',
-	'passwordrecoveryattemptid',
-	'apikey',
-]);
+import { LOG_REDACT_SENSITIVE_KEY_SET } from '../constants/logging';
 
-const isSensitiveKey = (key: string) => SENSITIVE_KEY_NORMALIZED.has(key.toLowerCase());
+const isSensitiveKey = (key: string) => LOG_REDACT_SENSITIVE_KEY_SET.has(key.toLowerCase());
 
-/**
- * Returns a log-safe copy of parsed request parts (form, query, JSON body).
- * Redacts passwords, OTPs, emails, tokens, and similar fields (case-insensitive keys).
- */
 export const redactForLog = (data: unknown): unknown => {
 	if (data === null || typeof data !== 'object') {
 		return data;
