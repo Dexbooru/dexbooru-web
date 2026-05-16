@@ -2,13 +2,13 @@ import { LOG_REDACT_SENSITIVE_KEY_SET } from '../constants/logging';
 
 const isSensitiveKey = (key: string) => LOG_REDACT_SENSITIVE_KEY_SET.has(key.toLowerCase());
 
-export const redactForLog = (data: unknown): unknown => {
+export const redaction = (data: unknown): unknown => {
 	if (data === null || typeof data !== 'object') {
 		return data;
 	}
 
 	if (Array.isArray(data)) {
-		return data.map((item) => redactForLog(item));
+		return data.map((item) => redaction(item));
 	}
 
 	if (data instanceof File) {
@@ -22,7 +22,7 @@ export const redactForLog = (data: unknown): unknown => {
 			continue;
 		}
 		if (value !== null && typeof value === 'object') {
-			result[key] = redactForLog(value);
+			result[key] = redaction(value);
 		} else {
 			result[key] = value;
 		}

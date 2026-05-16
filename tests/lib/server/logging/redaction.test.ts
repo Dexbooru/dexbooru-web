@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { redactForLog } from '$lib/server/logging/redactForLog';
+import { redaction } from '$lib/server/logging/redaction';
 
-describe('redactForLog', () => {
+describe('redaction', () => {
 	it.each([
 		{
 			name: 'password fields',
@@ -35,7 +35,7 @@ describe('redactForLog', () => {
 			forbidden: ['nested@test.com', 'UniquePasswordToken999'],
 		},
 	])('redacts $name', ({ input, forbidden }) => {
-		const out = redactForLog(input) as Record<string, unknown>;
+		const out = redaction(input) as Record<string, unknown>;
 		const json = JSON.stringify(out);
 		for (const secret of forbidden) {
 			expect(json).not.toContain(secret);
@@ -44,14 +44,14 @@ describe('redactForLog', () => {
 	});
 
 	it('preserves non-sensitive fields', () => {
-		const out = redactForLog({ username: 'bob', rememberMe: 'on' }) as Record<string, unknown>;
+		const out = redaction({ username: 'bob', rememberMe: 'on' }) as Record<string, unknown>;
 		expect(out.username).toBe('bob');
 		expect(out.rememberMe).toBe('on');
 	});
 
 	it('leaves scalars unchanged', () => {
-		expect(redactForLog('plain')).toBe('plain');
-		expect(redactForLog(null)).toBe(null);
-		expect(redactForLog(42)).toBe(42);
+		expect(redaction('plain')).toBe('plain');
+		expect(redaction(null)).toBe(null);
+		expect(redaction(42)).toBe(42);
 	});
 });
