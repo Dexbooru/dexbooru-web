@@ -6,6 +6,7 @@ export * from './aws/sqs';
 export * from './rabbitmq/publishers/newPostVectorTarget';
 export * from './rabbitmq/publishers/newPostLike';
 export * from './db/actions/post';
+export { mockCommentActions, restoreCommentActionMocks } from './db/actions/comment';
 export * from './db/actions/user';
 export * from './db/actions/tag';
 export * from './db/actions/artist';

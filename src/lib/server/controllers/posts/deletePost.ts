@@ -17,6 +17,7 @@ import {
 } from '../cache-strategies/posts';
 import { DeletePostSchema } from '../request-schemas/posts';
 import logger from '../../logging/logger';
+import { isModerationRole } from '$lib/shared/helpers/auth/role';
 import type { RequestEvent } from '@sveltejs/kit';
 
 export const handleDeletePost = async (event: RequestEvent) => {
@@ -36,7 +37,6 @@ export const handleDeletePost = async (event: RequestEvent) => {
 					author: {
 						select: {
 							id: true,
-							role: true,
 						},
 					},
 				});
@@ -48,11 +48,13 @@ export const handleDeletePost = async (event: RequestEvent) => {
 					);
 				}
 
-				if (event.locals.user.id !== post.author.id && post.author.role !== 'OWNER') {
+				const isAuthor = event.locals.user.id === post.author.id;
+				const isModerator = isModerationRole(event.locals.user.role);
+				if (!isAuthor && !isModerator) {
 					return createErrorResponse(
 						'api-route',
 						403,
-						'You are not authorized to delete this post, as you are not the author or a site owner',
+						'You are not authorized to delete this post, as you are not the author or a moderator',
 					);
 				}
 

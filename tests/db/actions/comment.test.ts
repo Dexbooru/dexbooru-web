@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mockPrisma } from '../../mocks/prisma';
+import { restoreCommentActionMocks } from '../../mocks/db/actions/comment';
 import {
 	findComments,
 	findCommentById,
@@ -11,6 +12,7 @@ import {
 describe('comment actions', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		restoreCommentActionMocks();
 	});
 
 	describe('findComments', () => {

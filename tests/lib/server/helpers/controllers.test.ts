@@ -5,6 +5,7 @@ import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { mockSessionHelpers } from '../../../mocks/helpers/sessions';
 import { mockControllerHelpers } from '../../../mocks/helpers/controllers';
+import { mockLogger } from '../../../mocks/logging/logger';
 
 // Use real implementations for controllers in this test file
 const {
@@ -151,6 +152,40 @@ describe('controllers', () => {
 				name: z.string().min(1),
 			}),
 		} satisfies TRequestSchema;
+
+		it('does not log raw password when form validation fails', async () => {
+			const formData = new FormData();
+			formData.set('name', '');
+			formData.set('password', 'secretPlaintextPassword');
+			const url = new URL('http://localhost/register');
+			const request = new Request(url.toString(), {
+				method: 'POST',
+				body: formData,
+			});
+			const sessionUser = { id: 'u1', username: 'alice', email: 'a@b.com', emailVerified: true };
+			const event = createMockEvent({
+				request,
+				url,
+				locals: { user: sessionUser as typeof NULLABLE_USER },
+			});
+
+			await validateAndHandleRequest(
+				event,
+				'api-route',
+				formSchema,
+				async () => ({ success: true }),
+				true,
+			);
+
+			const warnCalls = vi.mocked(mockLogger.warn).mock.calls;
+			const validationFailedCall = warnCalls.find(
+				(args) => typeof args[0] === 'string' && args[0].includes('Request validation failed for part'),
+			);
+			expect(validationFailedCall).toBeDefined();
+			const payload = JSON.stringify(validationFailedCall![1]);
+			expect(payload).not.toContain('secretPlaintextPassword');
+			expect(payload).toContain('[REDACTED]');
+		});
 
 		it('returns 401 when protected and user not authenticated', async () => {
 			const request = {

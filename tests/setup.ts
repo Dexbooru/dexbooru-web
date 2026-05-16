@@ -7,6 +7,7 @@ import './mocks/aws/sqs';
 import './mocks/rabbitmq/publishers/newPostVectorTarget';
 import './mocks/rabbitmq/publishers/newPostLike';
 import './mocks/db/actions/post';
+import './mocks/db/actions/comment';
 import './mocks/db/actions/user';
 import './mocks/db/actions/tag';
 import './mocks/db/actions/artist';

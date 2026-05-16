@@ -13,7 +13,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 import type { Prisma } from '$generated/prisma/client';
 
 type TPostWithAuthor = Prisma.PostGetPayload<{
-	select: { id: true; imageUrls: true; author: { select: { id: true; role: true } } };
+	select: { id: true; imageUrls: true; author: { select: { id: true } } };
 }>;
 type TPostBase = Prisma.PostGetPayload<{
 	select: {
@@ -47,7 +47,7 @@ describe('post action controllers', () => {
 			const mockPost = {
 				id: 'p1',
 				imageUrls: ['url1'],
-				author: { id: 'u1', role: 'USER' },
+				author: { id: 'u1' },
 			} as TPostWithAuthor;
 			mockPostActions.findPostById.mockResolvedValue(mockPost);
 			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
@@ -64,7 +64,7 @@ describe('post action controllers', () => {
 		});
 
 		it('should return 403 if user is not author', async () => {
-			const mockPost = { id: 'p1', author: { id: 'u2', role: 'USER' } } as TPostWithAuthor;
+			const mockPost = { id: 'p1', imageUrls: [], author: { id: 'u2' } } as TPostWithAuthor;
 			mockPostActions.findPostById.mockResolvedValue(mockPost);
 			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
 				async (event, handlerType, schema, callback) => {
@@ -79,6 +79,76 @@ describe('post action controllers', () => {
 				403,
 				expect.any(String),
 			);
+			expect(mockPostActions.deletePostById).not.toHaveBeenCalled();
+		});
+
+		it('should return 403 when USER tries to delete a post authored by site OWNER (IDOR regression)', async () => {
+			const mockPost = {
+				id: 'p1',
+				imageUrls: [],
+				author: { id: 'owner-user-id' },
+			} as TPostWithAuthor;
+			mockPostActions.findPostById.mockResolvedValue(mockPost);
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (_event, _handlerType, _schema, callback) => {
+					return await callback({ pathParams: { postId: 'p1' } });
+				},
+			);
+
+			await handleDeletePost(mockEvent);
+
+			expect(mockControllerHelpers.createErrorResponse).toHaveBeenCalledWith(
+				'api-route',
+				403,
+				expect.any(String),
+			);
+			expect(mockPostActions.deletePostById).not.toHaveBeenCalled();
+		});
+
+		it('should allow MODERATOR to delete another user post', async () => {
+			const modEvent = {
+				...mockEvent,
+				locals: { user: { id: 'm1', username: 'mod', role: 'MODERATOR' } },
+			} as unknown as RequestEvent;
+			const mockPost = {
+				id: 'p1',
+				imageUrls: [],
+				author: { id: 'u2' },
+			} as TPostWithAuthor;
+			mockPostActions.findPostById.mockResolvedValue(mockPost);
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (_event, _handlerType, _schema, callback) => {
+					return await callback({ pathParams: { postId: 'p1' } });
+				},
+			);
+
+			await handleDeletePost(modEvent);
+
+			expect(mockPostActions.deletePostById).toHaveBeenCalledWith('p1');
+			expect(mockControllerHelpers.createSuccessResponse).toHaveBeenCalled();
+		});
+
+		it('should allow OWNER to delete another user post', async () => {
+			const ownerEvent = {
+				...mockEvent,
+				locals: { user: { id: 'o1', username: 'owner', role: 'OWNER' } },
+			} as unknown as RequestEvent;
+			const mockPost = {
+				id: 'p1',
+				imageUrls: [],
+				author: { id: 'u2' },
+			} as TPostWithAuthor;
+			mockPostActions.findPostById.mockResolvedValue(mockPost);
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (_event, _handlerType, _schema, callback) => {
+					return await callback({ pathParams: { postId: 'p1' } });
+				},
+			);
+
+			await handleDeletePost(ownerEvent);
+
+			expect(mockPostActions.deletePostById).toHaveBeenCalledWith('p1');
+			expect(mockControllerHelpers.createSuccessResponse).toHaveBeenCalled();
 		});
 	});
 

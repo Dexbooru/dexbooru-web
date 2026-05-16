@@ -9,6 +9,7 @@ import {
 	VALID_REQUEST_TYPES,
 } from '../constants/controllers';
 import logger from '../logging/logger';
+import { redaction } from '../logging/redaction';
 import type {
 	TControllerHandlerVariant,
 	TInferRequestSchema,
@@ -69,7 +70,7 @@ const validatePart = <K extends keyof TRequestSchema>(
 
 	logger.warn(`Request validation failed for part: ${key}`, {
 		errors: parseResult.error.issues,
-		data: data,
+		data: redaction(data),
 	});
 
 	return {

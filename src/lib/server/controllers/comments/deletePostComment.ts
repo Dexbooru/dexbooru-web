@@ -1,5 +1,4 @@
 import { isModerationRole } from '$lib/shared/helpers/auth/role';
-import type { TComment } from '$lib/shared/types/comments';
 import type { RequestEvent } from '@sveltejs/kit';
 import {
 	deleteCommentById,
@@ -26,11 +25,10 @@ export const handleDeletePostComment = async (event: RequestEvent) => {
 			const commentId = data.urlSearchParams.commentId;
 
 			try {
-				const comment = (await findCommentById(commentId, {
+				const comment = await findCommentById(commentId, {
 					postId: true,
 					authorId: true,
-					author: { select: { role: true } },
-				})) as TComment;
+				});
 				if (!comment) {
 					return createErrorResponse(
 						'api-route',
@@ -47,7 +45,9 @@ export const handleDeletePostComment = async (event: RequestEvent) => {
 					);
 				}
 
-				if (comment.authorId !== event.locals.user.id && !isModerationRole(comment.author.role)) {
+				const isAuthor = comment.authorId === event.locals.user.id;
+				const callerIsModerator = isModerationRole(event.locals.user.role);
+				if (!isAuthor && !callerIsModerator) {
 					return createErrorResponse(
 						'api-route',
 						403,
@@ -55,7 +55,7 @@ export const handleDeletePostComment = async (event: RequestEvent) => {
 					);
 				}
 
-				if (comment.authorId !== event.locals.user.id && isModerationRole(comment.author.role)) {
+				if (!isAuthor && callerIsModerator) {
 					await editCommentContentById(
 						commentId,
 						'This comment has been removed by a site moderator',
