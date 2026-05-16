@@ -14,13 +14,13 @@ export const doPasswordsMatch = async (
 	return await bcrypt.compare(password, hashedPassword);
 };
 
+/** Printable ASCII 33–126 (94 chars). Slight bias from modulo is acceptable for ephemeral passwords. */
 export const generateRandomPassword = (passwordSize: number): string => {
-	let generatedPassword: string = '';
-
+	const bytes = new Uint8Array(passwordSize);
+	crypto.getRandomValues(bytes);
+	let generatedPassword = '';
 	for (let i = 0; i < passwordSize; i++) {
-		const randomCharacter = Math.floor(Math.random() * 94) + 33;
-		generatedPassword += String.fromCharCode(randomCharacter);
+		generatedPassword += String.fromCharCode(33 + (bytes[i]! % 94));
 	}
-
 	return generatedPassword;
 };

@@ -79,7 +79,7 @@ export const handleCreateUser = async (event: RequestEvent) => {
 		const { email, username, password, confirmedPassword, profilePicture } = data.form;
 
 		if (password !== confirmedPassword) {
-			logger.warn('Registration failed: password mismatch', { username, email });
+			logger.warn('Registration failed: password mismatch', { username });
 			return createErrorResponse('form-action', 400, 'Invalid registration data', {
 				email,
 				username,
@@ -88,12 +88,11 @@ export const handleCreateUser = async (event: RequestEvent) => {
 		}
 
 		try {
-			logger.info('Checking for existing user', { username, email });
+			logger.info('Checking for existing user', { username });
 			const user = await findUserByNameOrEmail(email, username);
 			if (user) {
 				logger.warn('Registration failed: username or email already exists', {
 					username,
-					email,
 				});
 				return createErrorResponse('form-action', 409, 'Invalid registration data', {
 					email,
@@ -121,7 +120,7 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			);
 			finalProfilePictureUrl = profilePictureObjectUrl;
 
-			logger.info('Creating user account', { username, email });
+			logger.info('Creating user account', { username });
 			const hashedPassword = await hashPassword(password);
 
 			const newUser = await createUser(username, email, hashedPassword, finalProfilePictureUrl);
@@ -138,7 +137,7 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			await createUserPreferences(newUser.id);
 
 			try {
-				logger.info('Sending verification email', { userId: newUser.id, email: newUser.email });
+				logger.info('Sending verification email', { userId: newUser.id });
 				const verificationToken = await createEmailVerificationToken(newUser.id);
 				await sendEmail({
 					from: {
@@ -152,8 +151,8 @@ export const handleCreateUser = async (event: RequestEvent) => {
 				logger.info('Verification email sent successfully', { userId: newUser.id });
 			} catch (emailError) {
 				logger.error('Failed to send verification email', {
-					error: emailError,
 					userId: newUser.id,
+					message: emailError instanceof Error ? emailError.message : String(emailError),
 				});
 			}
 
@@ -163,9 +162,8 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			if (isRedirect(error)) throw error;
 
 			logger.error('Unexpected error during user registration', {
-				error,
 				username,
-				email,
+				message: error instanceof Error ? error.message : String(error),
 			});
 			return createErrorResponse(
 				'form-action',
