@@ -1,4 +1,5 @@
 import { dev } from '$app/environment';
+import { ensureApplicationConfigurationLoaded } from '$lib/server/applicationConfiguration';
 import { populateAuthenticatedUser } from '$lib/server/helpers/controllers';
 import logger from '$lib/server/logging/logger';
 import type { Handle, HandleServerError } from '@sveltejs/kit';
@@ -6,6 +7,7 @@ import type { Handle, HandleServerError } from '@sveltejs/kit';
 export const handle: Handle = async ({ event, resolve }) => {
 	logger.info(event);
 
+	await ensureApplicationConfigurationLoaded();
 	populateAuthenticatedUser(event);
 	return await resolve(event);
 };
