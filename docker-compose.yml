@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile.app
     ports:
-      - "${PORT}:5173"
+      - '${PORT}:5173'
     environment:
       - PORT=${PORT}
       - ORIGIN=${ORIGIN}
@@ -19,7 +19,7 @@ services:
     container_name: dexbooru-localstack
     restart: always
     ports:
-      - "4566-4597:4566-4597"
+      - '4566-4597:4566-4597'
     environment:
       - SERVICES=s3,sqs
       - AWS_DEFAULT_REGION=us-east-1
@@ -37,27 +37,26 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
-      - "${DB_PORT}:5432"
+      - '${DB_PORT}:5432'
     volumes:
       - pg-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${DB_USER} -d ${DB_NAME}'"]
+      test: ['CMD-SHELL', "sh -c 'pg_isready -U ${DB_USER} -d ${DB_NAME}'"]
       interval: 10s
       timeout: 3s
       retries: 5
-
 
   redis:
     image: redis:latest
     container_name: dexbooru-redis
     restart: always
-    command: ["redis-server","--requirepass","${DB_REDIS_PASSWORD}"]
+    command: ['redis-server', '--requirepass', '${DB_REDIS_PASSWORD}']
     ports:
-      - "${DB_REDIS_PORT}:6379"
+      - '${DB_REDIS_PORT}:6379'
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${DB_REDIS_PASSWORD}", "PING"]
+      test: ['CMD', 'redis-cli', '-a', '${DB_REDIS_PASSWORD}', 'PING']
       interval: 10s
       timeout: 3s
       retries: 5

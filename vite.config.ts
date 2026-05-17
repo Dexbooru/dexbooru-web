@@ -6,6 +6,18 @@ export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}', 'tests/**/*.{test,spec}.{js,ts}'],
-		setupFiles: ['tests/setup.ts']
-	}
+		setupFiles: ['tests/setup.ts'],
+		coverage: {
+			provider: 'v8',
+			reportOnFailure: true,
+			include: ['src/**/*.{ts,js,svelte}'],
+			exclude: [
+				'**/*.{test,spec}.{js,ts}',
+				'tests/**',
+				'.svelte-kit/**',
+				'src/generated/**',
+				'build/**',
+			],
+		},
+	},
 });

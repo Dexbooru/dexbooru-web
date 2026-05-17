@@ -8,7 +8,6 @@ vi.mock('$lib/server/rabbitmq/publishers/newPostLike', () => ({
 	},
 	NewPostLikePublisher: {
 		BASE_ROUTING_KEY: 'event.new_post_like.',
-		buildRoutingKey: (postAuthorId: string) =>
-			`event.new_post_like.${postAuthorId}`,
+		buildRoutingKey: (postAuthorId: string) => `event.new_post_like.${postAuthorId}`,
 	},
 }));

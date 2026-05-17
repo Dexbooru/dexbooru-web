@@ -61,11 +61,7 @@ describe('email template builders', () => {
 
 	describe('buildOauthPasswordEmailTemplate', () => {
 		it('should escape HTML special characters in username and password', () => {
-			const result = buildOauthPasswordEmailTemplate(
-				'<script>',
-				'pass"word',
-				'google',
-			);
+			const result = buildOauthPasswordEmailTemplate('<script>', 'pass"word', 'google');
 
 			expect(result).toContain('&lt;script&gt;');
 			expect(result).toContain('pass&quot;word');
