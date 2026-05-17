@@ -22,7 +22,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest run",
-		"test:coverage": "vitest run --coverage.enabled --coverage.provider=v8 --coverage.reporter=html",
+		"test:coverage": "vitest run --coverage.enabled --coverage.reporter=html --coverage.reporter=text",
+		"test:coverage:ci": "vitest run --coverage.enabled --coverage.reporter=json-summary --coverage.reporter=json",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write 'src/**/*.{ts,svelte}'",
 		"prepare": "husky install && svelte-kit sync"
