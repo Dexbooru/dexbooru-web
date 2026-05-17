@@ -28,13 +28,15 @@ import {
 	createSuccessResponse,
 } from '$lib/server/helpers/controllers';
 
-function createMockEvent(overrides: Partial<{
-	request: Request;
-	url: URL;
-	cookies: { get: (name: string) => string | undefined };
-	params: Record<string, string>;
-	locals: { user: typeof NULLABLE_USER };
-}> = {}): RequestEvent {
+function createMockEvent(
+	overrides: Partial<{
+		request: Request;
+		url: URL;
+		cookies: { get: (name: string) => string | undefined };
+		params: Record<string, string>;
+		locals: { user: typeof NULLABLE_USER };
+	}> = {},
+): RequestEvent {
 	const formData = new FormData();
 	const url = new URL(overrides.url ?? 'http://localhost/posts/upload');
 	return {
@@ -68,9 +70,7 @@ describe('controllers', () => {
 			actual.validateAndHandleRequest,
 		);
 		mockControllerHelpers.createErrorResponse.mockImplementation(actual.createErrorResponse);
-		mockControllerHelpers.createSuccessResponse.mockImplementation(
-			actual.createSuccessResponse,
-		);
+		mockControllerHelpers.createSuccessResponse.mockImplementation(actual.createSuccessResponse);
 	});
 
 	describe('isRequestEvent', () => {
@@ -179,7 +179,8 @@ describe('controllers', () => {
 
 			const warnCalls = vi.mocked(mockLogger.warn).mock.calls;
 			const validationFailedCall = warnCalls.find(
-				(args) => typeof args[0] === 'string' && args[0].includes('Request validation failed for part'),
+				(args) =>
+					typeof args[0] === 'string' && args[0].includes('Request validation failed for part'),
 			);
 			expect(validationFailedCall).toBeDefined();
 			const payload = JSON.stringify(validationFailedCall![1]);

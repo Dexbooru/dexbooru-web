@@ -16,8 +16,8 @@ export default defineConfig({
 				'tests/**',
 				'.svelte-kit/**',
 				'src/generated/**',
-				'build/**'
-			]
-		}
-	}
+				'build/**',
+			],
+		},
+	},
 });

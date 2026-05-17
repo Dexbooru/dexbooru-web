@@ -10,6 +10,6 @@
 		"**/*.code-search": true,
 		".svelte-kit": true,
 		"dist": true,
-		"build": true,
+		"build": true
 	}
 }

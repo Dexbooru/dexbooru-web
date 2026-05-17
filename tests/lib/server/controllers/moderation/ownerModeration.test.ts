@@ -97,11 +97,11 @@ describe('handleGetOwnerResourceModerationStatus', () => {
 
 		await handleGetOwnerResourceModerationStatus(baseEvent(OWNER_ID));
 
-		expect(mockPostActions.findPostById).toHaveBeenCalledWith(
-			POST_ID,
-			{ moderationStatus: true },
-			['PENDING', 'APPROVED', 'REJECTED'],
-		);
+		expect(mockPostActions.findPostById).toHaveBeenCalledWith(POST_ID, { moderationStatus: true }, [
+			'PENDING',
+			'APPROVED',
+			'REJECTED',
+		]);
 		expect(mockControllerHelpers.createSuccessResponse).toHaveBeenCalledWith(
 			'api-route',
 			'Moderation status loaded.',

@@ -18,7 +18,9 @@ describe('mlApi tag rating', () => {
 	});
 
 	it('predictTagRating posts TagRatingPredictionRequest JSON', async () => {
-		const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 204 }));
+		const fetchSpy = vi
+			.spyOn(globalThis, 'fetch')
+			.mockResolvedValue(new Response(null, { status: 204 }));
 
 		await predictTagRating({ tag_string: 'solo cat' });
 
