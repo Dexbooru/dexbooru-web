@@ -1,0 +1,50 @@
+CREATE TABLE "ApplicationConfiguration" (
+    "id" TEXT NOT NULL DEFAULT 'singleton',
+    "maximumTagLength" INTEGER NOT NULL DEFAULT 75,
+    "maximumArtistLength" INTEGER NOT NULL DEFAULT 75,
+    "maximumTagDescriptionLength" INTEGER NOT NULL DEFAULT 200,
+    "maximumArtistDescriptionLength" INTEGER NOT NULL DEFAULT 200,
+    "maximumArtistSocialMediaLength" INTEGER NOT NULL DEFAULT 450,
+    "maximumArtistSocialMediasLength" INTEGER NOT NULL DEFAULT 5,
+    "maximumLabelsPerPage" INTEGER NOT NULL DEFAULT 100,
+    "maximumBlacklistedTags" INTEGER NOT NULL DEFAULT 50,
+    "maximumBlacklistedArtists" INTEGER NOT NULL DEFAULT 50,
+    "maximumSourceLinkLength" INTEGER NOT NULL DEFAULT 450,
+    "maximumPostsPerPage" INTEGER NOT NULL DEFAULT 27,
+    "maximumSimilarPostsPerPost" INTEGER NOT NULL DEFAULT 6,
+    "maximumTagsPerPost" INTEGER NOT NULL DEFAULT 20,
+    "maximumArtistsPerPost" INTEGER NOT NULL DEFAULT 5,
+    "maximumPostDescriptionLength" INTEGER NOT NULL DEFAULT 500,
+    "maximumCommentsPerPost" INTEGER NOT NULL DEFAULT 100,
+    "maximumDuplicatesToSearchOnPostUpload" INTEGER NOT NULL DEFAULT 2,
+    "maximumImagesPerPost" INTEGER NOT NULL DEFAULT 3,
+    "maximumPostImageUploadSizeMb" DOUBLE PRECISION NOT NULL DEFAULT 3.5,
+    "maximumProfilePictureImageUploadSizeMb" DOUBLE PRECISION NOT NULL DEFAULT 1.75,
+    "maximumCollectionThumbnailSizeMb" DOUBLE PRECISION NOT NULL DEFAULT 3.5,
+    "maximumCommentContentLength" INTEGER NOT NULL DEFAULT 1500,
+    "maximumCommentsPerPage" INTEGER NOT NULL DEFAULT 35,
+    "maximumCollectionTitleLength" INTEGER NOT NULL DEFAULT 100,
+    "maximumCollectionDescriptionLength" INTEGER NOT NULL DEFAULT 250,
+    "maximumPostsPerCollection" INTEGER NOT NULL DEFAULT 15,
+    "maximumCollectionsPerPage" INTEGER NOT NULL DEFAULT 28,
+    "minimumUsernameLength" INTEGER NOT NULL DEFAULT 4,
+    "maximumUsernameLength" INTEGER NOT NULL DEFAULT 12,
+    "minimumPasswordLength" INTEGER NOT NULL DEFAULT 8,
+    "maximumPasswordLength" INTEGER NOT NULL DEFAULT 50,
+    "maximumSiteWideCssLength" INTEGER NOT NULL DEFAULT 1000,
+    "maximumReportReasonDescriptionLength" INTEGER NOT NULL DEFAULT 250,
+    "maximumReportsPerPage" INTEGER NOT NULL DEFAULT 30,
+    "maximumTagsPerPage" INTEGER NOT NULL DEFAULT 100,
+    "maximumArtistsPerPage" INTEGER NOT NULL DEFAULT 100,
+    "likePostRateLimitMax" INTEGER NOT NULL DEFAULT 10,
+    "likePostRateLimitWindowMs" INTEGER NOT NULL DEFAULT 60000,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ApplicationConfiguration_pkey" PRIMARY KEY ("id")
+);
+
+INSERT INTO "ApplicationConfiguration" ("id") VALUES ('singleton');
+
+ALTER TABLE "PostCollection"
+ALTER COLUMN "title" TYPE VARCHAR(100);
