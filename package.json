@@ -19,6 +19,7 @@
 		"dbpush": "dotenv -e .env -o -- prisma db push",
 		"dbgenerate": "dotenv -e .env -o -- prisma generate",
 		"dbstudio": "dotenv -e .env -o -- prisma studio",
+		"appconfig:sync": "dotenv -e .env -o -- tsx scripts/syncApplicationConfiguration.ts",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest run",
@@ -106,6 +107,7 @@
 		"sharp": "^0.34.5",
 		"turndown": "^7.2.4",
 		"winston": "^3.19.0",
+		"yaml": "^2.9.0",
 		"zod": "^4.4.3"
 	},
 	"peerDependencies": {

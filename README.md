@@ -137,6 +137,7 @@ APP_URL=http://localhost:5173
 VITE_APP_URL=http://localhost:5173
 JWT_PRIVATE_KEY=<generate yourself>
 OTP_PRIVATE_KEY=<generate yourself>
+APPLICATION_CONFIGURATION_YAML_PATH=./instance-configuration.yaml
 NODE_ENV=development
 
 # Node server (if you build the project locally)
@@ -145,6 +146,65 @@ ORIGIN=http://localhost:5173
 ```
 
 For other values, please refer to `.env.example` located in the root of the project and fill in the variables as needed from your selected providers.
+
+### Instance configuration (optional)
+
+Dexbooru will run normally without this file. If you want to override instance limits, create `instance-configuration.yaml` at the project root.
+
+- Default path: `./instance-configuration.yaml`
+- Optional override: `APPLICATION_CONFIGURATION_YAML_PATH=/absolute/or/relative/path/to/file.yaml`
+- Apply overrides manually: `pnpm appconfig:sync`
+
+The YAML uses nested sections and camelCase keys. You only need to include keys you want to override.
+
+```yaml
+# instance-configuration.yaml
+labels:
+  maximumTagLength: 100
+  maximumArtistLength: 100
+  maximumTagDescriptionLength: 250
+  maximumBlacklistedTags: 75
+
+posts:
+  maximumPostDescriptionLength: 750
+  maximumTagsPerPost: 25
+  maximumArtistsPerPost: 8
+  maximumCommentsPerPost: 150
+
+images:
+  maximumImagesPerPost: 5
+  maximumPostImageUploadSizeMb: 5
+  maximumProfilePictureImageUploadSizeMb: 2
+  maximumCollectionThumbnailSizeMb: 5
+
+comments:
+  maximumCommentContentLength: 2000
+  maximumCommentsPerPage: 50
+
+collections:
+  maximumCollectionTitleLength: 120
+  maximumPostsPerCollection: 20
+
+auth:
+  minimumUsernameLength: 3
+  maximumUsernameLength: 16
+  minimumPasswordLength: 10
+
+preferences:
+  maximumSiteWideCssLength: 1500
+
+reports:
+  maximumReportReasonDescriptionLength: 300
+  maximumReportsPerPage: 40
+
+pagination:
+  maximumTagsPerPage: 150
+  maximumArtistsPerPage: 150
+
+rateLimit:
+  likePostRateLimitMax: 20
+  likePostRateLimitWindowMs: 60000
+```
 
 ### Local database configuration:
 
