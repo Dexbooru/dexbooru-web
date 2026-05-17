@@ -1,5 +1,5 @@
 import type { Artist } from '$generated/prisma/client';
-import { MAXIMUM_ARTISTS_PER_PAGE } from '$lib/server/constants/artists';
+import { getApplicationConfiguration } from '$lib/server/applicationConfiguration';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import prisma from '../prisma';
 
@@ -91,6 +91,7 @@ export async function findPostsByArtistName(
 }
 
 export async function getArtistsWithStartingLetter(letter: string, pageNumber: number) {
+	const { maximumArtistsPerPage } = await getApplicationConfiguration();
 	const artists = await prisma.artist.findMany({
 		where: {
 			OR: [
@@ -103,8 +104,8 @@ export async function getArtistsWithStartingLetter(letter: string, pageNumber: n
 			],
 		},
 		orderBy: { name: 'asc' },
-		skip: pageNumber * MAXIMUM_ARTISTS_PER_PAGE,
-		take: MAXIMUM_ARTISTS_PER_PAGE,
+		skip: pageNumber * maximumArtistsPerPage,
+		take: maximumArtistsPerPage,
 		select: {
 			name: true,
 			postCount: true,

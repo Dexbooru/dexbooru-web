@@ -1,7 +1,8 @@
 import type { RequestEvent } from '@sveltejs/kit';
+import { getApplicationConfiguration } from '$lib/server/applicationConfiguration';
 import redis from '../../db/redis';
 import { findPostById, likePostById } from '../../db/actions/post';
-import { LIKE_POST_RATE_LIMIT, REDIS_RATE_LIMIT_KEY_POST_LIKE } from '../../constants/rateLimit';
+import { REDIS_RATE_LIMIT_KEY_POST_LIKE } from '../../constants/rateLimit';
 import {
 	createErrorResponse,
 	createSuccessResponse,
@@ -27,12 +28,16 @@ import {
 } from '../../middleware/rateLimit';
 
 export const handleLikePost = async (event: RequestEvent) => {
+	const configuration = await getApplicationConfiguration();
 	const rateLimitResult = await consumeRateLimit(redis, {
 		keyPrefix: REDIS_RATE_LIMIT_KEY_POST_LIKE,
 		identifier: `${sanitizeClientAddressForRateLimitKey(event.getClientAddress())}:${
 			event.locals.user.id
 		}`,
-		rule: LIKE_POST_RATE_LIMIT,
+		rule: {
+			max: configuration.likePostRateLimitMax,
+			windowMs: configuration.likePostRateLimitWindowMs,
+		},
 	});
 	if (!rateLimitResult.ok) {
 		return rateLimitExceededApiResponse(rateLimitResult.retryAfterSeconds);

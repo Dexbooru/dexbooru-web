@@ -1,4 +1,4 @@
-import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
+import { getApplicationConfiguration } from '$lib/server/applicationConfiguration';
 import type { RequestEvent } from '@sveltejs/kit';
 import { GENERAL_COMMENTS_SELECTORS } from '../../constants/comments';
 import { findCommentsByAuthorId } from '../../db/actions/comment';
@@ -22,12 +22,13 @@ export const handleGetAuthenticatedUserComments = async (
 		async (data) => {
 			const user = event.locals.user;
 			const { orderBy, pageNumber } = data.urlSearchParams;
+			const { maximumCommentsPerPage } = await getApplicationConfiguration();
 
 			try {
 				const comments = await findCommentsByAuthorId(
 					user.id,
 					pageNumber,
-					MAXIMUM_COMMENTS_PER_PAGE,
+					maximumCommentsPerPage,
 					orderBy,
 					GENERAL_COMMENTS_SELECTORS,
 				);
