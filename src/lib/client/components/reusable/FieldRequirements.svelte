@@ -26,6 +26,7 @@
 		popoverButtonId: string;
 		satisifedRequirements?: string[];
 		unsatisfiedRequirements?: string[];
+		fallbackRequirements?: string[];
 	};
 
 	let {
@@ -34,6 +35,7 @@
 		popoverButtonId,
 		satisifedRequirements = [],
 		unsatisfiedRequirements = [],
+		fallbackRequirements = [],
 	}: Props = $props();
 </script>
 
@@ -67,7 +69,14 @@
 	</List>
 
 	{#if unsatisfiedRequirements.length === 0 && satisifedRequirements.length === 0}
-		{#if requirementsType === 'username'}
+		{#if fallbackRequirements.length > 0}
+			{#each fallbackRequirements as requirement (requirement)}
+				<Li class="mt-2" icon>
+					<CloseCircleSolid class="me-2 h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+					{requirement}
+				</Li>
+			{/each}
+		{:else if requirementsType === 'username'}
 			{#each Object.values(USERNAME_REQUIREMENTS) as requirement (requirement)}
 				<Li class="mt-2" icon>
 					<CloseCircleSolid class="me-2 h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />

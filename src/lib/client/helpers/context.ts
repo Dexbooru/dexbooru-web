@@ -1,4 +1,5 @@
 import type { UserPreference } from '$generated/prisma/browser';
+import type { TApplicationConfiguration } from '$lib/shared/applicationConfiguration';
 import { NULLABLE_USER, NULLABLE_USER_USER_PREFERENCES } from '$lib/shared/constants/auth';
 import CommentTree from '$lib/shared/helpers/comments';
 import type {
@@ -16,6 +17,7 @@ import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
 import type { LayoutData } from '../../../routes/$types';
 import {
+	APPLICATION_CONFIGURATION_CONTEXT_KEY,
 	ACTIVE_MODAL_CONTEXT_KEY,
 	BLACKLISTED_POST_PAGE_CONTEXT_KEY,
 	CHANGE_PASSWORD_AUTH_REQUIREMENTS_CONTEXT_KEY,
@@ -54,6 +56,7 @@ export const initLayoutContexts = (data: LayoutData) => {
 	updateAuthenticatedUserPreferences(
 		data.user.id === NULLABLE_USER.id ? NULLABLE_USER_USER_PREFERENCES : data.userPreferences,
 	);
+	updateApplicationConfiguration(data.applicationConfiguration);
 	updatePostPagination(null);
 	updatePostsPage([]);
 	updateOriginalPostsPage([]);
@@ -227,6 +230,13 @@ export const updateAuthenticatedUserPreferences = (userPreferences: UserPreferen
 	setContext(USER_PREFERENCE_CONTEXT_KEY, updatedUserPreferences);
 };
 
+export const updateApplicationConfiguration = (
+	applicationConfiguration: TApplicationConfiguration,
+) => {
+	const updatedConfiguration = writable(applicationConfiguration);
+	setContext(APPLICATION_CONFIGURATION_CONTEXT_KEY, updatedConfiguration);
+};
+
 export const getModerationPaginationData = () => {
 	return getContext<Writable<TModerationPaginationData | null>>(
 		MODERATION_PAGINATION_DATA_CONTEXT_KEY,
@@ -307,6 +317,14 @@ export const getAuthenticatedUserPreferences = () => {
 
 export const getAuthenticatedUserNotifications = () => {
 	return getContext<Writable<TUserNotifications | null>>(USER_NOTIFICATIONS_CONTEXT_KEY);
+};
+
+export const getApplicationConfiguration = () => {
+	return getContext<Writable<TApplicationConfiguration>>(APPLICATION_CONFIGURATION_CONTEXT_KEY);
+};
+
+export const setApplicationConfiguration = (configuration: TApplicationConfiguration) => {
+	getApplicationConfiguration().set(configuration);
 };
 
 export const getPostPaginationData = () => {

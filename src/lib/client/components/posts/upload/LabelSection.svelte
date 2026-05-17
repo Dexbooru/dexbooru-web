@@ -1,9 +1,9 @@
 <script lang="ts">
 	import LabelContainer from '$lib/client/components/labels/LabelContainer.svelte';
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { MAXIMUM_ARTIST_LENGTH, MAXIMUM_TAG_LENGTH } from '$lib/shared/constants/labels';
-	import { MAXIMUM_ARTISTS_PER_POST, MAXIMUM_TAGS_PER_POST } from '$lib/shared/constants/posts';
-	import { isLabelAppropriate, transformLabel } from '$lib/shared/helpers/labels';
+	import { getApplicationConfiguration } from '$lib/client/helpers/context';
+	import { BLACKLISTED_LABELS, LABEL_REGEX } from '$lib/shared/constants/labels';
+	import { transformLabel } from '$lib/shared/helpers/labels';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
@@ -15,18 +15,27 @@
 	};
 
 	let { labels = $bindable(), type }: Props = $props();
+	const applicationConfiguration = getApplicationConfiguration();
 
 	let currentInput = $state('');
 
-	const maxLabels = $derived(type === 'tag' ? MAXIMUM_TAGS_PER_POST : MAXIMUM_ARTISTS_PER_POST);
-	const maxLabelLength = $derived(type === 'tag' ? MAXIMUM_TAG_LENGTH : MAXIMUM_ARTIST_LENGTH);
+	const maxLabels = $derived(
+		type === 'tag'
+			? $applicationConfiguration.maximumTagsPerPost
+			: $applicationConfiguration.maximumArtistsPerPost,
+	);
+	const maxLabelLength = $derived(
+		type === 'tag'
+			? $applicationConfiguration.maximumTagLength
+			: $applicationConfiguration.maximumArtistLength,
+	);
 	const labelColor = $derived(type === 'tag' ? 'red' : 'green');
 	const inputName = $derived(type === 'tag' ? 'tags' : 'artists');
 	const placeholder = $derived(type === 'tag' ? 'Enter a tag name' : 'Enter an artist name');
 	const labelText = $derived(
 		type === 'tag'
-			? `Please specify one or more tags (max of ${MAXIMUM_TAGS_PER_POST}):`
-			: `Please specify one or more artists (max of ${MAXIMUM_ARTISTS_PER_POST}):`,
+			? `Please specify one or more tags (max of ${$applicationConfiguration.maximumTagsPerPost}):`
+			: `Please specify one or more artists (max of ${$applicationConfiguration.maximumArtistsPerPost}):`,
 	);
 
 	const addLabel = () => {
@@ -44,7 +53,11 @@
 		}
 
 		const transformedLabel = transformLabel(currentInput);
-		if (!isLabelAppropriate(transformedLabel, type)) {
+		const labelBlocked = BLACKLISTED_LABELS.some((blockedLabel) =>
+			transformedLabel.includes(blockedLabel),
+		);
+		const invalidLength = transformedLabel.length > maxLabelLength || transformedLabel.length === 0;
+		if (!LABEL_REGEX.test(transformedLabel) || labelBlocked || invalidLength) {
 			toast.push(`${transformedLabel} is not an allowed ${type}`, FAILURE_TOAST_OPTIONS);
 			currentInput = '';
 			return;

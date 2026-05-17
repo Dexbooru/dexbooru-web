@@ -2,11 +2,11 @@
 	import { enhance } from '$app/forms';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import {
+		getApplicationConfiguration,
 		getAuthenticatedUser,
 		getAuthenticatedUserPreferences,
 	} from '$lib/client/helpers/context';
 	import { applyCustomSiteWideCss } from '$lib/client/helpers/dom';
-	import { MAXIMUM_SITE_WIDE_CSS_LENGTH } from '$lib/shared/constants/preferences';
 	import type { TUser } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Button from 'flowbite-svelte/Button.svelte';
@@ -23,6 +23,7 @@
 
 	const user = getAuthenticatedUser();
 	const userPreferences = getAuthenticatedUserPreferences();
+	const applicationConfiguration = getApplicationConfiguration();
 	const userPreferenceUnsubscribe = userPreferences.subscribe((data) => {
 		customSiteCss = data.customSideWideCss;
 		hidePostMetadataOnPreview = data.hidePostMetadataOnPreview;
@@ -71,10 +72,13 @@
 		class="flex flex-col space-y-4"
 	>
 		<Label class="mb-3 space-y-2">
-			<span>Custom Site-wide CSS (max of {MAXIMUM_SITE_WIDE_CSS_LENGTH} characters)</span>
+			<span
+				>Custom Site-wide CSS (max of {$applicationConfiguration.maximumSiteWideCssLength}
+				characters)</span
+			>
 			<Textarea
 				class="w-full"
-				maxlength={MAXIMUM_SITE_WIDE_CSS_LENGTH}
+				maxlength={$applicationConfiguration.maximumSiteWideCssLength}
 				bind:value={customSiteCss}
 				rows={8}
 				name="customSiteWideCss"

@@ -4,6 +4,7 @@
 	import { clearPostDraft } from '$lib/client/helpers/drafts';
 	import { notificationStore } from '$lib/client/notifications/notificationStore';
 	import { authenticateNotificationSession } from '$lib/client/api/notificationApi';
+	import { isOwnerRole } from '$lib/shared/helpers/auth/role';
 	import DropdownDivider from 'flowbite-svelte/DropdownDivider.svelte';
 	import AngleDownOutline from 'flowbite-svelte-icons/AngleDownOutline.svelte';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
@@ -79,6 +80,11 @@
 			<DropdownItem href="/profile/settings" class="text-gray-900 dark:text-white"
 				>Settings</DropdownItem
 			>
+			{#if $user && isOwnerRole($user.role)}
+				<DropdownItem href="/admin/instance-configuration" class="text-gray-900 dark:text-white"
+					>Instance Configuration</DropdownItem
+				>
+			{/if}
 			<DropdownDivider />
 			<DropdownItem
 				href="/profile/logout"

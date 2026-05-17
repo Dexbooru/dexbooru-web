@@ -4,14 +4,11 @@
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import {
 		getActiveModal,
+		getApplicationConfiguration,
 		getCollectionPage,
 		getOriginalCollectionPage,
 		getUserCollections,
 	} from '$lib/client/helpers/context';
-	import {
-		MAXIMUM_COLLECTION_DESCRIPTION_LENGTH,
-		MAXIMUM_COLLECTION_TITLE_LENGTH,
-	} from '$lib/shared/constants/collections';
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Button from 'flowbite-svelte/Button.svelte';
@@ -30,6 +27,7 @@
 	const collectionPage = getCollectionPage();
 	const originalCollectionPage = getOriginalCollectionPage();
 	const userCollections = getUserCollections();
+	const applicationConfiguration = getApplicationConfiguration();
 
 	const modalStoreUnsubscribe = activeModal.subscribe((data) => {
 		if (data.focusedModalName === EDIT_COLLECTION_MODAL_NAME) {
@@ -99,27 +97,27 @@
 	class="w-full"
 >
 	<Label class="mb-1" for="collection-title-input">
-		Please enter a title for your collection <br /> (max {MAXIMUM_COLLECTION_TITLE_LENGTH}
+		Please enter a title for your collection <br /> (max {$applicationConfiguration.maximumCollectionTitleLength}
 		characters)
 	</Label>
 	<Input
 		id="collection-title-input"
-		maxlength={MAXIMUM_COLLECTION_TITLE_LENGTH}
+		maxlength={$applicationConfiguration.maximumCollectionTitleLength}
 		placeholder="Enter a title"
 		bind:value={title}
 	/>
 	<p class="mt-2 text-right leading-none dark:text-gray-400">
-		{title.length}/{MAXIMUM_COLLECTION_TITLE_LENGTH}
+		{title.length}/{$applicationConfiguration.maximumCollectionTitleLength}
 	</p>
 
 	<Label class="mb-1" for="collection-description-textarea">
-		Please enter a description for your collection <br /> (max {MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
+		Please enter a description for your collection <br /> (max {$applicationConfiguration.maximumCollectionDescriptionLength}
 		characters)
 	</Label>
 	<Textarea
 		class="w-full"
 		id="collection-description-textarea"
-		maxlength={MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
+		maxlength={$applicationConfiguration.maximumCollectionDescriptionLength}
 		rows={5}
 		bind:value={description}
 		name="description"
@@ -127,7 +125,7 @@
 		required
 	/>
 	<p class="mt-2 text-right leading-none dark:text-gray-400">
-		{description.length}/{MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
+		{description.length}/{$applicationConfiguration.maximumCollectionDescriptionLength}
 	</p>
 
 	<Button
