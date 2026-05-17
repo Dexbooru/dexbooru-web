@@ -1,0 +1,27 @@
+name: PR Lint
+
+on:
+  pull_request:
+
+concurrency:
+  group: pr-lint-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint and typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Run lint
+        run: pnpm lint
+
+      - name: Run Svelte/TypeScript check
+        run: pnpm check
