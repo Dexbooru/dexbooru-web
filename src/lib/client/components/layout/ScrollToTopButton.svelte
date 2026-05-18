@@ -31,6 +31,7 @@
 </script>
 
 <div
+	aria-hidden={!isVisible}
 	class="fixed inset-e-6 {isHomePage
 		? 'bottom-20'
 		: 'bottom-6'} z-40 transition-opacity duration-300 {isVisible
@@ -38,6 +39,7 @@
 		: 'pointer-events-none opacity-0'}"
 >
 	<Button
+		tabindex={isVisible ? 0 : -1}
 		color="blue"
 		size="sm"
 		pill
