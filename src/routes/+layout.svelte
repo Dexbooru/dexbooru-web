@@ -11,6 +11,7 @@
 	import EmailVerificationBanner from '$lib/client/components/auth/EmailVerificationBanner.svelte';
 	import Footer from '$lib/client/components/layout/Footer.svelte';
 	import Navbar from '$lib/client/components/layout/Navbar.svelte';
+	import ScrollToTopButton from '$lib/client/components/layout/ScrollToTopButton.svelte';
 	import PromoteModModal from '$lib/client/components/moderation/PromoteModModal.svelte';
 	import ReportListModal from '$lib/client/components/moderation/ReportListModal.svelte';
 	import ReportModal from '$lib/client/components/moderation/ReportModal.svelte';
@@ -97,6 +98,8 @@
 		<Footer />
 	{/if}
 </div>
+
+<ScrollToTopButton />
 
 <!-- Reusable app toast -->
 <SvelteToast options={TOAST_DEFAULT_OPTIONS} />

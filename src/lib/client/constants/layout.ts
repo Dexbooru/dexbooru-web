@@ -16,3 +16,4 @@ export const REPORT_POST_COLLECTION_MODAL_NAME = 'report-post-collection-modal';
 export const REPORT_USER_LIST_MODAL_NAME = 'report-user-list-modal-name';
 export const REPORT_POST_LIST_MODAL_NAME = 'report-post-list-modal-name';
 export const REPORT_POST_COLLECTION_LIST_MODAL_NAME = 'report-post-collection-list-modal-name';
+export const SCROLL_TO_TOP_VISIBILITY_THRESHOLD_PX = 300;
