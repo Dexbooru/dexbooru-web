@@ -22,6 +22,7 @@ const userFactory = (overrides: Partial<User> = {}): User => {
 		role: 'USER' as UserRole,
 		moderationStatus: 'UNFLAGGED',
 		superRolePromotionAt: null,
+		emailVerified: true,
 		...overrides,
 	};
 };

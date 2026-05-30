@@ -1,7 +1,5 @@
 import { page } from '$app/state';
 import type { TPostOrderByColumn } from '$lib/shared/types/posts';
-import { quintOut } from 'svelte/easing';
-import { scale } from 'svelte/transition';
 import type { TOrderByTranslationMap } from '../types/posts';
 
 export const getLabelFromOrderby = (
@@ -197,8 +195,6 @@ export const ORDER_BY_TRANSLATION_MAP: TOrderByTranslationMap = {
 
 export const POSTS_GRID_ANIMATION_DURATION_MS = 500;
 export const POST_CARD_CAROUSEL_SLIDE_DURATION = 350;
-export const POST_CARD_CAROUSEL_TRANSITION_FUNCTION = (x: Element) =>
-	scale(x, { duration: POSTS_GRID_ANIMATION_DURATION_MS, easing: quintOut });
 
 export const INDIVIDUAL_POST_PATH_REGEX = new RegExp(
 	'^/posts/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',

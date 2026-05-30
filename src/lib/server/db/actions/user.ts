@@ -383,6 +383,7 @@ export async function findUserSelf(userId: string) {
 					twoFactorAuthenticationEnabled: true,
 					hidePostMetadataOnPreview: true,
 					hideCollectionMetadataOnPreview: true,
+					hideImageCarousel: false,
 					customSideWideCss: true,
 					blacklistedArtists: true,
 					blacklistedTags: true,

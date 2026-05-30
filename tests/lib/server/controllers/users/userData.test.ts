@@ -101,5 +101,22 @@ describe('user data and preferences controllers', () => {
 			);
 			expect(mockControllerHelpers.createSuccessResponse).toHaveBeenCalled();
 		});
+
+		it('should persist hideImageCarousel when updating UI preferences', async () => {
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (event, handlerType, schema, callback) => {
+					return await callback({ form: { hideImageCarousel: true } });
+				},
+			);
+
+			await handleUpdateUserInterfacePreferences(mockEvent);
+
+			expect(mockPreferenceActions.updateUserPreferences).toHaveBeenCalledWith(
+				'u1',
+				expect.objectContaining({
+					hideImageCarousel: true,
+				}),
+			);
+		});
 	});
 });

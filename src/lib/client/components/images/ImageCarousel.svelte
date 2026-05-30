@@ -10,7 +10,10 @@
 		POST_PICTURE_PREVIEW_HEIGHT,
 		POST_PICTURE_PREVIEW_WIDTH,
 	} from '$lib/shared/constants/images';
+	import { getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import Carousel from 'flowbite-svelte/Carousel.svelte';
+	import CarouselIndicators from 'flowbite-svelte/CarouselIndicators.svelte';
+	import Controls from 'flowbite-svelte/Controls.svelte';
 	import { type Component } from 'svelte';
 	import type { HTMLImgAttributes } from 'svelte/elements';
 
@@ -36,6 +39,8 @@
 		slideDuration = 750,
 		transitionFunction = null,
 	}: Props = $props();
+
+	const userPreferences = getAuthenticatedUserPreferences();
 
 	let imagesData: HTMLImgAttributes[] = $derived(
 		imageUrls.map((_, index) => {
@@ -83,5 +88,9 @@
 				/>
 			</a>
 		{/snippet}
+		{#if imageUrls.length > 1 && !$userPreferences.hideImageCarousel}
+			<Controls />
+			<CarouselIndicators />
+		{/if}
 	</Carousel>
 {/if}
