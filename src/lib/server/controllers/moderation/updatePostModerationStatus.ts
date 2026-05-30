@@ -11,6 +11,7 @@ import logger from '../../logging/logger';
 import { UpdatePostModerationStatusSchema } from '../request-schemas/moderation';
 import { getCacheKeyForPendingPosts } from '../cache-strategies/moderation';
 import type { RequestEvent } from '@sveltejs/kit';
+import { getCacheKeyForIndividualPost } from '../cache-strategies/posts';
 
 export const handleUpdatePostModerationStatus = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -43,9 +44,11 @@ export const handleUpdatePostModerationStatus = async (event: RequestEvent) => {
 
 				const updatedPost = await updatePost(postId, {
 					moderationStatus: status,
+					updatedAt: new Date(),
 				});
 
 				invalidateCacheRemotely(getCacheKeyForPendingPosts(0));
+				invalidateCacheRemotely(getCacheKeyForIndividualPost(postId));
 
 				return createSuccessResponse('api-route', 'Post moderation status updated successfully', {
 					updatedPost,

@@ -347,8 +347,14 @@ describe('handleUpdatePostModerationStatus (owner PENDING rule)', () => {
 	});
 
 	it('allows moderator to set APPROVED', async () => {
+		const now = new Date();
+
 		mockUserActions.findUserById.mockResolvedValue({ id: MODERATOR_ID, role: 'MODERATOR' });
-		mockPostActions.updatePost.mockResolvedValue({ id: POST_ID, moderationStatus: 'APPROVED' });
+		mockPostActions.updatePost.mockResolvedValue({
+			id: POST_ID,
+			moderationStatus: 'APPROVED',
+			updatedAt: now,
+		});
 		mockControllerHelpers.validateAndHandleRequest.mockImplementation(
 			async (_event, _handlerType, _schema, callback) => {
 				return await callback({
@@ -362,6 +368,7 @@ describe('handleUpdatePostModerationStatus (owner PENDING rule)', () => {
 
 		expect(mockPostActions.updatePost).toHaveBeenCalledWith(POST_ID, {
 			moderationStatus: 'APPROVED',
+			updatedAt: now,
 		});
 		expect(mockControllerHelpers.createSuccessResponse).toHaveBeenCalled();
 	});
@@ -388,8 +395,14 @@ describe('handleUpdatePostModerationStatus (owner PENDING rule)', () => {
 	});
 
 	it('allows OWNER to set PENDING', async () => {
+		const now = new Date();
+
 		mockUserActions.findUserById.mockResolvedValue({ id: OWNER_ID, role: 'OWNER' });
-		mockPostActions.updatePost.mockResolvedValue({ id: POST_ID, moderationStatus: 'PENDING' });
+		mockPostActions.updatePost.mockResolvedValue({
+			id: POST_ID,
+			moderationStatus: 'PENDING',
+			updatedAt: now,
+		});
 		mockControllerHelpers.validateAndHandleRequest.mockImplementation(
 			async (_event, _handlerType, _schema, callback) => {
 				return await callback({
@@ -403,6 +416,7 @@ describe('handleUpdatePostModerationStatus (owner PENDING rule)', () => {
 
 		expect(mockPostActions.updatePost).toHaveBeenCalledWith(POST_ID, {
 			moderationStatus: 'PENDING',
+			updatedAt: now,
 		});
 		expect(mockControllerHelpers.createSuccessResponse).toHaveBeenCalled();
 	});
