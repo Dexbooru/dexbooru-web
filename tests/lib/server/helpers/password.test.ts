@@ -37,4 +37,22 @@ describe('password helpers (actual implementation)', () => {
 
 		expect(spy).toHaveBeenCalled();
 	});
+
+	it('hashPassword and doPasswordsMatch round-trip', async () => {
+		const { hashPassword, doPasswordsMatch } = await vi.importActual<
+			typeof import('$lib/server/helpers/password')
+		>('$lib/server/helpers/password');
+
+		const hashed = await hashPassword('Secret123!');
+		expect(await doPasswordsMatch('Secret123!', hashed)).toBe(true);
+	});
+
+	it('doPasswordsMatch rejects wrong password', async () => {
+		const { hashPassword, doPasswordsMatch } = await vi.importActual<
+			typeof import('$lib/server/helpers/password')
+		>('$lib/server/helpers/password');
+
+		const hashed = await hashPassword('Secret123!');
+		expect(await doPasswordsMatch('WrongPassword', hashed)).toBe(false);
+	});
 });
