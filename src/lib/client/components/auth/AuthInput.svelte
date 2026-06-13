@@ -1,7 +1,13 @@
 <script lang="ts">
 	import type { TAuthFormRequirementData } from '$lib/client/types/stores';
 	import { getApplicationConfiguration } from '$lib/client/helpers/context';
-	import { EMAIL_REGEX, SPECIAL_CHARACTER_REGEX } from '$lib/shared/constants/auth';
+	import { EMAIL_REGEX } from '$lib/shared/constants/auth';
+	import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
+	import {
+		buildPasswordRequirementMessages,
+		buildUsernameRequirementMessages,
+	} from '$lib/shared/helpers/auth/requirementMessages';
+	import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
 	import Input from 'flowbite-svelte/Input.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
 	import Toggle from 'flowbite-svelte/Toggle.svelte';
@@ -37,35 +43,24 @@
 	let showConfirmedPassword = $state(false);
 	const applicationConfiguration = getApplicationConfiguration();
 
-	const usernameLengthMessage = $derived(
-		`The username must be between ${$applicationConfiguration.minimumUsernameLength} and ${$applicationConfiguration.maximumUsernameLength} characters long`,
+	const usernameLimits = $derived({
+		minimumUsernameLength: $applicationConfiguration.minimumUsernameLength,
+		maximumUsernameLength: $applicationConfiguration.maximumUsernameLength,
+	});
+	const passwordLimits = $derived({
+		minimumPasswordLength: $applicationConfiguration.minimumPasswordLength,
+		maximumPasswordLength: $applicationConfiguration.maximumPasswordLength,
+	});
+
+	const usernameFallbackRequirements = $derived(
+		Object.values(buildUsernameRequirementMessages(usernameLimits)),
 	);
-	const usernameSpacesMessage =
-		'The username must not contain any leading, trailing or inline spaces';
-	const usernameHtmlMessage = `The username must not contain HTML special characters (e.g. &, <, >, ", ')`;
 	const emailLengthMessage = 'The email must be between 1 and 254 characters long';
 	const emailValidityMessage = 'The email must have a @ sign and a valid domain after it';
-	const passwordLengthMessage = $derived(
-		`The password must be between ${$applicationConfiguration.minimumPasswordLength} and ${$applicationConfiguration.maximumPasswordLength} characters long`,
-	);
-	const passwordLowercaseMessage = 'The password must contain at least one lowercase character';
-	const passwordUppercaseMessage = 'The password must contain at least one uppercase character';
-	const passwordNumberMessage = 'The password must contain at least one number';
-	const passwordSpecialMessage = 'The password must contain at least one special charcter';
-
-	const usernameFallbackRequirements = $derived([
-		usernameLengthMessage,
-		usernameSpacesMessage,
-		usernameHtmlMessage,
-	]);
 	const emailFallbackRequirements = $derived([emailLengthMessage, emailValidityMessage]);
-	const passwordFallbackRequirements = $derived([
-		passwordLengthMessage,
-		passwordLowercaseMessage,
-		passwordUppercaseMessage,
-		passwordNumberMessage,
-		passwordSpecialMessage,
-	]);
+	const passwordFallbackRequirements = $derived(
+		Object.values(buildPasswordRequirementMessages(passwordLimits)),
+	);
 
 	$effect(() => {
 		if (inputFieldType === 'username') onUsernameChange();
@@ -93,22 +88,7 @@
 			return;
 		}
 
-		const satisfied: string[] = [];
-		const unsatisfied: string[] = [];
-		const hasSpaces = input.includes(' ');
-		const hasHtmlSpecialChars = /[&<>"']/.test(input);
-		const usernameLengthWithoutSpaces = input.replace(/\s/g, '').length;
-		const lengthOutOfBounds =
-			usernameLengthWithoutSpaces < $applicationConfiguration.minimumUsernameLength ||
-			usernameLengthWithoutSpaces > $applicationConfiguration.maximumUsernameLength;
-
-		if (hasHtmlSpecialChars) unsatisfied.push(usernameHtmlMessage);
-		else satisfied.push(usernameHtmlMessage);
-		if (lengthOutOfBounds) unsatisfied.push(usernameLengthMessage);
-		else satisfied.push(usernameLengthMessage);
-		if (hasSpaces) unsatisfied.push(usernameSpacesMessage);
-		else satisfied.push(usernameSpacesMessage);
-
+		const { satisfied, unsatisfied } = getUsernameRequirements(input, usernameLimits);
 		satisfiedRequirements = satisfied;
 		unsatisfiedRequirements = unsatisfied;
 
@@ -141,27 +121,7 @@
 			return;
 		}
 
-		const satisfied: string[] = [];
-		const unsatisfied: string[] = [];
-		const inRange =
-			input.length >= $applicationConfiguration.minimumPasswordLength &&
-			input.length <= $applicationConfiguration.maximumPasswordLength;
-		if (inRange) satisfied.push(passwordLengthMessage);
-		else unsatisfied.push(passwordLengthMessage);
-
-		const hasUppercaseCharacter = /[A-Z]/.test(input);
-		const hasLowercaseCharacter = /[a-z]/.test(input);
-		const hasNumber = /[0-9]/.test(input);
-		const hasSpecialCharacter = SPECIAL_CHARACTER_REGEX.test(input);
-		if (hasLowercaseCharacter) satisfied.push(passwordLowercaseMessage);
-		else unsatisfied.push(passwordLowercaseMessage);
-		if (hasUppercaseCharacter) satisfied.push(passwordUppercaseMessage);
-		else unsatisfied.push(passwordUppercaseMessage);
-		if (hasNumber) satisfied.push(passwordNumberMessage);
-		else unsatisfied.push(passwordNumberMessage);
-		if (hasSpecialCharacter) satisfied.push(passwordSpecialMessage);
-		else unsatisfied.push(passwordSpecialMessage);
-
+		const { satisfied, unsatisfied } = getPasswordRequirements(input, passwordLimits);
 		satisfiedRequirements = satisfied;
 		unsatisfiedRequirements = unsatisfied;
 

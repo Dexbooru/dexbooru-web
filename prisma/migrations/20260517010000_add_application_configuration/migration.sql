@@ -46,5 +46,16 @@ CREATE TABLE "ApplicationConfiguration" (
 
 INSERT INTO "ApplicationConfiguration" ("id") VALUES ('singleton');
 
+DROP INDEX IF EXISTS collection_searchable_idx;
+
+ALTER TABLE "PostCollection" DROP COLUMN IF EXISTS searchable;
+
 ALTER TABLE "PostCollection"
 ALTER COLUMN "title" TYPE VARCHAR(100);
+
+ALTER TABLE "PostCollection"
+ADD COLUMN searchable tsvector
+    GENERATED ALWAYS AS (to_tsvector('english', COALESCE(title, '') || ' ' ||
+                            COALESCE(description, '') || ' ' || COALESCE(id, ''))) STORED;
+
+CREATE INDEX collection_searchable_idx ON "PostCollection" USING GIN(searchable);

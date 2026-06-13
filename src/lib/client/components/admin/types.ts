@@ -8,5 +8,6 @@ export type TField = {
 
 export type TSection = {
 	name: string;
+	tabLabel?: string;
 	fields: TField[];
 };

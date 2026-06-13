@@ -32,7 +32,11 @@ export const handleUpdateApplicationConfiguration = async (event: RequestEvent) 
 				await validateApplicationConfigurationUpdate(data.body, currentConfiguration);
 
 				const updatedConfiguration = await updateApplicationConfigurationInDb(data.body);
-				await syncDatabaseVarcharConstraints(updatedConfiguration);
+				await syncDatabaseVarcharConstraints({
+					updates: data.body,
+					previousConfiguration: currentConfiguration,
+					nextConfiguration: updatedConfiguration,
+				});
 				setApplicationConfigurationInMemory(updatedConfiguration);
 				await setApplicationConfigurationInRedis(updatedConfiguration);
 				await publishApplicationConfigurationUpdate(updatedConfiguration);

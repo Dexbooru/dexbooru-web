@@ -75,7 +75,7 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 		],
 	},
 	{
-		name: 'Auth',
+		name: 'Authentication',
 		fields: [
 			{ key: 'minimumUsernameLength', label: 'Minimum username length' },
 			{ key: 'maximumUsernameLength', label: 'Maximum username length' },
@@ -85,6 +85,7 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 	},
 	{
 		name: 'Preferences, reports and pagination',
+		tabLabel: 'Preferences',
 		fields: [
 			{ key: 'maximumSiteWideCssLength', label: 'Maximum site-wide CSS length' },
 			{

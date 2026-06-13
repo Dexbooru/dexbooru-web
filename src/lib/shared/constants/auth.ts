@@ -1,18 +1,18 @@
 import type { UserPreference } from '$generated/prisma/client';
-import type {
-	TEmailRequirements,
-	TPasswordRequirements,
-	TUsernameRequirements,
-} from '../types/auth';
+import { APPLICATION_CONFIGURATION_DEFAULTS } from '$lib/shared/applicationConfiguration/defaults';
+import {
+	buildPasswordRequirementMessages,
+	buildUsernameRequirementMessages,
+} from '$lib/shared/helpers/auth/requirementMessages';
+import type { TEmailRequirements } from '../types/auth';
 import type { TUser } from '../types/users';
 
-export const MINIMUM_USERNAME_LENGTH = 4;
-export const MAXIMUM_USERNAME_LENGTH = 12;
-export const USERNAME_REQUIREMENTS: TUsernameRequirements = {
-	length: `The username must be between ${MINIMUM_USERNAME_LENGTH} and ${MAXIMUM_USERNAME_LENGTH} characters long`,
-	spaces: 'The username must not contain any leading, trailing or inline spaces',
-	'html-chars': 'The username must not contain HTML special characters (e.g. &, <, >, ", \')',
-};
+export const MINIMUM_USERNAME_LENGTH = APPLICATION_CONFIGURATION_DEFAULTS.minimumUsernameLength;
+export const MAXIMUM_USERNAME_LENGTH = APPLICATION_CONFIGURATION_DEFAULTS.maximumUsernameLength;
+export const USERNAME_REQUIREMENTS = buildUsernameRequirementMessages({
+	minimumUsernameLength: MINIMUM_USERNAME_LENGTH,
+	maximumUsernameLength: MAXIMUM_USERNAME_LENGTH,
+});
 
 export const MINIMUM_EMAIL_LENGTH = 1;
 export const MAXIMUM_EMAIL_LENGTH = 254;
@@ -23,15 +23,12 @@ export const EMAIL_REQUIREMENTS: TEmailRequirements = {
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 export const DEFAULT_PASSWORD_LENGTH = 15;
-export const MINIMUM_PASSWORD_LENGTH = 8;
-export const MAXIMUM_PASSWORD_LENGTH = 50;
-export const PASSWORD_REQUIREMENTS: TPasswordRequirements = {
-	length: `The password must be between ${MINIMUM_PASSWORD_LENGTH} and ${MAXIMUM_PASSWORD_LENGTH} characters long`,
-	lowercase: 'The password must contain at least one lowercase character',
-	uppercase: 'The password must contain at least one uppercase character',
-	number: 'The password must contain at least one number',
-	'special-character': 'The password must contain at least one special charcter',
-};
+export const MINIMUM_PASSWORD_LENGTH = APPLICATION_CONFIGURATION_DEFAULTS.minimumPasswordLength;
+export const MAXIMUM_PASSWORD_LENGTH = APPLICATION_CONFIGURATION_DEFAULTS.maximumPasswordLength;
+export const PASSWORD_REQUIREMENTS = buildPasswordRequirementMessages({
+	minimumPasswordLength: MINIMUM_PASSWORD_LENGTH,
+	maximumPasswordLength: MAXIMUM_PASSWORD_LENGTH,
+});
 
 export const SPECIAL_CHARACTER_REGEX = /[\W_]/g;
 

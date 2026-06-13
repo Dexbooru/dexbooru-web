@@ -63,6 +63,8 @@ describe('application configuration controllers', () => {
 		} as never;
 		const { handleUpdateApplicationConfiguration } =
 			await import('$lib/server/controllers/applicationConfiguration');
+		const { syncDatabaseVarcharConstraints } =
+			await import('$lib/server/applicationConfiguration');
 
 		const response = (await handleUpdateApplicationConfiguration(event)) as {
 			status: number;
@@ -70,5 +72,13 @@ describe('application configuration controllers', () => {
 		};
 		expect(response.status).toBe(200);
 		expect(response.data.maximumTagLength).toBe(200);
+		expect(syncDatabaseVarcharConstraints).toHaveBeenCalledWith({
+			updates: { maximumTagLength: 200 },
+			previousConfiguration: configuration,
+			nextConfiguration: {
+				...configuration,
+				maximumTagLength: 200,
+			},
+		});
 	});
 });

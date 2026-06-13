@@ -1,12 +1,7 @@
 import { BoolStrSchema } from '$lib/server/constants/reusableSchemas';
 import { getApplicationConfigurationSync } from '$lib/server/applicationConfiguration';
 import type { TRequestSchema } from '$lib/server/types/controllers';
-import {
-	ACCOUNT_DELETION_CONFIRMATION_TEXT,
-	EMAIL_REQUIREMENTS,
-	PASSWORD_REQUIREMENTS,
-	USERNAME_REQUIREMENTS,
-} from '$lib/shared/constants/auth';
+import { ACCOUNT_DELETION_CONFIRMATION_TEXT, EMAIL_REQUIREMENTS } from '$lib/shared/constants/auth';
 import { TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
 import { getEmailRequirements } from '$lib/shared/helpers/auth/email';
 import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
@@ -28,32 +23,38 @@ const usernamePasswordEndpointSchmea = z.object({
 const usernameRequirementSchema = z
 	.string()
 	.min(1, 'The username cannot be empty')
-	.refine(
-		(val) => {
-			const { unsatisfied: usernameUnsatisfied } = getUsernameRequirements(val);
-			return usernameUnsatisfied.length === 0;
-		},
-		{
-			message: `The username did not meet the following requirements: ${Object.values(
-				USERNAME_REQUIREMENTS,
-			).join(', ')}`,
-		},
-	);
+	.superRefine((val, ctx) => {
+		const configuration = getApplicationConfigurationSync();
+		const { unsatisfied } = getUsernameRequirements(val, {
+			minimumUsernameLength: configuration.minimumUsernameLength,
+			maximumUsernameLength: configuration.maximumUsernameLength,
+		});
+
+		if (unsatisfied.length > 0) {
+			ctx.addIssue({
+				code: 'custom',
+				message: `The username did not meet the following requirements: ${unsatisfied.join(', ')}`,
+			});
+		}
+	});
 
 const passwordRequirementSchema = z
 	.string()
 	.min(1, 'The password cannot be empty')
-	.refine(
-		(val) => {
-			const { unsatisfied: passwordUnsatisifed } = getPasswordRequirements(val);
-			return passwordUnsatisifed.length === 0;
-		},
-		{
-			message: `The password did not meet the following requirements: ${Object.values(
-				PASSWORD_REQUIREMENTS,
-			).join(', ')}`,
-		},
-	);
+	.superRefine((val, ctx) => {
+		const configuration = getApplicationConfigurationSync();
+		const { unsatisfied } = getPasswordRequirements(val, {
+			minimumPasswordLength: configuration.minimumPasswordLength,
+			maximumPasswordLength: configuration.maximumPasswordLength,
+		});
+
+		if (unsatisfied.length > 0) {
+			ctx.addIssue({
+				code: 'custom',
+				message: `The password did not meet the following requirements: ${unsatisfied.join(', ')}`,
+			});
+		}
+	});
 
 const profilePictureRefinementError = {
 	message: `The provided file was either not in an image format or exceeded the maximum allowed size for a profile picture of: ${getApplicationConfigurationSync().maximumProfilePictureImageUploadSizeMb}`,

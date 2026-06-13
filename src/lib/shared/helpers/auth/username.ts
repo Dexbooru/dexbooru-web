@@ -1,11 +1,11 @@
-import {
-	MAXIMUM_USERNAME_LENGTH,
-	MINIMUM_USERNAME_LENGTH,
-	USERNAME_REQUIREMENTS,
-} from '../../constants/auth';
-import type { TAuthFieldRequirements } from '../../types/auth';
+import type { TAuthFieldRequirements, TUsernameValidationLimits } from '../../types/auth';
+import { buildUsernameRequirementMessages } from './requirementMessages';
 
-export const getUsernameRequirements = (username: string): TAuthFieldRequirements => {
+export const getUsernameRequirements = (
+	username: string,
+	limits: TUsernameValidationLimits,
+): TAuthFieldRequirements => {
+	const requirements = buildUsernameRequirementMessages(limits);
 	const satisfied: string[] = [];
 	const unsatisfied: string[] = [];
 	const hasSpaces = username.includes(' ');
@@ -14,30 +14,30 @@ export const getUsernameRequirements = (username: string): TAuthFieldRequirement
 	const usernameLengthWithoutSpaces = username.replace(/\s/g, '').length;
 
 	if (hasHtmlSpecialChars) {
-		unsatisfied.push(USERNAME_REQUIREMENTS['html-chars']);
+		unsatisfied.push(requirements['html-chars']);
 	} else {
-		satisfied.push(USERNAME_REQUIREMENTS['html-chars']);
+		satisfied.push(requirements['html-chars']);
 	}
 
 	if (
-		usernameLengthWithoutSpaces < MINIMUM_USERNAME_LENGTH ||
-		usernameLengthWithoutSpaces > MAXIMUM_USERNAME_LENGTH
+		usernameLengthWithoutSpaces < limits.minimumUsernameLength ||
+		usernameLengthWithoutSpaces > limits.maximumUsernameLength
 	) {
-		unsatisfied.push(USERNAME_REQUIREMENTS['length']);
+		unsatisfied.push(requirements.length);
 	} else {
-		satisfied.push(USERNAME_REQUIREMENTS['length']);
+		satisfied.push(requirements.length);
 	}
 
 	if (hasSpaces) {
-		unsatisfied.push(USERNAME_REQUIREMENTS['spaces']);
+		unsatisfied.push(requirements.spaces);
 	} else {
 		if (!username) {
 			return {
 				satisfied: [],
-				unsatisfied: Array.from(Object.values(USERNAME_REQUIREMENTS)),
+				unsatisfied: Object.values(requirements),
 			};
 		} else {
-			satisfied.push(USERNAME_REQUIREMENTS['spaces']);
+			satisfied.push(requirements.spaces);
 		}
 	}
 
