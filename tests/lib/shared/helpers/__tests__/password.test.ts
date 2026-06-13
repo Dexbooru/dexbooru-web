@@ -25,9 +25,7 @@ describe('getPasswordRequirements', () => {
 			maximumPasswordLength: 10,
 		});
 
-		expect(result.unsatisfied).toContain(
-			'The password must be between 8 and 10 characters long',
-		);
+		expect(result.unsatisfied).toContain('The password must be between 8 and 10 characters long');
 	});
 
 	it('rejects passwords shorter than a custom minimum', () => {
@@ -36,8 +34,6 @@ describe('getPasswordRequirements', () => {
 			maximumPasswordLength: 50,
 		});
 
-		expect(result.unsatisfied).toContain(
-			'The password must be between 8 and 50 characters long',
-		);
+		expect(result.unsatisfied).toContain('The password must be between 8 and 50 characters long');
 	});
 });

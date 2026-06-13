@@ -63,8 +63,7 @@ describe('application configuration controllers', () => {
 		} as never;
 		const { handleUpdateApplicationConfiguration } =
 			await import('$lib/server/controllers/applicationConfiguration');
-		const { syncDatabaseVarcharConstraints } =
-			await import('$lib/server/applicationConfiguration');
+		const { syncDatabaseVarcharConstraints } = await import('$lib/server/applicationConfiguration');
 
 		const response = (await handleUpdateApplicationConfiguration(event)) as {
 			status: number;

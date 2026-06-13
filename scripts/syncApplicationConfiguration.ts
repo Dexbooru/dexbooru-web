@@ -13,6 +13,7 @@ import { parse } from 'yaml';
 import { existsSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
+import logger from '../src/lib/server/logging/logger';
 
 const DEFAULT_APPLICATION_CONFIGURATION_YAML_PATH = './instance-configuration.yaml';
 
@@ -100,7 +101,7 @@ async function main() {
 
 	const yamlPath = resolveYamlPath();
 	if (!existsSync(yamlPath)) {
-		console.info(
+		logger.info(
 			`No configuration YAML found at ${yamlPath}. Skipping sync and keeping database defaults.`,
 		);
 		return;
@@ -115,7 +116,7 @@ async function main() {
 	try {
 		const yamlContent = await readFile(yamlPath, 'utf8');
 		if (!yamlContent.trim()) {
-			console.info(`Configuration YAML at ${yamlPath} is empty. Nothing to sync.`);
+			logger.info(`Configuration YAML at ${yamlPath} is empty. Nothing to sync.`);
 			return;
 		}
 
@@ -160,13 +161,13 @@ async function main() {
 		await updateDatabaseVarcharConstraints(prisma, mergedConfiguration);
 		await syncSchemaFiles(mergedConfiguration);
 
-		console.info(`Application configuration synchronized from YAML at ${yamlPath}.`);
+		logger.info(`Application configuration synchronized from YAML at ${yamlPath}.`);
 	} finally {
 		await prisma.$disconnect();
 	}
 }
 
 main().catch((error) => {
-	console.error('Failed to synchronize application configuration:', error);
+	logger.error('Failed to synchronize application configuration:', error);
 	process.exit(1);
 });

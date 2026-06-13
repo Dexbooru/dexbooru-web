@@ -45,9 +45,9 @@ describe('syncDatabaseVarcharConstraints', () => {
 
 		const sqlCalls = getSqlCalls();
 		expect(sqlCalls.some((sql) => sql.includes('ALTER TABLE "Comment"'))).toBe(true);
-		expect(sqlCalls.some((sql) => sql.includes('DROP INDEX IF EXISTS collection_searchable_idx'))).toBe(
-			false,
-		);
+		expect(
+			sqlCalls.some((sql) => sql.includes('DROP INDEX IF EXISTS collection_searchable_idx')),
+		).toBe(false);
 	});
 
 	it('drops and recreates searchable when a searchable-dependent limit changes', async () => {
@@ -78,12 +78,11 @@ describe('syncDatabaseVarcharConstraints', () => {
 		).toBe(true);
 		expect(
 			sqlCalls.some(
-				(sql) =>
-					sql.includes('ADD COLUMN searchable tsvector') && sql.includes('COALESCE(title'),
+				(sql) => sql.includes('ADD COLUMN searchable tsvector') && sql.includes('COALESCE(title'),
 			),
 		).toBe(true);
-		expect(
-			sqlCalls.some((sql) => sql.includes('CREATE INDEX collection_searchable_idx')),
-		).toBe(true);
+		expect(sqlCalls.some((sql) => sql.includes('CREATE INDEX collection_searchable_idx'))).toBe(
+			true,
+		);
 	});
 });
