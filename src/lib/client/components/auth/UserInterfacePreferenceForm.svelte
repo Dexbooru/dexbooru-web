@@ -20,6 +20,7 @@
 	let customSiteCss: string = $state('');
 	let hidePostMetadataOnPreview: boolean = $state(false);
 	let hideCollectionMetadataOnPreview: boolean = $state(false);
+	let hideImageCarousel: boolean = $state(false);
 
 	const user = getAuthenticatedUser();
 	const userPreferences = getAuthenticatedUserPreferences();
@@ -28,6 +29,7 @@
 		customSiteCss = data.customSideWideCss;
 		hidePostMetadataOnPreview = data.hidePostMetadataOnPreview;
 		hideCollectionMetadataOnPreview = data.hideCollectionMetadataOnPreview;
+		hideImageCarousel = data.hideImageCarousel;
 	});
 
 	onMount(() => {
@@ -88,28 +90,43 @@
 				Your CSS will be applied after each page on Dexbooru is fully loaded
 			</p>
 		</Label>
-		<Label class="mb-3 space-y-2">
-			<span>Hide post metadata on your preview</span>
-			<Checkbox bind:checked={hidePostMetadataOnPreview} />
-			<input name="hidePostMetadataOnPreview" type="hidden" value={hidePostMetadataOnPreview} />
-			<p class="text-sm text-gray-500">
+		<div class="space-y-2">
+			<Label class="flex items-center gap-3 py-1">
+				<Checkbox bind:checked={hidePostMetadataOnPreview} />
+				<span>Hide post metadata on your preview</span>
+			</Label>
+			<p class="ms-7 text-sm text-gray-500 dark:text-gray-400">
 				Post tags, artists, uploader and other visible information will not be shown. The images
 				will be shown still.
 			</p>
-		</Label>
-		<Label class="mb-3 space-y-2">
-			<span>Hide collection metadata on your preview</span>
-			<Checkbox bind:checked={hideCollectionMetadataOnPreview} />
+			<input name="hidePostMetadataOnPreview" type="hidden" value={hidePostMetadataOnPreview} />
+		</div>
+		<div class="space-y-2">
+			<Label class="flex items-center gap-3 py-1">
+				<Checkbox bind:checked={hideCollectionMetadataOnPreview} />
+				<span>Hide collection metadata on your preview</span>
+			</Label>
+			<p class="ms-7 text-sm text-gray-500 dark:text-gray-400">
+				Collection titles, descriptions, uploaders and other visible information will not be shown.
+				The images will be shown still.
+			</p>
 			<input
 				name="hideCollectionMetadataOnPreview"
 				type="hidden"
 				value={hideCollectionMetadataOnPreview}
 			/>
-			<p class="text-sm text-gray-500">
-				Collection titles, descriptions, uploaders and other visible information will not be shown.
-				The images will be shown still.
+		</div>
+		<div class="space-y-2">
+			<Label class="flex items-center gap-3 py-1">
+				<Checkbox bind:checked={hideImageCarousel} />
+				<span>Hide image carousel controls on preview</span>
+			</Label>
+			<p class="ms-7 text-sm text-gray-500 dark:text-gray-400">
+				When a post or collection has multiple images, the carousel slider controls and indicators
+				will not be shown. You can still swipe between images.
 			</p>
-		</Label>
+			<input name="hideImageCarousel" type="hidden" value={hideImageCarousel} />
+		</div>
 
 		<Button disabled={interfacePreferenceChanging} type="submit" color="primary"
 			>Save Interface Preferences</Button

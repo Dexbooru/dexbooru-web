@@ -39,7 +39,12 @@ describe('postSource actions', () => {
 			const characterName = 'Char Name';
 			const sourceTitle = 'Source Title';
 			const sourceType = 'ANIME' as PostSourceType;
-			const mockPostSource = { id: 'ps1', sourceTitle: 'source_title', sourceType, characterName: 'char_name' };
+			const mockPostSource = {
+				id: 'ps1',
+				sourceTitle: 'source_title',
+				sourceType,
+				characterName: 'char_name',
+			};
 			mockPrisma.postSource.upsert.mockResolvedValue(mockPostSource);
 			mockPrisma.post.update.mockResolvedValue({});
 
@@ -167,14 +172,7 @@ describe('postSource actions', () => {
 			const selectors = { id: true, tagString: true } as TPostSelector;
 			mockPrisma.post.findMany.mockResolvedValue([]);
 
-			await findPostsByCharacterName(
-				characterName,
-				0,
-				20,
-				'likes',
-				true,
-				selectors,
-			);
+			await findPostsByCharacterName(characterName, 0, 20, 'likes', true, selectors);
 
 			expect(mockPrisma.post.findMany).toHaveBeenCalledWith(
 				expect.objectContaining({

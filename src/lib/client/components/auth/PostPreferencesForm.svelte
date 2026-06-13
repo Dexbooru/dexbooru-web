@@ -68,19 +68,27 @@
 		action="?/postPreferences"
 		class="flex flex-col space-y-4"
 	>
-		<Label class="mb-3 space-y-2">
-			<span>Auto Blur NSFW Posts</span>
-			<Checkbox bind:checked={autoBlurNsfw} />
+		<div class="space-y-2">
+			<Label class="flex items-center gap-3 py-1">
+				<Checkbox bind:checked={autoBlurNsfw} />
+				<span>Auto Blur NSFW Posts</span>
+			</Label>
+			<p class="ms-7 text-sm text-gray-500 dark:text-gray-400">
+				Removes the automatic blur on posts marked as NSFW
+			</p>
 			<input type="hidden" name="autoBlurNsfw" value={autoBlurNsfw} />
-			<p class="text-sm text-gray-500">Removes the automatic blur on posts marked as NSFW</p>
-		</Label>
+		</div>
 
-		<Label class="mb-3 space-y-2">
-			<span>Browse in Safe Mode</span>
-			<Checkbox bind:checked={browseInSafeMode} />
-			<p class="text-sm text-gray-500">Safe mode hides NSFW marked posts automatically</p>
+		<div class="space-y-2">
+			<Label class="flex items-center gap-3 py-1">
+				<Checkbox bind:checked={browseInSafeMode} />
+				<span>Browse in Safe Mode</span>
+			</Label>
+			<p class="ms-7 text-sm text-gray-500 dark:text-gray-400">
+				Safe mode hides NSFW marked posts automatically
+			</p>
 			<input type="hidden" name="browseInSafeMode" value={browseInSafeMode} />
-		</Label>
+		</div>
 
 		<div class="flex flex-row flex-wrap">
 			<Label class="mb-3 space-y-2">

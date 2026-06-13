@@ -233,6 +233,7 @@ const UpdateUserUserInterfacePreferencesSchema = {
 			.optional(),
 		hidePostMetadataOnPreview: BoolStrSchema.optional(),
 		hideCollectionMetadataOnPreview: BoolStrSchema.optional(),
+		hideImageCarousel: BoolStrSchema.optional(),
 	}),
 } satisfies TRequestSchema;
 

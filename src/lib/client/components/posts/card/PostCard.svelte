@@ -4,10 +4,7 @@
 	import PostCardBody from '$lib/client/components/posts/card/PostCardBody.svelte';
 	import PostCardTooltip from '$lib/client/components/posts/card/PostCardTooltip.svelte';
 	import { HIDDEN_POSTS_MODAL_NAME } from '$lib/client/constants/layout';
-	import {
-		POST_CARD_CAROUSEL_SLIDE_DURATION,
-		POST_CARD_CAROUSEL_TRANSITION_FUNCTION,
-	} from '$lib/client/constants/posts';
+	import { POST_CARD_CAROUSEL_SLIDE_DURATION } from '$lib/client/constants/posts';
 	import { getActiveModal, getAuthenticatedUserPreferences } from '$lib/client/helpers/context';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
@@ -73,7 +70,6 @@
 				{imageUrls}
 				{imagesAlt}
 				slideDuration={POST_CARD_CAROUSEL_SLIDE_DURATION}
-				transitionFunction={POST_CARD_CAROUSEL_TRANSITION_FUNCTION}
 			/>
 		{:else if imageUrls.length === 1}
 			<a href="/posts/{postId}">
@@ -115,7 +111,6 @@
 				{imageUrls}
 				{imagesAlt}
 				slideDuration={POST_CARD_CAROUSEL_SLIDE_DURATION}
-				transitionFunction={POST_CARD_CAROUSEL_TRANSITION_FUNCTION}
 			/>
 		{:else if imageUrls.length === 1}
 			<a href="/posts/{postId}">

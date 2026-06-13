@@ -1,0 +1,39 @@
+name: PR Coverage
+
+on:
+  pull_request:
+
+concurrency:
+  group: pr-coverage-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: Coverage report
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Run tests with coverage
+        run: pnpm test:coverage:ci
+
+      - name: Report coverage on pull request
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vite-config-path: vite.config.ts
+          file-coverage-mode: changes
+          file-coverage-expanded: true

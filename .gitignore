@@ -25,5 +25,8 @@ mock_data/
 /docker/postgres/data
 /docker/localstack-*/datacoverage/
 
-# testing
-coverage/
+# testing (pnpm test:coverage, test:coverage:ci)
+/coverage/
+coverage-final.json
+coverage-summary.json
+*.lcov

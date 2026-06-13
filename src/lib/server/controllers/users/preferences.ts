@@ -17,14 +17,19 @@ export const handleUpdateUserInterfacePreferences = async (event: RequestEvent) 
 		'form-action',
 		UpdateUserUserInterfacePreferencesSchema,
 		async (data) => {
-			const { customSiteWideCss, hidePostMetadataOnPreview, hideCollectionMetadataOnPreview } =
-				data.form;
+			const {
+				customSiteWideCss,
+				hidePostMetadataOnPreview,
+				hideCollectionMetadataOnPreview,
+				hideImageCarousel,
+			} = data.form;
 
 			try {
 				const data = {
 					customSideWideCss: customSiteWideCss ?? '',
 					hidePostMetadataOnPreview: hidePostMetadataOnPreview ?? false,
 					hideCollectionMetadataOnPreview: hideCollectionMetadataOnPreview ?? false,
+					hideImageCarousel: hideImageCarousel ?? false,
 				};
 				await updateUserPreferences(event.locals.user.id, {
 					...data,

@@ -61,6 +61,7 @@ export const NULLABLE_USER_USER_PREFERENCES: UserPreference = {
 	customSideWideCss: '',
 	hidePostMetadataOnPreview: true,
 	hideCollectionMetadataOnPreview: false,
+	hideImageCarousel: false,
 	blacklistedArtists: [],
 	blacklistedTags: [],
 	createdAt: new Date(),
