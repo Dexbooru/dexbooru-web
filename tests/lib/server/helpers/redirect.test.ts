@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
-const { getSafeRedirectTo } = await vi.importActual<
-	typeof import('$lib/server/helpers/redirect')
->('$lib/server/helpers/redirect');
+const { getSafeRedirectTo } = await vi.importActual<typeof import('$lib/server/helpers/redirect')>(
+	'$lib/server/helpers/redirect',
+);
 
 describe('getSafeRedirectTo', () => {
 	const defaultPath = '/home';

@@ -22,7 +22,9 @@ const resolveYamlPath = () => {
 		configuredPath && configuredPath.length > 0
 			? configuredPath
 			: DEFAULT_APPLICATION_CONFIGURATION_YAML_PATH;
-	return path.isAbsolute(candidatePath) ? candidatePath : path.resolve(process.cwd(), candidatePath);
+	return path.isAbsolute(candidatePath)
+		? candidatePath
+		: path.resolve(process.cwd(), candidatePath);
 };
 
 const replaceModelFieldVarcharLimit = (
@@ -36,10 +38,7 @@ const replaceModelFieldVarcharLimit = (
 	if (!modelMatch) return source;
 
 	const modelBlock = modelMatch[0];
-	const fieldPattern = new RegExp(
-		`(^\\s*${fieldName}\\s+[^\\n]*@db\\.VarChar\\()(\\d+)(\\))`,
-		'm',
-	);
+	const fieldPattern = new RegExp(`(^\\s*${fieldName}\\s+[^\\n]*@db\\.VarChar\\()(\\d+)(\\))`, 'm');
 	if (!fieldPattern.test(modelBlock)) return source;
 
 	const nextModelBlock = modelBlock.replace(

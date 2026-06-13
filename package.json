@@ -26,7 +26,8 @@
 		"test:coverage": "vitest run --coverage.enabled --coverage.reporter=html --coverage.reporter=text",
 		"test:coverage:ci": "vitest run --coverage.enabled --coverage.reporter=json-summary --coverage.reporter=json",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write 'src/**/*.{ts,svelte}'",
+		"lint:fix": "prettier --write . && eslint . --fix",
+		"format": "prettier --write 'src/**/*.{ts,svelte}' 'scripts/**/*.ts'",
 		"prepare": "husky install && svelte-kit sync"
 	},
 	"devDependencies": {
@@ -116,6 +117,9 @@
 	},
 	"lint-staged": {
 		"src/**/*.{ts,svelte}": [
+			"prettier --write"
+		],
+		"scripts/**/*.ts": [
 			"prettier --write"
 		],
 		"*.{js,jsx,ts,tsx,svelte}": [

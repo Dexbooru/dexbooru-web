@@ -46,9 +46,8 @@ describe('application configuration controllers', () => {
 
 	it('returns application configuration in GET handler', async () => {
 		const event = {} as never;
-		const { handleGetApplicationConfiguration } = await import(
-			'$lib/server/controllers/applicationConfiguration'
-		);
+		const { handleGetApplicationConfiguration } =
+			await import('$lib/server/controllers/applicationConfiguration');
 
 		const response = (await handleGetApplicationConfiguration(event, 'api-route')) as {
 			status: number;
@@ -62,9 +61,8 @@ describe('application configuration controllers', () => {
 		const event = {
 			locals: { user: { id: 'owner-id' } },
 		} as never;
-		const { handleUpdateApplicationConfiguration } = await import(
-			'$lib/server/controllers/applicationConfiguration'
-		);
+		const { handleUpdateApplicationConfiguration } =
+			await import('$lib/server/controllers/applicationConfiguration');
 
 		const response = (await handleUpdateApplicationConfiguration(event)) as {
 			status: number;

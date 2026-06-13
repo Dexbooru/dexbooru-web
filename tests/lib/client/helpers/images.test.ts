@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-	computeDownScaledImageRatios,
-	transformImageDimensions,
-} from '$lib/client/helpers/images';
+import { computeDownScaledImageRatios, transformImageDimensions } from '$lib/client/helpers/images';
 
 describe('computeDownScaledImageRatios', () => {
 	it('returns 100 for equal dimensions', () => {

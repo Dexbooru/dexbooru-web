@@ -30,9 +30,8 @@ describe('application configuration SSE route', () => {
 	});
 
 	it('returns SSE response with initial payload', async () => {
-		const { GET } = await import(
-			'../../../../src/routes/api/events/application-configuration/+server'
-		);
+		const { GET } =
+			await import('../../../../src/routes/api/events/application-configuration/+server');
 		const response = await GET({} as never);
 
 		expect(response.headers.get('Content-Type')).toBe('text/event-stream');
