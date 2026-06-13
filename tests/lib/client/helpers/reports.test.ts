@@ -3,16 +3,14 @@ import { normalizeReportReasonName } from '$lib/client/helpers/reports';
 
 describe('normalizeReportReasonName', () => {
 	it('replaces underscores with spaces and capitalizes', () => {
-		expect(normalizeReportReasonName('spam_content')).toBe('Spam content');
+		expect(normalizeReportReasonName('IMPROPER_TAGGING')).toBe('Improper tagging');
 	});
 
 	it('capitalizes single-word categories', () => {
-		expect(normalizeReportReasonName('harassment')).toBe('Harassment');
+		expect(normalizeReportReasonName('SPAM')).toBe('Spam');
 	});
 
 	it('handles multiple underscores', () => {
-		expect(normalizeReportReasonName('fake_account_impersonation')).toBe(
-			'Fake account impersonation',
-		);
+		expect(normalizeReportReasonName('INAPPROPRIATE_USERNAME')).toBe('Inappropriate username');
 	});
 });

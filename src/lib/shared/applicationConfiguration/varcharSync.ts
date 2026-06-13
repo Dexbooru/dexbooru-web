@@ -18,7 +18,15 @@ export const SEARCHABLE_DEPENDENT_CONFIG_KEYS = new Set<TApplicationConfiguratio
 	'maximumCollectionDescriptionLength',
 ]);
 
-export const SEARCHABLE_DEPENDENT_COLUMNS: Record<string, readonly string[]> = {
+export const SEARCHABLE_TABLE_NAMES = ['User', 'Post', 'Tag', 'Artist', 'PostCollection'] as const;
+
+export type TSearchableTableName = (typeof SEARCHABLE_TABLE_NAMES)[number];
+
+export const isSearchableTableName = (table: string): table is TSearchableTableName => {
+	return (SEARCHABLE_TABLE_NAMES as readonly string[]).includes(table);
+};
+
+export const SEARCHABLE_DEPENDENT_COLUMNS: Record<TSearchableTableName, readonly string[]> = {
 	User: ['username'],
 	Post: ['description'],
 	Tag: ['name'],
@@ -92,8 +100,12 @@ export const getSearchableSyncImpact = (
 	const configKeys = new Set<TApplicationConfigurationKey>();
 
 	for (const mapping of changedMappings) {
+		if (!isSearchableTableName(mapping.table)) {
+			continue;
+		}
+
 		const dependentColumns = SEARCHABLE_DEPENDENT_COLUMNS[mapping.table];
-		if (!dependentColumns?.includes(mapping.column)) {
+		if (!dependentColumns.includes(mapping.column)) {
 			continue;
 		}
 

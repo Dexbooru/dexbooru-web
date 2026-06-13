@@ -1,4 +1,8 @@
-import { SEARCHABLE_DEPENDENT_COLUMNS } from '$lib/shared/applicationConfiguration/varcharSync';
+import {
+	SEARCHABLE_DEPENDENT_COLUMNS,
+	isSearchableTableName,
+	type TSearchableTableName,
+} from '$lib/shared/applicationConfiguration/varcharSync';
 
 type TSearchableTableConfig = {
 	indexName: string;
@@ -6,7 +10,7 @@ type TSearchableTableConfig = {
 	dependentColumns: readonly string[];
 };
 
-export const SEARCHABLE_TABLE_CONFIG: Record<string, TSearchableTableConfig> = {
+export const SEARCHABLE_TABLE_CONFIG: Record<TSearchableTableName, TSearchableTableConfig> = {
 	User: {
 		indexName: 'user_searchable_idx',
 		expression: "to_tsvector('english', COALESCE(username, '') || ' ' || COALESCE(id, ''))",
@@ -40,9 +44,11 @@ export const tableRequiresSearchableRebuild = (
 	table: string,
 	columns: Iterable<string>,
 ): boolean => {
-	const searchableConfig = SEARCHABLE_TABLE_CONFIG[table];
-	if (!searchableConfig) return false;
+	if (!isSearchableTableName(table)) {
+		return false;
+	}
 
+	const searchableConfig = SEARCHABLE_TABLE_CONFIG[table];
 	const dependentColumns = new Set(searchableConfig.dependentColumns);
 	for (const column of columns) {
 		if (dependentColumns.has(column)) return true;

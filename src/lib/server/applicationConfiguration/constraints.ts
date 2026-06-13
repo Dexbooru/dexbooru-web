@@ -8,6 +8,7 @@ import {
 } from '$lib/shared/applicationConfiguration';
 import prisma from '../db/prisma';
 import { SEARCHABLE_TABLE_CONFIG, tableRequiresSearchableRebuild } from './searchableColumns';
+import { isSearchableTableName } from '$lib/shared/applicationConfiguration/varcharSync';
 
 const groupMappingsByTable = (mappings: TConfigurationSchemaFieldMapping[]) => {
 	const mappingsByTable = new Map<string, TConfigurationSchemaFieldMapping[]>();
@@ -74,7 +75,9 @@ export const syncDatabaseVarcharConstraints = async ({
 
 	for (const [table, mappings] of mappingsByTable) {
 		const columns = mappings.map((mapping) => mapping.column);
-		const searchableConfig = SEARCHABLE_TABLE_CONFIG[table];
+		const searchableConfig = isSearchableTableName(table)
+			? SEARCHABLE_TABLE_CONFIG[table]
+			: undefined;
 		const needsSearchableRebuild =
 			searchableConfig !== undefined && tableRequiresSearchableRebuild(table, columns);
 
