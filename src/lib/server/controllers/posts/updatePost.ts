@@ -6,7 +6,7 @@ import {
 } from '../../helpers/controllers';
 import { deleteBatchFromBucket } from '../../aws/actions/s3';
 import { AWS_POST_PICTURE_BUCKET_NAME } from '../../constants/aws';
-import { MAXIMUM_IMAGES_PER_POST } from '$lib/shared/constants/images';
+import { getApplicationConfiguration } from '$lib/server/applicationConfiguration';
 import { base64ToFile } from '../../helpers/images';
 import { invalidateCacheRemotely } from '../../helpers/sessions';
 import { getCacheKeyForIndividualPost } from '../cache-strategies/posts';
@@ -24,6 +24,7 @@ export const handleUpdatePost = async (event: RequestEvent) => {
 			const { postId } = data.pathParams;
 			const { description, newPostImagesContent = [], deletionPostImageUrls = [] } = data.body;
 			const user = event.locals.user;
+			const { maximumImagesPerPost } = await getApplicationConfiguration();
 
 			const cacheKey = getCacheKeyForIndividualPost(postId);
 
@@ -80,11 +81,11 @@ export const handleUpdatePost = async (event: RequestEvent) => {
 				}
 
 				if (newPostImagesContent.length > 0) {
-					if (totalImagesInPost + newPostImagesContent.length > MAXIMUM_IMAGES_PER_POST) {
+					if (totalImagesInPost + newPostImagesContent.length > maximumImagesPerPost) {
 						return createErrorResponse(
 							'api-route',
 							400,
-							`The total number of images in the post exceeds the maximum allowed size of ${MAXIMUM_IMAGES_PER_POST}`,
+							`The total number of images in the post exceeds the maximum allowed size of ${maximumImagesPerPost}`,
 						);
 					}
 

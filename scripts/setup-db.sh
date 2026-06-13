@@ -37,6 +37,11 @@ pnpm dbgenerate
 log "Running pnpm dbmigrate"
 pnpm dbmigrate
 
+if [[ -f "$PROJECT_DIR/instance-configuration.yaml" ]] || [[ -n "${APPLICATION_CONFIGURATION_YAML_PATH:-}" ]]; then
+  log "Running pnpm appconfig:sync"
+  pnpm appconfig:sync
+fi
+
 log "Running pnpm dbseed"
 pnpm dbseed
 

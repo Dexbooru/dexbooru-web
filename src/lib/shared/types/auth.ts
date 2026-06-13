@@ -52,3 +52,13 @@ export type TEmailRequirements = Record<TEMAIL_REQUIREMENT_ABV, string>;
 
 type TUSERNAME_REQUIREMENT_ABV = 'length' | 'spaces' | 'html-chars';
 export type TUsernameRequirements = Record<TUSERNAME_REQUIREMENT_ABV, string>;
+
+export type TUsernameValidationLimits = {
+	minimumUsernameLength: number;
+	maximumUsernameLength: number;
+};
+
+export type TPasswordValidationLimits = {
+	minimumPasswordLength: number;
+	maximumPasswordLength: number;
+};

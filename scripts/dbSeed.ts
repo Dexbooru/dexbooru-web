@@ -1,7 +1,8 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import 'dotenv/config';
 import minimist from 'minimist';
-import { PrismaClient, UserRole } from '../src/generated/prisma/client';
+import { Prisma, PrismaClient, UserRole } from '../src/generated/prisma/client';
+import { APPLICATION_CONFIGURATION_SINGLETON_ID } from '../src/lib/shared/applicationConfiguration';
 import { hashPassword } from '../src/lib/server/helpers/password';
 import aggregateDanbooruPosts, { TAggregateOptions } from './helpers/aggregateDanbooruData';
 import dumpData from './helpers/dumpData';
@@ -24,6 +25,9 @@ async function main() {
 	});
 	const dbClient = new PrismaClient({ adapter });
 	await dbClient.$connect();
+	await dbClient.$executeRaw(
+		Prisma.sql`INSERT INTO ${Prisma.raw('"ApplicationConfiguration"')} ("id") VALUES (${APPLICATION_CONFIGURATION_SINGLETON_ID}) ON CONFLICT ("id") DO NOTHING`,
+	);
 
 	const args = minimist(process.argv.slice(2), {
 		string: ['blacklistedTags', 'outputDir', 'logLevel'],

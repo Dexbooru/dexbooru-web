@@ -1,15 +1,7 @@
 import { BoolStrSchema, PageNumberSchema } from '$lib/server/constants/reusableSchemas';
+import { getApplicationConfigurationSync } from '$lib/server/applicationConfiguration';
 import type { TRequestSchema } from '$lib/server/types/controllers';
-import {
-	MAXIMUM_IMAGES_PER_POST,
-	MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB,
-} from '$lib/shared/constants/images';
-import {
-	MAXIMUM_ARTISTS_PER_POST,
-	MAXIMUM_POST_DESCRIPTION_LENGTH,
-	MAXIMUM_TAGS_PER_POST,
-} from '$lib/shared/constants/posts';
-import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
+import { isFileImage } from '$lib/shared/helpers/images';
 import { isLabelAppropriate, transformLabels } from '$lib/shared/helpers/labels';
 import { z } from 'zod';
 
@@ -113,11 +105,15 @@ const CreatePostSchema = {
 			.transform((val) => Array.from(val instanceof File ? [val] : val))
 			.refine(
 				(val) => {
-					if (val.length > MAXIMUM_IMAGES_PER_POST) return false;
-					return !val.some((file) => !isFileImage(file) || !isFileImageSmall(file, 'post'));
+					const configuration = getApplicationConfigurationSync();
+					if (val.length > configuration.maximumImagesPerPost) return false;
+					return !val.some((file) => {
+						const fileSizeMb = file.size / 1000 / 1000;
+						return !isFileImage(file) || fileSizeMb > configuration.maximumPostImageUploadSizeMb;
+					});
 				},
 				{
-					message: `At least one of the uploaded post picture was not an image format, exceeded the maximum size of ${MAXIMUM_POST_IMAGE_UPLOAD_SIZE_MB} or the total number of images exceeded the maximum allowed size per post of ${MAXIMUM_IMAGES_PER_POST}`,
+					message: `At least one of the uploaded post picture was not an image format, exceeded the maximum size of ${getApplicationConfigurationSync().maximumPostImageUploadSizeMb} or the total number of images exceeded the maximum allowed size per post of ${getApplicationConfigurationSync().maximumImagesPerPost}`,
 				},
 			),
 		isNsfw: BoolStrSchema,
@@ -129,7 +125,7 @@ const CreatePostSchema = {
 			})
 			.refine(
 				(val) => {
-					if (val.length > MAXIMUM_TAGS_PER_POST) return false;
+					if (val.length > getApplicationConfigurationSync().maximumTagsPerPost) return false;
 					return !val.some((tag) => !isLabelAppropriate(tag, 'tag'));
 				},
 				{
@@ -145,7 +141,7 @@ const CreatePostSchema = {
 			})
 			.refine(
 				(val) => {
-					if (val.length > MAXIMUM_ARTISTS_PER_POST) return false;
+					if (val.length > getApplicationConfigurationSync().maximumArtistsPerPost) return false;
 					return !val.some((artist) => !isLabelAppropriate(artist, 'artist'));
 				},
 				{
@@ -165,7 +161,7 @@ const GetSimilarPostsSchema = {
 		imageFile: z.string().optional(),
 		similarityDescription: z
 			.string()
-			.max(MAXIMUM_POST_DESCRIPTION_LENGTH)
+			.max(getApplicationConfigurationSync().maximumPostDescriptionLength)
 			.optional()
 			.transform((val) => (val && val.trim() ? val.trim() : undefined)),
 	}),

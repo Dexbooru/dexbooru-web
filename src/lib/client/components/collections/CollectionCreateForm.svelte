@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import {
+		getApplicationConfiguration,
 		getCollectionPage,
 		getCollectionPaginationData,
 		getOriginalCollectionPage,
@@ -9,17 +10,11 @@
 	} from '$lib/client/helpers/context';
 	import { filesToBase64Strings } from '$lib/client/helpers/images';
 	import {
-		MAXIMUM_COLLECTION_DESCRIPTION_LENGTH,
-		MAXIMUM_COLLECTION_TITLE_LENGTH,
-	} from '$lib/shared/constants/collections';
-	import {
 		COLLECTION_THUMBNAIL_HEIGHT,
 		COLLECTION_THUMBNAIL_WIDTH,
 		FILE_IMAGE_ACCEPT,
-		MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB,
 	} from '$lib/shared/constants/images';
-	import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
-	import { isLabelAppropriate } from '$lib/shared/helpers/labels';
+	import { isFileImage } from '$lib/shared/helpers/images';
 	import type { TPostCollection } from '$lib/shared/types/collections';
 	import { toast } from '@zerodevx/svelte-toast';
 	import CalendarEditSolid from 'flowbite-svelte-icons/CalendarEditSolid.svelte';
@@ -36,7 +31,6 @@
 		isOpen: boolean;
 	};
 
-	// eslint-disable-next-line no-useless-assignment
 	let { isOpen = $bindable() }: Props = $props();
 
 	let collectionCreating: boolean = $state(false);
@@ -47,13 +41,14 @@
 	let thumbnailLoading: boolean = $state(false);
 	let createCollectionButtonDisabled = $derived.by(() => {
 		return !(
-			isLabelAppropriate(title, 'collectionTitle') &&
-			isLabelAppropriate(description, 'collectionDescription') &&
+			isTitleValid(title) &&
+			isDescriptionValid(description) &&
 			((thumbnailFile === null && !thumbnailLoading) ||
 				(thumbnailFile !== null &&
 					thumbnailBase64.length > 0 &&
 					isFileImage(thumbnailFile) &&
-					isFileImageSmall(thumbnailFile, 'collection')))
+					thumbnailFile.size / 1000 / 1000 <=
+						$applicationConfiguration.maximumCollectionThumbnailSizeMb))
 		);
 	});
 	let isNsfw: boolean = $state(false);
@@ -62,11 +57,28 @@
 	const originalCollectionPage = getOriginalCollectionPage();
 	const collectionPage = getCollectionPage();
 	const userCollections = getUserCollections();
+	const applicationConfiguration = getApplicationConfiguration();
+
+	const isTitleValid = (value: string) => {
+		if (value.length === 0) return false;
+		return value.length <= $applicationConfiguration.maximumCollectionTitleLength;
+	};
+
+	const isDescriptionValid = (value: string) => {
+		if (value.length === 0) return false;
+		return value.length <= $applicationConfiguration.maximumCollectionDescriptionLength;
+	};
 
 	const resetFileUploadState = () => {
 		thumbnailLoading = false;
 		thumbnailBase64 = '';
 		thumbnailFile = null;
+	};
+
+	const closeModal = () => {
+		if (isOpen) {
+			isOpen = false;
+		}
 	};
 
 	const onFileChange = async (event: Event) => {
@@ -84,9 +96,9 @@
 		}
 
 		const file = files.item(0) as File;
-		if (!isFileImageSmall(file, 'collection')) {
+		if (file.size / 1000 / 1000 > $applicationConfiguration.maximumCollectionThumbnailSizeMb) {
 			toast.push(
-				`The collection thumbnail image has a maximum size of ${MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB} MB`,
+				`The collection thumbnail image has a maximum size of ${$applicationConfiguration.maximumCollectionThumbnailSizeMb} MB`,
 				FAILURE_TOAST_OPTIONS,
 			);
 			resetFileUploadState();
@@ -128,7 +140,7 @@
 				description = '';
 				isNsfw = false;
 				resetFileUploadState();
-				isOpen = false;
+				closeModal();
 
 				const newCollection = result.data?.newCollection as TPostCollection;
 				originalCollectionPage.update((collections) => {
@@ -171,33 +183,33 @@
 >
 	<div class="mb-6">
 		<Label for="title" class="mb-2 block "
-			>Title (max of {MAXIMUM_COLLECTION_TITLE_LENGTH} characters):</Label
+			>Title (max of {$applicationConfiguration.maximumCollectionTitleLength} characters):</Label
 		>
 		<Input
 			name="title"
 			bind:value={title}
-			maxlength={MAXIMUM_COLLECTION_TITLE_LENGTH}
+			maxlength={$applicationConfiguration.maximumCollectionTitleLength}
 			required
 			placeholder="Enter a title"
 		/>
 		<p class="mt-2 text-right leading-none dark:text-gray-400">
-			{title.length}/{MAXIMUM_COLLECTION_TITLE_LENGTH}
+			{title.length}/{$applicationConfiguration.maximumCollectionTitleLength}
 		</p>
 	</div>
 	<div class="mb-6">
 		<Label for="description" class="mb-2 "
-			>Description (max of {MAXIMUM_COLLECTION_DESCRIPTION_LENGTH} characters):</Label
+			>Description (max of {$applicationConfiguration.maximumCollectionDescriptionLength} characters):</Label
 		>
 		<Textarea
 			placeholder="Enter a description"
-			maxlength={MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
+			maxlength={$applicationConfiguration.maximumCollectionDescriptionLength}
 			rows={4}
 			name="description"
 			bind:value={description}
 			class="w-full"
 		/>
 		<p class="mt-2 text-right leading-none dark:text-gray-400">
-			{description.length}/{MAXIMUM_COLLECTION_DESCRIPTION_LENGTH}
+			{description.length}/{$applicationConfiguration.maximumCollectionDescriptionLength}
 		</p>
 	</div>
 
@@ -208,7 +220,8 @@
 
 	<div class="mb-6">
 		<Label for="collectionThumbnail" class="mb-2 "
-			>Collection Thumbnnail (maximum image size is {MAXIMUM_COLLECTION_THUMBNAIL_SIZE_MB} MB)</Label
+			>Collection Thumbnnail (maximum image size is {$applicationConfiguration.maximumCollectionThumbnailSizeMb}
+			MB)</Label
 		>
 		<Fileupload
 			onchange={onFileChange}

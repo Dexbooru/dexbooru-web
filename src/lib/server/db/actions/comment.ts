@@ -1,6 +1,6 @@
 import type { Comment } from '$generated/prisma/client';
+import { getApplicationConfiguration } from '$lib/server/applicationConfiguration';
 import type { TCommentSelector } from '$lib/server/types/comments';
-import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
 import type { TCommentOrderByColumn } from '$lib/shared/types/comments';
 import prisma from '../prisma';
 
@@ -10,10 +10,11 @@ export async function findComments(
 	ascending: boolean,
 	selectors?: TCommentSelector,
 ) {
+	const { maximumCommentsPerPage } = await getApplicationConfiguration();
 	const comments = await prisma.comment.findMany({
 		select: selectors,
-		skip: pageNumber * MAXIMUM_COMMENTS_PER_PAGE,
-		take: MAXIMUM_COMMENTS_PER_PAGE,
+		skip: pageNumber * maximumCommentsPerPage,
+		take: maximumCommentsPerPage,
 		orderBy: {
 			[orderBy]: ascending ? 'asc' : 'desc',
 		},

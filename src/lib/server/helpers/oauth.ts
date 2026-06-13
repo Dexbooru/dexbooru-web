@@ -6,7 +6,8 @@ import {
 	OAUTH_GOOGLE_CLIENT_ID,
 	OAUTH_GOOGLE_CLIENT_SECRET,
 } from '$env/static/private';
-import { MAXIMUM_USERNAME_LENGTH, NULLABLE_USER } from '$lib/shared/constants/auth';
+import { getApplicationConfigurationSync } from '$lib/server/applicationConfiguration';
+import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import type { RequestEvent } from '@sveltejs/kit';
 import { CALLBACK_ENDPOINT } from '../constants/oauth';
 import redis from '../db/redis';
@@ -48,11 +49,12 @@ export class SkeletonOauthProvider {
 	}
 
 	public static constructPrimaryApplicationUsername(oauthUsername: string): string {
+		const { maximumUsernameLength } = getApplicationConfigurationSync();
 		return oauthUsername
 			.toLocaleLowerCase()
 			.replaceAll(' ', '_')
 			.trim()
-			.slice(0, MAXIMUM_USERNAME_LENGTH);
+			.slice(0, maximumUsernameLength);
 	}
 
 	public static getApplicationFromState(state: string): TOauthApplication | undefined {

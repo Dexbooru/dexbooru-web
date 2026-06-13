@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fileToBase64String } from '$lib/client/helpers/images';
-	import { MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB } from '$lib/shared/constants/images';
+	import { getApplicationConfiguration } from '$lib/client/helpers/context';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Fileupload from 'flowbite-svelte/Fileupload.svelte';
 	import ImagePlaceholder from 'flowbite-svelte/ImagePlaceholder.svelte';
@@ -14,6 +14,7 @@
 	};
 
 	let { isChangingProfilePicture = false, profilePictureFile = $bindable(null) }: Props = $props();
+	const applicationConfiguration = getApplicationConfiguration();
 
 	let profilePictureBase64String: string | null = $state(null);
 	let parsingProfilePicture = $state(false);
@@ -84,7 +85,9 @@
 <Label style="margin-top: 0px;" class="space-y-2">
 	<span>Upload a profile picture{isChangingProfilePicture ? '' : ' (optional)'}</span>
 	<br />
-	<span>The maximum size allowed is: {MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB} MB</span>
+	<span
+		>The maximum size allowed is: {$applicationConfiguration.maximumProfilePictureImageUploadSizeMb} MB</span
+	>
 	<Fileupload id={inputId} name={inputName} accept="image/*" onchange={onProfilePictureChange} />
 </Label>
 

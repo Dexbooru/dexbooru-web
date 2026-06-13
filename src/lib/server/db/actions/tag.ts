@@ -1,5 +1,5 @@
 import type { Tag } from '$generated/prisma/client';
-import { MAXIMUM_TAGS_PER_PAGE } from '$lib/server/constants/tags';
+import { getApplicationConfiguration } from '$lib/server/applicationConfiguration';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import prisma from '../prisma';
 
@@ -84,6 +84,7 @@ export async function findPostsByTagName(
 }
 
 export async function getTagsWithStartingLetter(letter: string, pageNumber: number) {
+	const { maximumTagsPerPage } = await getApplicationConfiguration();
 	const tags = await prisma.tag.findMany({
 		where: {
 			name: {
@@ -91,8 +92,8 @@ export async function getTagsWithStartingLetter(letter: string, pageNumber: numb
 			},
 		},
 		orderBy: { name: 'asc' },
-		skip: pageNumber * MAXIMUM_TAGS_PER_PAGE,
-		take: MAXIMUM_TAGS_PER_PAGE,
+		skip: pageNumber * maximumTagsPerPage,
+		take: maximumTagsPerPage,
 		select: {
 			name: true,
 			postCount: true,

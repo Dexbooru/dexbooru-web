@@ -1,19 +1,22 @@
-import {
-	MAXIMUM_PASSWORD_LENGTH,
-	MINIMUM_PASSWORD_LENGTH,
-	PASSWORD_REQUIREMENTS,
-	SPECIAL_CHARACTER_REGEX,
-} from '$lib/shared/constants/auth';
-import type { TAuthFieldRequirements } from '$lib/shared/types/auth';
+import { SPECIAL_CHARACTER_REGEX } from '$lib/shared/constants/auth';
+import type { TAuthFieldRequirements, TPasswordValidationLimits } from '$lib/shared/types/auth';
+import { buildPasswordRequirementMessages } from './requirementMessages';
 
-export const getPasswordRequirements = (password: string): TAuthFieldRequirements => {
+export const getPasswordRequirements = (
+	password: string,
+	limits: TPasswordValidationLimits,
+): TAuthFieldRequirements => {
+	const requirements = buildPasswordRequirementMessages(limits);
 	const satisifedRequirements: string[] = [];
 	const unsatisfiedRequirements: string[] = [];
 
-	if (password.length < MINIMUM_PASSWORD_LENGTH || password.length > MAXIMUM_PASSWORD_LENGTH) {
-		unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['length']);
+	if (
+		password.length < limits.minimumPasswordLength ||
+		password.length > limits.maximumPasswordLength
+	) {
+		unsatisfiedRequirements.push(requirements.length);
 	} else {
-		satisifedRequirements.push(PASSWORD_REQUIREMENTS['length']);
+		satisifedRequirements.push(requirements.length);
 	}
 
 	let hasUppercaseCharacter = false;
@@ -46,27 +49,27 @@ export const getPasswordRequirements = (password: string): TAuthFieldRequirement
 	}
 
 	if (hasLowercaseCharacter) {
-		satisifedRequirements.push(PASSWORD_REQUIREMENTS['lowercase']);
+		satisifedRequirements.push(requirements.lowercase);
 	} else {
-		unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['lowercase']);
+		unsatisfiedRequirements.push(requirements.lowercase);
 	}
 
 	if (hasUppercaseCharacter) {
-		satisifedRequirements.push(PASSWORD_REQUIREMENTS['uppercase']);
+		satisifedRequirements.push(requirements.uppercase);
 	} else {
-		unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['uppercase']);
+		unsatisfiedRequirements.push(requirements.uppercase);
 	}
 
 	if (hasNumber) {
-		satisifedRequirements.push(PASSWORD_REQUIREMENTS['number']);
+		satisifedRequirements.push(requirements.number);
 	} else {
-		unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['number']);
+		unsatisfiedRequirements.push(requirements.number);
 	}
 
 	if (hasSpecialCharacter) {
-		satisifedRequirements.push(PASSWORD_REQUIREMENTS['special-character']);
+		satisifedRequirements.push(requirements['special-character']);
 	} else {
-		unsatisfiedRequirements.push(PASSWORD_REQUIREMENTS['special-character']);
+		unsatisfiedRequirements.push(requirements['special-character']);
 	}
 
 	return {

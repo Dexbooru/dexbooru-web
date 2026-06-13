@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { RequestEvent } from '@sveltejs/kit';
 
 const { mockFindCollectionById, mockUpdateCollectionModerationStatus } = vi.hoisted(() => ({
@@ -338,7 +338,11 @@ describe('handleOwnerAmendResourceModerationStatus', () => {
 });
 
 describe('handleUpdatePostModerationStatus (owner PENDING rule)', () => {
+	const fixedNow = new Date('2026-06-13T21:43:48.003Z');
+
 	beforeEach(() => {
+		vi.useFakeTimers();
+		vi.setSystemTime(fixedNow);
 		vi.clearAllMocks();
 		mockUserActions.findUserById.mockReset();
 		mockPostActions.updatePost.mockReset();
@@ -346,14 +350,16 @@ describe('handleUpdatePostModerationStatus (owner PENDING rule)', () => {
 		mockControllerHelpers.validateAndHandleRequest.mockReset();
 	});
 
-	it('allows moderator to set APPROVED', async () => {
-		const now = new Date();
+	afterEach(() => {
+		vi.useRealTimers();
+	});
 
+	it('allows moderator to set APPROVED', async () => {
 		mockUserActions.findUserById.mockResolvedValue({ id: MODERATOR_ID, role: 'MODERATOR' });
 		mockPostActions.updatePost.mockResolvedValue({
 			id: POST_ID,
 			moderationStatus: 'APPROVED',
-			updatedAt: now,
+			updatedAt: fixedNow,
 		});
 		mockControllerHelpers.validateAndHandleRequest.mockImplementation(
 			async (_event, _handlerType, _schema, callback) => {
@@ -368,7 +374,7 @@ describe('handleUpdatePostModerationStatus (owner PENDING rule)', () => {
 
 		expect(mockPostActions.updatePost).toHaveBeenCalledWith(POST_ID, {
 			moderationStatus: 'APPROVED',
-			updatedAt: now,
+			updatedAt: fixedNow,
 		});
 		expect(mockControllerHelpers.createSuccessResponse).toHaveBeenCalled();
 	});
@@ -395,13 +401,11 @@ describe('handleUpdatePostModerationStatus (owner PENDING rule)', () => {
 	});
 
 	it('allows OWNER to set PENDING', async () => {
-		const now = new Date();
-
 		mockUserActions.findUserById.mockResolvedValue({ id: OWNER_ID, role: 'OWNER' });
 		mockPostActions.updatePost.mockResolvedValue({
 			id: POST_ID,
 			moderationStatus: 'PENDING',
-			updatedAt: now,
+			updatedAt: fixedNow,
 		});
 		mockControllerHelpers.validateAndHandleRequest.mockImplementation(
 			async (_event, _handlerType, _schema, callback) => {
@@ -416,7 +420,7 @@ describe('handleUpdatePostModerationStatus (owner PENDING rule)', () => {
 
 		expect(mockPostActions.updatePost).toHaveBeenCalledWith(POST_ID, {
 			moderationStatus: 'PENDING',
-			updatedAt: now,
+			updatedAt: fixedNow,
 		});
 		expect(mockControllerHelpers.createSuccessResponse).toHaveBeenCalled();
 	});

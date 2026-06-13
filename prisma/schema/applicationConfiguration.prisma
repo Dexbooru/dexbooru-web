@@ -1,0 +1,54 @@
+model ApplicationConfiguration {
+  id String @id @default("singleton")
+
+  maximumTagLength               Int @default(75)
+  maximumArtistLength            Int @default(75)
+  maximumTagDescriptionLength    Int @default(200)
+  maximumArtistDescriptionLength Int @default(200)
+  maximumArtistSocialMediaLength Int @default(450)
+  maximumArtistSocialMediasLength Int @default(5)
+  maximumLabelsPerPage           Int @default(100)
+  maximumBlacklistedTags         Int @default(50)
+  maximumBlacklistedArtists      Int @default(50)
+
+  maximumSourceLinkLength                 Int @default(450)
+  maximumPostsPerPage                     Int @default(27)
+  maximumSimilarPostsPerPost              Int @default(6)
+  maximumTagsPerPost                      Int @default(20)
+  maximumArtistsPerPost                   Int @default(5)
+  maximumPostDescriptionLength            Int @default(500)
+  maximumCommentsPerPost                  Int @default(100)
+  maximumDuplicatesToSearchOnPostUpload   Int @default(2)
+
+  maximumImagesPerPost                      Int   @default(3)
+  maximumPostImageUploadSizeMb              Float @default(3.5)
+  maximumProfilePictureImageUploadSizeMb    Float @default(1.75)
+  maximumCollectionThumbnailSizeMb          Float @default(3.5)
+
+  maximumCommentContentLength Int @default(1500)
+  maximumCommentsPerPage      Int @default(35)
+
+  maximumCollectionTitleLength       Int @default(100)
+  maximumCollectionDescriptionLength Int @default(250)
+  maximumPostsPerCollection          Int @default(15)
+  maximumCollectionsPerPage          Int @default(28)
+
+  minimumUsernameLength Int @default(4)
+  maximumUsernameLength Int @default(12)
+  minimumPasswordLength Int @default(8)
+  maximumPasswordLength Int @default(50)
+
+  maximumSiteWideCssLength Int @default(1000)
+
+  maximumReportReasonDescriptionLength Int @default(250)
+  maximumReportsPerPage                Int @default(30)
+
+  maximumTagsPerPage    Int @default(100)
+  maximumArtistsPerPage Int @default(100)
+
+  likePostRateLimitMax      Int @default(10)
+  likePostRateLimitWindowMs Int @default(60000)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}

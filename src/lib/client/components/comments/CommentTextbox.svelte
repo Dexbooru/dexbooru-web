@@ -2,8 +2,12 @@
 	import { createComment, editComment } from '$lib/client/api/comments';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { convertToMarkdown, htmlToMarkdown } from '$lib/client/helpers/comments';
-	import { getAuthenticatedUser, getCommentTree } from '$lib/client/helpers/context';
-	import { COMMENT_TEXT_AREA_ROWS, MAXIMUM_CONTENT_LENGTH } from '$lib/shared/constants/comments';
+	import {
+		getApplicationConfiguration,
+		getAuthenticatedUser,
+		getCommentTree,
+	} from '$lib/client/helpers/context';
+	import { COMMENT_TEXT_AREA_ROWS } from '$lib/shared/constants/comments';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { TComment } from '$lib/shared/types/comments';
 	import { toast } from '@zerodevx/svelte-toast';
@@ -42,6 +46,7 @@
 
 	const user = getAuthenticatedUser();
 	const commentTree = getCommentTree();
+	const applicationConfiguration = getApplicationConfiguration();
 
 	const handleOnInput = async (event: Event) => {
 		const target = event.target as HTMLTextAreaElement;
@@ -50,7 +55,11 @@
 
 	const handleEmoji = async (targetEmoji: string) => {
 		const emojiPadding = ` ${targetEmoji} `;
-		if (commentContent.length + emojiPadding.length > MAXIMUM_CONTENT_LENGTH) return;
+		if (
+			commentContent.length + emojiPadding.length >
+			$applicationConfiguration.maximumCommentContentLength
+		)
+			return;
 
 		commentContent += emojiPadding;
 		commentContentMarkdown = await convertToMarkdown(commentContent);
@@ -59,7 +68,7 @@
 	const handleCommentEdit = async () => {
 		if (!$user) return;
 		if (!commentContent) return;
-		if (commentContent.length > MAXIMUM_CONTENT_LENGTH) return;
+		if (commentContent.length > $applicationConfiguration.maximumCommentContentLength) return;
 		if (!commentId) return;
 
 		commentEditing = true;
@@ -89,7 +98,7 @@
 	const handleCommentCreate = async () => {
 		if (!$user) return;
 		if (!commentContent) return;
-		if (commentContent.length > MAXIMUM_CONTENT_LENGTH) return;
+		if (commentContent.length > $applicationConfiguration.maximumCommentContentLength) return;
 
 		commentCreating = true;
 		const response = await createComment(postId, {
@@ -144,11 +153,11 @@
 				bind:value={commentContent}
 				placeholder="Leave a comment on this post... Feel free to use emojis, links and markdown!"
 				rows={COMMENT_TEXT_AREA_ROWS}
-				maxlength={MAXIMUM_CONTENT_LENGTH}
+				maxlength={$applicationConfiguration.maximumCommentContentLength}
 				oninput={handleOnInput}
 			/>
 			<p class="leading-none dark:text-gray-400">
-				{commentContent.length} / {MAXIMUM_CONTENT_LENGTH}
+				{commentContent.length} / {$applicationConfiguration.maximumCommentContentLength}
 			</p>
 		</div>
 		{#if !editMode}

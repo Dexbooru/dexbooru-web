@@ -9,6 +9,7 @@ services:
     environment:
       - PORT=${PORT}
       - ORIGIN=${ORIGIN}
+      - APPLICATION_CONFIGURATION_YAML_PATH=${APPLICATION_CONFIGURATION_YAML_PATH}
     depends_on:
       - postgres
       - redis

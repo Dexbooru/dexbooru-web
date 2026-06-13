@@ -3,9 +3,12 @@
 	import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
 	import { EDIT_POST_MODAL_NAME } from '$lib/client/constants/layout';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
-	import { getActiveModal, getUpdatedPost } from '$lib/client/helpers/context';
-	import { MAXIMUM_IMAGES_PER_POST, ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
-	import { MAXIMUM_POST_DESCRIPTION_LENGTH } from '$lib/shared/constants/posts';
+	import {
+		getActiveModal,
+		getApplicationConfiguration,
+		getUpdatedPost,
+	} from '$lib/client/helpers/context';
+	import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
 	import { URL_REGEX } from '$lib/shared/constants/urls';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { TPost } from '$lib/shared/types/posts';
@@ -23,6 +26,7 @@
 
 	const activeModal = getActiveModal();
 	const updatedPostGlobal = getUpdatedPost();
+	const applicationConfiguration = getApplicationConfiguration();
 
 	const getImageId = (imageUrl: string) => {
 		const imageUrlParts = imageUrl.split('_');
@@ -122,7 +126,7 @@
 	});
 	let maximumImagesAllowed = $derived.by(() => {
 		const remainingImagesCount = getRemainingImagesCount();
-		return MAXIMUM_IMAGES_PER_POST - remainingImagesCount;
+		return $applicationConfiguration.maximumImagesPerPost - remainingImagesCount;
 	});
 	let uniqueDeletedImagesCount = $derived.by(() => {
 		return getUniqueImageGroupCount(deletionPostImageUrls);
@@ -144,11 +148,12 @@
 	class="w-full"
 >
 	<Label class="mb-1" for="post-description-textarea">
-		Please enter a description for your post <br /> (max {MAXIMUM_POST_DESCRIPTION_LENGTH} characters)
+		Please enter a description for your post <br /> (max {$applicationConfiguration.maximumPostDescriptionLength}
+		characters)
 	</Label>
 	<Textarea
 		id="post-description-textarea"
-		maxlength={MAXIMUM_POST_DESCRIPTION_LENGTH}
+		maxlength={$applicationConfiguration.maximumPostDescriptionLength}
 		rows={5}
 		bind:value={description}
 		name="description"
@@ -157,7 +162,7 @@
 		required
 	/>
 	<p class="mt-2 text-right leading-none dark:text-gray-400">
-		{description.length}/{MAXIMUM_POST_DESCRIPTION_LENGTH}
+		{description.length}/{$applicationConfiguration.maximumPostDescriptionLength}
 	</p>
 
 	<Label class="mb-1" for="post-source-link">Please enter the source link for your post</Label>

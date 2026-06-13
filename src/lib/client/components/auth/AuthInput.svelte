@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { TAuthFormRequirementData } from '$lib/client/types/stores';
-	import {
-		MAXIMUM_EMAIL_LENGTH,
-		MAXIMUM_PASSWORD_LENGTH,
-		MAXIMUM_USERNAME_LENGTH,
-	} from '$lib/shared/constants/auth';
-	import { getEmailRequirements } from '$lib/shared/helpers/auth/email';
+	import { getApplicationConfiguration } from '$lib/client/helpers/context';
+	import { EMAIL_REGEX } from '$lib/shared/constants/auth';
 	import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
+	import {
+		buildPasswordRequirementMessages,
+		buildUsernameRequirementMessages,
+	} from '$lib/shared/helpers/auth/requirementMessages';
 	import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
 	import Input from 'flowbite-svelte/Input.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
@@ -41,6 +41,26 @@
 	let unsatisfiedRequirements: string[] = $state([]);
 	let showPassword = $state(false);
 	let showConfirmedPassword = $state(false);
+	const applicationConfiguration = getApplicationConfiguration();
+
+	const usernameLimits = $derived({
+		minimumUsernameLength: $applicationConfiguration.minimumUsernameLength,
+		maximumUsernameLength: $applicationConfiguration.maximumUsernameLength,
+	});
+	const passwordLimits = $derived({
+		minimumPasswordLength: $applicationConfiguration.minimumPasswordLength,
+		maximumPasswordLength: $applicationConfiguration.maximumPasswordLength,
+	});
+
+	const usernameFallbackRequirements = $derived(
+		Object.values(buildUsernameRequirementMessages(usernameLimits)),
+	);
+	const emailLengthMessage = 'The email must be between 1 and 254 characters long';
+	const emailValidityMessage = 'The email must have a @ sign and a valid domain after it';
+	const emailFallbackRequirements = $derived([emailLengthMessage, emailValidityMessage]);
+	const passwordFallbackRequirements = $derived(
+		Object.values(buildPasswordRequirementMessages(passwordLimits)),
+	);
 
 	$effect(() => {
 		if (inputFieldType === 'username') onUsernameChange();
@@ -50,7 +70,25 @@
 	});
 
 	const onUsernameChange = () => {
-		const { satisfied, unsatisfied } = getUsernameRequirements(input);
+		if (!input) {
+			satisfiedRequirements = [];
+			unsatisfiedRequirements = [...usernameFallbackRequirements];
+
+			if (formStore) {
+				formStore.update((data) => {
+					return {
+						...data,
+						username: {
+							satisfied: [],
+							unsatisfied: [...usernameFallbackRequirements],
+						},
+					};
+				});
+			}
+			return;
+		}
+
+		const { satisfied, unsatisfied } = getUsernameRequirements(input, usernameLimits);
 		satisfiedRequirements = satisfied;
 		unsatisfiedRequirements = unsatisfied;
 
@@ -65,8 +103,25 @@
 	};
 
 	const onPasswordChange = () => {
-		const { satisfied, unsatisfied } = getPasswordRequirements(input);
+		if (!input) {
+			satisfiedRequirements = [];
+			unsatisfiedRequirements = [...passwordFallbackRequirements];
 
+			if (formStore) {
+				formStore.update((data) => {
+					return {
+						...data,
+						password: {
+							satisfied: [],
+							unsatisfied: [...passwordFallbackRequirements],
+						},
+					};
+				});
+			}
+			return;
+		}
+
+		const { satisfied, unsatisfied } = getPasswordRequirements(input, passwordLimits);
 		satisfiedRequirements = satisfied;
 		unsatisfiedRequirements = unsatisfied;
 
@@ -92,7 +147,30 @@
 	};
 
 	const onEmailChange = () => {
-		const { satisfied, unsatisfied } = getEmailRequirements(input);
+		if (!input) {
+			satisfiedRequirements = [];
+			unsatisfiedRequirements = [...emailFallbackRequirements];
+
+			if (formStore) {
+				formStore.update((data) => {
+					return {
+						...data,
+						email: {
+							satisfied: [],
+							unsatisfied: [...emailFallbackRequirements],
+						},
+					};
+				});
+			}
+			return;
+		}
+
+		const satisfied: string[] = [];
+		const unsatisfied: string[] = [];
+		if (input.length >= 1 && input.length <= 254) satisfied.push(emailLengthMessage);
+		else unsatisfied.push(emailLengthMessage);
+		if (EMAIL_REGEX.test(input)) satisfied.push(emailValidityMessage);
+		else unsatisfied.push(emailValidityMessage);
 
 		satisfiedRequirements = satisfied;
 		unsatisfiedRequirements = unsatisfied;
@@ -120,7 +198,7 @@
 					name={inputName}
 					placeholder="•••••"
 					required
-					maxlength={MAXIMUM_PASSWORD_LENGTH}
+					maxlength={$applicationConfiguration.maximumPasswordLength}
 				/>
 				{#if showRequirements}
 					<FieldRequirements
@@ -129,6 +207,7 @@
 						popoverButtonId="password-req-popover-btn"
 						satisifedRequirements={satisfiedRequirements}
 						{unsatisfiedRequirements}
+						fallbackRequirements={passwordFallbackRequirements}
 					/>
 				{/if}
 			</div>
@@ -144,7 +223,7 @@
 				name={inputName}
 				placeholder="•••••"
 				required
-				maxlength={MAXIMUM_PASSWORD_LENGTH}
+				maxlength={$applicationConfiguration.maximumPasswordLength}
 			/>
 			<Toggle bind:checked={showConfirmedPassword}>Show password</Toggle>
 
@@ -162,7 +241,7 @@
 				name={inputName}
 				placeholder="Your username"
 				required
-				maxlength={MAXIMUM_USERNAME_LENGTH}
+				maxlength={$applicationConfiguration.maximumUsernameLength}
 			/>
 			<FieldRequirements
 				requirementsPlacement="right-end"
@@ -170,6 +249,7 @@
 				popoverButtonId="username-req-popover-btn"
 				satisifedRequirements={satisfiedRequirements}
 				{unsatisfiedRequirements}
+				fallbackRequirements={usernameFallbackRequirements}
 			/>
 		</div>
 	{:else if inputFieldType === 'email'}
@@ -182,7 +262,7 @@
 				name={inputName}
 				placeholder="Your email"
 				required
-				maxlength={MAXIMUM_EMAIL_LENGTH}
+				maxlength={254}
 			/>
 
 			<FieldRequirements
@@ -191,6 +271,7 @@
 				popoverButtonId="email-req-popover-btn"
 				satisifedRequirements={satisfiedRequirements}
 				{unsatisfiedRequirements}
+				fallbackRequirements={emailFallbackRequirements}
 			/>
 		</div>
 	{:else if inputFieldType === 'otp-code'}

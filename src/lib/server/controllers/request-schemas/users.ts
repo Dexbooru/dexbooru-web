@@ -1,24 +1,12 @@
 import { BoolStrSchema } from '$lib/server/constants/reusableSchemas';
+import { getApplicationConfigurationSync } from '$lib/server/applicationConfiguration';
 import type { TRequestSchema } from '$lib/server/types/controllers';
-import {
-	ACCOUNT_DELETION_CONFIRMATION_TEXT,
-	EMAIL_REQUIREMENTS,
-	PASSWORD_REQUIREMENTS,
-	USERNAME_REQUIREMENTS,
-} from '$lib/shared/constants/auth';
-import { MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB } from '$lib/shared/constants/images';
-import {
-	MAXIMUM_ARTIST_LENGTH,
-	MAXIMUM_BLACKLISTED_ARTISTS,
-	MAXIMUM_BLACKLISTED_TAGS,
-	MAXIMUM_TAG_LENGTH,
-} from '$lib/shared/constants/labels';
-import { MAXIMUM_SITE_WIDE_CSS_LENGTH } from '$lib/shared/constants/preferences';
+import { ACCOUNT_DELETION_CONFIRMATION_TEXT, EMAIL_REQUIREMENTS } from '$lib/shared/constants/auth';
 import { TOTP_CODE_LENGTH } from '$lib/shared/constants/totp';
 import { getEmailRequirements } from '$lib/shared/helpers/auth/email';
 import { getPasswordRequirements } from '$lib/shared/helpers/auth/password';
 import { getUsernameRequirements } from '$lib/shared/helpers/auth/username';
-import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
+import { isFileImage } from '$lib/shared/helpers/images';
 import { z } from 'zod';
 
 const usernamePasswordFormSchema = z.object({
@@ -35,35 +23,41 @@ const usernamePasswordEndpointSchmea = z.object({
 const usernameRequirementSchema = z
 	.string()
 	.min(1, 'The username cannot be empty')
-	.refine(
-		(val) => {
-			const { unsatisfied: usernameUnsatisfied } = getUsernameRequirements(val);
-			return usernameUnsatisfied.length === 0;
-		},
-		{
-			message: `The username did not meet the following requirements: ${Object.values(
-				USERNAME_REQUIREMENTS,
-			).join(', ')}`,
-		},
-	);
+	.superRefine((val, ctx) => {
+		const configuration = getApplicationConfigurationSync();
+		const { unsatisfied } = getUsernameRequirements(val, {
+			minimumUsernameLength: configuration.minimumUsernameLength,
+			maximumUsernameLength: configuration.maximumUsernameLength,
+		});
+
+		if (unsatisfied.length > 0) {
+			ctx.addIssue({
+				code: 'custom',
+				message: `The username did not meet the following requirements: ${unsatisfied.join(', ')}`,
+			});
+		}
+	});
 
 const passwordRequirementSchema = z
 	.string()
 	.min(1, 'The password cannot be empty')
-	.refine(
-		(val) => {
-			const { unsatisfied: passwordUnsatisifed } = getPasswordRequirements(val);
-			return passwordUnsatisifed.length === 0;
-		},
-		{
-			message: `The password did not meet the following requirements: ${Object.values(
-				PASSWORD_REQUIREMENTS,
-			).join(', ')}`,
-		},
-	);
+	.superRefine((val, ctx) => {
+		const configuration = getApplicationConfigurationSync();
+		const { unsatisfied } = getPasswordRequirements(val, {
+			minimumPasswordLength: configuration.minimumPasswordLength,
+			maximumPasswordLength: configuration.maximumPasswordLength,
+		});
+
+		if (unsatisfied.length > 0) {
+			ctx.addIssue({
+				code: 'custom',
+				message: `The password did not meet the following requirements: ${unsatisfied.join(', ')}`,
+			});
+		}
+	});
 
 const profilePictureRefinementError = {
-	message: `The provided file was either not in an image format or exceeded the maximum allowed size for a profile picture of: ${MAXIMUM_PROFILE_PICTURE_IMAGE_UPLOAD_SIZE_MB}`,
+	message: `The provided file was either not in an image format or exceeded the maximum allowed size for a profile picture of: ${getApplicationConfigurationSync().maximumProfilePictureImageUploadSizeMb}`,
 };
 
 const emailRequirementSchema = z
@@ -153,7 +147,11 @@ const UserCreateSchema = {
 			.refine((val) => {
 				if (typeof val === 'string') return true;
 
-				return isFileImage(val) && isFileImageSmall(val, 'profilePicture');
+				const configuration = getApplicationConfigurationSync();
+				const fileSizeMb = val.size / 1000 / 1000;
+				return (
+					isFileImage(val) && fileSizeMb <= configuration.maximumProfilePictureImageUploadSizeMb
+				);
 			}, profilePictureRefinementError),
 	}),
 } satisfies TRequestSchema;
@@ -169,7 +167,9 @@ const UserChangeProfilePictureSchema = {
 	form: z.object({
 		newProfilePicture: z.instanceof(globalThis.File).refine((val) => {
 			if (val.size === 0) return true;
-			return isFileImage(val) && isFileImageSmall(val, 'profilePicture');
+			const configuration = getApplicationConfigurationSync();
+			const fileSizeMb = val.size / 1000 / 1000;
+			return isFileImage(val) && fileSizeMb <= configuration.maximumProfilePictureImageUploadSizeMb;
 		}, profilePictureRefinementError),
 		removeProfilePicture: BoolStrSchema,
 	}),
@@ -204,9 +204,9 @@ const UpdateUserPersonalPreferencesSchema = {
 			.transform((val) => val.toLocaleLowerCase().trim().split('\n'))
 			.refine(
 				(val) =>
-					val.length <= MAXIMUM_BLACKLISTED_TAGS &&
-					val.every((tag) => tag.length <= MAXIMUM_TAG_LENGTH),
-				`The blacklisted tags exceed the maximum allowed length of ${MAXIMUM_TAG_LENGTH} characters or the maximum allowed amount of ${MAXIMUM_BLACKLISTED_TAGS} tags`,
+					val.length <= getApplicationConfigurationSync().maximumBlacklistedTags &&
+					val.every((tag) => tag.length <= getApplicationConfigurationSync().maximumTagLength),
+				`The blacklisted tags exceed the maximum allowed length of ${getApplicationConfigurationSync().maximumTagLength} characters or the maximum allowed amount of ${getApplicationConfigurationSync().maximumBlacklistedTags} tags`,
 			)
 			.optional(),
 		blacklistedArtists: z
@@ -214,9 +214,11 @@ const UpdateUserPersonalPreferencesSchema = {
 			.transform((val) => val.toLocaleLowerCase().trim().split('\n'))
 			.refine(
 				(val) =>
-					val.length <= MAXIMUM_BLACKLISTED_ARTISTS &&
-					val.every((artist) => artist.length <= MAXIMUM_ARTIST_LENGTH),
-				`The blacklisted artists exceed the maximum allowed length of ${MAXIMUM_ARTIST_LENGTH} characters or the maximum allowed amount of ${MAXIMUM_BLACKLISTED_ARTISTS} artists`,
+					val.length <= getApplicationConfigurationSync().maximumBlacklistedArtists &&
+					val.every(
+						(artist) => artist.length <= getApplicationConfigurationSync().maximumArtistLength,
+					),
+				`The blacklisted artists exceed the maximum allowed length of ${getApplicationConfigurationSync().maximumArtistLength} characters or the maximum allowed amount of ${getApplicationConfigurationSync().maximumBlacklistedArtists} artists`,
 			)
 			.optional(),
 	}),
@@ -226,8 +228,8 @@ const UpdateUserUserInterfacePreferencesSchema = {
 	form: z.object({
 		customSiteWideCss: z
 			.string()
-			.max(MAXIMUM_SITE_WIDE_CSS_LENGTH, {
-				message: `The maximum site wide CSS length is ${MAXIMUM_SITE_WIDE_CSS_LENGTH} characters`,
+			.max(getApplicationConfigurationSync().maximumSiteWideCssLength, {
+				message: `The maximum site wide CSS length is ${getApplicationConfigurationSync().maximumSiteWideCssLength} characters`,
 			})
 			.optional(),
 		hidePostMetadataOnPreview: BoolStrSchema.optional(),

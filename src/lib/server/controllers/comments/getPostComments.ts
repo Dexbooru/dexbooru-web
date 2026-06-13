@@ -1,4 +1,4 @@
-import { MAXIMUM_COMMENTS_PER_PAGE } from '$lib/shared/constants/comments';
+import { getApplicationConfiguration } from '$lib/server/applicationConfiguration';
 import type { RequestEvent } from '@sveltejs/kit';
 import { PUBLIC_COMMENT_SELECTORS } from '../../constants/comments';
 import { findPaginatedCommentsByPostId } from '../../db/actions/comment';
@@ -16,6 +16,7 @@ export const handleGetPostComments = async (event: RequestEvent) => {
 		const postId = data.pathParams.postId;
 		const parentCommentId = data.urlSearchParams.parentCommentId;
 		const pageNumber = data.urlSearchParams.pageNumber;
+		const { maximumCommentsPerPage } = await getApplicationConfiguration();
 
 		try {
 			const post = await findPostById(postId, { id: true });
@@ -31,7 +32,7 @@ export const handleGetPostComments = async (event: RequestEvent) => {
 				postId,
 				parentCommentId === 'null' ? null : parentCommentId,
 				pageNumber,
-				MAXIMUM_COMMENTS_PER_PAGE,
+				maximumCommentsPerPage,
 				PUBLIC_COMMENT_SELECTORS,
 			);
 

@@ -2,6 +2,7 @@ import { PUBLIC_USER_SELECTORS } from '$lib/server/constants/users';
 import { getUserNotificationsFromId } from '$lib/server/db/actions/notification';
 import { findUserPreferences } from '$lib/server/db/actions/preference';
 import { findUserById } from '$lib/server/db/actions/user';
+import { getApplicationConfiguration } from '$lib/server/applicationConfiguration';
 import { NULLABLE_USER, NULLABLE_USER_USER_PREFERENCES } from '$lib/shared/constants/auth';
 import { clearSessionIdCookie } from '$lib/server/helpers/cookies';
 import type { LayoutServerLoad } from './$types';
@@ -24,10 +25,12 @@ export const load: LayoutServerLoad = async (event) => {
 			: await findUserPreferences(locals.user.id);
 	const userNotifications =
 		locals.user.id === NULLABLE_USER.id ? null : await getUserNotificationsFromId(locals.user.id);
+	const applicationConfiguration = await getApplicationConfiguration();
 
 	return {
 		user,
 		userPreferences,
 		userNotifications,
+		applicationConfiguration,
 	};
 };

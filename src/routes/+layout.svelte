@@ -20,7 +20,11 @@
 	import HiddenPostModal from '$lib/client/components/posts/container/HiddenPostModal.svelte';
 	import GlobalSearchModal from '$lib/client/components/search/GlobalSearchModal.svelte';
 	import { SUCCESS_TOAST_OPTIONS, TOAST_DEFAULT_OPTIONS } from '$lib/client/constants/toasts';
-	import { getActiveModal, initLayoutContexts } from '$lib/client/helpers/context';
+	import {
+		getActiveModal,
+		getApplicationConfiguration,
+		initLayoutContexts,
+	} from '$lib/client/helpers/context';
 	import { setAuthenticatedUserForFetch } from '$lib/client/stores/authenticatedUserForFetch';
 	import '$lib/client/fetchWrapper';
 	import {
@@ -31,7 +35,7 @@
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import NProgress from 'nprogress';
 	import 'nprogress/nprogress.css';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import '../app.css';
 	import type { LayoutData } from './$types';
 
@@ -46,17 +50,36 @@
 
 	// svelte-ignore state_referenced_locally
 	initLayoutContexts(data);
+	const applicationConfiguration = getApplicationConfiguration();
 
 	$effect(() => {
 		setAuthenticatedUserForFetch(data.user);
 	});
 
+	let applicationConfigurationSource: EventSource | null = null;
+
 	onMount(() => {
 		registerDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
+		applicationConfigurationSource = new EventSource('/api/events/application-configuration');
+		applicationConfigurationSource.onmessage = (event) => {
+			const configuration = JSON.parse(event.data) as LayoutData['applicationConfiguration'];
+			applicationConfiguration.set({
+				...configuration,
+				createdAt: new Date(configuration.createdAt),
+				updatedAt: new Date(configuration.updatedAt),
+			});
+		};
 
 		return () => {
 			destroyDocumentEventListeners(data.user, data.userPreferences, getActiveModal());
+			applicationConfigurationSource?.close();
+			applicationConfigurationSource = null;
 		};
+	});
+
+	onDestroy(() => {
+		applicationConfigurationSource?.close();
+		applicationConfigurationSource = null;
 	});
 
 	$effect(() => {

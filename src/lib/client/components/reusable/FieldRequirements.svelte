@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { getApplicationConfiguration } from '$lib/client/helpers/context';
+	import { EMAIL_REQUIREMENTS } from '$lib/shared/constants/auth';
 	import {
-		EMAIL_REQUIREMENTS,
-		PASSWORD_REQUIREMENTS,
-		USERNAME_REQUIREMENTS,
-	} from '$lib/shared/constants/auth';
+		buildPasswordRequirementMessages,
+		buildUsernameRequirementMessages,
+	} from '$lib/shared/helpers/auth/requirementMessages';
 	import CheckCircleSolid from 'flowbite-svelte-icons/CheckCircleSolid.svelte';
 	import CloseCircleSolid from 'flowbite-svelte-icons/CloseCircleSolid.svelte';
 	import QuestionCircleSolid from 'flowbite-svelte-icons/QuestionCircleSolid.svelte';
@@ -26,6 +27,7 @@
 		popoverButtonId: string;
 		satisifedRequirements?: string[];
 		unsatisfiedRequirements?: string[];
+		fallbackRequirements?: string[];
 	};
 
 	let {
@@ -34,7 +36,27 @@
 		popoverButtonId,
 		satisifedRequirements = [],
 		unsatisfiedRequirements = [],
+		fallbackRequirements = [],
 	}: Props = $props();
+
+	const applicationConfiguration = getApplicationConfiguration();
+
+	const usernameFallbackRequirements = $derived(
+		Object.values(
+			buildUsernameRequirementMessages({
+				minimumUsernameLength: $applicationConfiguration.minimumUsernameLength,
+				maximumUsernameLength: $applicationConfiguration.maximumUsernameLength,
+			}),
+		),
+	);
+	const passwordFallbackRequirements = $derived(
+		Object.values(
+			buildPasswordRequirementMessages({
+				minimumPasswordLength: $applicationConfiguration.minimumPasswordLength,
+				maximumPasswordLength: $applicationConfiguration.maximumPasswordLength,
+			}),
+		),
+	);
 </script>
 
 <button type="button" id={popoverButtonId}>
@@ -67,8 +89,15 @@
 	</List>
 
 	{#if unsatisfiedRequirements.length === 0 && satisifedRequirements.length === 0}
-		{#if requirementsType === 'username'}
-			{#each Object.values(USERNAME_REQUIREMENTS) as requirement (requirement)}
+		{#if fallbackRequirements.length > 0}
+			{#each fallbackRequirements as requirement (requirement)}
+				<Li class="mt-2" icon>
+					<CloseCircleSolid class="me-2 h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+					{requirement}
+				</Li>
+			{/each}
+		{:else if requirementsType === 'username'}
+			{#each usernameFallbackRequirements as requirement (requirement)}
 				<Li class="mt-2" icon>
 					<CloseCircleSolid class="me-2 h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
 					{requirement}
@@ -82,7 +111,7 @@
 				</Li>
 			{/each}
 		{:else if requirementsType === 'password'}
-			{#each Object.values(PASSWORD_REQUIREMENTS) as requirement (requirement)}
+			{#each passwordFallbackRequirements as requirement (requirement)}
 				<Li class="mt-2" icon>
 					<CloseCircleSolid class="me-2 h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
 					{requirement}

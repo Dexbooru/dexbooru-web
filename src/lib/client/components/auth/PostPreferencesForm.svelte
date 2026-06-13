@@ -2,14 +2,11 @@
 	import { enhance } from '$app/forms';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import {
+		getApplicationConfiguration,
 		getAuthenticatedUser,
 		getAuthenticatedUserPreferences,
 	} from '$lib/client/helpers/context';
 	import { applyCustomSiteWideCss } from '$lib/client/helpers/dom';
-	import {
-		MAXIMUM_BLACKLISTED_ARTISTS,
-		MAXIMUM_BLACKLISTED_TAGS,
-	} from '$lib/shared/constants/labels';
 	import type { TUser } from '$lib/shared/types/users';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Button from 'flowbite-svelte/Button.svelte';
@@ -27,6 +24,7 @@
 
 	const user = getAuthenticatedUser();
 	const userPreferences = getAuthenticatedUserPreferences();
+	const applicationConfiguration = getApplicationConfiguration();
 
 	const userPreferenceUnsubscribe = userPreferences.subscribe((data) => {
 		autoBlurNsfw = data.autoBlurNsfw;
@@ -94,7 +92,9 @@
 
 		<div class="flex flex-row flex-wrap">
 			<Label class="mb-3 space-y-2">
-				<span>Blacklisted Tags (One per line with a max of {MAXIMUM_BLACKLISTED_TAGS})</span>
+				<span
+					>Blacklisted Tags (One per line with a max of {$applicationConfiguration.maximumBlacklistedTags})</span
+				>
 				<Textarea
 					class="w-full"
 					bind:value={blacklistedTags}
@@ -108,7 +108,9 @@
 			</Label>
 
 			<Label class="mb-3 space-y-2">
-				<span>Blacklisted Artists (One per line with a max of {MAXIMUM_BLACKLISTED_ARTISTS})</span>
+				<span
+					>Blacklisted Artists (One per line with a max of {$applicationConfiguration.maximumBlacklistedArtists})</span
+				>
 				<Textarea
 					class="w-full"
 					bind:value={blacklistedArtists}

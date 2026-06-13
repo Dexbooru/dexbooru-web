@@ -1,6 +1,6 @@
 import { PageNumberSchema, BoolStrSchema } from '$lib/server/constants/reusableSchemas';
+import { getApplicationConfigurationSync } from '$lib/server/applicationConfiguration';
 import type { TRequestSchema } from '$lib/server/types/controllers';
-import { MAXIMUM_CONTENT_LENGTH } from '$lib/shared/constants/comments';
 import { z } from 'zod';
 
 const GeneralCommentsSchema = {
@@ -30,9 +30,12 @@ const EditPostCommentsSchmea = {
 			.string()
 			.trim()
 			.min(1, 'The comment content cannot be empty')
-			.refine((val) => val.length <= MAXIMUM_CONTENT_LENGTH, {
-				message: `The maximum content length for a comment is: ${MAXIMUM_CONTENT_LENGTH} characters`,
-			}),
+			.refine(
+				(val) => val.length <= getApplicationConfigurationSync().maximumCommentContentLength,
+				{
+					message: `The maximum content length for a comment is: ${getApplicationConfigurationSync().maximumCommentContentLength} characters`,
+				},
+			),
 	}),
 } satisfies TRequestSchema;
 
@@ -56,9 +59,12 @@ const CreateCommentSchema = {
 			.string()
 			.trim()
 			.min(1, 'The comment content cannot be empty')
-			.refine((val) => val.length <= MAXIMUM_CONTENT_LENGTH, {
-				message: `The maximum content length for a comment is: ${MAXIMUM_CONTENT_LENGTH} characters`,
-			}),
+			.refine(
+				(val) => val.length <= getApplicationConfigurationSync().maximumCommentContentLength,
+				{
+					message: `The maximum content length for a comment is: ${getApplicationConfigurationSync().maximumCommentContentLength} characters`,
+				},
+			),
 	}),
 } satisfies TRequestSchema;
 

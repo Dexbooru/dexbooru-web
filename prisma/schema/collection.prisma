@@ -11,7 +11,7 @@ enum CollectionModerationStatus {
 
 model PostCollection {
   id                 String                   @id @default(uuid())
-  title              String                   @db.VarChar(150)
+  title              String                   @db.VarChar(100)
   description        String                   @db.VarChar(250)
   isNsfw             Boolean                  @default(false)
   moderationStatus   CollectionModerationStatus @default(UNFLAGGED)

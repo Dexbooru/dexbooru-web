@@ -1,6 +1,7 @@
 export const USER_CONTEXT_KEY = 'authenticatedUser';
 export const USER_PREFERENCE_CONTEXT_KEY = 'authenticatedUserPreferences';
 export const USER_NOTIFICATIONS_CONTEXT_KEY = 'authenticatedUserNotifications';
+export const APPLICATION_CONFIGURATION_CONTEXT_KEY = 'applicationConfiguration';
 export const POST_PAGINATION_DATA_CONTEXT_KEY = 'postPaginationData';
 export const POSTS_PAGE_CONTEXT_KEY = 'postsPage';
 export const ORIGINAL_POSTS_PAGE_CONTEXT_KEY = 'originalPostsPage';
