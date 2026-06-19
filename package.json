@@ -99,7 +99,7 @@
 		"jsonwebtoken": "^9.0.3",
 		"markdown-it": "^14.1.1",
 		"markdown-it-emoji": "^3.0.0",
-		"nodemailer": "^8.0.7",
+		"nodemailer": "^9.0.1",
 		"nprogress": "^0.2.0",
 		"otpauth": "^9.5.1",
 		"qrcode": "^1.5.4",
