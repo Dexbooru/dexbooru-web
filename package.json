@@ -101,7 +101,7 @@
 		"html-to-text": "^9.0.5",
 		"jdenticon": "^3.3.0",
 		"jsonwebtoken": "^9.0.3",
-		"markdown-it": "^14.1.1",
+		"markdown-it": "^14.2.0",
 		"markdown-it-emoji": "^3.0.0",
 		"nodemailer": "^8.0.7",
 		"nprogress": "^0.2.0",
