@@ -75,6 +75,30 @@ const assertMinimumBounds = (updates: TPartialApplicationConfiguration) => {
 	}
 };
 
+const assertExistingUsernamesMeetMinimumLength = async (
+	updates: TPartialApplicationConfiguration,
+	current: TApplicationConfiguration,
+) => {
+	if (updates.minimumUsernameLength === undefined) return;
+
+	const nextMinimumUsernameLength = updates.minimumUsernameLength;
+	if (nextMinimumUsernameLength <= current.minimumUsernameLength) return;
+
+	const rows = (await prisma.$queryRaw(
+		Prisma.sql`
+			SELECT MIN(LENGTH(REPLACE("username", ' ', '')))::INT as "minLength"
+			FROM "User"
+		`,
+	)) as { minLength: number | null }[];
+
+	const minLength = rows[0]?.minLength;
+	if (minLength !== null && minLength !== undefined && minLength < nextMinimumUsernameLength) {
+		throw new Error(
+			`"User.username" has existing values of length ${minLength}, cannot raise minimum length to ${nextMinimumUsernameLength}.`,
+		);
+	}
+};
+
 const assertNotBelowExistingData = async (
 	updates: TPartialApplicationConfiguration,
 	current: TApplicationConfiguration,
@@ -113,5 +137,6 @@ export const validateApplicationConfigurationUpdate = async (
 ) => {
 	assertMinimumBounds(updates);
 	assertRelationalLimits(updates, current);
+	await assertExistingUsernamesMeetMinimumLength(updates, current);
 	await assertNotBelowExistingData(updates, current);
 };

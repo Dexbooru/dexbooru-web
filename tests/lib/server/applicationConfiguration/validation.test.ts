@@ -30,4 +30,40 @@ describe('validateApplicationConfigurationUpdate', () => {
 			),
 		).rejects.toThrow('cannot reduce limit');
 	});
+
+	it('rejects increased minimumUsernameLength above the shortest existing username', async () => {
+		mockPrisma.$queryRaw.mockResolvedValue([{ minLength: 3 }]);
+		await expect(
+			validateApplicationConfigurationUpdate(
+				{
+					minimumUsernameLength: 5,
+				},
+				buildDefaultApplicationConfiguration(),
+			),
+		).rejects.toThrow('cannot raise minimum length');
+	});
+
+	it('allows increased minimumUsernameLength when existing usernames meet the new minimum', async () => {
+		mockPrisma.$queryRaw.mockResolvedValue([{ minLength: 6 }]);
+		await expect(
+			validateApplicationConfigurationUpdate(
+				{
+					minimumUsernameLength: 5,
+				},
+				buildDefaultApplicationConfiguration(),
+			),
+		).resolves.toBeUndefined();
+	});
+
+	it('allows increased minimumUsernameLength when there are no users', async () => {
+		mockPrisma.$queryRaw.mockResolvedValue([{ minLength: null }]);
+		await expect(
+			validateApplicationConfigurationUpdate(
+				{
+					minimumUsernameLength: 5,
+				},
+				buildDefaultApplicationConfiguration(),
+			),
+		).resolves.toBeUndefined();
+	});
 });

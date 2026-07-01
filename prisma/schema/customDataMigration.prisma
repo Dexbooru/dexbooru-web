@@ -1,0 +1,13 @@
+enum CustomDataMigrationStatus {
+  PENDING
+  APPLIED
+  FAILED
+}
+
+model CustomDataMigration {
+  id             String                    @id @default(uuid())
+  name           String                    @unique @db.Char(200)
+  scriptFilePath String
+  createdAt      DateTime                  @default(now())
+  status         CustomDataMigrationStatus @default(PENDING)
+}
