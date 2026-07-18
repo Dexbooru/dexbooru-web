@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RequestEvent } from '@sveltejs/kit';
-import type { TPostsByLabelStrategy } from '../types';
+import type { TPostsByLabelStrategy } from '$lib/server/controllers/strategies/types';
 
 const {
 	mockValidateAndHandleRequest,
@@ -20,11 +20,11 @@ vi.mock('$lib/server/helpers/controllers', () => ({
 	createErrorResponse: mockCreateErrorResponse,
 }));
 
-vi.mock('../withRemoteCache', () => ({
+vi.mock('$lib/server/controllers/strategies/withRemoteCache', () => ({
 	withRemoteCache: mockWithRemoteCache,
 }));
 
-import { createCachedPaginatedHandler } from '../createCachedPaginatedHandler';
+import { createCachedPaginatedHandler } from '$lib/server/controllers/strategies/createCachedPaginatedHandler';
 
 describe('createCachedPaginatedHandler', () => {
 	const mockEvent = {
@@ -37,7 +37,7 @@ describe('createCachedPaginatedHandler', () => {
 		vi.clearAllMocks();
 		mockCreateSuccessResponse.mockImplementation((_h, _m, data) => data);
 		mockValidateAndHandleRequest.mockImplementation(
-			async (_event, handlerType, _schema, callback) => {
+			async (_event, _handlerType, _schema, callback) => {
 				return await callback({
 					pathParams: { name: 'sakura' },
 					urlSearchParams: { pageNumber: 0, orderBy: 'createdAt', ascending: false },

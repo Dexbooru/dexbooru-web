@@ -16,7 +16,7 @@ vi.mock('$lib/server/helpers/sessions', () => ({
 	cacheMultipleToCollectionRemotely: mockCacheMultipleToCollectionRemotely,
 }));
 
-import { withRemoteCache } from '../withRemoteCache';
+import { withRemoteCache } from '$lib/server/controllers/strategies/withRemoteCache';
 
 describe('withRemoteCache', () => {
 	beforeEach(() => {

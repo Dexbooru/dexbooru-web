@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { TPost } from '$lib/shared/types/posts';
-import { assignTagAndArtistEntities, hydratePostsTagAndArtistEntities } from '../postHydration';
+import {
+	assignTagAndArtistEntities,
+	hydratePostsTagAndArtistEntities,
+} from '$lib/server/helpers/postHydration';
 
 describe('postHydration', () => {
 	it('splits and trims tag/artist strings into entity arrays', () => {

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RequestEvent } from '@sveltejs/kit';
-import type { TReportStrategy } from '../types';
+import type { TReportStrategy } from '$lib/server/controllers/strategies/types';
 
 const {
 	mockValidateAndHandleRequest,
@@ -20,11 +20,11 @@ vi.mock('$lib/server/helpers/controllers', () => ({
 	createErrorResponse: mockCreateErrorResponse,
 }));
 
-vi.mock('../../reports', () => ({
+vi.mock('$lib/server/controllers/reports', () => ({
 	handleModerationRoleCheck: mockHandleModerationRoleCheck,
 }));
 
-import { createReportHandlers } from '../createReportHandlers';
+import { createReportHandlers } from '$lib/server/controllers/strategies/createReportHandlers';
 
 describe('createReportHandlers', () => {
 	const mockEvent = {
