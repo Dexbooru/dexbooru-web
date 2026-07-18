@@ -16,7 +16,7 @@ export async function withRemoteCache<T>(options: TWithRemoteCacheOptions<T>): P
 	} = options;
 
 	const cachedData = await getRemoteResponseFromCache<T>(cacheKey);
-	if (cachedData !== null && cachedData !== undefined) {
+	if (cachedData !== null) {
 		return cachedData;
 	}
 
@@ -25,11 +25,13 @@ export async function withRemoteCache<T>(options: TWithRemoteCacheOptions<T>): P
 
 	if (canCache) {
 		const ttl = resolveTtl?.(computed) ?? ttlSeconds;
-		cacheResponseRemotely(cacheKey, computed, ttl);
 		const associateKeys = getAssociateKeys?.(computed) ?? [];
-		if (associateKeys.length > 0) {
-			cacheMultipleToCollectionRemotely(associateKeys, cacheKey);
-		}
+		await Promise.all([
+			cacheResponseRemotely(cacheKey, computed, ttl),
+			associateKeys.length > 0
+				? cacheMultipleToCollectionRemotely(associateKeys, cacheKey)
+				: Promise.resolve(),
+		]);
 	}
 
 	return computed;

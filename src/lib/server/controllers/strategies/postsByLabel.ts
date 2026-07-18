@@ -32,7 +32,7 @@ const tagStrategy: TPostsByLabelStrategy = {
 		findPostsByTagName(label, pageNumber, pageLimit, orderBy, ascending, selectors),
 	successMessage: (label) => `Successfully fetched the posts with the tag name of: ${label}`,
 	errorMessage:
-		'An unexpected error occured while fetching the posts with tags with a certain name',
+		'An unexpected error occurred while fetching the posts with tags with a certain name',
 };
 
 const artistStrategy: TPostsByLabelStrategy = {
@@ -45,7 +45,7 @@ const artistStrategy: TPostsByLabelStrategy = {
 		findPostsByArtistName(label, pageNumber, pageLimit, orderBy, ascending, selectors),
 	successMessage: (label) => `Successfully fetched the posts with the artist name of: ${label}`,
 	errorMessage:
-		'An unexpected error occured while fetching the posts with artists with a certain name',
+		'An unexpected error occurred while fetching the posts with artists with a certain name',
 };
 
 const characterStrategy: TPostsByLabelStrategy = {
@@ -87,7 +87,7 @@ const authorStrategy: TPostsByLabelStrategy = {
 		author: label,
 	}),
 	successMessage: (label) => `Successfully fetched the posts with the author username of: ${label}`,
-	errorMessage: 'An unexpected error occured while fetching the author posts',
+	errorMessage: 'An unexpected error occurred while fetching the author posts',
 };
 
 export const handleGetPostsWithTagName = createCachedPaginatedHandler(tagStrategy);

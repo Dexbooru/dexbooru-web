@@ -351,9 +351,19 @@ export async function findSimilarPosts(input: TFindSimilarPostsInput) {
 
 	const selectedPosts = (await prisma.post.findMany({
 		where: {
-			id: {
-				in: sortedIdsByScore,
-			},
+			AND: [
+				{
+					id: {
+						in: sortedIdsByScore,
+					},
+				},
+				buildSimilarityWhereInput({
+					postId: input.postId,
+					isNsfw: input.isNsfw,
+					seed,
+					preferences: input.preferences,
+				}),
+			],
 		},
 		select: input.selectors,
 	})) as TPost[];

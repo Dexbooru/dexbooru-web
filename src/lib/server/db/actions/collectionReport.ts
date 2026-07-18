@@ -29,7 +29,7 @@ export const createPostCollectionReport = async ({
 	return await collectionReportActions.create({
 		description,
 		category,
-		targetId: postCollectionId ?? '',
+		targetId: postCollectionId,
 	});
 };
 

@@ -52,6 +52,20 @@ describe('withRemoteCache', () => {
 		expect(compute).not.toHaveBeenCalled();
 	});
 
+	it('treats falsey non-null values as cache hits', async () => {
+		mockGetRemoteResponseFromCache.mockResolvedValue(false);
+		const compute = vi.fn();
+
+		const result = await withRemoteCache({
+			cacheKey: 'key-false',
+			ttlSeconds: 30,
+			compute,
+		});
+
+		expect(result).toBe(false);
+		expect(compute).not.toHaveBeenCalled();
+	});
+
 	it('computes, caches, and associates keys on miss', async () => {
 		mockGetRemoteResponseFromCache.mockResolvedValue(null);
 		const computed = { posts: [{ id: 'p1' }, { id: 'p2' }] };

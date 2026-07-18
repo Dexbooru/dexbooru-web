@@ -37,10 +37,22 @@ type TLegacyCachedPostPayload = {
 	similarities?: Record<string, number>;
 };
 
-type TCachedIndividualPost = TPost | TLegacyCachedPostPayload | { notFound: true };
+type TPrivilegedPostPayload = {
+	privilegedPost: TPost;
+};
+
+type TCachedIndividualPost =
+	| TPost
+	| TLegacyCachedPostPayload
+	| TPrivilegedPostPayload
+	| { notFound: true };
 
 const isNotFoundCacheEntry = (value: TCachedIndividualPost): value is { notFound: true } => {
 	return 'notFound' in value && value.notFound === true;
+};
+
+const isPrivilegedPostPayload = (value: TCachedIndividualPost): value is TPrivilegedPostPayload => {
+	return 'privilegedPost' in value;
 };
 
 const isLegacyCachedPostPayload = (
@@ -48,6 +60,7 @@ const isLegacyCachedPostPayload = (
 ): value is TLegacyCachedPostPayload => {
 	return (
 		!isNotFoundCacheEntry(value) &&
+		!isPrivilegedPostPayload(value) &&
 		'post' in value &&
 		typeof value.post === 'object' &&
 		value.post !== null &&
@@ -57,6 +70,7 @@ const isLegacyCachedPostPayload = (
 
 const resolvePostFromCacheEntry = (value: TCachedIndividualPost): TPost | null => {
 	if (isNotFoundCacheEntry(value)) return null;
+	if (isPrivilegedPostPayload(value)) return value.privilegedPost;
 	if (isLegacyCachedPostPayload(value)) return value.post;
 	return value;
 };
@@ -65,7 +79,7 @@ const loadPostForRequest = async (
 	postId: string,
 	handlerType: TControllerHandlerVariant,
 	user: RequestEvent['locals']['user'],
-): Promise<TPost | null> => {
+): Promise<{ post: TPost | null; isPrivileged: boolean }> => {
 	const selectors = {
 		...PUBLIC_POST_SELECTORS,
 		comments: {
@@ -83,7 +97,11 @@ const loadPostForRequest = async (
 			? await findPostById(postId, selectors)
 			: await findPostByIdWithUpdatedViewCount(postId, selectors);
 
-	if (!post && user.id !== NULLABLE_USER.id) {
+	if (post) {
+		return { post, isPrivileged: false };
+	}
+
+	if (user.id !== NULLABLE_USER.id) {
 		const rejectedPost = await findPostById(postId, { authorId: true }, [
 			'PENDING',
 			'APPROVED',
@@ -98,10 +116,11 @@ const loadPostForRequest = async (
 							'APPROVED',
 							'REJECTED',
 						]);
+			return { post, isPrivileged: true };
 		}
 	}
 
-	return post;
+	return { post: null, isPrivileged: false };
 };
 
 export const handleGetPost = async (
@@ -118,17 +137,26 @@ export const handleGetPost = async (
 			const cachedResult = await withRemoteCache<TCachedIndividualPost>({
 				cacheKey,
 				ttlSeconds: CACHE_TIME_INDIVIDUAL_POST_FOUND,
+				// Never put owner/moderator-only rejected posts in the shared public cache.
+				shouldCache: (value) => !isPrivilegedPostPayload(value),
 				resolveTtl: (value) =>
 					isNotFoundCacheEntry(value)
 						? CACHE_TIME_INDIVIDUAL_POST_NOT_FOUND
 						: CACHE_TIME_INDIVIDUAL_POST_FOUND,
 				compute: async () => {
-					const loadedPost = await loadPostForRequest(postId, handlerType, user);
+					const { post: loadedPost, isPrivileged } = await loadPostForRequest(
+						postId,
+						handlerType,
+						user,
+					);
 					if (!loadedPost) {
 						return { notFound: true as const };
 					}
 
 					assignTagAndArtistEntities(loadedPost);
+					if (isPrivileged) {
+						return { privilegedPost: loadedPost };
+					}
 					return loadedPost;
 				},
 			});
@@ -184,7 +212,12 @@ export const handleGetPost = async (
 			}>({
 				cacheKey: similarityCacheKey,
 				ttlSeconds: CACHE_TIME_INDIVIDUAL_POST_SIMILARITY,
-				getAssociateKeys: () => [getCacheKeyForIndividualPostKeys(post.id)],
+				getAssociateKeys: (computed) => [
+					getCacheKeyForIndividualPostKeys(post.id),
+					...computed.similarPosts.map((similarPost) =>
+						getCacheKeyForIndividualPostKeys(similarPost.id),
+					),
+				],
 				compute: async () => {
 					const { posts: similarPosts, similarities } = await findSimilarPosts({
 						postId: post.id,

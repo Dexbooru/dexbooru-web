@@ -43,7 +43,7 @@ export function createReportActions<TCategory, TReport>(
 	}: {
 		description: string | null | undefined;
 		category: TCategory;
-		targetId: string;
+		targetId: string | null;
 	}): Promise<TReport> => {
 		return (await delegate.create({
 			data: {

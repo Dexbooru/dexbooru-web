@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RequestEvent } from '@sveltejs/kit';
+import { Prisma } from '$generated/prisma/client';
 import type { TReportStrategy } from '$lib/server/controllers/strategies/types';
 
 const {
@@ -38,7 +39,6 @@ describe('createReportHandlers', () => {
 	const findPaginated = vi.fn();
 	const deleteByIds = vi.fn();
 	const updateStatus = vi.fn();
-	const onStatusUpdated = vi.fn();
 
 	const strategy: TReportStrategy<{ id: string }, 'SPAM'> = {
 		entityLabel: 'post',
@@ -60,7 +60,6 @@ describe('createReportHandlers', () => {
 		findPaginated,
 		deleteByIds,
 		updateStatus,
-		onStatusUpdated,
 	};
 
 	beforeEach(() => {
@@ -124,7 +123,7 @@ describe('createReportHandlers', () => {
 		);
 	});
 
-	it('invokes onStatusUpdated after a status update', async () => {
+	it('updates report status through the strategy', async () => {
 		updateStatus.mockResolvedValue({ id: 'r1' });
 		mockValidateAndHandleRequest.mockImplementation(
 			async (_event, _handlerType, _schema, callback) =>
@@ -138,6 +137,35 @@ describe('createReportHandlers', () => {
 		await handleUpdateStatus(mockEvent);
 
 		expect(updateStatus).toHaveBeenCalledWith('r1', 'ACCEPTED');
-		expect(onStatusUpdated).toHaveBeenCalledWith('r1', 'ACCEPTED', { id: 'r1' });
+		expect(mockCreateSuccessResponse).toHaveBeenCalledWith(
+			'api-route',
+			'Successfully updated the post report status.',
+			{ id: 'r1' },
+		);
+	});
+
+	it('maps Prisma P2025 on delete to a 404 response', async () => {
+		deleteByIds.mockRejectedValue(
+			new Prisma.PrismaClientKnownRequestError('Record to delete does not exist.', {
+				code: 'P2025',
+				clientVersion: 'test',
+			}),
+		);
+		mockValidateAndHandleRequest.mockImplementation(
+			async (_event, _handlerType, _schema, callback) =>
+				callback({
+					pathParams: { postId: 'target-1' },
+					urlSearchParams: { reportId: 'missing' },
+				}),
+		);
+
+		const { handleDelete } = createReportHandlers(strategy);
+		await handleDelete(mockEvent);
+
+		expect(mockCreateErrorResponse).toHaveBeenCalledWith(
+			'api-route',
+			404,
+			'The post report you are trying to delete does not exist.',
+		);
 	});
 });

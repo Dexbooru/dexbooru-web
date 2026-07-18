@@ -110,6 +110,42 @@ describe('post retrieval controllers', () => {
 			expect(mockPostActions.findPostById).not.toHaveBeenCalled();
 			expect(mockControllerHelpers.createErrorResponse).toHaveBeenCalled();
 		});
+
+		it('should not cache privileged rejected posts under the public key', async () => {
+			const privilegedPost = {
+				id: 'p-rejected',
+				tagString: 't1',
+				artistString: 'a1',
+				authorId: 'u1',
+			} as TPostBase & { authorId: string };
+			mockSessionHelpers.getRemoteResponseFromCache.mockResolvedValue(null);
+			mockPostActions.findPostById
+				.mockResolvedValueOnce(null)
+				.mockResolvedValueOnce({ authorId: 'u1' })
+				.mockResolvedValueOnce(privilegedPost);
+			mockPostActions.findSimilarPosts.mockResolvedValue({ posts: [], similarities: {} });
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (_event, _handlerType, _schema, callback) => {
+					return await callback({
+						pathParams: { postId: 'p-rejected' },
+						urlSearchParams: {},
+					});
+				},
+			);
+
+			await handleGetPost(mockEvent, 'api-route');
+
+			expect(mockSessionHelpers.cacheResponseRemotely).not.toHaveBeenCalledWith(
+				'post-p-rejected',
+				expect.anything(),
+				expect.any(Number),
+			);
+			expect(mockControllerHelpers.createSuccessResponse).toHaveBeenCalledWith(
+				'api-route',
+				expect.any(String),
+				privilegedPost,
+			);
+		});
 	});
 
 	describe('handleGetPosts', () => {

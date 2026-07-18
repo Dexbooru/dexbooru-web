@@ -88,6 +88,28 @@ describe('createCachedPaginatedHandler', () => {
 		);
 	});
 
+	it('partitions cache keys by handlerType', async () => {
+		const strategy: TPostsByLabelStrategy = {
+			schema: {},
+			getLabel: () => 'sakura',
+			buildCacheKey: () => 'tag-sakura-0-createdAt-false',
+			cacheTtlSeconds: 60,
+			findPosts: vi.fn().mockResolvedValue([]),
+			successMessage: () => 'ok',
+			errorMessage: 'failed',
+		};
+
+		mockWithRemoteCache.mockImplementation(async ({ cacheKey, compute }) => {
+			expect(cacheKey).toBe('tag-sakura-0-createdAt-false-api-route');
+			return compute();
+		});
+
+		const handler = createCachedPaginatedHandler(strategy);
+		await handler(mockEvent, 'api-route');
+
+		expect(mockWithRemoteCache).toHaveBeenCalled();
+	});
+
 	it('honors shouldCache=false for author-style strategies', async () => {
 		const strategy: TPostsByLabelStrategy = {
 			schema: {},

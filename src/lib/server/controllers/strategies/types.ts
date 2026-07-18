@@ -81,12 +81,8 @@ export type TReportStrategy<TReport = unknown, TCategory = string> = {
 		category: TCategory | undefined,
 	) => Promise<TReport[]>;
 	deleteByIds: (targetId: string, reportId: string) => Promise<TReport>;
+	/** Implementations with moderation side effects must keep them atomic with the status write. */
 	updateStatus: (reportId: string, status: ModerationReportStatus) => Promise<TReport>;
-	onStatusUpdated?: (
-		reportId: string,
-		reviewStatus: ModerationReportStatus,
-		updatedReport: TReport,
-	) => Promise<void>;
 };
 
 export type TReportHandlers = {

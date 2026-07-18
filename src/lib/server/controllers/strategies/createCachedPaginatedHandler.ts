@@ -28,12 +28,13 @@ export function createCachedPaginatedHandler(strategy: TPostsByLabelStrategy) {
 					? PAGE_SERVER_LOAD_POST_SELECTORS
 					: PUBLIC_POST_SELECTORS;
 
-			const cacheKey = strategy.buildCacheKey(
+			// Partition by handler type so page-server-load selectors never collide with api-route.
+			const cacheKey = `${strategy.buildCacheKey(
 				label,
 				pageNumber,
 				orderBy as TPostOrderByColumn,
 				ascending,
-			);
+			)}-${handlerType}`;
 			const shouldCache = strategy.shouldCache?.(handlerType) ?? true;
 
 			try {

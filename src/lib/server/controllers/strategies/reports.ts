@@ -7,14 +7,12 @@ import type {
 	UserReportCategory,
 } from '$generated/prisma/client';
 import { UUID_REGEX } from '$lib/shared/constants/search';
-import { findCollectionById, updateCollectionModerationStatus } from '../../db/actions/collection';
+import { findCollectionById } from '../../db/actions/collection';
 import {
 	createPostCollectionReport,
 	deletePostCollectionReportByIds,
-	findPostCollectionReportById,
 	findPostCollectionReportsFromCollectionId,
 	findPostCollectionsReportsViaPagination,
-	updatePostCollectionReportStatus,
 } from '../../db/actions/collectionReport';
 import { findPostById } from '../../db/actions/post';
 import {
@@ -24,15 +22,14 @@ import {
 	findPostReportsViaPagination,
 	updatePostReportStatus,
 } from '../../db/actions/postReport';
-import { findUserById, findUserByName, updateUserModerationStatus } from '../../db/actions/user';
+import { findUserById, findUserByName } from '../../db/actions/user';
 import {
 	createUserReport,
 	deleteUserReportByIds,
-	findUserReportById,
 	findUserReportsFromUserId,
 	findUserReportsViaPagination,
-	updateUserReportStatus,
 } from '../../db/actions/userReport';
+import prisma from '../../db/prisma';
 import {
 	CreatePostCollectionReportSchema,
 	DeletePostCollectionReportSchema,
@@ -60,6 +57,11 @@ import type { TReportStrategy } from './types';
 const pathParam = (pathParams: Record<string, string>, key: string): string =>
 	pathParams[key] ?? '';
 
+const resolvePostTarget = async (pathParams: Record<string, string>) => {
+	const post = await findPostById(pathParam(pathParams, 'postId'), { id: true });
+	return post ? { id: post.id } : null;
+};
+
 const postReportStrategy: TReportStrategy<PostReport, PostReportCategory> = {
 	entityLabel: 'post',
 	responseCollectionKey: 'postReports',
@@ -71,15 +73,15 @@ const postReportStrategy: TReportStrategy<PostReport, PostReportCategory> = {
 		delete: DeletePostReportSchema,
 		updateStatus: UpdatePostReportStatusSchema,
 	},
-	resolveCreateTarget: async (pathParams) => ({ id: pathParam(pathParams, 'postId') }),
-	resolveGetTarget: async (pathParams) => {
-		const post = await findPostById(pathParam(pathParams, 'postId'), { id: true });
-		return post ? { id: post.id } : null;
-	},
-	resolveDeleteTarget: async (pathParams) => ({ id: pathParam(pathParams, 'postId') }),
+	resolveCreateTarget: resolvePostTarget,
+	resolveGetTarget: resolvePostTarget,
+	resolveDeleteTarget: resolvePostTarget,
 	missingTargetMessage: (operation) => {
 		if (operation === 'get') {
 			return 'The post you are trying to fetch reports for does not exist.';
+		}
+		if (operation === 'delete') {
+			return 'The post you are trying to delete a report for does not exist.';
 		}
 		return 'The post you are trying to report does not exist.';
 	},
@@ -130,13 +132,25 @@ const userReportStrategy: TReportStrategy<UserReport, UserReportCategory> = {
 	findByTargetId: findUserReportsFromUserId,
 	findPaginated: findUserReportsViaPagination,
 	deleteByIds: deleteUserReportByIds,
-	updateStatus: updateUserReportStatus,
-	onStatusUpdated: async (reportId, reviewStatus) => {
-		if (reviewStatus !== 'ACCEPTED') return;
-		const report = await findUserReportById(reportId);
-		if (report && 'userId' in report && report.userId) {
-			await updateUserModerationStatus(report.userId as string, 'FLAGGED');
-		}
+	updateStatus: async (reportId, status) => {
+		return await prisma.$transaction(async (tx) => {
+			const updatedReport = await tx.userReport.update({
+				where: { id: reportId },
+				data: { reviewStatus: status },
+			});
+
+			if (status === 'ACCEPTED' && updatedReport.userId) {
+				await tx.user.update({
+					where: { id: updatedReport.userId },
+					data: {
+						moderationStatus: 'FLAGGED',
+						updatedAt: new Date(),
+					},
+				});
+			}
+
+			return updatedReport;
+		});
 	},
 };
 
@@ -186,13 +200,25 @@ const collectionReportStrategy: TReportStrategy<
 	findByTargetId: findPostCollectionReportsFromCollectionId,
 	findPaginated: findPostCollectionsReportsViaPagination,
 	deleteByIds: deletePostCollectionReportByIds,
-	updateStatus: updatePostCollectionReportStatus,
-	onStatusUpdated: async (reportId, reviewStatus) => {
-		if (reviewStatus !== 'ACCEPTED') return;
-		const report = await findPostCollectionReportById(reportId);
-		if (report && 'postCollectionId' in report && report.postCollectionId) {
-			await updateCollectionModerationStatus(report.postCollectionId as string, 'FLAGGED');
-		}
+	updateStatus: async (reportId, status) => {
+		return await prisma.$transaction(async (tx) => {
+			const updatedReport = await tx.postCollectionReport.update({
+				where: { id: reportId },
+				data: { reviewStatus: status },
+			});
+
+			if (status === 'ACCEPTED' && updatedReport.postCollectionId) {
+				await tx.postCollection.update({
+					where: { id: updatedReport.postCollectionId },
+					data: {
+						moderationStatus: 'FLAGGED',
+						updatedAt: new Date(),
+					},
+				});
+			}
+
+			return updatedReport;
+		});
 	},
 };
 

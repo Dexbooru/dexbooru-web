@@ -15,6 +15,10 @@ export function createReportClientApi<TCategory extends string>(config: TReportC
 	) => {
 		return await fetch(config.createPath(targetId), {
 			method: 'POST',
+			headers: {
+				...getApiAuthHeaders(),
+				'Content-Type': 'application/json',
+			},
 			body: JSON.stringify({ category: reportReasonCategory, description }),
 		});
 	};

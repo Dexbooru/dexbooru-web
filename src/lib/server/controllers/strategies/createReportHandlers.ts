@@ -1,4 +1,4 @@
-import type { ModerationReportStatus } from '$generated/prisma/client';
+import { Prisma, type ModerationReportStatus } from '$generated/prisma/client';
 import type { RequestEvent } from '@sveltejs/kit';
 import {
 	createErrorResponse,
@@ -9,6 +9,9 @@ import logger from '../../logging/logger';
 import type { TControllerHandlerVariant } from '../../types/controllers';
 import { handleModerationRoleCheck } from '../reports';
 import type { TReportHandlers, TReportStrategy } from './types';
+
+const isPrismaRecordNotFound = (error: unknown) =>
+	error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025';
 
 export function createReportHandlers<TReport, TCategory>(
 	strategy: TReportStrategy<TReport, TCategory>,
@@ -157,7 +160,14 @@ export function createReportHandlers<TReport, TCategory>(
 				} catch (error) {
 					logger.error(error);
 
-					// Prisma throws when the report row is missing; map that to a 404-friendly message.
+					if (isPrismaRecordNotFound(error)) {
+						return createErrorResponse(
+							'api-route',
+							404,
+							`The ${strategy.entityLabel} report you are trying to delete does not exist.`,
+						);
+					}
+
 					return createErrorResponse(
 						'api-route',
 						500,
@@ -183,7 +193,6 @@ export function createReportHandlers<TReport, TCategory>(
 					if (moderationFailureResponse) return moderationFailureResponse;
 
 					const updatedReport = await strategy.updateStatus(reportId, reviewStatus);
-					await strategy.onStatusUpdated?.(reportId, reviewStatus, updatedReport);
 
 					return createSuccessResponse(
 						'api-route',
