@@ -30,9 +30,8 @@ describe('uploadStatus events', () => {
 	});
 
 	it('resolves waitForUploadCompletion when a completed event arrives', async () => {
-		const { emitUploadCompleted, waitForUploadCompletion } = await import(
-			'$lib/server/events/uploadStatus'
-		);
+		const { emitUploadCompleted, waitForUploadCompletion } =
+			await import('$lib/server/events/uploadStatus');
 
 		const uploadId = crypto.randomUUID();
 		const waitPromise = waitForUploadCompletion(uploadId, 2_000);
@@ -53,9 +52,8 @@ describe('uploadStatus events', () => {
 	});
 
 	it('rejects waitForUploadCompletion when a failed event arrives', async () => {
-		const { emitUploadFailure, waitForUploadCompletion } = await import(
-			'$lib/server/events/uploadStatus'
-		);
+		const { emitUploadFailure, waitForUploadCompletion } =
+			await import('$lib/server/events/uploadStatus');
 
 		const uploadId = crypto.randomUUID();
 		const waitPromise = waitForUploadCompletion(uploadId, 2_000);
@@ -66,9 +64,8 @@ describe('uploadStatus events', () => {
 	});
 
 	it('emits progress events locally', async () => {
-		const { emitUploadProgress, emitLocalUploadStatus, uploadStatusEmitter } = await import(
-			'$lib/server/events/uploadStatus'
-		);
+		const { emitUploadProgress, emitLocalUploadStatus, uploadStatusEmitter } =
+			await import('$lib/server/events/uploadStatus');
 
 		const uploadId = crypto.randomUUID();
 		const messages: string[] = [];

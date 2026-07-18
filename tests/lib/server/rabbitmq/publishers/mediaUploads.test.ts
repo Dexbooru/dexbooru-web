@@ -13,12 +13,10 @@ describe('MediaUploadsPublisher', () => {
 	});
 
 	it('maps job payloads to the wire DTO', async () => {
-		const { MediaUploadsPublisher } = await import(
-			'$lib/server/rabbitmq/publishers/mediaUploads'
-		);
-		const publisher = Object.create(
-			MediaUploadsPublisher.prototype,
-		) as InstanceType<typeof MediaUploadsPublisher>;
+		const { MediaUploadsPublisher } = await import('$lib/server/rabbitmq/publishers/mediaUploads');
+		const publisher = Object.create(MediaUploadsPublisher.prototype) as InstanceType<
+			typeof MediaUploadsPublisher
+		>;
 
 		const job: TMediaUploadJob = {
 			uploadId: 'upload-1',

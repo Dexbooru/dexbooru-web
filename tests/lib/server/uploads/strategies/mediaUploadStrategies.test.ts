@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-	getMediaUploadStrategy,
-	mediaUploadStrategies,
-} from '$lib/server/uploads/strategies';
+import { getMediaUploadStrategy, mediaUploadStrategies } from '$lib/server/uploads/strategies';
 
 describe('media upload strategies', () => {
 	it('maps each resource type to the expected preset and emitProgress flag', () => {
@@ -27,8 +24,6 @@ describe('media upload strategies', () => {
 	it('resolves strategies for valid resource types', () => {
 		expect(getMediaUploadStrategy('posts')).toBe(mediaUploadStrategies.posts);
 		expect(getMediaUploadStrategy('collections')).toBe(mediaUploadStrategies.collections);
-		expect(getMediaUploadStrategy('user-profiles')).toBe(
-			mediaUploadStrategies['user-profiles'],
-		);
+		expect(getMediaUploadStrategy('user-profiles')).toBe(mediaUploadStrategies['user-profiles']);
 	});
 });

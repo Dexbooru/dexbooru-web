@@ -161,9 +161,7 @@ describe('createCreatePostHandler', () => {
 	});
 
 	it('returns 409 and cleans up images when duplicates are found', async () => {
-		findDuplicates.mockResolvedValue([
-			{ id: 'dup-1', imageUrls: ['x'], description: 'dup' },
-		]);
+		findDuplicates.mockResolvedValue([{ id: 'dup-1', imageUrls: ['x'], description: 'dup' }]);
 		mockValidateAndHandleRequest.mockImplementation(
 			async (_event, handlerType, _schema, callback) =>
 				callback({

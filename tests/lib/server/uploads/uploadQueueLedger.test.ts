@@ -9,7 +9,8 @@ const createMemoryRedis = () => {
 	let seq = 0;
 	const waiting: TZsetMember[] = [];
 
-	const sorted = () => [...waiting].sort((a, b) => a.score - b.score || a.value.localeCompare(b.value));
+	const sorted = () =>
+		[...waiting].sort((a, b) => a.score - b.score || a.value.localeCompare(b.value));
 
 	return {
 		incr: vi.fn(async () => {
@@ -67,9 +68,7 @@ describe('uploadQueueLedger', () => {
 	});
 
 	it('formats queue position messages', async () => {
-		const { formatQueuePositionMessage } = await import(
-			'$lib/server/uploads/uploadQueueLedger'
-		);
+		const { formatQueuePositionMessage } = await import('$lib/server/uploads/uploadQueueLedger');
 		expect(formatQueuePositionMessage(1)).toBe("Queued — you're next");
 		expect(formatQueuePositionMessage(0)).toBe("Queued — you're next");
 		expect(formatQueuePositionMessage(3)).toBe('Queued — position 3');
@@ -79,9 +78,8 @@ describe('uploadQueueLedger', () => {
 		const memoryRedis = createMemoryRedis();
 		vi.doMock('$lib/server/db/redis', () => ({ default: memoryRedis }));
 
-		const { enqueueUploadQueue, getUploadQueueDepth } = await import(
-			'$lib/server/uploads/uploadQueueLedger'
-		);
+		const { enqueueUploadQueue, getUploadQueueDepth } =
+			await import('$lib/server/uploads/uploadQueueLedger');
 
 		const first = await enqueueUploadQueue('upload-a');
 		const second = await enqueueUploadQueue('upload-b');
@@ -97,9 +95,8 @@ describe('uploadQueueLedger', () => {
 		const memoryRedis = createMemoryRedis();
 		vi.doMock('$lib/server/db/redis', () => ({ default: memoryRedis }));
 
-		const { enqueueUploadQueue, leaveUploadQueue } = await import(
-			'$lib/server/uploads/uploadQueueLedger'
-		);
+		const { enqueueUploadQueue, leaveUploadQueue } =
+			await import('$lib/server/uploads/uploadQueueLedger');
 
 		await enqueueUploadQueue('upload-a');
 		await enqueueUploadQueue('upload-b');
@@ -129,9 +126,8 @@ describe('uploadQueueLedger', () => {
 		const memoryRedis = createMemoryRedis();
 		vi.doMock('$lib/server/db/redis', () => ({ default: memoryRedis }));
 
-		const { enqueueUploadQueue, leaveUploadQueue } = await import(
-			'$lib/server/uploads/uploadQueueLedger'
-		);
+		const { enqueueUploadQueue, leaveUploadQueue } =
+			await import('$lib/server/uploads/uploadQueueLedger');
 
 		await enqueueUploadQueue('z-last-lex');
 		await enqueueUploadQueue('a-first-lex');

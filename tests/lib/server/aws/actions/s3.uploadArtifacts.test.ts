@@ -26,21 +26,14 @@ describe('s3 upload artifact helpers', () => {
 	it('builds temp keys under uploads/{resourceType}/{uploadId}/{index}', async () => {
 		const { buildTempUploadObjectKey } = await import('$lib/server/aws/actions/s3');
 		expect(buildTempUploadObjectKey('posts', 'abc', 2)).toBe('uploads/posts/abc/2');
-		expect(buildTempUploadObjectKey('collections', 'abc', 0)).toBe(
-			'uploads/collections/abc/0',
-		);
-		expect(buildTempUploadObjectKey('user-profiles', 'abc', 1)).toBe(
-			'uploads/user-profiles/abc/1',
-		);
+		expect(buildTempUploadObjectKey('collections', 'abc', 0)).toBe('uploads/collections/abc/0');
+		expect(buildTempUploadObjectKey('user-profiles', 'abc', 1)).toBe('uploads/user-profiles/abc/1');
 	});
 
 	it('deletes keys scoped to resourceType and uploadId prefix', async () => {
 		send
 			.mockResolvedValueOnce({
-				Contents: [
-					{ Key: 'uploads/posts/abc/0' },
-					{ Key: 'uploads/posts/abc/1' },
-				],
+				Contents: [{ Key: 'uploads/posts/abc/0' }, { Key: 'uploads/posts/abc/1' }],
 				IsTruncated: false,
 			})
 			.mockResolvedValueOnce({});

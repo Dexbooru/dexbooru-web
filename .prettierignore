@@ -16,6 +16,7 @@ yarn.lock
 scripts/venv/
 
 # LLM / IDE tooling (not project source)
+.agents/
 .claude/
 .cursor/
 .gemini/
