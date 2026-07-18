@@ -1,34 +1,21 @@
-import type { ModerationReportStatus, UserReportCategory } from '$generated/prisma/client';
-import { MAXIMUM_REPORTS_PER_PAGE } from '$lib/shared/constants/reports';
+import type {
+	ModerationReportStatus,
+	UserReport,
+	UserReportCategory,
+} from '$generated/prisma/client';
 import prisma from '../prisma';
+import { createReportActions } from './reportFactory';
 
-export const findUserReportsViaPagination = async (
-	pageNumber: number,
-	reviewStatus: ModerationReportStatus,
-	category: UserReportCategory | undefined,
-) => {
-	return await prisma.userReport.findMany({
-		where: {
-			reviewStatus,
-			...(category ? { category } : {}),
-		},
-		skip: pageNumber * MAXIMUM_REPORTS_PER_PAGE,
-		take: MAXIMUM_REPORTS_PER_PAGE,
-		orderBy: {
-			createdAt: 'desc',
-		},
-	});
-};
+const userReportActions = createReportActions<UserReportCategory, UserReport>(
+	prisma.userReport,
+	'userId',
+);
 
-export const findUserReportsFromUserId = async (userId: string) => {
-	const reports = await prisma.userReport.findMany({
-		where: {
-			userId,
-		},
-	});
-
-	return reports;
-};
+export const findUserReportsViaPagination = userReportActions.findPaginated;
+export const findUserReportsFromUserId = userReportActions.findByTargetId;
+export const deleteUserReportByIds = userReportActions.deleteByIds;
+export const findUserReportById = userReportActions.findById;
+export const updateUserReportStatus = userReportActions.updateStatus;
 
 export const createUserReport = async ({
 	description,
@@ -39,37 +26,7 @@ export const createUserReport = async ({
 	category: UserReportCategory;
 	userId: string;
 }) => {
-	const report = await prisma.userReport.create({
-		data: {
-			description,
-			userId,
-			category,
-		},
-	});
-
-	return report;
+	return await userReportActions.create({ description, category, targetId: userId });
 };
 
-export const deleteUserReportByIds = async (userId: string, reportId: string) => {
-	const report = await prisma.userReport.delete({
-		where: {
-			id: reportId,
-			userId,
-		},
-	});
-
-	return report;
-};
-
-export const findUserReportById = async (reportId: string) => {
-	return await prisma.userReport.findUnique({
-		where: { id: reportId },
-	});
-};
-
-export const updateUserReportStatus = async (reportId: string, status: ModerationReportStatus) => {
-	return await prisma.userReport.update({
-		where: { id: reportId },
-		data: { reviewStatus: status },
-	});
-};
+export type { ModerationReportStatus };

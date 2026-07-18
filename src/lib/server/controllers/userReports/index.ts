@@ -1,5 +1,7 @@
-export * from './updateUserReportStatus';
-export * from './deleteUserReport';
-export * from './getUserReports';
-export * from './createUserReport';
-export * from './getUserReportsGeneral';
+export {
+	handleCreateUserReport,
+	handleDeleteUserReport,
+	handleGetUserReports,
+	handleGetUserReportsGeneral,
+	handleUpdateUserReportStatus,
+} from '../strategies/reports';

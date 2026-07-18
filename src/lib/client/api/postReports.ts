@@ -1,35 +1,14 @@
 import type { PostReportCategory } from '$generated/prisma/browser';
-import { getApiAuthHeaders } from '../helpers/auth';
+import { createReportClientApi } from './reportClient';
 
-export const createPostReport = async (
-	postId: string,
-	reportReasonCategory: PostReportCategory,
-	description: string,
-) => {
-	return await fetch(`/api/post/${postId}/reports`, {
-		method: 'POST',
-		body: JSON.stringify({ category: reportReasonCategory, description }),
-	});
-};
+const postReportClient = createReportClientApi<PostReportCategory>({
+	createPath: (postId) => `/api/post/${postId}/reports`,
+	getByTargetPath: (postId) => `/api/post/${postId}/reports`,
+	deletePath: (postId, reportId) => `/api/post/${postId}/reports?reportId=${reportId}`,
+	listGeneralPath: (pageNumber) => `/api/posts/reports?pageNumber=${pageNumber}`,
+});
 
-export const getPostsReports = async (pageNumber: number) => {
-	const url = `/api/posts/reports?pageNumber=${pageNumber}`;
-	return await fetch(url, {
-		headers: getApiAuthHeaders(),
-		method: 'GET',
-	});
-};
-
-export const getPostReports = async (postId: string) => {
-	return await fetch(`/api/post/${postId}/reports`, {
-		headers: getApiAuthHeaders(),
-		method: 'GET',
-	});
-};
-
-export const deletePostReport = async (postId: string, reportId: string) => {
-	return await fetch(`/api/post/${postId}/reports?reportId=${reportId}`, {
-		headers: getApiAuthHeaders(),
-		method: 'DELETE',
-	});
-};
+export const createPostReport = postReportClient.createReport;
+export const getPostReports = postReportClient.getReportsByTarget;
+export const deletePostReport = postReportClient.deleteReport;
+export const getPostsReports = postReportClient.getReportsGeneral;

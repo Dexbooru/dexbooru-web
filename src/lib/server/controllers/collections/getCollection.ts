@@ -4,6 +4,7 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
+import { hydratePostsTagAndArtistEntities } from '../../helpers/postHydration';
 import { cacheResponseRemotely, getRemoteResponseFromCache } from '../../helpers/sessions';
 import { PUBLIC_POST_COLLECTION_SELECTORS } from '../../constants/collections';
 import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../../constants/posts';
@@ -49,10 +50,7 @@ export const handleGetCollection = async (
 					);
 				}
 
-				collection.posts.forEach((post) => {
-					post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
-					post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
-				});
+				hydratePostsTagAndArtistEntities(collection.posts);
 
 				finalCollection = collection;
 

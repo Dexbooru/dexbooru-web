@@ -7,6 +7,7 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
+import { hydratePostsTagAndArtistEntities } from '../../helpers/postHydration';
 import QueryBuilder from '../../helpers/search';
 import { cacheResponseRemotely, getRemoteResponseFromCache } from '../../helpers/sessions';
 import type { TControllerHandlerVariant } from '../../types/controllers';
@@ -56,10 +57,7 @@ export const handleGetAdvancedPostSearchResults = async (
 					const ormQuery = builder.buildOrmQuery();
 					const searchResults = (await prisma.post.findMany(ormQuery)) as TPost[];
 
-					searchResults.forEach((post) => {
-						post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
-						post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
-					});
+					hydratePostsTagAndArtistEntities(searchResults);
 
 					searchResponse = {
 						posts: searchResults,

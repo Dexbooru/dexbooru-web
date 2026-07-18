@@ -8,13 +8,15 @@ import {
 	mockPostSourceActions,
 	mockTagActions,
 } from '../../../../mocks';
-import { handleGetPost } from '$lib/server/controllers/posts/getPost';
-import { handleGetPosts } from '$lib/server/controllers/posts/getPosts';
-import { handleGetPostsByAuthor } from '$lib/server/controllers/posts/getPostsByAuthor';
-import { handleGetPostsWithArtistName } from '$lib/server/controllers/posts/getPostsWithArtistName';
-import { handleGetPostsWithCharacterName } from '$lib/server/controllers/posts/getPostsWithCharacterName';
-import { handleGetPostsWithSourceTitle } from '$lib/server/controllers/posts/getPostsWithSourceTitle';
-import { handleGetPostsWithTagName } from '$lib/server/controllers/posts/getPostsWithTagName';
+import {
+	handleGetPost,
+	handleGetPosts,
+	handleGetPostsByAuthor,
+	handleGetPostsWithArtistName,
+	handleGetPostsWithCharacterName,
+	handleGetPostsWithSourceTitle,
+	handleGetPostsWithTagName,
+} from '$lib/server/controllers/posts';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { Prisma } from '$generated/prisma/client';
 

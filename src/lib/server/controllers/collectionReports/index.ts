@@ -1,5 +1,7 @@
-export * from './updatePostCollectionReportStatus';
-export * from './deletePostCollectionReport';
-export * from './getPostCollectionReports';
-export * from './createPostCollectionReport';
-export * from './getPostCollectionsReportsGeneral';
+export {
+	handleCreatePostCollectionReport,
+	handleDeletePostCollectionReport,
+	handleGetPostCollectionReports,
+	handleGetPostCollectionsReportsGeneral,
+	handleUpdatePostCollectionReportStatus,
+} from '../strategies/reports';

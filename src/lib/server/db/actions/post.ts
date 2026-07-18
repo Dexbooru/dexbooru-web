@@ -1,8 +1,20 @@
-import type { PostModerationStatus, Prisma } from '$generated/prisma/client';
+import type { PostModerationStatus } from '$generated/prisma/client';
 import { PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
 import { MAXIMUM_SIMILAR_POSTS_PER_POST } from '$lib/shared/constants/posts';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
 import prisma from '../prisma';
+import {
+	buildSimilaritySeed,
+	buildSimilarityWhereInput,
+	isSimilaritySeedEmpty,
+	scoreAndRankSimilarityCandidates,
+	shouldSkipSimilarityForSafeMode,
+} from '$lib/server/helpers/postSimilarity';
+import type {
+	TSimilarityPreferences,
+	TSimilarityRawCandidate,
+	TSimilaritySourceFields,
+} from '$lib/server/types/postSimilarity';
 import { decrementArtistPostCount, incrementArtistPostCount } from './artist';
 import { decrementTagPostCount, incrementTagPostCount } from './tag';
 
@@ -265,68 +277,91 @@ export async function findDuplicatePosts(
 	});
 }
 
-export async function findSimilarPosts(
-	postId: string,
-	tagString: string,
-	artistString: string,
-	selectors?: TPostSelector,
-) {
-	if (tagString.length === 0 && artistString.length === 0) {
+type TFindSimilarPostsInput = {
+	postId: string;
+	tagString: string;
+	artistString: string;
+	isNsfw: boolean;
+	sources: TSimilaritySourceFields[];
+	preferences: TSimilarityPreferences;
+	selectors?: TPostSelector;
+};
+
+const MAXIMUM_SIMILARITY_CANDIDATE_POSTS = MAXIMUM_SIMILAR_POSTS_PER_POST * 50;
+
+export async function findSimilarPosts(input: TFindSimilarPostsInput) {
+	const seed = buildSimilaritySeed(input.tagString, input.artistString, input.sources);
+
+	if (shouldSkipSimilarityForSafeMode(input.isNsfw, input.preferences.browseInSafeMode)) {
+		return {
+			posts: [] as TPost[],
+			similarities: {} as Record<string, number>,
+		};
+	}
+	if (isSimilaritySeedEmpty(seed)) {
 		return {
 			posts: [] as TPost[],
 			similarities: {} as Record<string, number>,
 		};
 	}
 
-	const tags = tagString.split(',');
-	const artists = artistString.split(',');
-
-	const orStatements: Prisma.PostWhereInput['OR'] = [];
-	tags.forEach((tag) => {
-		orStatements.push({
-			tagString: {
-				contains: tag,
-			},
-		});
-	});
-	artists.forEach((artist) => {
-		orStatements.push({
-			artistString: {
-				contains: artist,
-			},
-		});
-	});
-
 	const similarPosts = (await prisma.post.findMany({
-		where: {
-			moderationStatus: { in: ['PENDING', 'APPROVED'] },
-			id: {
-				not: {
-					equals: postId,
+		where: buildSimilarityWhereInput({
+			postId: input.postId,
+			isNsfw: input.isNsfw,
+			seed,
+			preferences: input.preferences,
+		}),
+		select: {
+			id: true,
+			tagString: true,
+			artistString: true,
+			createdAt: true,
+			sources: {
+				select: {
+					sourceTitle: true,
+					sourceType: true,
+					characterName: true,
 				},
 			},
-			OR: orStatements,
 		},
-		select: selectors,
-		take: MAXIMUM_SIMILAR_POSTS_PER_POST,
+		orderBy: {
+			createdAt: 'desc',
+		},
+		take: MAXIMUM_SIMILARITY_CANDIDATE_POSTS,
+	})) as TSimilarityRawCandidate[];
+
+	const targetFeatures = {
+		tags: seed.tags,
+		artists: seed.artists,
+		sources: input.sources,
+	};
+	const { sortedIds: sortedIdsByScore, similarityMap } = scoreAndRankSimilarityCandidates(
+		targetFeatures,
+		similarPosts,
+		MAXIMUM_SIMILAR_POSTS_PER_POST,
+	);
+
+	if (sortedIdsByScore.length === 0) {
+		return {
+			posts: [] as TPost[],
+			similarities: {} as Record<string, number>,
+		};
+	}
+
+	const selectedPosts = (await prisma.post.findMany({
+		where: {
+			id: {
+				in: sortedIdsByScore,
+			},
+		},
+		select: input.selectors,
 	})) as TPost[];
 
-	const originalSet = new Set([...tags, ...artists]);
-
-	const similarityMap: Record<string, number> = {};
-	similarPosts.forEach((similarPost) => {
-		const similarTags = similarPost.tagString.split(',');
-		const similarArtists = similarPost.artistString.split(',');
-
-		const similarSet = new Set([...similarTags, ...similarArtists]);
-		const intersection = new Set([...originalSet].filter((item) => similarSet.has(item)));
-
-		const union = new Set([...originalSet, ...similarSet]);
-		const jaccardSimilarity = union.size === 0 ? 0 : (intersection.size / union.size) * 100;
-		similarityMap[similarPost.id] = jaccardSimilarity;
-	});
-
-	const filteredSimilarPosts = similarPosts.filter((post) => similarityMap[post.id] || 0 > 40);
+	const postsById = new Map(selectedPosts.map((post) => [post.id, post]));
+	const filteredSimilarPosts = sortedIdsByScore
+		.map((postId) => postsById.get(postId))
+		.filter((post): post is TPost => !!post);
 	return {
 		posts: filteredSimilarPosts,
 		similarities: similarityMap,

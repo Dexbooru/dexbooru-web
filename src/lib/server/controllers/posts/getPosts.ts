@@ -12,6 +12,7 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
+import { hydratePostsTagAndArtistEntities } from '../../helpers/postHydration';
 import {
 	cacheMultipleToCollectionRemotely,
 	cacheResponseRemotely,
@@ -105,10 +106,7 @@ export const handleGetPosts = async (
 					}
 				}
 
-				posts.forEach((post) => {
-					post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
-					post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
-				});
+				hydratePostsTagAndArtistEntities(posts);
 
 				responseData = {
 					posts,

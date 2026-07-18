@@ -68,33 +68,18 @@ const LikePostSchema = {
 	}),
 } satisfies TRequestSchema;
 
-const GetPostsWithTagNameSchema = {
-	pathParams: z.object({
-		name: z.string().min(1, 'The tag name needs to be least one character long'),
-	}),
-	urlSearchParams: PostPaginationSchema,
-} satisfies TRequestSchema;
+const createGetPostsByNameSchema = (label: string) =>
+	({
+		pathParams: z.object({
+			name: z.string().min(1, `The ${label} name needs to be at least one character long`),
+		}),
+		urlSearchParams: PostPaginationSchema,
+	}) satisfies TRequestSchema;
 
-const GetPostsWithArtistNameSchema = {
-	pathParams: z.object({
-		name: z.string().min(1, 'The tag name needs to be least one character long'),
-	}),
-	urlSearchParams: PostPaginationSchema,
-} satisfies TRequestSchema;
-
-const GetPostsWithCharacterNameSchema = {
-	pathParams: z.object({
-		name: z.string().min(1, 'The character name needs to be at least one character long'),
-	}),
-	urlSearchParams: PostPaginationSchema,
-} satisfies TRequestSchema;
-
-const GetPostsWithSourceTitleSchema = {
-	pathParams: z.object({
-		name: z.string().min(1, 'The source name needs to be at least one character long'),
-	}),
-	urlSearchParams: PostPaginationSchema,
-} satisfies TRequestSchema;
+const GetPostsWithTagNameSchema = createGetPostsByNameSchema('tag');
+const GetPostsWithArtistNameSchema = createGetPostsByNameSchema('artist');
+const GetPostsWithCharacterNameSchema = createGetPostsByNameSchema('character');
+const GetPostsWithSourceTitleSchema = createGetPostsByNameSchema('source');
 
 const CreatePostSchema = {
 	form: z.object({

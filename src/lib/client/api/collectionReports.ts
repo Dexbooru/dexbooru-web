@@ -1,35 +1,15 @@
 import type { PostCollectionReportCategory } from '$generated/prisma/browser';
-import { getApiAuthHeaders } from '../helpers/auth';
+import { createReportClientApi } from './reportClient';
 
-export const createPostCollectionReport = async (
-	collectionId: string,
-	reportReasonCategory: PostCollectionReportCategory,
-	description: string,
-) => {
-	return await fetch(`/api/collection/${collectionId}/reports`, {
-		method: 'POST',
-		body: JSON.stringify({ category: reportReasonCategory, description }),
-	});
-};
+const collectionReportClient = createReportClientApi<PostCollectionReportCategory>({
+	createPath: (collectionId) => `/api/collection/${collectionId}/reports`,
+	getByTargetPath: (collectionId) => `/api/collection/${collectionId}/reports`,
+	deletePath: (collectionId, reportId) =>
+		`/api/collection/${collectionId}/reports?reportId=${reportId}`,
+	listGeneralPath: (pageNumber) => `/api/collections/reports?pageNumber=${pageNumber}`,
+});
 
-export const getPostCollectionReports = async (collectionId: string) => {
-	return await fetch(`/api/collection/${collectionId}/reports`, {
-		headers: getApiAuthHeaders(),
-		method: 'GET',
-	});
-};
-
-export const deletePostCollectionReport = async (collectionId: string, reportId: string) => {
-	return await fetch(`/api/collection/${collectionId}/reports?reportId=${reportId}`, {
-		headers: getApiAuthHeaders(),
-		method: 'DELETE',
-	});
-};
-
-export const getCollectionsReports = async (pageNumber: number) => {
-	const url = `/api/collections/reports?pageNumber=${pageNumber}`;
-	return await fetch(url, {
-		headers: getApiAuthHeaders(),
-		method: 'GET',
-	});
-};
+export const createPostCollectionReport = collectionReportClient.createReport;
+export const getPostCollectionReports = collectionReportClient.getReportsByTarget;
+export const deletePostCollectionReport = collectionReportClient.deleteReport;
+export const getCollectionsReports = collectionReportClient.getReportsGeneral;

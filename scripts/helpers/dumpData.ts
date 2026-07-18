@@ -2,8 +2,8 @@ import { faker } from '@faker-js/faker';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
-import { PrismaClient, User } from '../../src/generated/prisma/client';
-import { TDanbooruPost } from './aggregateDanbooruData';
+import type { PrismaClient, User } from '../../src/generated/prisma/client';
+import type { TDanbooruPost } from './aggregateDanbooruData';
 import factories from './factories';
 import buildLogger from './logger';
 

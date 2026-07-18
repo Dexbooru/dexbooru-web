@@ -1,37 +1,21 @@
 import type {
 	ModerationReportStatus,
+	PostCollectionReport,
 	PostCollectionReportCategory,
 } from '$generated/prisma/client';
-import { MAXIMUM_REPORTS_PER_PAGE } from '$lib/shared/constants/reports';
 import prisma from '../prisma';
+import { createReportActions } from './reportFactory';
 
-export const findPostCollectionsReportsViaPagination = async (
-	pageNumber: number,
-	reviewStatus: ModerationReportStatus,
-	category: PostCollectionReportCategory | undefined,
-) => {
-	return await prisma.postCollectionReport.findMany({
-		where: {
-			reviewStatus,
-			...(category ? { category } : {}),
-		},
-		skip: pageNumber * MAXIMUM_REPORTS_PER_PAGE,
-		take: MAXIMUM_REPORTS_PER_PAGE,
-		orderBy: {
-			createdAt: 'desc',
-		},
-	});
-};
+const collectionReportActions = createReportActions<
+	PostCollectionReportCategory,
+	PostCollectionReport
+>(prisma.postCollectionReport, 'postCollectionId');
 
-export const findPostCollectionReportsFromCollectionId = async (postCollectionId: string) => {
-	const reports = await prisma.postCollectionReport.findMany({
-		where: {
-			postCollectionId,
-		},
-	});
-
-	return reports;
-};
+export const findPostCollectionsReportsViaPagination = collectionReportActions.findPaginated;
+export const findPostCollectionReportsFromCollectionId = collectionReportActions.findByTargetId;
+export const deletePostCollectionReportByIds = collectionReportActions.deleteByIds;
+export const findPostCollectionReportById = collectionReportActions.findById;
+export const updatePostCollectionReportStatus = collectionReportActions.updateStatus;
 
 export const createPostCollectionReport = async ({
 	description,
@@ -42,43 +26,11 @@ export const createPostCollectionReport = async ({
 	category: PostCollectionReportCategory;
 	postCollectionId: string | null;
 }) => {
-	const report = await prisma.postCollectionReport.create({
-		data: {
-			description,
-			postCollectionId,
-			category,
-		},
-	});
-
-	return report;
-};
-
-export const deletePostCollectionReportByIds = async (
-	postCollectionId: string,
-	reportId: string,
-) => {
-	const report = await prisma.postCollectionReport.delete({
-		where: {
-			id: reportId,
-			postCollectionId,
-		},
-	});
-
-	return report;
-};
-
-export const findPostCollectionReportById = async (reportId: string) => {
-	return await prisma.postCollectionReport.findUnique({
-		where: { id: reportId },
+	return await collectionReportActions.create({
+		description,
+		category,
+		targetId: postCollectionId ?? '',
 	});
 };
 
-export const updatePostCollectionReportStatus = async (
-	reportId: string,
-	status: ModerationReportStatus,
-) => {
-	return await prisma.postCollectionReport.update({
-		where: { id: reportId },
-		data: { reviewStatus: status },
-	});
-};
+export type { ModerationReportStatus };
