@@ -2,12 +2,14 @@ import { dev } from '$app/environment';
 import { ensureApplicationConfigurationLoaded } from '$lib/server/applicationConfiguration';
 import { populateAuthenticatedUser } from '$lib/server/helpers/controllers';
 import logger from '$lib/server/logging/logger';
+import { ensureUploadPipelineBootstrapped } from '$lib/server/uploads/bootstrap';
 import type { Handle, HandleServerError } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	logger.info(event);
 
 	await ensureApplicationConfigurationLoaded();
+	await ensureUploadPipelineBootstrapped();
 	populateAuthenticatedUser(event);
 	return await resolve(event);
 };

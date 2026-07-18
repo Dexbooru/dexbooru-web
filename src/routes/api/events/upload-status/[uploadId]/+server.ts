@@ -1,4 +1,5 @@
 import { uploadStatusEmitter } from '$lib/server/events/uploadStatus';
+import type { TUploadStatusEvent } from '$lib/server/types/upload';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = ({ params }) => {
@@ -8,12 +9,26 @@ export const GET: RequestHandler = ({ params }) => {
 		start(controller) {
 			const encoder = new TextEncoder();
 
-			const send = (data: string) => {
-				controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+			const send = (data: string, eventName?: string) => {
+				const prefix = eventName ? `event: ${eventName}\n` : '';
+				controller.enqueue(encoder.encode(`${prefix}data: ${data}\n\n`));
 			};
 
-			const onStatusUpdate = (message: string) => {
-				send(message);
+			const onStatusUpdate = (event: TUploadStatusEvent | string) => {
+				// Back-compat if a bare string is ever emitted
+				if (typeof event === 'string') {
+					send(event);
+					return;
+				}
+
+				if (event.uploadId !== uploadId) return;
+
+				if (event.kind === 'failed') {
+					send(event.message, 'failed');
+					return;
+				}
+
+				send(event.message);
 			};
 
 			uploadStatusEmitter.on(uploadId, onStatusUpdate);

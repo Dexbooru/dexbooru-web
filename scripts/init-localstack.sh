@@ -6,9 +6,11 @@ BUCKETS=(
   dexbooru-dev-pfps
   dexbooru-dev-posts
   dexbooru-dev-collections
+  dexbooru-dev-upload-artifacts
   dexbooru-prd-pfps
   dexbooru-prd-posts
   dexbooru-prd-collections
+  dexbooru-prd-upload-artifacts
 )
 
 QUEUES=(

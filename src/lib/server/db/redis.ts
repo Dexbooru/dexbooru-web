@@ -33,6 +33,16 @@ const mockRedisClient = {
 	incr: async () => 1,
 	pExpire: async () => true,
 	pTTL: async () => -1,
+	publish: async () => 0,
+	subscribe: async () => undefined,
+	zAdd: async () => 1,
+	zRem: async () => 0,
+	zRange: async () => [],
+	zRank: async () => null,
+	zCard: async () => 0,
+	duplicate: () => mockRedisClient,
+	connect: async () => mockRedisClient,
+	isOpen: true,
 } as unknown as RedisClient;
 
 const globalForRedis = globalThis as unknown as {
