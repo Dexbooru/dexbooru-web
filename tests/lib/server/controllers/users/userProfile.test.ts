@@ -33,9 +33,7 @@ describe('user profile and lifecycle controllers', () => {
 	describe('handleCreateUser', () => {
 		it('should successfully create user and send verification email', async () => {
 			mockUserActions.findUserByNameOrEmail.mockResolvedValue(null);
-			mockImageHelpers.runDefaultProfilePictureTransformationPipeline.mockResolvedValue(
-				Buffer.from('pfp'),
-			);
+			mockImageHelpers.transformDefaultProfilePicture.mockResolvedValue(Buffer.from('pfp'));
 			mockS3Actions.uploadToBucket.mockResolvedValue('http://pfp-url');
 			mockPasswordHelpers.hashPassword.mockResolvedValue('hashed_pass');
 			mockUserActions.createUser.mockResolvedValue({

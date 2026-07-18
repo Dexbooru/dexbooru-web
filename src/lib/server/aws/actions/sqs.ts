@@ -17,7 +17,9 @@ export const enqueueUploadedPostImage = async (
 	return response.$metadata.httpStatusCode === 200;
 };
 
-export const enqueueBatchUploadedPostImages = async (post: Post): Promise<boolean> => {
+export const enqueueBatchUploadedPostImages = async (
+	post: Pick<Post, 'id' | 'imageUrls'>,
+): Promise<boolean> => {
 	const postImageUrls = post.imageUrls;
 	const originalSizedImageUrls = postImageUrls.filter((imageUrl) =>
 		imageUrl.endsWith(ORIGINAL_IMAGE_SUFFIX),

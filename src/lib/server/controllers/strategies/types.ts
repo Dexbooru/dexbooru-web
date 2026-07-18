@@ -6,6 +6,7 @@ import type {
 	TInferRequestSchema,
 	TRequestSchema,
 } from '../../types/controllers';
+import type { TUploadCompletedResult } from '../../types/upload';
 
 export type TWithRemoteCacheOptions<T> = {
 	cacheKey: string;
@@ -94,4 +95,81 @@ export type TReportHandlers = {
 	handleGetGeneral: (event: RequestEvent) => Promise<unknown>;
 	handleDelete: (event: RequestEvent) => Promise<unknown>;
 	handleUpdateStatus: (event: RequestEvent) => Promise<unknown>;
+};
+
+export type TCreatePostDuplicate = {
+	id: string;
+	imageUrls: string[];
+	description: string | null;
+};
+
+export type TCreatePostRecord = {
+	id: string;
+	description: string;
+	imageUrls: string[];
+	createdAt: Date;
+	author?: {
+		id: string;
+		username: string;
+		profilePictureUrl: string;
+	} | null;
+};
+
+export type TCreatePostFormInput = {
+	description: string;
+	tags: string[];
+	artists: string[];
+	isNsfw: boolean;
+	postPictures: File[];
+	sourceLink: string;
+	uploadId?: string;
+	ignoreDuplicates: boolean;
+};
+
+export type TCreatePostStrategy = {
+	schema: TRequestSchema;
+	maxDuplicatesToSearch: number;
+	requireEmailVerified: boolean;
+	messages: {
+		emailUnverified: string;
+		duplicatesDetected: string;
+		success: string;
+		unexpectedError: string;
+		pipelineFailureFallback: string;
+	};
+	ensureAuthorCanUpload: (
+		authorId: string,
+	) => Promise<{ ok: true } | { ok: false; reason: string }>;
+	uploadImages: (
+		postPictures: File[],
+		isNsfw: boolean,
+		uploadId?: string,
+	) => Promise<TUploadCompletedResult>;
+	findDuplicates: (imageHashes: string[], limit: number) => Promise<TCreatePostDuplicate[]>;
+	deleteUploadedImages: (imageUrls: string[]) => Promise<unknown>;
+	createPost: (input: {
+		sourceLink: string;
+		description: string;
+		isNsfw: boolean;
+		tags: string[];
+		artists: string[];
+		imageUrls: string[];
+		imageWidths: number[];
+		imageHeights: number[];
+		imageHashes: string[];
+		authorId: string;
+	}) => Promise<TCreatePostRecord>;
+	deletePost: (postId: string) => Promise<unknown>;
+	afterCreate: (ctx: {
+		post: TCreatePostRecord;
+		originalImageUrls: string[];
+		uploadId?: string;
+	}) => Promise<void> | void;
+	onFormActionSuccess: (ctx: {
+		post: TCreatePostRecord;
+		originalImageUrls: string[];
+		uploadId?: string;
+		authorId: string;
+	}) => Promise<void> | void;
+	getFormRedirectPath: (postId: string) => string;
 };

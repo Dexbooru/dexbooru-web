@@ -13,10 +13,8 @@ import {
 import { createUserPreferences } from '../../db/actions/preference';
 import { createErrorResponse, validateAndHandleRequest } from '../../helpers/controllers';
 import { buildCookieOptions, clearSessionIdCookie } from '../../helpers/cookies';
-import {
-	runDefaultProfilePictureTransformationPipeline,
-	runProfileImageTransformationPipeline,
-} from '../../helpers/images';
+import { transformDefaultProfilePicture } from '../../helpers/images';
+import { processMediaUpload } from '../../uploads/processMediaUpload';
 import { doPasswordsMatch, hashPassword } from '../../helpers/password';
 import { generateEncodedUserTokenFromRecord } from '../../helpers/sessions';
 import logger from '../../logging/logger';
@@ -102,23 +100,29 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			}
 
 			let finalProfilePictureUrl = '';
-			let finalProfilePictureBuffer: Buffer;
 
 			if (profilePicture instanceof globalThis.File && profilePicture.size > 0) {
-				logger.info('Processing custom profile picture', { username });
-				finalProfilePictureBuffer = await runProfileImageTransformationPipeline(profilePicture);
+				logger.info('Processing custom profile picture via media upload queue', { username });
+				const processed = await processMediaUpload({
+					resourceType: 'user-profiles',
+					files: [profilePicture],
+					emitProgress: false,
+				});
+				const processedUrl = processed.imageUrls[0];
+				if (!processedUrl) {
+					throw new Error('Profile picture processing returned no image URL');
+				}
+				finalProfilePictureUrl = processedUrl;
 			} else {
 				logger.info('Generating default profile picture', { username });
-				finalProfilePictureBuffer = await runDefaultProfilePictureTransformationPipeline(username);
+				const finalProfilePictureBuffer = await transformDefaultProfilePicture(username);
+				logger.info('Uploading default profile picture to S3', { username });
+				finalProfilePictureUrl = await uploadToBucket(
+					AWS_PROFILE_PICTURE_BUCKET_NAME,
+					'profile_pictures',
+					finalProfilePictureBuffer,
+				);
 			}
-
-			logger.info('Uploading profile picture to S3', { username });
-			const profilePictureObjectUrl = await uploadToBucket(
-				AWS_PROFILE_PICTURE_BUCKET_NAME,
-				'profile_pictures',
-				finalProfilePictureBuffer,
-			);
-			finalProfilePictureUrl = profilePictureObjectUrl;
 
 			logger.info('Creating user account', { username });
 			const hashedPassword = await hashPassword(password);

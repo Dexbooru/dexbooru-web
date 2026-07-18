@@ -56,8 +56,9 @@
 		file: File;
 	}[] = $state([]);
 	let loadingPostPictures = $state(false);
-	let loading = $state(false);
 	let statusMessage = $state('Uploading post... Please wait.');
+	let showStatusModal = $state(false);
+	let uploadFailed = $state(false);
 	let eventSource: EventSource | null = null;
 	let duplicates = $state<TPostDuplicate[]>([]);
 	let forceUpload = $state(false);
@@ -180,8 +181,21 @@
 		return !isValidForm;
 	});
 
+	const closeUploadEventSource = () => {
+		if (eventSource) {
+			eventSource.close();
+			eventSource = null;
+		}
+	};
+
+	const dismissStatusModal = () => {
+		showStatusModal = false;
+		uploadFailed = false;
+	};
+
 	const handleSubmit: SubmitFunction = ({ formData }) => {
-		loading = true;
+		uploadFailed = false;
+		showStatusModal = true;
 		statusMessage = 'Uploading post... Please wait.';
 
 		const uploadId = crypto.randomUUID();
@@ -197,19 +211,16 @@
 		eventSource.onmessage = (event) => {
 			statusMessage = event.data;
 		};
+		eventSource.addEventListener('failed', (event) => {
+			statusMessage = (event as MessageEvent).data;
+			uploadFailed = true;
+		});
 		eventSource.onerror = () => {
-			if (eventSource) {
-				eventSource.close();
-				eventSource = null;
-			}
+			closeUploadEventSource();
 		};
 
 		return async ({ result, update }) => {
-			loading = false;
-			if (eventSource) {
-				eventSource.close();
-				eventSource = null;
-			}
+			closeUploadEventSource();
 
 			if (result.type === 'failure') {
 				const reason = result.data?.reason as string | undefined;
@@ -217,13 +228,24 @@
 
 				if (serverDuplicates && serverDuplicates.length > 0) {
 					duplicates = serverDuplicates;
+					showStatusModal = false;
+					uploadFailed = false;
 					toast.push('Duplicates detected on server', FAILURE_TOAST_OPTIONS);
 				} else if (reason) {
+					statusMessage = reason;
+					uploadFailed = true;
+					showStatusModal = true;
 					toast.push(reason, FAILURE_TOAST_OPTIONS);
+				} else {
+					showStatusModal = uploadFailed;
 				}
 			} else if (result.type === 'redirect') {
 				shouldShowDraftToast = false;
 				clearPostDraft();
+				showStatusModal = false;
+				uploadFailed = false;
+			} else {
+				showStatusModal = uploadFailed;
 			}
 			await update();
 		};
@@ -463,5 +485,10 @@
 		</Card>
 	{/if}
 
-	<UploadStatusModal bind:open={loading} {statusMessage} />
+	<UploadStatusModal
+		bind:open={showStatusModal}
+		{statusMessage}
+		failed={uploadFailed}
+		onDismiss={dismissStatusModal}
+	/>
 </main>

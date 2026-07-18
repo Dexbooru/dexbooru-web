@@ -5,6 +5,7 @@ export * from './aws/s3';
 export * from './aws/sqs';
 export * from './rabbitmq/publishers/newPostVectorTarget';
 export * from './rabbitmq/publishers/newPostLike';
+export * from './rabbitmq/publishers/mediaUploads';
 export * from './db/actions/post';
 export { mockCommentActions, restoreCommentActionMocks } from './db/actions/comment';
 export * from './db/actions/user';

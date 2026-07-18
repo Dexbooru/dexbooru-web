@@ -1,21 +1,18 @@
+import { isRedirect, type RequestEvent } from '@sveltejs/kit';
+import { deleteBatchFromBucket } from '../../aws/actions/s3';
+import { AWS_COLLECTION_PICTURE_BUCKET_NAME } from '../../constants/aws';
 import { createCollection, deleteCollectionById } from '../../db/actions/collection';
 import {
 	createErrorResponse,
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { deleteBatchFromBucket, uploadBatchToBucket } from '../../aws/actions/s3';
-import { AWS_COLLECTION_PICTURE_BUCKET_NAME } from '../../constants/aws';
-import {
-	applyCollectionImageTransformationPipeline,
-	flattenImageBuffers,
-} from '../../helpers/images';
 import { invalidateCacheRemotely } from '../../helpers/sessions';
+import logger from '../../logging/logger';
+import type { TControllerHandlerVariant } from '../../types/controllers';
+import { processMediaUpload } from '../../uploads/processMediaUpload';
 import { getCacheKeyForGeneralCollectionPagination } from '../cache-strategies/collections';
 import { CreateCollectionSchema } from '../request-schemas/collections';
-import logger from '../../logging/logger';
-import { isRedirect, type RequestEvent } from '@sveltejs/kit';
-import type { TControllerHandlerVariant } from '../../types/controllers';
 import { createCollectionFormErrorData } from './helpers';
 
 export const handleCreateCollection = async (
@@ -40,18 +37,13 @@ export const handleCreateCollection = async (
 			try {
 				let thumbnailImageUrls: string[] = [];
 				if (collectionThumbnail !== null) {
-					const imageData = await applyCollectionImageTransformationPipeline(
-						collectionThumbnail,
+					const processed = await processMediaUpload({
+						resourceType: 'collections',
+						files: [collectionThumbnail],
 						isNsfw,
-					);
-					const { fileObjectIds, fileBuffers } = flattenImageBuffers([imageData]);
-					thumbnailImageUrls = await uploadBatchToBucket(
-						AWS_COLLECTION_PICTURE_BUCKET_NAME,
-						'collections',
-						fileBuffers,
-						'webp',
-						fileObjectIds,
-					);
+						emitProgress: false,
+					});
+					thumbnailImageUrls = processed.imageUrls;
 					finalThumbnailImageUrls = thumbnailImageUrls;
 				}
 
@@ -86,7 +78,7 @@ export const handleCreateCollection = async (
 					deleteCollectionById(finalCollectionId, event.locals.user.id);
 				}
 
-				const message = 'An unexpected error occurred while creating the post';
+				const message = 'An unexpected error occurred while creating the collection';
 				return createErrorResponse(
 					handlerType,
 					500,

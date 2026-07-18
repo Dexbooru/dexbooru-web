@@ -12,10 +12,8 @@ import {
 } from '../../helpers/controllers';
 import { deleteFromBucket, uploadToBucket } from '../../aws/actions/s3';
 import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '../../constants/aws';
-import {
-	runDefaultProfilePictureTransformationPipeline,
-	runProfileImageTransformationPipeline,
-} from '../../helpers/images';
+import { transformDefaultProfilePicture } from '../../helpers/images';
+import { processMediaUpload } from '../../uploads/processMediaUpload';
 import { doPasswordsMatch, hashPassword } from '../../helpers/password';
 import logger from '../../logging/logger';
 import {
@@ -60,14 +58,26 @@ export const handleChangeProfilePicture = async (event: RequestEvent) => {
 					deleteFromBucket(AWS_PROFILE_PICTURE_BUCKET_NAME, user.profilePictureUrl);
 				}
 
-				const newProfilePictureFileBuffer = removeProfilePicture
-					? await runDefaultProfilePictureTransformationPipeline(user.username)
-					: await runProfileImageTransformationPipeline(newProfilePicture);
-				const updatedProfilePictureObjectUrl = await uploadToBucket(
-					AWS_PROFILE_PICTURE_BUCKET_NAME,
-					'profile_pictures',
-					newProfilePictureFileBuffer,
-				);
+				let updatedProfilePictureObjectUrl: string;
+				if (removeProfilePicture) {
+					const defaultProfilePictureBuffer = await transformDefaultProfilePicture(user.username);
+					updatedProfilePictureObjectUrl = await uploadToBucket(
+						AWS_PROFILE_PICTURE_BUCKET_NAME,
+						'profile_pictures',
+						defaultProfilePictureBuffer,
+					);
+				} else {
+					const processed = await processMediaUpload({
+						resourceType: 'user-profiles',
+						files: [newProfilePicture],
+						emitProgress: false,
+					});
+					const processedUrl = processed.imageUrls[0];
+					if (!processedUrl) {
+						throw new Error('Profile picture processing returned no image URL');
+					}
+					updatedProfilePictureObjectUrl = processedUrl;
+				}
 				await updateProfilePictureByUserId(userId, updatedProfilePictureObjectUrl);
 
 				return createSuccessResponse(

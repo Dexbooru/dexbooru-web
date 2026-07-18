@@ -36,13 +36,19 @@ const getRandomArtists = (artists: string[]) => {
 	const sampleSize = faker.number.int({ min: ARTIST_SAMPLE_MIN, max: ARTIST_SAMPLE_MAX });
 	while (artistSet.size < sampleSize) {
 		const randomArtist = artists[Math.floor(Math.random() * artists.length)];
-		artistSet.add(randomArtist);
+		if (randomArtist !== undefined) {
+			artistSet.add(randomArtist);
+		}
 	}
 	return Array.from(artistSet);
 };
 
-const getRandomUser = (users: User[]) => {
-	return users[Math.floor(Math.random() * users.length)];
+const getRandomUser = (users: User[]): User => {
+	const user = users[Math.floor(Math.random() * users.length)];
+	if (!user) {
+		throw new Error('Expected at least one mock user');
+	}
+	return user;
 };
 
 const generatePostCreationPromise = (
@@ -297,7 +303,11 @@ async function dumpData({
 				comment.content = truncate(comment.content, 1500);
 
 				const usersIndex = Math.floor(Math.random() * mockUsers.length);
-				comment.authorId = mockUsers[usersIndex].id;
+				const author = mockUsers[usersIndex];
+				if (!author) {
+					throw new Error('Expected at least one mock user');
+				}
+				comment.authorId = author.id;
 			});
 
 			commentIndex += 3;

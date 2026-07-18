@@ -6,6 +6,7 @@ import './mocks/aws/s3';
 import './mocks/aws/sqs';
 import './mocks/rabbitmq/publishers/newPostVectorTarget';
 import './mocks/rabbitmq/publishers/newPostLike';
+import './mocks/rabbitmq/publishers/mediaUploads';
 import './mocks/db/actions/post';
 import './mocks/db/actions/comment';
 import './mocks/db/actions/user';
