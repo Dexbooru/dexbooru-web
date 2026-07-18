@@ -38,6 +38,20 @@ describe('withRemoteCache', () => {
 		expect(mockCacheResponseRemotely).not.toHaveBeenCalled();
 	});
 
+	it('treats empty arrays as cache hits', async () => {
+		mockGetRemoteResponseFromCache.mockResolvedValue([]);
+		const compute = vi.fn();
+
+		const result = await withRemoteCache({
+			cacheKey: 'key-empty',
+			ttlSeconds: 30,
+			compute,
+		});
+
+		expect(result).toEqual([]);
+		expect(compute).not.toHaveBeenCalled();
+	});
+
 	it('computes, caches, and associates keys on miss', async () => {
 		mockGetRemoteResponseFromCache.mockResolvedValue(null);
 		const computed = { posts: [{ id: 'p1' }, { id: 'p2' }] };
@@ -71,5 +85,32 @@ describe('withRemoteCache', () => {
 
 		expect(mockCacheResponseRemotely).not.toHaveBeenCalled();
 		expect(mockCacheMultipleToCollectionRemotely).not.toHaveBeenCalled();
+	});
+
+	it('skips writing cache when shouldCache predicate returns false', async () => {
+		mockGetRemoteResponseFromCache.mockResolvedValue(null);
+
+		await withRemoteCache({
+			cacheKey: 'key-4',
+			ttlSeconds: 60,
+			shouldCache: (value) => !('notFound' in value),
+			compute: async () => ({ notFound: true as const }),
+		});
+
+		expect(mockCacheResponseRemotely).not.toHaveBeenCalled();
+	});
+
+	it('uses resolveTtl for dynamic expiry', async () => {
+		mockGetRemoteResponseFromCache.mockResolvedValue(null);
+		const computed = { posts: [] as unknown[] };
+
+		await withRemoteCache({
+			cacheKey: 'key-5',
+			ttlSeconds: 60,
+			resolveTtl: (value) => (value.posts.length === 0 ? 300 : 60),
+			compute: async () => computed,
+		});
+
+		expect(mockCacheResponseRemotely).toHaveBeenCalledWith('key-5', computed, 300);
 	});
 });

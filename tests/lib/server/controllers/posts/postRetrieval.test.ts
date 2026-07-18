@@ -71,7 +71,44 @@ describe('post retrieval controllers', () => {
 			await handleGetPost(mockEvent, 'api-route');
 
 			expect(mockPostActions.findPostById).toHaveBeenCalledWith('p1', expect.any(Object));
-			expect(mockSessionHelpers.cacheResponseRemotely).toHaveBeenCalled();
+			expect(mockSessionHelpers.cacheResponseRemotely).toHaveBeenCalledWith(
+				'post-p1',
+				mockPost,
+				expect.any(Number),
+			);
+		});
+
+		it('should cache a not-found sentinel and surface a not-found response', async () => {
+			mockSessionHelpers.getRemoteResponseFromCache.mockResolvedValue(null);
+			mockPostActions.findPostById.mockResolvedValue(null);
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (_event, _handlerType, _schema, callback) => {
+					return await callback({ pathParams: { postId: 'missing' }, urlSearchParams: {} });
+				},
+			);
+
+			await handleGetPost(mockEvent, 'api-route');
+
+			expect(mockSessionHelpers.cacheResponseRemotely).toHaveBeenCalledWith(
+				'post-missing',
+				{ notFound: true },
+				expect.any(Number),
+			);
+			expect(mockControllerHelpers.createErrorResponse).toHaveBeenCalled();
+		});
+
+		it('should honor a cached not-found sentinel without hitting the DB', async () => {
+			mockSessionHelpers.getRemoteResponseFromCache.mockResolvedValue({ notFound: true });
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (_event, _handlerType, _schema, callback) => {
+					return await callback({ pathParams: { postId: 'missing' }, urlSearchParams: {} });
+				},
+			);
+
+			await handleGetPost(mockEvent, 'api-route');
+
+			expect(mockPostActions.findPostById).not.toHaveBeenCalled();
+			expect(mockControllerHelpers.createErrorResponse).toHaveBeenCalled();
 		});
 	});
 

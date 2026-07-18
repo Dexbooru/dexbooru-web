@@ -10,7 +10,10 @@ import type {
 export type TWithRemoteCacheOptions<T> = {
 	cacheKey: string;
 	ttlSeconds: number;
-	shouldCache?: boolean;
+	/** Static flag or predicate evaluated after compute (e.g. skip caching empty results). */
+	shouldCache?: boolean | ((computed: T) => boolean);
+	/** Override TTL based on the computed value (e.g. longer TTL for empty search results). */
+	resolveTtl?: (computed: T) => number;
 	getAssociateKeys?: (computed: T) => string[];
 	compute: () => Promise<T>;
 };

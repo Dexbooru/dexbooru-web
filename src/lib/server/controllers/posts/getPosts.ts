@@ -13,11 +13,6 @@ import {
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
 import { hydratePostsTagAndArtistEntities } from '../../helpers/postHydration';
-import {
-	cacheMultipleToCollectionRemotely,
-	cacheResponseRemotely,
-	getRemoteResponseFromCache,
-} from '../../helpers/sessions';
 import logger from '../../logging/logger';
 import type { TControllerHandlerVariant, TPostFetchCategory } from '../../types/controllers';
 import {
@@ -26,6 +21,7 @@ import {
 	getCacheKeyWithPostCategory,
 } from '../cache-strategies/posts';
 import { GetPostsSchema } from '../request-schemas/posts';
+import { withRemoteCache } from '../strategies/withRemoteCache';
 
 export const handleGetPosts = async (
 	event: RequestEvent,
@@ -53,74 +49,69 @@ export const handleGetPosts = async (
 		);
 
 		try {
-			let responseData: TPostPaginationData;
-			const cachedData = await getRemoteResponseFromCache<TPostPaginationData>(cacheKey);
+			const responseData = await withRemoteCache<TPostPaginationData>({
+				cacheKey,
+				ttlSeconds: CACHE_TIME_GENERAL_POSTS,
+				getAssociateKeys: (data) =>
+					data.posts.map((post) => getCacheKeyForIndividualPostKeys(post.id)),
+				compute: async () => {
+					const selectors =
+						handlerType === 'page-server-load'
+							? PAGE_SERVER_LOAD_POST_SELECTORS
+							: PUBLIC_POST_SELECTORS;
 
-			if (cachedData) {
-				responseData = cachedData;
-			} else {
-				const selectors =
-					handlerType === 'page-server-load'
-						? PAGE_SERVER_LOAD_POST_SELECTORS
-						: PUBLIC_POST_SELECTORS;
+					let posts: TPost[] = [];
+					switch (category) {
+						case 'general':
+							posts = await findPostsByPage(
+								pageNumber,
+								MAXIMUM_POSTS_PER_PAGE,
+								orderBy as TPostOrderByColumn,
+								ascending,
+								selectors,
+							);
+							break;
+						case 'liked':
+							posts = await findLikedPostsByAuthorId(
+								pageNumber,
+								MAXIMUM_POSTS_PER_PAGE,
+								user.id,
+								orderBy as TPostOrderByColumn,
+								ascending,
+								selectors,
+							);
+							break;
+						case 'uploaded': {
+							const targetUserId = userId ?? user.id;
+							const moderationStatuses: PostModerationStatus[] =
+								user.id !== NULLABLE_USER.id &&
+								(user.id === targetUserId || isModerationRole(user.role))
+									? ['PENDING', 'APPROVED', 'REJECTED']
+									: ['PENDING', 'APPROVED'];
 
-				let posts: TPost[] = [];
-				switch (category) {
-					case 'general':
-						posts = await findPostsByPage(
-							pageNumber,
-							MAXIMUM_POSTS_PER_PAGE,
-							orderBy as TPostOrderByColumn,
-							ascending,
-							selectors,
-						);
-						break;
-					case 'liked':
-						posts = await findLikedPostsByAuthorId(
-							pageNumber,
-							MAXIMUM_POSTS_PER_PAGE,
-							user.id,
-							orderBy as TPostOrderByColumn,
-							ascending,
-							selectors,
-						);
-						break;
-					case 'uploaded': {
-						const targetUserId = userId ?? user.id;
-						const moderationStatuses: PostModerationStatus[] =
-							user.id !== NULLABLE_USER.id &&
-							(user.id === targetUserId || isModerationRole(user.role))
-								? ['PENDING', 'APPROVED', 'REJECTED']
-								: ['PENDING', 'APPROVED'];
-
-						posts = await findPostsByAuthorId(
-							pageNumber,
-							MAXIMUM_POSTS_PER_PAGE,
-							targetUserId,
-							orderBy as TPostOrderByColumn,
-							ascending,
-							selectors,
-							moderationStatuses,
-						);
-						break;
+							posts = await findPostsByAuthorId(
+								pageNumber,
+								MAXIMUM_POSTS_PER_PAGE,
+								targetUserId,
+								orderBy as TPostOrderByColumn,
+								ascending,
+								selectors,
+								moderationStatuses,
+							);
+							break;
+						}
 					}
-				}
 
-				hydratePostsTagAndArtistEntities(posts);
+					hydratePostsTagAndArtistEntities(posts);
 
-				responseData = {
-					posts,
-					pageNumber,
-					ascending,
-					orderBy: orderBy as TPostOrderByColumn,
-				};
-
-				cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_GENERAL_POSTS);
-				cacheMultipleToCollectionRemotely(
-					posts.map((post) => getCacheKeyForIndividualPostKeys(post.id)),
-					cacheKey,
-				);
-			}
+					return {
+						posts,
+						pageNumber,
+						ascending,
+						orderBy: orderBy as TPostOrderByColumn,
+					};
+				},
+			});
 
 			return createSuccessResponse(
 				handlerType,

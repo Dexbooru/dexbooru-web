@@ -1,18 +1,27 @@
-import { findPostById } from '../../db/actions/post';
+import type { TCollectionPaginationData } from '$lib/shared/types/collections';
+import { isHttpError, type RequestEvent } from '@sveltejs/kit';
+import { PUBLIC_POST_COLLECTION_SELECTORS } from '../../constants/collections';
 import { findCollectionsForPost } from '../../db/actions/collection';
+import { findPostById } from '../../db/actions/post';
 import {
 	createErrorResponse,
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { getRemoteResponseFromCache } from '../../helpers/sessions';
-import { PUBLIC_POST_COLLECTION_SELECTORS } from '../../constants/collections';
-import { getCacheKeyForCollectionsForPost } from '../cache-strategies/collections';
-import { GetPostCollectionsSchema } from '../request-schemas/collections';
 import logger from '../../logging/logger';
-import { isHttpError, type RequestEvent } from '@sveltejs/kit';
 import type { TControllerHandlerVariant } from '../../types/controllers';
-import type { TCollectionPaginationData } from '$lib/shared/types/collections';
+import {
+	CACHE_TIME_INDIVIDUAL_COLLECTIONS_FOR_POST,
+	getCacheKeyForCollectionsForPost,
+} from '../cache-strategies/collections';
+import { GetPostCollectionsSchema } from '../request-schemas/collections';
+import { withRemoteCache } from '../strategies/withRemoteCache';
+
+type TPostCollectionsResult = TCollectionPaginationData | { notFound: true };
+
+const isNotFound = (result: TPostCollectionsResult): result is { notFound: true } => {
+	return 'notFound' in result;
+};
 
 export const handleGetPostCollections = async (
 	event: RequestEvent,
@@ -25,43 +34,48 @@ export const handleGetPostCollections = async (
 		async (data) => {
 			const postId = data.pathParams.postId;
 			const { pageNumber, orderBy, ascending } = data.urlSearchParams;
-
-			let responseData: TCollectionPaginationData;
-			const cacheKey = getCacheKeyForCollectionsForPost(postId);
+			const cacheKey = getCacheKeyForCollectionsForPost(postId, orderBy, ascending, pageNumber);
 
 			try {
-				const cachedData = await getRemoteResponseFromCache<TCollectionPaginationData>(cacheKey);
-				if (cachedData) {
-					responseData = cachedData;
-				} else {
-					const post = await findPostById(postId, { id: true });
-					if (!post) {
-						return createErrorResponse(
-							handlerType,
-							404,
-							`A post with the id: ${postId} does not exist`,
-						);
-					}
+				const result = await withRemoteCache<TPostCollectionsResult>({
+					cacheKey,
+					ttlSeconds: CACHE_TIME_INDIVIDUAL_COLLECTIONS_FOR_POST,
+					shouldCache: (value) => !isNotFound(value),
+					compute: async () => {
+						const post = await findPostById(postId, { id: true });
+						if (!post) {
+							return { notFound: true as const };
+						}
 
-					const collections = await findCollectionsForPost(
-						postId,
-						pageNumber,
-						ascending,
-						orderBy,
-						PUBLIC_POST_COLLECTION_SELECTORS,
+						const collections = await findCollectionsForPost(
+							postId,
+							pageNumber,
+							ascending,
+							orderBy,
+							PUBLIC_POST_COLLECTION_SELECTORS,
+						);
+
+						return {
+							collections,
+							pageNumber,
+							orderBy,
+							ascending,
+						};
+					},
+				});
+
+				if (isNotFound(result)) {
+					return createErrorResponse(
+						handlerType,
+						404,
+						`A post with the id: ${postId} does not exist`,
 					);
-					responseData = {
-						collections,
-						pageNumber,
-						orderBy,
-						ascending,
-					};
 				}
 
 				return createSuccessResponse(
 					handlerType,
 					'Successfully fetched the collections for the post',
-					responseData,
+					result,
 				);
 			} catch (error) {
 				if (isHttpError(error)) throw error;

@@ -21,7 +21,7 @@ import {
 	CACHE_TIME_PRIMARY_ANALYTICS_SECONDS,
 	getAnalyticsCacheKey,
 } from '../cache-strategies/analytics';
-import { cacheResponseRemotely, getRemoteResponseFromCache } from '../../helpers/sessions';
+import { withRemoteCache } from '../strategies/withRemoteCache';
 
 export const handleGetAnalytics = async (
 	event: RequestEvent,
@@ -30,35 +30,29 @@ export const handleGetAnalytics = async (
 	return await validateAndHandleRequest(event, handlerType, {}, async (_) => {
 		try {
 			const cacheKey = getAnalyticsCacheKey();
-			const cachedData = await getRemoteResponseFromCache(cacheKey);
+			const responseData = await withRemoteCache({
+				cacheKey,
+				ttlSeconds: CACHE_TIME_PRIMARY_ANALYTICS_SECONDS,
+				compute: async () => {
+					const topTags = await findTopKPopularTags(TOP_K_LABEL_COUNT);
+					const topArtists = await findTopKPopularArtists(TOP_K_LABEL_COUNT);
+					const topLikedPosts = await findTopKMostLikedPosts(
+						TOP_K_POST_LIKE_COUNT,
+						TOP_K_POST_LOOKBACK_HOURS,
+					);
+					const topViewedPosts = await findTopKMostViewedPosts(
+						TOP_K_POST_LIKE_COUNT,
+						TOP_K_POST_LOOKBACK_HOURS,
+					);
 
-			if (cachedData) {
-				return createSuccessResponse(
-					handlerType,
-					'Successfully fetched analytics data from cache.',
-					cachedData,
-				);
-			}
-
-			const topTags = await findTopKPopularTags(TOP_K_LABEL_COUNT);
-			const topArtists = await findTopKPopularArtists(TOP_K_LABEL_COUNT);
-			const topLikedPosts = await findTopKMostLikedPosts(
-				TOP_K_POST_LIKE_COUNT,
-				TOP_K_POST_LOOKBACK_HOURS,
-			);
-			const topViewedPosts = await findTopKMostViewedPosts(
-				TOP_K_POST_LIKE_COUNT,
-				TOP_K_POST_LOOKBACK_HOURS,
-			);
-
-			const responseData = {
-				topTags,
-				topArtists,
-				topLikedPosts,
-				topViewedPosts,
-			};
-
-			cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_PRIMARY_ANALYTICS_SECONDS);
+					return {
+						topTags,
+						topArtists,
+						topLikedPosts,
+						topViewedPosts,
+					};
+				},
+			});
 
 			return createSuccessResponse(
 				handlerType,

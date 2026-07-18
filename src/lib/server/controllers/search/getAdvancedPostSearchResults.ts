@@ -9,7 +9,6 @@ import {
 } from '../../helpers/controllers';
 import { hydratePostsTagAndArtistEntities } from '../../helpers/postHydration';
 import QueryBuilder from '../../helpers/search';
-import { cacheResponseRemotely, getRemoteResponseFromCache } from '../../helpers/sessions';
 import type { TControllerHandlerVariant } from '../../types/controllers';
 import {
 	CACHE_TIME_NO_RESULTS_SECONDS,
@@ -17,6 +16,7 @@ import {
 	getCacheKeyAdvanced,
 } from '../cache-strategies/search';
 import { AdvancedPostSearchResultsSchema } from '../request-schemas/search';
+import { withRemoteCache } from '../strategies/withRemoteCache';
 
 export type TSearchResults = {
 	posts: TPost[];
@@ -39,42 +39,35 @@ export const handleGetAdvancedPostSearchResults = async (
 			const finalLimit = handlerType === 'page-server-load' ? MAXIMUM_POSTS_PER_PAGE : limit;
 
 			try {
-				let searchResponse: TSearchResults;
 				const cacheKey = getCacheKeyAdvanced(query, finalLimit, pageNumber, orderBy, ascending);
-				const cachedData = await getRemoteResponseFromCache<TSearchResults>(cacheKey);
+				const searchResponse = await withRemoteCache<TSearchResults>({
+					cacheKey,
+					ttlSeconds: CACHE_TIME_RESULTS_SECONDS,
+					resolveTtl: (result) =>
+						result.posts.length === 0 ? CACHE_TIME_NO_RESULTS_SECONDS : CACHE_TIME_RESULTS_SECONDS,
+					compute: async () => {
+						const builder = new QueryBuilder({
+							rawQuery: query,
+							limit: finalLimit,
+							orderBy,
+							pageNumber,
+							ascending,
+							handlerType,
+						});
+						const ormQuery = builder.buildOrmQuery();
+						const searchResults = (await prisma.post.findMany(ormQuery)) as TPost[];
 
-				if (cachedData) {
-					searchResponse = cachedData;
-				} else {
-					const builder = new QueryBuilder({
-						rawQuery: query,
-						limit: finalLimit,
-						orderBy,
-						pageNumber,
-						ascending,
-						handlerType,
-					});
-					const ormQuery = builder.buildOrmQuery();
-					const searchResults = (await prisma.post.findMany(ormQuery)) as TPost[];
+						hydratePostsTagAndArtistEntities(searchResults);
 
-					hydratePostsTagAndArtistEntities(searchResults);
-
-					searchResponse = {
-						posts: searchResults,
-						limit: finalLimit,
-						pageNumber,
-						orderBy,
-						ascending,
-					};
-
-					cacheResponseRemotely(
-						cacheKey,
-						searchResponse,
-						searchResponse.posts.length === 0
-							? CACHE_TIME_NO_RESULTS_SECONDS
-							: CACHE_TIME_RESULTS_SECONDS,
-					);
-				}
+						return {
+							posts: searchResults,
+							limit: finalLimit,
+							pageNumber,
+							orderBy,
+							ascending,
+						};
+					},
+				});
 
 				return createSuccessResponse(
 					handlerType,

@@ -5,13 +5,13 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { cacheResponseRemotely, getRemoteResponseFromCache } from '../../helpers/sessions';
 import logger from '../../logging/logger';
 import {
 	TAGS_PAGINATION_CACHE_TIME_SECONDS,
 	getLabelLetterCacheKey,
 } from '../cache-strategies/labels';
 import { GetTagsSchema } from '../request-schemas/tags';
+import { withRemoteCache } from '../strategies/withRemoteCache';
 
 export const handleGetTags = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(event, 'api-route', GetTagsSchema, async (data) => {
@@ -20,11 +20,11 @@ export const handleGetTags = async (event: RequestEvent) => {
 			const pageNumber = data.urlSearchParams.pageNumber;
 			const cacheKey = getLabelLetterCacheKey('tags', pageNumber, letter);
 
-			const tags =
-				(await getRemoteResponseFromCache<{ name: string; postCount: number }[]>(cacheKey)) ??
-				(await getTagsWithStartingLetter(letter, pageNumber));
-
-			cacheResponseRemotely(cacheKey, tags, TAGS_PAGINATION_CACHE_TIME_SECONDS);
+			const tags = await withRemoteCache({
+				cacheKey,
+				ttlSeconds: TAGS_PAGINATION_CACHE_TIME_SECONDS,
+				compute: () => getTagsWithStartingLetter(letter, pageNumber),
+			});
 
 			return createSuccessResponse(
 				'api-route',

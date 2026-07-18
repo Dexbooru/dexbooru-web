@@ -1,25 +1,21 @@
+import type { TCollectionPaginationData } from '$lib/shared/types/collections';
+import type { RequestEvent } from '@sveltejs/kit';
+import { PUBLIC_POST_COLLECTION_SELECTORS } from '../../constants/collections';
 import { findCollections } from '../../db/actions/collection';
 import {
 	createErrorResponse,
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
+import logger from '../../logging/logger';
+import type { TControllerHandlerVariant } from '../../types/controllers';
 import {
-	cacheMultipleToCollectionRemotely,
-	cacheResponseRemotely,
-	getRemoteResponseFromCache,
-} from '../../helpers/sessions';
-import { PUBLIC_POST_COLLECTION_SELECTORS } from '../../constants/collections';
-import {
+	CACHE_TIME_COLLECTION_GENERAL,
 	getCacheKeyForGeneralCollectionPagination,
 	getCacheKeyForIndividualCollectionKeys,
-	CACHE_TIME_COLLECTION_GENERAL,
 } from '../cache-strategies/collections';
 import { GetCollectionsSchema } from '../request-schemas/collections';
-import logger from '../../logging/logger';
-import type { RequestEvent } from '@sveltejs/kit';
-import type { TControllerHandlerVariant } from '../../types/controllers';
-import type { TCollectionPaginationData } from '$lib/shared/types/collections';
+import { withRemoteCache } from '../strategies/withRemoteCache';
 
 export const handleGetCollections = async (
 	event: RequestEvent,
@@ -29,34 +25,31 @@ export const handleGetCollections = async (
 		const { pageNumber, orderBy, ascending } = data.urlSearchParams;
 
 		const cacheKey = getCacheKeyForGeneralCollectionPagination(orderBy, ascending, pageNumber);
-		let responseData: TCollectionPaginationData;
 
 		try {
-			const cachedResponseData =
-				await getRemoteResponseFromCache<TCollectionPaginationData>(cacheKey);
-			if (cachedResponseData) {
-				responseData = cachedResponseData;
-			} else {
-				const collections = await findCollections(
-					pageNumber,
-					ascending,
-					orderBy,
-					PUBLIC_POST_COLLECTION_SELECTORS,
-				);
+			const responseData = await withRemoteCache<TCollectionPaginationData>({
+				cacheKey,
+				ttlSeconds: CACHE_TIME_COLLECTION_GENERAL,
+				getAssociateKeys: (data) =>
+					data.collections.map((collection) =>
+						getCacheKeyForIndividualCollectionKeys(collection.id),
+					),
+				compute: async () => {
+					const collections = await findCollections(
+						pageNumber,
+						ascending,
+						orderBy,
+						PUBLIC_POST_COLLECTION_SELECTORS,
+					);
 
-				responseData = {
-					collections,
-					pageNumber,
-					orderBy,
-					ascending,
-				};
-
-				cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_COLLECTION_GENERAL);
-				cacheMultipleToCollectionRemotely(
-					collections.map((collection) => getCacheKeyForIndividualCollectionKeys(collection.id)),
-					cacheKey,
-				);
-			}
+					return {
+						collections,
+						pageNumber,
+						orderBy,
+						ascending,
+					};
+				},
+			});
 
 			return createSuccessResponse(
 				handlerType,
