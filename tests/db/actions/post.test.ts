@@ -162,26 +162,70 @@ describe('post actions', () => {
 	});
 
 	describe('findSimilarPosts', () => {
-		it('should return empty if tags and artists are empty', async () => {
-			const result = await findSimilarPosts('p1', '', '');
+		it('should return empty if tags, artists and sources are empty', async () => {
+			const result = await findSimilarPosts({
+				postId: 'p1',
+				tagString: '',
+				artistString: '',
+				isNsfw: false,
+				sources: [],
+				preferences: {
+					browseInSafeMode: false,
+					blacklistedTags: [],
+					blacklistedArtists: [],
+				},
+			});
 			expect(result.posts).toEqual([]);
 		});
 
-		it('should call prisma.post.findMany with OR statements', async () => {
+		it('should call prisma.post.findMany with relation-based OR statements', async () => {
 			mockPrisma.post.findMany.mockResolvedValue([
-				{ id: 'p2', tagString: 't1', artistString: 'a1' },
+				{
+					id: 'p2',
+					tagString: 't1',
+					artistString: 'a1',
+					createdAt: new Date('2024-01-01T00:00:00.000Z'),
+					sources: [],
+				},
 			]);
-			await findSimilarPosts('p1', 't1', 'a1');
+			await findSimilarPosts({
+				postId: 'p1',
+				tagString: 't1',
+				artistString: 'a1',
+				isNsfw: false,
+				sources: [],
+				preferences: {
+					browseInSafeMode: false,
+					blacklistedTags: [],
+					blacklistedArtists: [],
+				},
+			});
 
 			expect(mockPrisma.post.findMany).toHaveBeenCalledWith(
 				expect.objectContaining({
 					where: expect.objectContaining({
 						OR: expect.arrayContaining([
-							{ tagString: { contains: 't1' } },
-							{ artistString: { contains: 'a1' } },
+							{
+								tags: {
+									some: {
+										name: {
+											in: ['t1'],
+										},
+									},
+								},
+							},
+							{
+								artists: {
+									some: {
+										name: {
+											in: ['a1'],
+										},
+									},
+								},
+							},
 						]),
 					}),
-					take: 6,
+					take: 300,
 				}),
 			);
 		});

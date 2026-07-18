@@ -5,13 +5,13 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { cacheResponseRemotely, getRemoteResponseFromCache } from '../../helpers/sessions';
 import logger from '../../logging/logger';
 import {
 	ARTISTS_PAGINATION_CACHE_TIME_SECONDS,
 	getLabelLetterCacheKey,
 } from '../cache-strategies/labels';
 import { GetArtistsSchema } from '../request-schemas/artists';
+import { withRemoteCache } from '../strategies/withRemoteCache';
 
 export const handleGetArtists = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(event, 'api-route', GetArtistsSchema, async (data) => {
@@ -20,11 +20,11 @@ export const handleGetArtists = async (event: RequestEvent) => {
 			const pageNumber = data.urlSearchParams.pageNumber;
 			const cacheKey = getLabelLetterCacheKey('artists', pageNumber, letter);
 
-			const artists =
-				(await getRemoteResponseFromCache<{ name: string; postCount: number }[]>(cacheKey)) ??
-				(await getArtistsWithStartingLetter(letter, pageNumber));
-
-			cacheResponseRemotely(cacheKey, artists, ARTISTS_PAGINATION_CACHE_TIME_SECONDS);
+			const artists = await withRemoteCache({
+				cacheKey,
+				ttlSeconds: ARTISTS_PAGINATION_CACHE_TIME_SECONDS,
+				compute: () => getArtistsWithStartingLetter(letter, pageNumber),
+			});
 
 			return createSuccessResponse(
 				'api-route',

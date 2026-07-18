@@ -1,34 +1,20 @@
-import type { ModerationReportStatus, PostReportCategory } from '$generated/prisma/client';
-import { MAXIMUM_REPORTS_PER_PAGE } from '$lib/shared/constants/reports';
+import type {
+	ModerationReportStatus,
+	PostReport,
+	PostReportCategory,
+} from '$generated/prisma/client';
 import prisma from '../prisma';
+import { createReportActions } from './reportFactory';
 
-export const findPostReportsViaPagination = async (
-	pageNumber: number,
-	reviewStatus: ModerationReportStatus,
-	category: PostReportCategory | undefined,
-) => {
-	return await prisma.postReport.findMany({
-		where: {
-			reviewStatus,
-			...(category ? { category } : {}),
-		},
-		skip: pageNumber * MAXIMUM_REPORTS_PER_PAGE,
-		take: MAXIMUM_REPORTS_PER_PAGE,
-		orderBy: {
-			createdAt: 'desc',
-		},
-	});
-};
+const postReportActions = createReportActions<PostReportCategory, PostReport>(
+	prisma.postReport,
+	'postId',
+);
 
-export const findPostReportsFromPostId = async (postId: string) => {
-	const reports = await prisma.postReport.findMany({
-		where: {
-			postId,
-		},
-	});
-
-	return reports;
-};
+export const findPostReportsViaPagination = postReportActions.findPaginated;
+export const findPostReportsFromPostId = postReportActions.findByTargetId;
+export const deletePostReportByIds = postReportActions.deleteByIds;
+export const updatePostReportStatus = postReportActions.updateStatus;
 
 export const createPostReport = async ({
 	description,
@@ -39,31 +25,7 @@ export const createPostReport = async ({
 	category: PostReportCategory;
 	postId: string;
 }) => {
-	const report = await prisma.postReport.create({
-		data: {
-			description,
-			postId,
-			category,
-		},
-	});
-
-	return report;
+	return await postReportActions.create({ description, category, targetId: postId });
 };
 
-export const deletePostReportByIds = async (postId: string, reportId: string) => {
-	const report = await prisma.postReport.delete({
-		where: {
-			id: reportId,
-			postId,
-		},
-	});
-
-	return report;
-};
-
-export const updatePostReportStatus = async (reportId: string, status: ModerationReportStatus) => {
-	return await prisma.postReport.update({
-		where: { id: reportId },
-		data: { reviewStatus: status },
-	});
-};
+export type { ModerationReportStatus };

@@ -1,21 +1,28 @@
+import type { TPostCollection } from '$lib/shared/types/collections';
+import { isHttpError, type RequestEvent } from '@sveltejs/kit';
+import { PUBLIC_POST_COLLECTION_SELECTORS } from '../../constants/collections';
+import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../../constants/posts';
 import { findCollectionById } from '../../db/actions/collection';
 import {
 	createErrorResponse,
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { cacheResponseRemotely, getRemoteResponseFromCache } from '../../helpers/sessions';
-import { PUBLIC_POST_COLLECTION_SELECTORS } from '../../constants/collections';
-import { PAGE_SERVER_LOAD_POST_SELECTORS, PUBLIC_POST_SELECTORS } from '../../constants/posts';
+import { hydratePostsTagAndArtistEntities } from '../../helpers/postHydration';
+import logger from '../../logging/logger';
+import type { TControllerHandlerVariant } from '../../types/controllers';
 import {
-	getCacheKeyForIndividualCollection,
 	CACHE_TIME_INDIVIDUAL_COLLECTION,
+	getCacheKeyForIndividualCollection,
 } from '../cache-strategies/collections';
 import { GetCollectionSchema } from '../request-schemas/collections';
-import logger from '../../logging/logger';
-import { isHttpError, type RequestEvent } from '@sveltejs/kit';
-import type { TControllerHandlerVariant } from '../../types/controllers';
-import type { TPostCollection } from '$lib/shared/types/collections';
+import { withRemoteCache } from '../strategies/withRemoteCache';
+
+type TCollectionCacheResult = TPostCollection | { notFound: true };
+
+const isNotFound = (result: TCollectionCacheResult): result is { notFound: true } => {
+	return 'notFound' in result;
+};
 
 export const handleGetCollection = async (
 	event: RequestEvent,
@@ -23,47 +30,41 @@ export const handleGetCollection = async (
 ) => {
 	return await validateAndHandleRequest(event, handlerType, GetCollectionSchema, async (data) => {
 		const { collectionId } = data.pathParams;
-
 		const cacheKey = getCacheKeyForIndividualCollection(collectionId);
-		let finalCollection: TPostCollection;
 
 		try {
-			const cachedCollection = await getRemoteResponseFromCache<TPostCollection>(cacheKey);
-			if (cachedCollection) {
-				finalCollection = cachedCollection;
-			} else {
-				const collection = await findCollectionById(collectionId, {
-					...PUBLIC_POST_COLLECTION_SELECTORS,
-					posts: {
-						select:
-							handlerType === 'page-server-load'
-								? PAGE_SERVER_LOAD_POST_SELECTORS
-								: PUBLIC_POST_SELECTORS,
-					},
-				});
-				if (!collection) {
-					return createErrorResponse(
-						handlerType,
-						404,
-						`A collection with the id: ${collectionId} does not exist`,
-					);
-				}
+			const result = await withRemoteCache<TCollectionCacheResult>({
+				cacheKey,
+				ttlSeconds: CACHE_TIME_INDIVIDUAL_COLLECTION,
+				shouldCache: (value) => !isNotFound(value),
+				compute: async () => {
+					const collection = await findCollectionById(collectionId, {
+						...PUBLIC_POST_COLLECTION_SELECTORS,
+						posts: {
+							select:
+								handlerType === 'page-server-load'
+									? PAGE_SERVER_LOAD_POST_SELECTORS
+									: PUBLIC_POST_SELECTORS,
+						},
+					});
+					if (!collection) {
+						return { notFound: true as const };
+					}
 
-				collection.posts.forEach((post) => {
-					post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
-					post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
-				});
+					hydratePostsTagAndArtistEntities(collection.posts);
+					return collection;
+				},
+			});
 
-				finalCollection = collection;
-
-				cacheResponseRemotely(cacheKey, finalCollection, CACHE_TIME_INDIVIDUAL_COLLECTION);
+			if (isNotFound(result)) {
+				return createErrorResponse(
+					handlerType,
+					404,
+					`A collection with the id: ${collectionId} does not exist`,
+				);
 			}
 
-			return createSuccessResponse(
-				handlerType,
-				'Successfully fetched the collection',
-				finalCollection,
-			);
+			return createSuccessResponse(handlerType, 'Successfully fetched the collection', result);
 		} catch (error) {
 			if (isHttpError(error)) throw error;
 

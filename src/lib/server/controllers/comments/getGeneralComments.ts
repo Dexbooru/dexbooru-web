@@ -7,7 +7,6 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { cacheResponseRemotely, getRemoteResponseFromCache } from '../../helpers/sessions';
 import logger from '../../logging/logger';
 import type { TControllerHandlerVariant } from '../../types/controllers';
 import {
@@ -15,6 +14,7 @@ import {
 	getCacheKeyWithCategory,
 } from '../cache-strategies/comments';
 import { GeneralCommentsSchema } from '../request-schemas/comments';
+import { withRemoteCache } from '../strategies/withRemoteCache';
 
 export const handleGetGeneralComments = async (
 	event: RequestEvent,
@@ -23,29 +23,27 @@ export const handleGetGeneralComments = async (
 	return await validateAndHandleRequest(event, handlerType, GeneralCommentsSchema, async (data) => {
 		const { orderBy, ascending, pageNumber } = data.urlSearchParams;
 		const cacheKey = getCacheKeyWithCategory(pageNumber, orderBy, ascending);
-		let responseData: TCommentPaginationData;
 
 		try {
-			const cachedData = await getRemoteResponseFromCache<TCommentPaginationData>(cacheKey);
-			if (cachedData) {
-				responseData = cachedData;
-			} else {
-				const comments = (await findComments(
-					pageNumber,
-					orderBy,
-					ascending,
-					GENERAL_COMMENTS_SELECTORS,
-				)) as TComment[];
+			const responseData = await withRemoteCache<TCommentPaginationData>({
+				cacheKey,
+				ttlSeconds: CACHE_TIME_CATEGORY_COMMENTS,
+				compute: async () => {
+					const comments = (await findComments(
+						pageNumber,
+						orderBy,
+						ascending,
+						GENERAL_COMMENTS_SELECTORS,
+					)) as TComment[];
 
-				responseData = {
-					comments,
-					pageNumber,
-					orderBy,
-					ascending,
-				};
-
-				cacheResponseRemotely(cacheKey, responseData, CACHE_TIME_CATEGORY_COMMENTS);
-			}
+					return {
+						comments,
+						pageNumber,
+						orderBy,
+						ascending,
+					};
+				},
+			});
 
 			return createSuccessResponse(handlerType, 'Comments fetched successfully', responseData);
 		} catch (error) {

@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import winston from 'winston';
-import buildLogger, { TLogLevel } from './logger';
+import buildLogger from './logger';
+import type { TLogLevel } from './logger';
 
 type Fetch = (_input: string, _init?: RequestInit) => Promise<Response>;
 const fetchFn: Fetch = globalThis.fetch.bind(globalThis);

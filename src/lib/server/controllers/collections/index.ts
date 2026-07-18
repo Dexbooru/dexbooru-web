@@ -1,8 +1,10 @@
 export * from './getPostCollections';
 export * from './updateCollectionsPosts';
 export * from './getCollection';
-export * from './getAuthenticatedUserCollections';
-export * from './getUserCollections';
+export {
+	handleGetAuthenticatedUserCollections,
+	handleGetUserCollections,
+} from '../strategies/authorCollections';
 export * from './getCollections';
 export * from './deleteCollection';
 export * from './updateCollection';

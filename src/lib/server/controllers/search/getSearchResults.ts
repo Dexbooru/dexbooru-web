@@ -13,10 +13,10 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { cacheResponseRemotely, getRemoteResponseFromCache } from '../../helpers/sessions';
 import logger from '../../logging/logger';
 import { CACHE_TIME_RESULTS_SECONDS, getCacheKeyGeneral } from '../cache-strategies/search';
 import { GetSearchResultsSchema } from '../request-schemas/search';
+import { withRemoteCache } from '../strategies/withRemoteCache';
 
 export const handleGetSearchResults = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -28,35 +28,29 @@ export const handleGetSearchResults = async (event: RequestEvent) => {
 			const cacheKey = getCacheKeyGeneral(query, searchSection, limit);
 
 			try {
-				let finalSearchResults: TAppSearchResult | null = null;
-
-				const cachedData = await getRemoteResponseFromCache<TAppSearchResult>(cacheKey);
-				if (cachedData) {
-					finalSearchResults = cachedData;
-				} else {
-					switch (searchSection) {
-						case 'all':
-							finalSearchResults = await searchAllSections(query, limit);
-							break;
-						case 'artists':
-							finalSearchResults = await searchForArtists(query, limit);
-							break;
-						case 'tags':
-							finalSearchResults = await searchForTags(query, limit);
-							break;
-						case 'users':
-							finalSearchResults = await searchForUsers(query, limit);
-							break;
-						case 'posts':
-							finalSearchResults = await searchForPosts(query, limit);
-							break;
-						case 'collections':
-							finalSearchResults = await searchForCollections(query, limit);
-							break;
-					}
-
-					cacheResponseRemotely(cacheKey, finalSearchResults, CACHE_TIME_RESULTS_SECONDS);
-				}
+				const finalSearchResults = await withRemoteCache<TAppSearchResult | null>({
+					cacheKey,
+					ttlSeconds: CACHE_TIME_RESULTS_SECONDS,
+					shouldCache: (result) => result !== null,
+					compute: async () => {
+						switch (searchSection) {
+							case 'all':
+								return await searchAllSections(query, limit);
+							case 'artists':
+								return await searchForArtists(query, limit);
+							case 'tags':
+								return await searchForTags(query, limit);
+							case 'users':
+								return await searchForUsers(query, limit);
+							case 'posts':
+								return await searchForPosts(query, limit);
+							case 'collections':
+								return await searchForCollections(query, limit);
+							default:
+								return null;
+						}
+					},
+				});
 
 				return createSuccessResponse(
 					'api-route',

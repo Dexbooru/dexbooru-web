@@ -6,30 +6,25 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { cacheResponseRemotely, getRemoteResponseFromCache } from '../../helpers/sessions';
 import logger from '../../logging/logger';
 import {
 	CACHE_TIME_FOR_POST_SOURCES,
 	getCacheKeyForPostSource,
 } from '../cache-strategies/postSources';
 import { GetPostSourcesSchema } from '../request-schemas/postSource';
+import { withRemoteCache } from '../strategies/withRemoteCache';
 
 export const handleGetPostSources = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(event, 'api-route', GetPostSourcesSchema, async (data) => {
 		try {
 			const postId = data.pathParams.postId;
-
 			const cacheKey = getCacheKeyForPostSource(postId);
-			const cachedPostSources = await getRemoteResponseFromCache<PostSource[]>(cacheKey);
 
-			if (cachedPostSources) {
-				return createSuccessResponse('api-route', 'Successfully fetched post sources from cache', {
-					postSources: cachedPostSources,
-				});
-			}
-
-			const postSources = await getPostSourcesByPostId(postId);
-			cacheResponseRemotely(cacheKey, postSources, CACHE_TIME_FOR_POST_SOURCES);
+			const postSources = await withRemoteCache<PostSource[]>({
+				cacheKey,
+				ttlSeconds: CACHE_TIME_FOR_POST_SOURCES,
+				compute: () => getPostSourcesByPostId(postId),
+			});
 
 			return createSuccessResponse('api-route', 'Successfully fetched post sources', {
 				postSources,

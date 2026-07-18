@@ -1,30 +1,127 @@
+import { NULLABLE_USER, NULLABLE_USER_USER_PREFERENCES } from '$lib/shared/constants/auth';
+import { isModerationRole } from '$lib/shared/helpers/auth/role';
+import type { TPost } from '$lib/shared/types/posts';
+import { isHttpError, type RequestEvent } from '@sveltejs/kit';
+import { PUBLIC_COMMENT_SELECTORS } from '../../constants/comments';
+import { PUBLIC_POST_SELECTORS, PUBLIC_POST_SOURCE_SELECTORS } from '../../constants/posts';
 import {
 	findPostById,
 	findPostByIdWithUpdatedViewCount,
 	findSimilarPosts,
 	hasUserLikedPost,
 } from '../../db/actions/post';
+import { findUserPreferences } from '../../db/actions/preference';
 import {
 	createErrorResponse,
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { getRemoteResponseFromCache, cacheResponseRemotely } from '../../helpers/sessions';
-import {
-	getCacheKeyForIndividualPost,
-	CACHE_TIME_INDIVIDUAL_POST_NOT_FOUND,
-	CACHE_TIME_INDIVIDUAL_POST_FOUND,
-} from '../cache-strategies/posts';
-import { PUBLIC_POST_SELECTORS, PUBLIC_POST_SOURCE_SELECTORS } from '../../constants/posts';
-import { PUBLIC_COMMENT_SELECTORS } from '../../constants/comments';
-import { NULLABLE_USER } from '$lib/shared/constants/auth';
-import { isModerationRole } from '$lib/shared/helpers/auth/role';
-import { GetPostSchema } from '../request-schemas/posts';
+import { assignTagAndArtistEntities } from '../../helpers/postHydration';
 import logger from '../../logging/logger';
-import { isHttpError, type RequestEvent } from '@sveltejs/kit';
 import type { TControllerHandlerVariant } from '../../types/controllers';
-import type { TPost } from '$lib/shared/types/posts';
+import {
+	CACHE_TIME_INDIVIDUAL_POST_FOUND,
+	CACHE_TIME_INDIVIDUAL_POST_NOT_FOUND,
+	CACHE_TIME_INDIVIDUAL_POST_SIMILARITY,
+	getCacheKeyForIndividualPost,
+	getCacheKeyForIndividualPostKeys,
+	getCacheKeyForPostSimilarity,
+} from '../cache-strategies/posts';
+import { GetPostSchema } from '../request-schemas/posts';
+import { withRemoteCache } from '../strategies/withRemoteCache';
 import { throwPostNotFoundError } from './helpers';
+
+type TLegacyCachedPostPayload = {
+	post: TPost;
+	similarPosts?: TPost[];
+	similarities?: Record<string, number>;
+};
+
+type TPrivilegedPostPayload = {
+	privilegedPost: TPost;
+};
+
+type TCachedIndividualPost =
+	| TPost
+	| TLegacyCachedPostPayload
+	| TPrivilegedPostPayload
+	| { notFound: true };
+
+const isNotFoundCacheEntry = (value: TCachedIndividualPost): value is { notFound: true } => {
+	return 'notFound' in value && value.notFound === true;
+};
+
+const isPrivilegedPostPayload = (value: TCachedIndividualPost): value is TPrivilegedPostPayload => {
+	return 'privilegedPost' in value;
+};
+
+const isLegacyCachedPostPayload = (
+	value: TCachedIndividualPost,
+): value is TLegacyCachedPostPayload => {
+	return (
+		!isNotFoundCacheEntry(value) &&
+		!isPrivilegedPostPayload(value) &&
+		'post' in value &&
+		typeof value.post === 'object' &&
+		value.post !== null &&
+		'tagString' in value.post
+	);
+};
+
+const resolvePostFromCacheEntry = (value: TCachedIndividualPost): TPost | null => {
+	if (isNotFoundCacheEntry(value)) return null;
+	if (isPrivilegedPostPayload(value)) return value.privilegedPost;
+	if (isLegacyCachedPostPayload(value)) return value.post;
+	return value;
+};
+
+const loadPostForRequest = async (
+	postId: string,
+	handlerType: TControllerHandlerVariant,
+	user: RequestEvent['locals']['user'],
+): Promise<{ post: TPost | null; isPrivileged: boolean }> => {
+	const selectors = {
+		...PUBLIC_POST_SELECTORS,
+		comments: {
+			select: PUBLIC_COMMENT_SELECTORS,
+		},
+		sources: {
+			select: PUBLIC_POST_SOURCE_SELECTORS,
+		},
+	};
+
+	const isModerator = user.id !== NULLABLE_USER.id && isModerationRole(user.role);
+
+	let post =
+		handlerType === 'api-route'
+			? await findPostById(postId, selectors)
+			: await findPostByIdWithUpdatedViewCount(postId, selectors);
+
+	if (post) {
+		return { post, isPrivileged: false };
+	}
+
+	if (user.id !== NULLABLE_USER.id) {
+		const rejectedPost = await findPostById(postId, { authorId: true }, [
+			'PENDING',
+			'APPROVED',
+			'REJECTED',
+		]);
+		if (rejectedPost && (isModerator || rejectedPost.authorId === user.id)) {
+			post =
+				handlerType === 'api-route'
+					? await findPostById(postId, selectors, ['PENDING', 'APPROVED', 'REJECTED'])
+					: await findPostByIdWithUpdatedViewCount(postId, selectors, [
+							'PENDING',
+							'APPROVED',
+							'REJECTED',
+						]);
+			return { post, isPrivileged: true };
+		}
+	}
+
+	return { post: null, isPrivileged: false };
+};
 
 export const handleGetPost = async (
 	event: RequestEvent,
@@ -34,114 +131,124 @@ export const handleGetPost = async (
 		const postId = data.pathParams.postId;
 		const uploadedSuccessfully = data.urlSearchParams.uploadedSuccessfully === 'true';
 		const user = event.locals.user;
-
 		const cacheKey = getCacheKeyForIndividualPost(postId);
-		let finalData:
-			| TPost
-			| {
-					post: TPost;
-					similarPosts: TPost[];
-					similarities?: Record<string, number>;
-					uploadedSuccessfully?: boolean;
-					hasLikedPost?: boolean;
-			  };
 
 		try {
-			const cachedData = await getRemoteResponseFromCache<
-				| TPost
-				| {
-						post: TPost;
-						similarPosts: TPost[];
-						similarities?: Record<string, number>;
-						uploadedSuccessfully?: boolean;
-						hasLikedPost?: boolean;
-				  }
-			>(cacheKey);
-
-			if (cachedData) {
-				if (cachedData === null) {
-					return throwPostNotFoundError(handlerType, postId);
-				}
-
-				if ('post' in cachedData && 'similarPosts' in cachedData) {
-					finalData = cachedData;
-					finalData.uploadedSuccessfully = uploadedSuccessfully;
-				} else {
-					finalData = cachedData as TPost;
-				}
-			} else {
-				const selectors = {
-					...PUBLIC_POST_SELECTORS,
-					comments: {
-						select: PUBLIC_COMMENT_SELECTORS,
-					},
-					sources: {
-						select: PUBLIC_POST_SOURCE_SELECTORS,
-					},
-				};
-				const similaritySelectors = {
-					id: true,
-					tagString: true,
-					artistString: true,
-					imageUrls: true,
-				};
-
-				const isModerator = user.id !== NULLABLE_USER.id && isModerationRole(user.role);
-
-				let post =
-					handlerType === 'api-route'
-						? await findPostById(postId, selectors)
-						: await findPostByIdWithUpdatedViewCount(postId, selectors);
-
-				if (!post && user.id !== NULLABLE_USER.id) {
-					const rejectedPost = await findPostById(postId, { authorId: true }, [
-						'PENDING',
-						'APPROVED',
-						'REJECTED',
-					]);
-					if (rejectedPost && (isModerator || rejectedPost.authorId === user.id)) {
-						post =
-							handlerType === 'api-route'
-								? await findPostById(postId, selectors, ['PENDING', 'APPROVED', 'REJECTED'])
-								: await findPostByIdWithUpdatedViewCount(postId, selectors, [
-										'PENDING',
-										'APPROVED',
-										'REJECTED',
-									]);
+			const cachedResult = await withRemoteCache<TCachedIndividualPost>({
+				cacheKey,
+				ttlSeconds: CACHE_TIME_INDIVIDUAL_POST_FOUND,
+				// Never put owner/moderator-only rejected posts in the shared public cache.
+				shouldCache: (value) => !isPrivilegedPostPayload(value),
+				resolveTtl: (value) =>
+					isNotFoundCacheEntry(value)
+						? CACHE_TIME_INDIVIDUAL_POST_NOT_FOUND
+						: CACHE_TIME_INDIVIDUAL_POST_FOUND,
+				compute: async () => {
+					const { post: loadedPost, isPrivileged } = await loadPostForRequest(
+						postId,
+						handlerType,
+						user,
+					);
+					if (!loadedPost) {
+						return { notFound: true as const };
 					}
-				}
 
-				if (!post) {
-					cacheResponseRemotely(cacheKey, null, CACHE_TIME_INDIVIDUAL_POST_NOT_FOUND);
-					return throwPostNotFoundError(handlerType, postId);
-				}
+					assignTagAndArtistEntities(loadedPost);
+					if (isPrivileged) {
+						return { privilegedPost: loadedPost };
+					}
+					return loadedPost;
+				},
+			});
 
-				post.tags = post.tagString.split(',').map((tag) => ({ name: tag }));
-				post.artists = post.artistString.split(',').map((artist) => ({ name: artist }));
-
-				const { posts: similarPosts, similarities } = await findSimilarPosts(
-					post.id,
-					post.tagString,
-					post.artistString,
-					similaritySelectors,
-				);
-				similarPosts.forEach((similarPost) => {
-					similarPost.tags = similarPost.tagString.split(',').map((tag) => ({ name: tag }));
-					similarPost.artists = similarPost.artistString
-						.split(',')
-						.map((artist) => ({ name: artist }));
-				});
-
-				const hasLikedPost =
-					user.id !== NULLABLE_USER.id ? await hasUserLikedPost(user.id, post.id) : false;
-
-				finalData =
-					handlerType === 'api-route'
-						? post
-						: { post, similarPosts, similarities, uploadedSuccessfully, hasLikedPost };
-
-				cacheResponseRemotely(cacheKey, finalData, CACHE_TIME_INDIVIDUAL_POST_FOUND);
+			if (isNotFoundCacheEntry(cachedResult)) {
+				return throwPostNotFoundError(handlerType, postId);
 			}
+
+			const post = resolvePostFromCacheEntry(cachedResult);
+			if (!post) {
+				return throwPostNotFoundError(handlerType, postId);
+			}
+
+			assignTagAndArtistEntities(post);
+
+			if (handlerType === 'api-route') {
+				return createSuccessResponse(
+					handlerType,
+					`Successfully fetched post with id: ${postId}`,
+					post,
+				);
+			}
+
+			const userPreferences =
+				user.id === NULLABLE_USER.id
+					? NULLABLE_USER_USER_PREFERENCES
+					: await findUserPreferences(user.id);
+
+			const similaritySelectors = {
+				id: true,
+				createdAt: true,
+				tagString: true,
+				artistString: true,
+				imageUrls: true,
+				isNsfw: true,
+				sources: {
+					select: PUBLIC_POST_SOURCE_SELECTORS,
+				},
+			};
+
+			const similarityCacheKey = getCacheKeyForPostSimilarity(
+				post.id,
+				user.id === NULLABLE_USER.id ? null : user.id,
+				{
+					browseInSafeMode: userPreferences.browseInSafeMode,
+					blacklistedTags: userPreferences.blacklistedTags,
+					blacklistedArtists: userPreferences.blacklistedArtists,
+				},
+			);
+			const cachedSimilarity = await withRemoteCache<{
+				similarPosts: TPost[];
+				similarities: Record<string, number>;
+			}>({
+				cacheKey: similarityCacheKey,
+				ttlSeconds: CACHE_TIME_INDIVIDUAL_POST_SIMILARITY,
+				getAssociateKeys: (computed) => [
+					getCacheKeyForIndividualPostKeys(post.id),
+					...computed.similarPosts.map((similarPost) =>
+						getCacheKeyForIndividualPostKeys(similarPost.id),
+					),
+				],
+				compute: async () => {
+					const { posts: similarPosts, similarities } = await findSimilarPosts({
+						postId: post.id,
+						tagString: post.tagString,
+						artistString: post.artistString,
+						isNsfw: post.isNsfw,
+						sources: post.sources,
+						preferences: {
+							browseInSafeMode: userPreferences.browseInSafeMode,
+							blacklistedTags: userPreferences.blacklistedTags,
+							blacklistedArtists: userPreferences.blacklistedArtists,
+						},
+						selectors: similaritySelectors,
+					});
+					similarPosts.forEach((similarPost) => assignTagAndArtistEntities(similarPost));
+					return { similarPosts, similarities };
+				},
+			});
+
+			const hasLikedPost =
+				user.id !== NULLABLE_USER.id ? await hasUserLikedPost(user.id, post.id) : false;
+			const finalData = {
+				post,
+				similarPosts: cachedSimilarity.similarPosts.map((similarPost) => {
+					assignTagAndArtistEntities(similarPost);
+					return similarPost;
+				}),
+				similarities: cachedSimilarity.similarities,
+				uploadedSuccessfully,
+				hasLikedPost,
+			};
 
 			return createSuccessResponse(
 				handlerType,

@@ -8,13 +8,15 @@ import {
 	mockPostSourceActions,
 	mockTagActions,
 } from '../../../../mocks';
-import { handleGetPost } from '$lib/server/controllers/posts/getPost';
-import { handleGetPosts } from '$lib/server/controllers/posts/getPosts';
-import { handleGetPostsByAuthor } from '$lib/server/controllers/posts/getPostsByAuthor';
-import { handleGetPostsWithArtistName } from '$lib/server/controllers/posts/getPostsWithArtistName';
-import { handleGetPostsWithCharacterName } from '$lib/server/controllers/posts/getPostsWithCharacterName';
-import { handleGetPostsWithSourceTitle } from '$lib/server/controllers/posts/getPostsWithSourceTitle';
-import { handleGetPostsWithTagName } from '$lib/server/controllers/posts/getPostsWithTagName';
+import {
+	handleGetPost,
+	handleGetPosts,
+	handleGetPostsByAuthor,
+	handleGetPostsWithArtistName,
+	handleGetPostsWithCharacterName,
+	handleGetPostsWithSourceTitle,
+	handleGetPostsWithTagName,
+} from '$lib/server/controllers/posts';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { Prisma } from '$generated/prisma/client';
 
@@ -69,7 +71,80 @@ describe('post retrieval controllers', () => {
 			await handleGetPost(mockEvent, 'api-route');
 
 			expect(mockPostActions.findPostById).toHaveBeenCalledWith('p1', expect.any(Object));
-			expect(mockSessionHelpers.cacheResponseRemotely).toHaveBeenCalled();
+			expect(mockSessionHelpers.cacheResponseRemotely).toHaveBeenCalledWith(
+				'post-p1',
+				mockPost,
+				expect.any(Number),
+			);
+		});
+
+		it('should cache a not-found sentinel and surface a not-found response', async () => {
+			mockSessionHelpers.getRemoteResponseFromCache.mockResolvedValue(null);
+			mockPostActions.findPostById.mockResolvedValue(null);
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (_event, _handlerType, _schema, callback) => {
+					return await callback({ pathParams: { postId: 'missing' }, urlSearchParams: {} });
+				},
+			);
+
+			await handleGetPost(mockEvent, 'api-route');
+
+			expect(mockSessionHelpers.cacheResponseRemotely).toHaveBeenCalledWith(
+				'post-missing',
+				{ notFound: true },
+				expect.any(Number),
+			);
+			expect(mockControllerHelpers.createErrorResponse).toHaveBeenCalled();
+		});
+
+		it('should honor a cached not-found sentinel without hitting the DB', async () => {
+			mockSessionHelpers.getRemoteResponseFromCache.mockResolvedValue({ notFound: true });
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (_event, _handlerType, _schema, callback) => {
+					return await callback({ pathParams: { postId: 'missing' }, urlSearchParams: {} });
+				},
+			);
+
+			await handleGetPost(mockEvent, 'api-route');
+
+			expect(mockPostActions.findPostById).not.toHaveBeenCalled();
+			expect(mockControllerHelpers.createErrorResponse).toHaveBeenCalled();
+		});
+
+		it('should not cache privileged rejected posts under the public key', async () => {
+			const privilegedPost = {
+				id: 'p-rejected',
+				tagString: 't1',
+				artistString: 'a1',
+				authorId: 'u1',
+			} as TPostBase & { authorId: string };
+			mockSessionHelpers.getRemoteResponseFromCache.mockResolvedValue(null);
+			mockPostActions.findPostById
+				.mockResolvedValueOnce(null)
+				.mockResolvedValueOnce({ authorId: 'u1' })
+				.mockResolvedValueOnce(privilegedPost);
+			mockPostActions.findSimilarPosts.mockResolvedValue({ posts: [], similarities: {} });
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (_event, _handlerType, _schema, callback) => {
+					return await callback({
+						pathParams: { postId: 'p-rejected' },
+						urlSearchParams: {},
+					});
+				},
+			);
+
+			await handleGetPost(mockEvent, 'api-route');
+
+			expect(mockSessionHelpers.cacheResponseRemotely).not.toHaveBeenCalledWith(
+				'post-p-rejected',
+				expect.anything(),
+				expect.any(Number),
+			);
+			expect(mockControllerHelpers.createSuccessResponse).toHaveBeenCalledWith(
+				'api-route',
+				expect.any(String),
+				privilegedPost,
+			);
 		});
 	});
 

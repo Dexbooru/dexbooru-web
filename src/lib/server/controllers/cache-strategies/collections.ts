@@ -1,7 +1,12 @@
 import type { TCollectionOrderByColumn } from '$lib/shared/types/collections';
 
-export const getCacheKeyForCollectionsForPost = (postId: string) => {
-	return `collection-post-${postId}`;
+export const getCacheKeyForCollectionsForPost = (
+	postId: string,
+	orderBy: TCollectionOrderByColumn = 'createdAt',
+	ascending: boolean = false,
+	pageNumber: number = 0,
+) => {
+	return `collection-post-${postId}-${orderBy}-${ascending}-${pageNumber}`;
 };
 
 export const getCacheKeyForIndividualCollection = (collectionId: string) => {
