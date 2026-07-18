@@ -3,6 +3,10 @@ import type { TMediaUploadJob } from '$lib/server/types/upload';
 
 vi.unmock('$lib/server/rabbitmq/publishers/mediaUploads');
 
+vi.mock('$lib/server/rabbitmq/client', () => ({
+	default: null,
+}));
+
 describe('MediaUploadsPublisher', () => {
 	beforeEach(() => {
 		vi.resetModules();
