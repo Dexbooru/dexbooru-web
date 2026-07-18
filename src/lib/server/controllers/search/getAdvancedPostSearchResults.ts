@@ -1,4 +1,5 @@
 import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
+import { isModerationRole } from '$lib/shared/helpers/auth/role';
 import type { TPost } from '$lib/shared/types/posts';
 import type { RequestEvent } from '@sveltejs/kit';
 import prisma from '../../db/prisma';
@@ -37,9 +38,17 @@ export const handleGetAdvancedPostSearchResults = async (
 		async (data) => {
 			const { query, limit, pageNumber, orderBy, ascending } = data.urlSearchParams;
 			const finalLimit = handlerType === 'page-server-load' ? MAXIMUM_POSTS_PER_PAGE : limit;
+			const includeRejectedPosts = isModerationRole(event.locals.user.role);
 
 			try {
-				const cacheKey = getCacheKeyAdvanced(query, finalLimit, pageNumber, orderBy, ascending);
+				const cacheKey = getCacheKeyAdvanced(
+					query,
+					finalLimit,
+					pageNumber,
+					orderBy,
+					ascending,
+					includeRejectedPosts,
+				);
 				const searchResponse = await withRemoteCache<TSearchResults>({
 					cacheKey,
 					ttlSeconds: CACHE_TIME_RESULTS_SECONDS,
@@ -53,6 +62,7 @@ export const handleGetAdvancedPostSearchResults = async (
 							pageNumber,
 							ascending,
 							handlerType,
+							includeRejectedPosts,
 						});
 						const ormQuery = builder.buildOrmQuery();
 						const searchResults = (await prisma.post.findMany(ormQuery)) as TPost[];

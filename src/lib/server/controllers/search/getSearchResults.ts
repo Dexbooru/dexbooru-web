@@ -1,4 +1,5 @@
 import type { TAppSearchResult } from '$lib/shared/types/search';
+import { isModerationRole } from '$lib/shared/helpers/auth/role';
 import type { RequestEvent } from '@sveltejs/kit';
 import {
 	searchAllSections,
@@ -25,7 +26,8 @@ export const handleGetSearchResults = async (event: RequestEvent) => {
 		GetSearchResultsSchema,
 		async (data) => {
 			const { query, limit, searchSection } = data.urlSearchParams;
-			const cacheKey = getCacheKeyGeneral(query, searchSection, limit);
+			const includeRejectedPosts = isModerationRole(event.locals.user.role);
+			const cacheKey = getCacheKeyGeneral(query, searchSection, limit, includeRejectedPosts);
 
 			try {
 				const finalSearchResults = await withRemoteCache<TAppSearchResult | null>({
@@ -35,7 +37,7 @@ export const handleGetSearchResults = async (event: RequestEvent) => {
 					compute: async () => {
 						switch (searchSection) {
 							case 'all':
-								return await searchAllSections(query, limit);
+								return await searchAllSections(query, limit, includeRejectedPosts);
 							case 'artists':
 								return await searchForArtists(query, limit);
 							case 'tags':
@@ -43,7 +45,7 @@ export const handleGetSearchResults = async (event: RequestEvent) => {
 							case 'users':
 								return await searchForUsers(query, limit);
 							case 'posts':
-								return await searchForPosts(query, limit);
+								return await searchForPosts(query, limit, includeRejectedPosts);
 							case 'collections':
 								return await searchForCollections(query, limit);
 							default:

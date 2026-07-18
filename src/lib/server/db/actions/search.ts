@@ -14,11 +14,11 @@ export async function searchForTags(query: string, limit: number): Promise<TAppS
       FROM 
           "Tag" t
       WHERE
-          t."searchable" @@ phraseto_tsquery('english', ${Prisma.raw(`'${query}'`)}) OR
-          LOWER(t."name") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
-          LOWER(t."id") ILIKE ${Prisma.raw(`'%${query}%'`)}
+          t."searchable" @@ phraseto_tsquery('english', ${query}) OR
+          LOWER(t."name") ILIKE ${`%${query}%`} OR
+          LOWER(t."id") ILIKE ${`%${query}%`}
       LIMIT 
-          ${Prisma.raw(limit.toString())}
+          ${limit}
     `;
 
 	const results = (await prisma.$queryRaw(searchStatement)) as Tag[];
@@ -32,11 +32,11 @@ export async function searchForArtists(query: string, limit: number): Promise<TA
       FROM 
           "Artist" a
       WHERE
-          a."searchable" @@ phraseto_tsquery('english', ${Prisma.raw(`'${query}'`)}) OR
-          LOWER(a."name") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
-          LOWER(a."id") ILIKE ${Prisma.raw(`'%${query}%'`)}
+          a."searchable" @@ phraseto_tsquery('english', ${query}) OR
+          LOWER(a."name") ILIKE ${`%${query}%`} OR
+          LOWER(a."id") ILIKE ${`%${query}%`}
       LIMIT 
-          ${Prisma.raw(limit.toString())}
+          ${limit}
     `;
 
 	const results = (await prisma.$queryRaw(searchStatement)) as Artist[];
@@ -62,20 +62,27 @@ export async function searchForCollections(
      ON
         c."authorId" = u."id"
      WHERE
-        c."searchable" @@ phraseto_tsquery('english', ${Prisma.raw(`'${query}'`)}) OR
-        LOWER(c."id") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
-        LOWER(c."title") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
-        LOWER(u."username") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
-        LOWER(u."id") ILIKE ${Prisma.raw(`'%${query}%'`)}
+        c."searchable" @@ phraseto_tsquery('english', ${query}) OR
+        LOWER(c."id") ILIKE ${`%${query}%`} OR
+        LOWER(c."title") ILIKE ${`%${query}%`} OR
+        LOWER(u."username") ILIKE ${`%${query}%`} OR
+        LOWER(u."id") ILIKE ${`%${query}%`}
      LIMIT 
-        ${Prisma.raw(limit.toString())}
+        ${limit}
     `;
 
 	const results = (await prisma.$queryRaw(searchStatement)) as TPostCollectionSearchResults;
 	return { collections: results };
 }
 
-export async function searchForPosts(query: string, limit: number): Promise<TAppSearchResult> {
+export async function searchForPosts(
+	query: string,
+	limit: number,
+	includeRejectedPosts = false,
+): Promise<TAppSearchResult> {
+	const moderationFilter = includeRejectedPosts
+		? Prisma.empty
+		: Prisma.sql`AND p."moderationStatus" IN ('PENDING', 'APPROVED')`;
 	const searchStatement = Prisma.sql`
       SELECT
           p."id", 
@@ -90,13 +97,16 @@ export async function searchForPosts(query: string, limit: number): Promise<TApp
       ON
         p."authorId" = u."id"
       WHERE
-          p."searchable" @@ phraseto_tsquery('english', ${Prisma.raw(`'${query}'`)}) OR
-          LOWER(p."id") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
-          LOWER(p."description") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
-          LOWER(u."username") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
-          LOWER(u."id") ILIKE ${Prisma.raw(`'%${query}%'`)}
+        (
+          p."searchable" @@ phraseto_tsquery('english', ${query}) OR
+          LOWER(p."id") ILIKE ${`%${query}%`} OR
+          LOWER(p."description") ILIKE ${`%${query}%`} OR
+          LOWER(u."username") ILIKE ${`%${query}%`} OR
+          LOWER(u."id") ILIKE ${`%${query}%`}
+        )
+        ${moderationFilter}
       LIMIT 
-          ${Prisma.raw(limit.toString())}
+          ${limit}
     `;
 
 	const results = (await prisma.$queryRaw(searchStatement)) as TPostSearchResults;
@@ -110,22 +120,26 @@ export async function searchForUsers(query: string, limit: number): Promise<TApp
      FROM 
         "User" u
      WHERE
-        u."searchable" @@ phraseto_tsquery('english', ${Prisma.raw(`'${query}'`)}) OR
-        LOWER(u."id") ILIKE ${Prisma.raw(`'%${query}%'`)} OR
-        LOWER(u."username") ILIKE ${Prisma.raw(`'%${query}%'`)}
+        u."searchable" @@ phraseto_tsquery('english', ${query}) OR
+        LOWER(u."id") ILIKE ${`%${query}%`} OR
+        LOWER(u."username") ILIKE ${`%${query}%`}
      LIMIT 
-        ${Prisma.raw(limit.toString())}
+        ${limit}
     `;
 
 	const results = (await prisma.$queryRaw(searchStatement)) as TUserSearchResults;
 	return { users: results };
 }
 
-export async function searchAllSections(query: string, limit: number): Promise<TAppSearchResult> {
+export async function searchAllSections(
+	query: string,
+	limit: number,
+	includeRejectedPosts = false,
+): Promise<TAppSearchResult> {
 	const [usersResult, postsResult, collectionsResult, tagsResult, artistsResult] =
 		await Promise.all([
 			searchForUsers(query, limit),
-			searchForPosts(query, limit),
+			searchForPosts(query, limit, includeRejectedPosts),
 			searchForCollections(query, limit),
 			searchForTags(query, limit),
 			searchForArtists(query, limit),

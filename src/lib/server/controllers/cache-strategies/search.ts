@@ -6,12 +6,18 @@ export const getCacheKeyAdvanced = (
 	pageNumber: number,
 	orderBy: TPostOrderByColumn,
 	ascending: boolean,
+	includeRejectedPosts: boolean,
 ) => {
-	return `${query}-${limit}-${pageNumber}-${orderBy}-${ascending}`;
+	return `${query}-${limit}-${pageNumber}-${orderBy}-${ascending}-${includeRejectedPosts ? 'moderation' : 'public'}`;
 };
 
-export const getCacheKeyGeneral = (query: string, searchSection: string, limit: number) => {
-	return `${query}-${searchSection}-${limit}`;
+export const getCacheKeyGeneral = (
+	query: string,
+	searchSection: string,
+	limit: number,
+	includeRejectedPosts: boolean,
+) => {
+	return `${query}-${searchSection}-${limit}-${includeRejectedPosts ? 'moderation' : 'public'}`;
 };
 
 export const CACHE_TIME_RESULTS_SECONDS = 60;

@@ -11,6 +11,22 @@ const baseInput = {
 };
 
 describe('QueryBuilder', () => {
+	it('excludes rejected posts by default', () => {
+		const result = new QueryBuilder({ ...baseInput, rawQuery: 'cat' }).buildOrmQuery();
+
+		expect(result.where?.moderationStatus).toEqual({ in: ['PENDING', 'APPROVED'] });
+	});
+
+	it('allows rejected posts for moderation roles', () => {
+		const result = new QueryBuilder({
+			...baseInput,
+			rawQuery: 'cat',
+			includeRejectedPosts: true,
+		}).buildOrmQuery();
+
+		expect(result.where?.moderationStatus).toBeUndefined();
+	});
+
 	it('builds OR condition for bare tag token', () => {
 		const result = new QueryBuilder({ ...baseInput, rawQuery: 'cat' }).buildOrmQuery();
 

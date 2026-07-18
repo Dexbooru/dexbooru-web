@@ -5,6 +5,10 @@
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import { isOwnerRole } from '$lib/shared/helpers/auth/role';
 	import { capitalize } from '$lib/shared/helpers/util';
+	import {
+		IMAGE_FILTER_EXCLUSION_BASE_URLS,
+		ORIGINAL_IMAGE_SUFFIX,
+	} from '$lib/shared/constants/images';
 	import type { TPost } from '$lib/shared/types/posts';
 	import { toast } from '@zerodevx/svelte-toast';
 	import Badge from 'flowbite-svelte/Badge.svelte';
@@ -20,7 +24,19 @@
 	let { post, open = $bindable() }: Props = $props();
 	let loading = $state(false);
 	let ownerAmendOpen = $state(false);
-	let imageUrls = $derived<string[]>(post.imageUrls.slice(0, 1));
+	let imageUrls = $derived(
+		post.imageUrls.filter((imageUrl) => {
+			if (
+				IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusionBaseUrl) =>
+					imageUrl.includes(exclusionBaseUrl),
+				)
+			) {
+				return true;
+			}
+
+			return imageUrl.includes(ORIGINAL_IMAGE_SUFFIX);
+		}),
+	);
 
 	const user = getAuthenticatedUser();
 	const moderationData = getModerationPaginationData();
@@ -78,10 +94,19 @@
 <Modal title="Inspect Post" bind:open size="xl" outsideclose>
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 		<div class="space-y-4">
-			<div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+			<div
+				class="max-h-[70vh] snap-y snap-mandatory overflow-y-auto overscroll-contain rounded-lg border border-gray-200 dark:border-gray-700"
+				aria-label="Post images"
+				role="region"
+			>
 				{#if imageUrls.length > 0}
-					{#each imageUrls as imageUrl (imageUrl)}
-						<img src={imageUrl} alt={post.description} class="mb-2 h-auto w-full last:mb-0" />
+					{#each imageUrls as imageUrl, index (imageUrl)}
+						<img
+							src={imageUrl}
+							alt={`${post.description || 'Post image'} (${index + 1} of ${imageUrls.length})`}
+							loading={index === 0 ? 'eager' : 'lazy'}
+							class="min-h-full w-full snap-start snap-always object-contain"
+						/>
 					{/each}
 				{:else}
 					<div class="flex h-64 w-full items-center justify-center bg-gray-100 dark:bg-gray-800">

@@ -9,6 +9,7 @@
 	import SearchOutline from 'flowbite-svelte-icons/SearchOutline.svelte';
 	import {
 		IMAGE_FILTER_EXCLUSION_BASE_URLS,
+		NSFW_PREVIEW_IMAGE_SUFFIX,
 		PREVIEW_IMAGE_SUFFIX,
 	} from '$lib/shared/constants/images';
 	import PostModerationModal from './PostModerationModal.svelte';
@@ -21,14 +22,16 @@
 
 	let isModalOpen = $state(false);
 
-	const previewImageUrl = $derived(
-		post.imageUrls.find((url) => {
+	const previewImageUrls = $derived.by(() => {
+		const urls = post.imageUrls.filter((url) => {
 			if (IMAGE_FILTER_EXCLUSION_BASE_URLS.some((exclusion) => url.includes(exclusion))) {
 				return true;
 			}
-			return url.endsWith(PREVIEW_IMAGE_SUFFIX);
-		}) || post.imageUrls[0],
-	);
+			return url.endsWith(PREVIEW_IMAGE_SUFFIX) && !url.endsWith(NSFW_PREVIEW_IMAGE_SUFFIX);
+		});
+
+		return urls.length > 0 ? urls : post.imageUrls.slice(0, 1);
+	});
 
 	const statusColors = {
 		PENDING: 'yellow',
@@ -43,12 +46,36 @@
 	class="flex h-full w-full max-w-none flex-col overflow-hidden p-0 shadow-md transition-shadow duration-200 hover:shadow-lg"
 >
 	<div class="relative h-48 w-full bg-gray-100 dark:bg-gray-800">
-		<img src={previewImageUrl} alt={post.description} class="h-full w-full object-cover" />
+		{#if previewImageUrls.length > 0}
+			<div
+				class="h-full snap-y snap-mandatory overflow-y-auto overscroll-contain"
+				aria-label="Post images"
+				role="region"
+			>
+				{#each previewImageUrls as imageUrl, index (imageUrl)}
+					<img
+						src={imageUrl}
+						alt={`${post.description || 'Post image'} (${index + 1} of ${previewImageUrls.length})`}
+						loading={index === 0 ? 'eager' : 'lazy'}
+						class="h-full w-full snap-start snap-always object-cover"
+					/>
+				{/each}
+			</div>
+		{:else}
+			<div class="flex h-full items-center justify-center text-sm text-gray-500 dark:text-gray-400">
+				No image available
+			</div>
+		{/if}
 		<div class="absolute top-2 left-2">
 			<Badge color={currentStatusColor} class="px-2.5 py-0.5">
 				{capitalize(post.moderationStatus)}
 			</Badge>
 		</div>
+		{#if previewImageUrls.length > 1}
+			<div class="absolute right-2 bottom-2">
+				<Badge color="gray">{previewImageUrls.length} images</Badge>
+			</div>
+		{/if}
 		{#if post.isNsfw}
 			<div class="absolute top-2 right-2">
 				<Badge color="red" class="px-2.5 py-0.5">NSFW</Badge>

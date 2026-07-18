@@ -64,6 +64,7 @@ type TQueryBuilderInput = {
 	ascending: boolean;
 	orderBy: TPostOrderByColumn;
 	handlerType: TControllerHandlerVariant;
+	includeRejectedPosts?: boolean;
 };
 
 class QueryBuilder {
@@ -73,6 +74,7 @@ class QueryBuilder {
 	private ascending: boolean;
 	private orderBy: TPostOrderByColumn;
 	private handlerType: TControllerHandlerVariant;
+	private includeRejectedPosts: boolean;
 
 	constructor({
 		rawQuery,
@@ -81,12 +83,14 @@ class QueryBuilder {
 		handlerType,
 		ascending,
 		orderBy,
+		includeRejectedPosts = false,
 	}: TQueryBuilderInput) {
 		this.rawQuery = rawQuery;
 		this.pageNumber = pageNumber;
 		this.limit = limit;
 		this.ascending = ascending;
 		this.orderBy = orderBy;
+		this.includeRejectedPosts = includeRejectedPosts;
 		this.handlerType = handlerType;
 	}
 
@@ -195,6 +199,7 @@ class QueryBuilder {
 		const queryTokens = this.parseQueryTokens();
 		const ormQuery: TPostSelectMany = {
 			where: {
+				...(this.includeRejectedPosts ? {} : { moderationStatus: { in: ['PENDING', 'APPROVED'] } }),
 				NOT: [] as Prisma.PostWhereInput[],
 				AND: [] as Prisma.PostWhereInput[],
 			},
