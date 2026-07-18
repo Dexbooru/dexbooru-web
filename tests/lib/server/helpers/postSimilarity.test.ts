@@ -5,7 +5,7 @@ import {
 	rankSimilarityCandidates,
 	scoreAndRankSimilarityCandidates,
 	shouldSkipSimilarityForSafeMode,
-} from '../postSimilarity';
+} from '$lib/server/helpers/postSimilarity';
 import type { TSimilarityFeatures } from '$lib/server/types/postSimilarity';
 
 const target: TSimilarityFeatures = {

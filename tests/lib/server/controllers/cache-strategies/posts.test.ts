@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getCacheKeyForPostSimilarity } from '../posts';
+import { getCacheKeyForPostSimilarity } from '$lib/server/controllers/cache-strategies/posts';
 
 describe('post cache strategy helpers', () => {
 	it('builds deterministic similarity keys regardless of blacklist ordering', () => {
