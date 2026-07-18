@@ -6,7 +6,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "dotenv -e .env -o -- vite dev",
-		"build": "prisma generate --schema ./prisma/schema && vite build",
+		"build": "prisma generate --schema ./prisma/schema && vite build && pnpm build:workers",
+		"build:workers": "node build-workers.mjs",
 		"preview": "dotenv -e .env -o -- vite preview",
 		"run-build": "dotenv -e .env -o -- node build/index.js",
 		"setup:localstack": "dotenv -e .env -o -- bash ./scripts/init-localstack.sh",
