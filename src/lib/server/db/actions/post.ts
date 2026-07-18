@@ -1,4 +1,4 @@
-import type { PostModerationStatus } from '$generated/prisma/client';
+import type { PostModerationStatus, Prisma } from '$generated/prisma/client';
 import { PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
 import { MAXIMUM_SIMILAR_POSTS_PER_POST } from '$lib/shared/constants/posts';
 import type { TPost, TPostOrderByColumn, TPostSelector } from '$lib/shared/types/posts';
