@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.app
+      args:
+        VITE_DEXBOORU_NOTIFICATIONS_API_URL: ${VITE_DEXBOORU_NOTIFICATIONS_API_URL}
     env_file:
       - .env
     ports:
