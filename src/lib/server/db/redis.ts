@@ -1,5 +1,5 @@
 import { building, dev } from '$app/environment';
-import { DB_REDIS_PASSWORD, DB_REDIS_URL } from '$env/static/private';
+import { DB_REDIS_PASSWORD, DB_REDIS_URL } from '$lib/server/runtimeEnv';
 import {
 	createClient,
 	type RedisClientOptions,

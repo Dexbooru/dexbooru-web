@@ -5,7 +5,7 @@ import {
 	OAUTH_GITHUB_CLIENT_SECRET,
 	OAUTH_GOOGLE_CLIENT_ID,
 	OAUTH_GOOGLE_CLIENT_SECRET,
-} from '$env/static/private';
+} from '$lib/server/runtimeEnv';
 import { getApplicationConfigurationSync } from '$lib/server/applicationConfiguration';
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import type { RequestEvent } from '@sveltejs/kit';

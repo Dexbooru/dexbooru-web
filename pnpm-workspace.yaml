@@ -1,0 +1,9 @@
+allowBuilds:
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+  sharp: true
+
+minimumReleaseAgeExclude:
+  - esrap@2.3.0
+  - lint-staged@17.1.0

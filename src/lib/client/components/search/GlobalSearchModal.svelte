@@ -85,7 +85,7 @@
 	title="Find global resources"
 	open={$activeModal.isOpen && $activeModal.focusedModalName === GLOBAL_SEARCH_MODAL_NAME}
 	outsideclose
-	class="w-screen"
+	class="mt-10 w-screen"
 	placement="top-center"
 	onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 >

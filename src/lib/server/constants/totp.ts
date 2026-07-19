@@ -1,4 +1,4 @@
-import { OTP_PRIVATE_KEY } from '$env/static/private';
+import { OTP_PRIVATE_KEY } from '$lib/server/runtimeEnv';
 import base32Encode from 'base32-encode';
 
 export const TOTP_ISSUER_NAME = 'Dexbooru';

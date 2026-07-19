@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('$env/static/private', () => ({
+vi.mock('$lib/server/runtimeEnv', () => ({
 	APP_URL: 'https://test.example.com',
 	SMTP_HOST: 'localhost',
 	SMTP_PORT: '587',

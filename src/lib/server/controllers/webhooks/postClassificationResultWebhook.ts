@@ -1,4 +1,4 @@
-import { WEBHOOK_SECRET } from '$env/static/private';
+import { WEBHOOK_SECRET } from '$lib/server/runtimeEnv';
 import type { RequestEvent } from '@sveltejs/kit';
 import { WEBHOOK_SECRET_REQUEST_HEADER } from '../../constants/webhooks';
 import { createPostSources } from '../../db/actions/postSource';

@@ -1,5 +1,11 @@
 import { dev } from '$app/environment';
-import { APP_URL, SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_USERNAME } from '$env/static/private';
+import {
+	APP_URL,
+	SMTP_HOST,
+	SMTP_PASSWORD,
+	SMTP_PORT,
+	SMTP_USERNAME,
+} from '$lib/server/runtimeEnv';
 import { escapeHtml } from '$lib/shared/helpers/html';
 import { capitalize } from '$lib/shared/helpers/util';
 import nodemailer from 'nodemailer';

@@ -5,7 +5,7 @@ import {
 	SESSION_JWT_EXPIRES_IN_SUPER_AGE,
 } from '$lib/server/constants/cookies';
 
-vi.mock('$env/static/private', () => ({
+vi.mock('$lib/server/runtimeEnv', () => ({
 	JWT_PRIVATE_KEY: 'test-jwt-private-key-for-unit-tests',
 	APP_URL: 'https://test.example.com',
 	DOMAIN: 'test.example.com',

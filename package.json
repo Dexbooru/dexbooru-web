@@ -33,7 +33,7 @@
 		"lint": "prettier --check . && eslint .",
 		"lint:fix": "prettier --write . && eslint . --fix",
 		"format": "prettier --write 'src/**/*.{ts,svelte}' 'scripts/**/*.ts'",
-		"prepare": "husky install && svelte-kit sync"
+		"prepare": "husky && svelte-kit sync"
 	},
 	"devDependencies": {
 		"@eslint/eslintrc": "^3.3.6",
@@ -50,7 +50,7 @@
 		"@types/markdown-it": "^14.1.2",
 		"@types/markdown-it-emoji": "^3.0.1",
 		"@types/minimist": "^1.2.5",
-		"@types/node": "^26.1.1",
+		"@types/node": "^24.13.3",
 		"@types/nodemailer": "^8.0.1",
 		"@types/nprogress": "^0.2.3",
 		"@types/qrcode": "^1.5.6",
@@ -132,20 +132,12 @@
 		]
 	},
 	"engines": {
-		"node": ">=20.0.0"
+		"node": "24.x"
 	},
-	"packageManager": "pnpm@10.29.3",
+	"packageManager": "pnpm@11.15.0",
 	"exports": {
 		".": {
 			"svelte": "./dist/index.js"
 		}
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"@prisma/engines",
-			"prisma",
-			"sharp",
-			"esbuild"
-		]
 	}
 }

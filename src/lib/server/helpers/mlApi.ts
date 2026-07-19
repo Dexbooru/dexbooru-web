@@ -1,4 +1,4 @@
-import { DEXBOORU_ML_API_URL } from '$env/static/private';
+import { DEXBOORU_ML_API_URL } from '$lib/server/runtimeEnv';
 import { DEFAULT_POST_IMAGE_SIMILARITY_TOP_K } from '$lib/shared/constants/postImageSimilarity';
 import type { TSimilaritySearchMlRequest } from '../types/mlApi';
 

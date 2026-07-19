@@ -1,4 +1,4 @@
-import { JWT_PRIVATE_KEY } from '$env/static/private';
+import { JWT_PRIVATE_KEY } from '$lib/server/runtimeEnv';
 import { convertDataStructureToIncludeDatetimes } from '$lib/shared/helpers/dates';
 import type { TUser } from '$lib/shared/types/users';
 import jwt, { type JwtPayload } from 'jsonwebtoken';

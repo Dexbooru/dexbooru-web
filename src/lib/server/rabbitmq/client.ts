@@ -1,5 +1,5 @@
 import { dev } from '$app/environment';
-import { RABBITMQ_URL } from '$env/static/private';
+import { RABBITMQ_URL } from '$lib/server/runtimeEnv';
 import { RABBITMQ_CONNECT } from '../constants/rabbitmq';
 import { Connection } from 'rabbitmq-client';
 

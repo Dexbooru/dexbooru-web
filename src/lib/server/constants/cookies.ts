@@ -1,5 +1,5 @@
 import { dev } from '$app/environment';
-import { DOMAIN as APP_DOMAIN } from '$env/static/private';
+import { DOMAIN as APP_DOMAIN } from '$lib/server/runtimeEnv';
 import type { SerializeOptions } from 'cookie';
 
 type CookieOptions = Pick<

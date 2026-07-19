@@ -4,16 +4,27 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.app
+    env_file:
+      - .env
     ports:
-      - '${PORT}:5173'
+      - '${PORT:-5173}:5173'
     environment:
-      - PORT=${PORT}
-      - ORIGIN=${ORIGIN}
+      - PORT=5173
+      - ORIGIN=${ORIGIN:-http://localhost:5173}
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      - DB_REDIS_URL=redis://redis:6379
+      - DB_REDIS_PASSWORD=${DB_REDIS_PASSWORD}
+      - RABBITMQ_URL=amqp://dexbooru:${RABBITMQ_PASSWORD:-dexbooru}@rabbitmq:5672
       - APPLICATION_CONFIGURATION_YAML_PATH=${APPLICATION_CONFIGURATION_YAML_PATH}
     depends_on:
-      - postgres
-      - redis
-      - localstack
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      localstack:
+        condition: service_started
 
   localstack:
     image: localstack/localstack:latest
@@ -62,7 +73,23 @@ services:
       timeout: 3s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:4-alpine
+    container_name: dexbooru-rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=dexbooru
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-dexbooru}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   localstack-data:
   pg-data:
   redis-data:
+  rabbitmq-data:

@@ -1,5 +1,5 @@
-import { AWS_SQS_POST_CLASSIFICATION_QUEUE_URL } from '$env/static/private';
 import type { Post } from '$generated/prisma/client';
+import { AWS_SQS_POST_CLASSIFICATION_QUEUE_URL } from '$lib/server/runtimeEnv';
 import type { TPostImageSqsMessage } from '$lib/server/types/aws';
 import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
 import { SendMessageCommand, type SendMessageCommandInput } from '@aws-sdk/client-sqs';

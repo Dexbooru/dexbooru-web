@@ -1,5 +1,4 @@
 import { dev } from '$app/environment';
-import { AWS_CLOUDFRONT_CDN_URL } from '$env/static/private';
 import {
 	AWS_LOCAL_COLLECTION_PICTURE_BASE_URL,
 	AWS_LOCAL_POSTS_BASE_URL,
@@ -7,6 +6,7 @@ import {
 	AWS_LOCAL_UPLOAD_ARTIFACTS_BASE_URL,
 	AWS_UPLOAD_ARTIFACTS_BUCKET_NAME,
 } from '$lib/server/constants/aws';
+import { AWS_CLOUDFRONT_CDN_URL } from '$lib/server/runtimeEnv';
 import { UPLOAD_TEMP_KEY_PREFIX } from '$lib/server/constants/upload';
 import type { TS3ObjectSource } from '$lib/server/types/aws';
 import type { TMediaUploadResourceType } from '$lib/server/types/upload';
