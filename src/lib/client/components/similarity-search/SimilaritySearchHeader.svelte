@@ -22,9 +22,9 @@
 	/>
 </svelte:head>
 
-<div class="mb-6">
-	<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
-	<p class="mt-2 text-gray-600 dark:text-gray-400">
+<div class="mb-4 sm:mb-6">
+	<h1 class="text-2xl font-bold text-gray-800 sm:text-3xl dark:text-gray-200">{title}</h1>
+	<p class="mt-2 text-sm text-gray-600 sm:text-base dark:text-gray-400">
 		{description}
 	</p>
 </div>

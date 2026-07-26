@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { sortSimilarityResultsByCreatedAtDesc } from '$lib/shared/helpers/postImageSimilarity';
 	import type { PostImageSimilarityResult } from '$lib/shared/types/postImageSimilarity';
 	import Alert from 'flowbite-svelte/Alert.svelte';
 	import ImagePlaceholder from 'flowbite-svelte/ImagePlaceholder.svelte';
@@ -13,14 +14,15 @@
 	let { loading, results, showNoResults }: Props = $props();
 
 	const skeletonCount = 10;
+	const sortedResults = $derived(sortSimilarityResultsByCreatedAtDesc(results));
 </script>
 
-{#if results.length > 0}
+{#if sortedResults.length > 0}
 	<Alert color="green" class="mt-8">
 		<span class="font-medium"
-			>Found {results.length} similar image{results.length === 1 ? '' : 's'}</span
+			>Found {sortedResults.length} similar image{sortedResults.length === 1 ? '' : 's'}</span
 		>
-		— ordered by similarity score (higher is closer). Results may include imperfect matches.
+		— ordered by upload date (newest first). Results may include imperfect matches.
 	</Alert>
 {/if}
 
@@ -29,7 +31,7 @@
 {/if}
 
 <section
-	class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+	class="mt-6 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
 	aria-busy={loading}
 >
 	{#if loading}
@@ -37,7 +39,7 @@
 			<ImagePlaceholder />
 		{/each}
 	{:else}
-		{#each results as item (item.post_id)}
+		{#each sortedResults as item (item.post_id)}
 			<SimilaritySearchResultCard result={item} />
 		{/each}
 	{/if}

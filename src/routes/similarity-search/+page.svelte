@@ -8,10 +8,13 @@
 	import type { PostImageSimilarityResult } from '$lib/shared/types/postImageSimilarity';
 	import { isFileImage } from '$lib/shared/helpers/images';
 	import { toast } from '@zerodevx/svelte-toast';
+	import { untrack } from 'svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
 
-	let postId = $state('');
+	let { data } = $props();
+
+	let postId = $state(untrack(() => data.postId ?? ''));
 	let imageUrl = $state('');
 	let imageFile = $state('');
 	let similarityDescription = $state('');
@@ -68,10 +71,10 @@
 	}
 </script>
 
-<main class="m-2 w-1/2 p-2">
+<main class="w-full px-3 py-4 sm:px-4 md:px-6">
 	<SimilaritySearchHeader />
 
-	<Card class="mt-2 max-w-md space-y-4 p-6 shadow-lg dark:bg-gray-800">
+	<Card class="mt-2 w-full space-y-4 p-4 shadow-lg sm:p-6 dark:bg-gray-800">
 		<form
 			method="POST"
 			enctype="multipart/form-data"

@@ -21,6 +21,12 @@
 
 <p class="text-lg dark:text-white">
 	ID: <span class=" dark:text-gray-400">{post.id}</span>
+	<a
+		href="/similarity-search?postId={encodeURIComponent(post.id)}"
+		class="ml-2 text-sm text-blue-500 hover:underline"
+	>
+		Find similar images
+	</a>
 </p>
 
 <p class="text-lg dark:text-white">

@@ -5,6 +5,7 @@ export const mockPostActions = {
 	deletePostById: vi.fn(),
 	findDuplicatePosts: vi.fn(),
 	findPostById: vi.fn(),
+	findPostsByIds: vi.fn(),
 	findPostsByPage: vi.fn(),
 	findPostsByAuthorId: vi.fn(),
 	findPostByIdWithUpdatedViewCount: vi.fn(),

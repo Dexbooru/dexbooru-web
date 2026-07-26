@@ -11,6 +11,7 @@ import {
 	updatePost,
 	findPostsByPage,
 	findPostById,
+	findPostsByIds,
 	likePostById,
 	createPost,
 	findSimilarPosts,
@@ -105,6 +106,31 @@ describe('post actions', () => {
 					moderationStatus: { in: ['PENDING', 'APPROVED'] },
 				},
 				select: undefined,
+			});
+		});
+	});
+
+	describe('findPostsByIds', () => {
+		it('should return an empty array when no ids are provided', async () => {
+			const result = await findPostsByIds([]);
+
+			expect(result).toEqual([]);
+			expect(mockPrisma.post.findMany).not.toHaveBeenCalled();
+		});
+
+		it('should call prisma.post.findMany with the provided ids', async () => {
+			const mockPosts = [{ id: 'p1' }, { id: 'p2' }];
+			mockPrisma.post.findMany.mockResolvedValue(mockPosts);
+
+			const result = await findPostsByIds(['p1', 'p2'], { id: true });
+
+			expect(result).toEqual(mockPosts);
+			expect(mockPrisma.post.findMany).toHaveBeenCalledWith({
+				where: {
+					id: { in: ['p1', 'p2'] },
+					moderationStatus: { in: ['PENDING', 'APPROVED'] },
+				},
+				select: { id: true },
 			});
 		});
 	});

@@ -139,6 +139,28 @@ export async function findPostById(
 	})) as TPost | null;
 }
 
+export async function findPostsByIds(
+	postIds: string[],
+	selectors?: TPostSelector,
+	moderationStatus?: PostModerationStatus[],
+): Promise<TPost[]> {
+	if (postIds.length === 0) {
+		return [];
+	}
+
+	const posts = await prisma.post.findMany({
+		where: {
+			id: { in: postIds },
+			moderationStatus: moderationStatus
+				? { in: moderationStatus }
+				: { in: ['PENDING', 'APPROVED'] },
+		},
+		select: selectors,
+	});
+
+	return (posts ?? []) as TPost[];
+}
+
 export async function findPostsByAuthorId(
 	pageNumber: number,
 	pageLimit: number,

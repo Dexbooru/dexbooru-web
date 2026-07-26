@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer';
-import { findPostById } from '../../db/actions/post';
+import { findPostById, findPostsByIds } from '../../db/actions/post';
 import {
 	createErrorResponse,
 	createSuccessResponse,
@@ -8,7 +8,11 @@ import {
 import { getSimilarPostsBySimilaritySearch } from '../../helpers/mlApi';
 import { parseDexbooruMlErrorMessage } from '../../helpers/mlApiSimilarity';
 import { DEFAULT_POST_IMAGE_SIMILARITY_TOP_K } from '$lib/shared/constants/postImageSimilarity';
-import type { PostImageSimilaritySearchResponse } from '$lib/shared/types/postImageSimilarity';
+import { sortSimilarityResultsByCreatedAtDesc } from '$lib/shared/helpers/postImageSimilarity';
+import type {
+	PostImageSimilarityResult,
+	PostImageSimilaritySearchResponse,
+} from '$lib/shared/types/postImageSimilarity';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { TControllerHandlerVariant } from '../../types/controllers';
 import { GetSimilarPostsSchema } from '../request-schemas/posts';
@@ -139,9 +143,40 @@ export const handleGetSimilarPosts = async (
 			}
 
 			const responseData = (await response.json()) as PostImageSimilaritySearchResponse;
+			const mlResults = responseData.results ?? [];
+			const postIds = mlResults.map((result) => result.post_id);
+			const posts = await findPostsByIds(postIds, {
+				id: true,
+				createdAt: true,
+				author: {
+					select: {
+						username: true,
+						profilePictureUrl: true,
+					},
+				},
+			});
+			const postsById = new Map(posts.map((post) => [post.id, post]));
+
+			const enrichedResults: PostImageSimilarityResult[] = [];
+			for (const mlResult of mlResults) {
+				const post = postsById.get(mlResult.post_id);
+				if (!post) {
+					continue;
+				}
+
+				enrichedResults.push({
+					...mlResult,
+					createdAt:
+						post.createdAt instanceof Date
+							? post.createdAt.toISOString()
+							: new Date(post.createdAt).toISOString(),
+					authorUsername: post.author?.username ?? null,
+					authorProfilePictureUrl: post.author?.profilePictureUrl ?? null,
+				});
+			}
 
 			return createSuccessResponse(handlerType, 'Successfully fetched similar posts', {
-				results: responseData.results,
+				results: sortSimilarityResultsByCreatedAtDesc(enrichedResults),
 			});
 		},
 		handlerType === 'api-route',
