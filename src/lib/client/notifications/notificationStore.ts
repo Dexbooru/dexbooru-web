@@ -1,6 +1,7 @@
 import { writable, derived } from 'svelte/store';
 import { ConnectionState, NotificationWebSocketClient } from './NotificationWebSocketClient';
 import type { TRealtimeNotification, TUserNotifications } from '$lib/shared/types/notifcations';
+import { NotificationMarkAsReadIdKey } from '$lib/shared/constants/notifications';
 import { DEXBOORU_NOTIFICATIONS_API_API_URL } from '$lib/client/constants/notificationApi';
 import { markNotificationsAsRead, type TMarkAsReadRequest } from '$lib/client/api/notificationApi';
 import newNotificationSoundUrl from '$lib/client/assets/sounds/new_notification.ogg';
@@ -138,9 +139,9 @@ async function markAsRead(request: TMarkAsReadRequest): Promise<boolean> {
 		notifications.set([]);
 	} else {
 		const ids = new Set([
-			...(request.notificationIds?.newPostLikeIds ?? []),
-			...(request.notificationIds?.newPostCommentIds ?? []),
-			...(request.notificationIds?.friendInviteIds ?? []),
+			...(request.notificationIds?.[NotificationMarkAsReadIdKey.NewPostLike] ?? []),
+			...(request.notificationIds?.[NotificationMarkAsReadIdKey.NewPostComment] ?? []),
+			...(request.notificationIds?.[NotificationMarkAsReadIdKey.FriendInvite] ?? []),
 		]);
 
 		notifications.update((list) => list.map((n) => (ids.has(n._id) ? { ...n, wasRead: true } : n)));

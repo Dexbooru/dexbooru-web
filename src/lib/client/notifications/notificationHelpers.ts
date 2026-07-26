@@ -1,5 +1,13 @@
+import DefaultPostPicture from '$lib/client/assets/default_post_picture.webp';
 import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
+import type { TMarkAsReadRequest } from '$lib/client/api/notificationApi';
+import {
+	COMMENT_CONTENT_PREVIEW_ELLIPSIS,
+	COMMENT_CONTENT_PREVIEW_LENGTH,
+} from '$lib/shared/constants/comments';
+import { NOTIFICATION_ID_KEYS } from '$lib/shared/constants/notifications';
 import type { TRealtimeNotification } from '$lib/shared/types/notifcations';
+import { convert as htmlToText } from 'html-to-text';
 
 export function getActorAvatar(notification: TRealtimeNotification): string {
 	switch (notification.type) {
@@ -72,4 +80,43 @@ export function getTypeBadgeColor(notification: TRealtimeNotification): string {
 export function onAvatarError(event: Event): void {
 	const target = event.target as HTMLImageElement;
 	target.src = DefaultProfilePicture;
+}
+
+export function getPostImageUrl(notification: TRealtimeNotification): string | undefined {
+	if (notification.type === 'new_post_like' || notification.type === 'new_post_comment') {
+		return notification.postImageUrl;
+	}
+	return undefined;
+}
+
+export function onPostImageError(event: Event): void {
+	const target = event.target as HTMLImageElement;
+	target.src = DefaultPostPicture;
+}
+
+export function buildMarkSingleAsReadRequest(
+	notification: TRealtimeNotification,
+): TMarkAsReadRequest {
+	const key = NOTIFICATION_ID_KEYS[notification.type];
+	return {
+		notificationIds: { [key]: [notification._id] },
+	};
+}
+
+export function getCommentNotificationPreview(htmlContent: string): string {
+	let plainText: string;
+	try {
+		plainText = htmlToText(htmlContent, { wordwrap: false });
+	} catch {
+		plainText = htmlContent.replace(/<[^>]*>/g, '');
+	}
+
+	const normalized = plainText.replace(/\s+/g, ' ').trim();
+	if (normalized.length <= COMMENT_CONTENT_PREVIEW_LENGTH) {
+		return normalized;
+	}
+
+	return (
+		normalized.slice(0, COMMENT_CONTENT_PREVIEW_LENGTH).trimEnd() + COMMENT_CONTENT_PREVIEW_ELLIPSIS
+	);
 }

@@ -33,6 +33,19 @@ export async function findCommentById(commentId: string, selectors?: TCommentSel
 	});
 }
 
+export async function findCommentsByIds(commentIds: string[], selectors?: TCommentSelector) {
+	if (commentIds.length === 0) {
+		return [];
+	}
+
+	return await prisma.comment.findMany({
+		where: {
+			id: { in: commentIds },
+		},
+		select: selectors,
+	});
+}
+
 export async function findCommentAncestorChain(commentId: string, selectors?: TCommentSelector) {
 	const lineage: string[] = [];
 	const visited = new Set<string>();

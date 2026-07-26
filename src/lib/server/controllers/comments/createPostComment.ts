@@ -72,7 +72,6 @@ export const handleCreatePostComment = async (event: RequestEvent) => {
 							postId,
 							postAuthorId: post.authorId,
 							commentAuthorId: event.locals.user.id,
-							commentContent: content,
 							parentCommentId: parentCommentId ?? null,
 							parentCommentAuthorId,
 							wasRead: false,

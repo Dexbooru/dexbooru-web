@@ -11,6 +11,7 @@ export type TNewPostLikeNotification = {
 	likerUserId: string;
 	likerUsername?: string;
 	likerProfilePictureUrl?: string;
+	postImageUrl?: string;
 	totalLikes: number;
 	wasRead: boolean;
 };
@@ -25,7 +26,8 @@ export type TNewPostCommentNotification = {
 	commentAuthorId: string;
 	commentAuthorUsername?: string;
 	commentAuthorProfilePictureUrl?: string;
-	commentContent: string;
+	commentContent?: string;
+	postImageUrl?: string;
 	parentCommentId: string | null;
 	parentCommentAuthorId: string | null;
 	wasRead: boolean;
@@ -45,9 +47,7 @@ export type TFriendInviteNotification = {
 };
 
 export type TRealtimeNotification =
-	| TNewPostLikeNotification
-	| TNewPostCommentNotification
-	| TFriendInviteNotification;
+	TNewPostLikeNotification | TNewPostCommentNotification | TFriendInviteNotification;
 
 export type TUserNotifications = {
 	newPostLikes: TNewPostLikeNotification[];

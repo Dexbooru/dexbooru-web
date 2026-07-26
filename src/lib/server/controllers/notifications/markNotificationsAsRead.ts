@@ -1,5 +1,6 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { z } from 'zod';
+import { NotificationMarkAsReadIdKey } from '$lib/shared/constants/notifications';
 import {
 	DEXBOORU_NOTIFICATIONS_API_URL,
 	DEXBOORU_NOTIFICATIONS_SESSION_COOKIE_KEY,
@@ -17,15 +18,15 @@ export const MarkNotificationsAsReadSchema = {
 		all: z.boolean().optional().default(false),
 		notificationIds: z
 			.object({
-				newPostLikeIds: z.array(z.string()).optional().default([]),
-				newPostCommentIds: z.array(z.string()).optional().default([]),
-				friendInviteIds: z.array(z.string()).optional().default([]),
+				[NotificationMarkAsReadIdKey.NewPostLike]: z.array(z.string()).optional().default([]),
+				[NotificationMarkAsReadIdKey.NewPostComment]: z.array(z.string()).optional().default([]),
+				[NotificationMarkAsReadIdKey.FriendInvite]: z.array(z.string()).optional().default([]),
 			})
 			.optional()
 			.default({
-				newPostCommentIds: [],
-				newPostLikeIds: [],
-				friendInviteIds: [],
+				[NotificationMarkAsReadIdKey.NewPostComment]: [],
+				[NotificationMarkAsReadIdKey.NewPostLike]: [],
+				[NotificationMarkAsReadIdKey.FriendInvite]: [],
 			}),
 	}),
 } satisfies TRequestSchema;

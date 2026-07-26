@@ -1,18 +1,21 @@
 <script lang="ts">
 	import {
+		buildMarkSingleAsReadRequest,
 		getActorAvatar,
 		getActorUsername,
+		getCommentNotificationPreview,
 		getNotificationLink,
 		getNotificationMessage,
+		getPostImageUrl,
 		getTypeBadgeColor,
 		getTypeLabel,
 		onAvatarError,
+		onPostImageError,
 	} from '$lib/client/notifications/notificationHelpers';
 	import { notificationStore } from '$lib/client/notifications/notificationStore';
 	import { getFormalDateTitle, getTimeDifferenceString } from '$lib/shared/helpers/dates';
 	import { groupBy } from '$lib/shared/helpers/util';
-	import { convert as htmlToText } from 'html-to-text';
-	import type { TNotificationType, TRealtimeNotification } from '$lib/shared/types/notifcations';
+	import type { TRealtimeNotification } from '$lib/shared/types/notifcations';
 	import ArrowLeftOutline from 'flowbite-svelte-icons/ArrowLeftOutline.svelte';
 	import ArrowRightOutline from 'flowbite-svelte-icons/ArrowRightOutline.svelte';
 	import BullhornSolid from 'flowbite-svelte-icons/BullhornSolid.svelte';
@@ -37,14 +40,6 @@
 			const labelDate = new Date(items[0]?.createdAt ?? dateKey);
 			return { dateKey, label: getFormalDateTitle(labelDate), items };
 		});
-	}
-
-	function stripCommentPreview(html: string): string {
-		try {
-			return htmlToText(html, { wordwrap: false }).slice(0, 120);
-		} catch {
-			return html.replace(/<[^>]*>/g, '').slice(0, 120);
-		}
 	}
 
 	let currentPage = $state(1);
@@ -88,16 +83,7 @@
 	async function handleMarkSingleAsRead(notification: TRealtimeNotification) {
 		if (notification.wasRead) return;
 
-		const idsByType: Record<TNotificationType, string> = {
-			new_post_like: 'newPostLikeIds',
-			new_post_comment: 'newPostCommentIds',
-			friend_invite: 'friendInviteIds',
-		};
-
-		const key = idsByType[notification.type];
-		const success = await notificationStore.markAsRead({
-			notificationIds: { [key]: [notification._id] },
-		});
+		const success = await notificationStore.markAsRead(buildMarkSingleAsReadRequest(notification));
 
 		if (success) {
 			pageNotifications = pageNotifications.map((n) =>
@@ -184,6 +170,7 @@
 				>
 					{#each items as notification (notification._id)}
 						{@const link = getNotificationLink(notification)}
+						{@const postImageUrl = getPostImageUrl(notification)}
 						<li
 							class="flex list-none items-start gap-3 px-4 py-4 transition-colors first:pt-4 sm:items-center sm:gap-4 sm:px-5 {!notification.wasRead
 								? 'bg-blue-50 dark:bg-blue-950/30'
@@ -213,7 +200,7 @@
 										</p>
 										{#if notification.type === 'new_post_comment' && notification.commentContent}
 											<p class="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
-												"{stripCommentPreview(notification.commentContent)}"
+												"{getCommentNotificationPreview(notification.commentContent)}"
 											</p>
 										{/if}
 									</a>
@@ -231,6 +218,16 @@
 							</div>
 
 							<div class="flex shrink-0 items-center gap-2">
+								{#if postImageUrl}
+									<a href={link} class="shrink-0">
+										<img
+											src={postImageUrl}
+											alt="Post preview"
+											class="h-12 w-12 rounded object-cover"
+											onerror={onPostImageError}
+										/>
+									</a>
+								{/if}
 								{#if !notification.wasRead}
 									<button
 										type="button"

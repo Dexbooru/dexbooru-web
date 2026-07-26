@@ -6,7 +6,6 @@ export type TNewPostCommentMessage = {
 	postId: string;
 	postAuthorId: string;
 	commentAuthorId: string;
-	commentContent: string;
 	parentCommentId: string | null;
 	parentCommentAuthorId: string | null;
 	wasRead: boolean;
@@ -25,7 +24,6 @@ export class NewPostCommentPublisher extends BasePublisher<TNewPostCommentMessag
 			postId: data.postId,
 			postAuthorId: data.postAuthorId,
 			commentAuthorId: data.commentAuthorId,
-			commentContent: data.commentContent,
 			parentCommentId: data.parentCommentId,
 			parentCommentAuthorId: data.parentCommentAuthorId,
 			wasRead: false,

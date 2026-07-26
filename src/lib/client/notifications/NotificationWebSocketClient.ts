@@ -215,7 +215,7 @@ export class NotificationWebSocketClient {
 		if ('likerUserId' in payload && 'postId' in payload && 'totalLikes' in payload) {
 			return 'new_post_like';
 		}
-		if ('commentAuthorId' in payload && 'commentContent' in payload) {
+		if ('commentAuthorId' in payload && 'commentId' in payload) {
 			return 'new_post_comment';
 		}
 		if ('senderUserId' in payload && 'receiverUserId' in payload && 'status' in payload) {

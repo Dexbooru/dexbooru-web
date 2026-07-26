@@ -1,4 +1,5 @@
 import { DEXBOORU_NOTIFICATIONS_API_API_URL } from '../constants/notificationApi';
+import type { NotificationMarkAsReadIdKey } from '$lib/shared/constants/notifications';
 import type { TUserNotifications, TRealtimeNotification } from '$lib/shared/types/notifcations';
 import { buildUrl } from '$lib/client/helpers/urls';
 
@@ -48,11 +49,7 @@ export const enrichRealtimeNotifications = async (
 
 export type TMarkAsReadRequest = {
 	all?: boolean;
-	notificationIds?: {
-		newPostLikeIds?: string[];
-		newPostCommentIds?: string[];
-		friendInviteIds?: string[];
-	};
+	notificationIds?: Partial<Record<NotificationMarkAsReadIdKey, string[]>>;
 };
 
 export const markNotificationsAsRead = async (
