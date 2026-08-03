@@ -33,6 +33,9 @@
 		return urls.length > 0 ? urls : post.imageUrls.slice(0, 1);
 	});
 
+	const previewImageUrl = $derived(previewImageUrls[0]);
+	const imageCount = $derived(previewImageUrls.length);
+
 	const statusColors = {
 		PENDING: 'yellow',
 		APPROVED: 'green',
@@ -45,22 +48,15 @@
 <Card
 	class="flex h-full w-full max-w-none flex-col overflow-hidden p-0 shadow-md transition-shadow duration-200 hover:shadow-lg"
 >
-	<div class="relative h-48 w-full bg-gray-100 dark:bg-gray-800">
-		{#if previewImageUrls.length > 0}
-			<div
-				class="h-full snap-y snap-mandatory overflow-y-auto overscroll-contain"
-				aria-label="Post images"
-				role="region"
-			>
-				{#each previewImageUrls as imageUrl, index (imageUrl)}
-					<img
-						src={imageUrl}
-						alt={`${post.description || 'Post image'} (${index + 1} of ${previewImageUrls.length})`}
-						loading={index === 0 ? 'eager' : 'lazy'}
-						class="h-full w-full snap-start snap-always object-cover"
-					/>
-				{/each}
-			</div>
+	<div class="relative h-48 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+		{#if previewImageUrl}
+			<img
+				src={previewImageUrl}
+				alt={post.description || 'Post image'}
+				loading="lazy"
+				decoding="async"
+				class="h-full w-full object-cover"
+			/>
 		{:else}
 			<div class="flex h-full items-center justify-center text-sm text-gray-500 dark:text-gray-400">
 				No image available
@@ -71,9 +67,9 @@
 				{capitalize(post.moderationStatus)}
 			</Badge>
 		</div>
-		{#if previewImageUrls.length > 1}
+		{#if imageCount > 1}
 			<div class="absolute right-2 bottom-2">
-				<Badge color="gray">{previewImageUrls.length} images</Badge>
+				<Badge color="gray">{imageCount} images</Badge>
 			</div>
 		{/if}
 		{#if post.isNsfw}

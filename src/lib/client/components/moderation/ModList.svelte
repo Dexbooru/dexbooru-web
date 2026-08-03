@@ -6,17 +6,21 @@
 		getAuthenticatedUser,
 		getModerationPaginationData,
 	} from '$lib/client/helpers/context';
+	import {
+		MODERATION_MOD_LIST_ITEM_ESTIMATED_HEIGHT,
+		MODERATION_MOD_LIST_MIN_ITEMS_TO_VIRTUALIZE,
+		MODERATION_VIRTUAL_LIST_HEIGHT,
+	} from '$lib/client/helpers/moderation';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import { formatDate } from '$lib/shared/helpers/dates';
 	import { capitalize } from '$lib/shared/helpers/util';
 	import type { TUser } from '$lib/shared/types/users';
 	import Avatar from 'flowbite-svelte/Avatar.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
-	import Listgroup from 'flowbite-svelte/Listgroup.svelte';
-	import ListgroupItem from 'flowbite-svelte/ListgroupItem.svelte';
 	import Select from 'flowbite-svelte/Select.svelte';
 	import { onMount } from 'svelte';
 	import Searchbar from '../reusable/Searchbar.svelte';
+	import VirtualizedList from '../reusable/VirtualizedList.svelte';
 
 	type Props = {
 		containerId: string;
@@ -167,7 +171,7 @@
 			/>
 			<Select
 				id="moderation-list-role-selector"
-				class="w-full sm:ml-0 sm:w-auto"
+				class="w-full sm:ml-0 sm:w-44"
 				onchange={handleRoleChange}
 				bind:value={filterRole}
 				items={[
@@ -177,7 +181,7 @@
 			/>
 			<Select
 				id="moderation-list-sorting-selector"
-				class="w-full sm:ml-0 sm:w-auto"
+				class="w-full sm:ml-0 sm:w-48"
 				onchange={handleSortingCriteriaChange}
 				bind:value={sortingCriteria}
 				items={[
@@ -189,36 +193,48 @@
 		</div>
 
 		{#if moderators.length > 0}
-			<Listgroup>
-				{#each moderators as moderator (moderator.id)}
-					<ListgroupItem
-						class="flex flex-col gap-3 py-3 text-base font-semibold hover:bg-gray-100 sm:flex-row sm:items-center sm:justify-between dark:hover:bg-gray-700"
-					>
-						<div class="flex items-start gap-3">
-							<Avatar
-								src={moderator.profilePictureUrl}
-								size="sm"
-								alt={`${moderator.username}'s profile picture`}
-							/>
-							<div class="min-w-0">
-								<p>{moderator.username}</p>
-								<p class="text-sm break-all text-gray-500 dark:text-gray-400">ID: {moderator.id}</p>
-								<p class="text-sm text-gray-500 dark:text-gray-400">
-									Role: {capitalize(moderator.role)}
-								</p>
-								{#if moderator.superRolePromotionAt !== null}
-									<p class="text-sm text-gray-500 dark:text-gray-400">
-										Promoted At: {formatDate(new Date(moderator.superRolePromotionAt))}
+			<div
+				class="divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white text-gray-500 dark:divide-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+			>
+				<VirtualizedList
+					data={moderators}
+					listHeight={MODERATION_VIRTUAL_LIST_HEIGHT}
+					defaultEstimatedItemHeight={MODERATION_MOD_LIST_ITEM_ESTIMATED_HEIGHT}
+					minItemsToVirtualize={MODERATION_MOD_LIST_MIN_ITEMS_TO_VIRTUALIZE}
+					viewportLabel="Moderators"
+				>
+					{#snippet children(moderator)}
+						<div
+							class="flex w-full flex-col gap-3 px-4 py-3 text-base font-semibold hover:bg-gray-100 sm:flex-row sm:items-center sm:justify-between dark:hover:bg-gray-700"
+						>
+							<div class="flex items-start gap-3">
+								<Avatar
+									src={moderator.profilePictureUrl}
+									size="sm"
+									alt={`${moderator.username}'s profile picture`}
+								/>
+								<div class="min-w-0">
+									<p>{moderator.username}</p>
+									<p class="text-sm break-all text-gray-500 dark:text-gray-400">
+										ID: {moderator.id}
 									</p>
-								{/if}
+									<p class="text-sm text-gray-500 dark:text-gray-400">
+										Role: {capitalize(moderator.role)}
+									</p>
+									{#if moderator.superRolePromotionAt !== null}
+										<p class="text-sm text-gray-500 dark:text-gray-400">
+											Promoted At: {formatDate(new Date(moderator.superRolePromotionAt))}
+										</p>
+									{/if}
+								</div>
 							</div>
+							<a class="w-full sm:w-auto" href={`/profile/${moderator.username}`}>
+								<Button class="w-full sm:w-auto" color="blue" size="sm">View Profile</Button>
+							</a>
 						</div>
-						<a class="w-full sm:w-auto" href={`/profile/${moderator.username}`}>
-							<Button class="w-full sm:w-auto" color="blue" size="sm">View Profile</Button>
-						</a>
-					</ListgroupItem>
-				{/each}
-			</Listgroup>
+					{/snippet}
+				</VirtualizedList>
+			</div>
 		{:else}
 			<p class="p-2 text-center text-gray-500 dark:text-gray-400">No moderators found</p>
 		{/if}

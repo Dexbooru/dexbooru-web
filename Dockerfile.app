@@ -5,7 +5,7 @@ ENV VITE_DEXBOORU_NOTIFICATIONS_API_URL=${VITE_DEXBOORU_NOTIFICATIONS_API_URL}
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@11.15.0 --activate
+RUN npm install --global pnpm@11.15.0
 
 COPY . .
 
@@ -34,18 +34,23 @@ FROM node:24-alpine AS runtime
 
 ENV NODE_ENV=production
 ENV PORT=5173
+# pnpm 11 defaults verifyDepsBeforeRun=install, which tries to rewrite node_modules
+# on `pnpm run`/`pnpm exec` and fails in the read-mostly runtime image.
+ENV PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
 
 WORKDIR /app
 
-# Coolify post-deploy hooks invoke `pnpm postdeploy`; keep pnpm + bash available.
+# Coolify post-deploy may invoke pnpm; keep a preinstalled pnpm + bash available.
+# Avoid corepack runtime downloads (permission issues under USER node).
 RUN apk add --no-cache bash \
-	&& corepack enable \
-	&& corepack prepare pnpm@11.15.0 --activate
+	&& npm install --global pnpm@11.15.0 \
+	&& chown node:node /app
 
 COPY --from=build --chown=node:node /app/build ./build
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/package.json ./package.json
 COPY --from=build --chown=node:node /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=build --chown=node:node /app/.npmrc ./.npmrc
 COPY --from=build --chown=node:node /app/prisma ./prisma
 COPY --from=build --chown=node:node /app/prisma.config.ts ./prisma.config.ts
 COPY --from=build --chown=node:node /app/scripts ./scripts

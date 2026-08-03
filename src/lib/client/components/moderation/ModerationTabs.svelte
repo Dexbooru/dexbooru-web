@@ -9,6 +9,8 @@
 	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getAuthenticatedUser, getModerationPaginationData } from '$lib/client/helpers/context';
 	import { isModerationRole } from '$lib/shared/helpers/auth/role';
+	import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
+	import { MAXIMUM_REPORTS_PER_PAGE } from '$lib/shared/constants/reports';
 	import type { TApiResponse } from '$lib/shared/types/api';
 	import type { TPost } from '$lib/shared/types/posts';
 	import type { TUser } from '$lib/shared/types/users';
@@ -38,6 +40,10 @@
 	let postCollectionReportsLoading = $state(false);
 	let userReportsLoading = $state(false);
 	let pendingPostsLoading = $state(false);
+	let pendingPostsHasMore = $state(true);
+	let postReportsHasMore = $state(true);
+	let postCollectionReportsHasMore = $state(true);
+	let userReportsHasMore = $state(true);
 
 	const TAB_TITLES: Partial<Record<TTabName, string>> = {
 		'moderator-list': 'Moderator List',
@@ -67,21 +73,25 @@
 		const pendingPostsPageNumber = get(moderationData)?.pendingPostsPageNumber ?? 0;
 
 		if (fromTabClick && loadedPendingPosts.length > 0) return;
+		if (!fromTabClick && (!pendingPostsHasMore || pendingPostsLoading)) return;
 
 		pendingPostsLoading = true;
 
 		const response = await getPendingPosts(pendingPostsPageNumber);
 		if (response.ok) {
 			const responseData: TApiResponse<{ pendingPosts: TPost[] }> = await response.json();
+			const fetchedPosts = responseData.data.pendingPosts;
+			pendingPostsHasMore = fetchedPosts.length >= MAXIMUM_POSTS_PER_PAGE;
 			moderationData.update((data) => {
 				if (!data) return null;
 				return {
 					...data,
-					pendingPosts: [...data.pendingPosts, ...responseData.data.pendingPosts],
+					pendingPosts: [...data.pendingPosts, ...fetchedPosts],
 					pendingPostsPageNumber: data.pendingPostsPageNumber + 1,
 				};
 			});
 		} else {
+			pendingPostsHasMore = false;
 			toast.push(
 				'An unexpected error occurred while fetching the pending posts',
 				FAILURE_TOAST_OPTIONS,
@@ -96,21 +106,25 @@
 		const postReportsPageNumber = get(moderationData)?.postReportPageNumber ?? 0;
 
 		if (fromTabClick && loadedPostReports.length > 0) return;
+		if (!fromTabClick && (!postReportsHasMore || postReportsLoading)) return;
 
 		postReportsLoading = true;
 
 		const response = await getPostsReports(postReportsPageNumber);
 		if (response.ok) {
 			const responseData: TApiResponse<{ postReports: PostReport[] }> = await response.json();
+			const fetchedReports = responseData.data.postReports;
+			postReportsHasMore = fetchedReports.length >= MAXIMUM_REPORTS_PER_PAGE;
 			moderationData.update((data) => {
 				if (!data) return null;
 				return {
 					...data,
-					postReports: [...data.postReports, ...responseData.data.postReports],
+					postReports: [...data.postReports, ...fetchedReports],
 					postReportPageNumber: data.postReportPageNumber + 1,
 				};
 			});
 		} else {
+			postReportsHasMore = false;
 			toast.push(
 				'An unexpected error occured while fetching the post reports',
 				FAILURE_TOAST_OPTIONS,
@@ -125,6 +139,7 @@
 		const collectionReportsPageNumber = get(moderationData)?.postCollectionReportPageNumber ?? 0;
 
 		if (fromTabClick && loadedCollectionReports.length > 0) return;
+		if (!fromTabClick && (!postCollectionReportsHasMore || postCollectionReportsLoading)) return;
 
 		postCollectionReportsLoading = true;
 
@@ -132,18 +147,18 @@
 		if (response.ok) {
 			const responseData: TApiResponse<{ postCollectionReports: PostCollectionReport[] }> =
 				await response.json();
+			const fetchedReports = responseData.data.postCollectionReports;
+			postCollectionReportsHasMore = fetchedReports.length >= MAXIMUM_REPORTS_PER_PAGE;
 			moderationData.update((data) => {
 				if (!data) return null;
 				return {
 					...data,
-					postCollectionReports: [
-						...data.postCollectionReports,
-						...responseData.data.postCollectionReports,
-					],
+					postCollectionReports: [...data.postCollectionReports, ...fetchedReports],
 					postCollectionReportPageNumber: data.postCollectionReportPageNumber + 1,
 				};
 			});
 		} else {
+			postCollectionReportsHasMore = false;
 			toast.push(
 				'An unexpected error occurred while fetching the collection reports',
 				FAILURE_TOAST_OPTIONS,
@@ -158,21 +173,25 @@
 		const userReportsPageNumber = get(moderationData)?.userReportPageNumber ?? 0;
 
 		if (fromTabClick && loadedUserReports.length > 0) return;
+		if (!fromTabClick && (!userReportsHasMore || userReportsLoading)) return;
 
 		userReportsLoading = true;
 
 		const response = await getUsersReports(userReportsPageNumber);
 		if (response.ok) {
 			const responseData: TApiResponse<{ userReports: UserReport[] }> = await response.json();
+			const fetchedReports = responseData.data.userReports;
+			userReportsHasMore = fetchedReports.length >= MAXIMUM_REPORTS_PER_PAGE;
 			moderationData.update((data) => {
 				if (!data) return null;
 				return {
 					...data,
-					userReports: [...data.userReports, ...responseData.data.userReports],
+					userReports: [...data.userReports, ...fetchedReports],
 					userReportPageNumber: data.userReportPageNumber + 1,
 				};
 			});
 		} else {
+			userReportsHasMore = false;
 			toast.push(
 				'An unexpected error occurred while fetching the user reports',
 				FAILURE_TOAST_OPTIONS,
@@ -348,6 +367,7 @@
 					containerId={TAB_CONTAINER_IDS['post-decisions'] ?? ''}
 					handleLoadMorePosts={() => handleLoadPendingPosts(false)}
 					loadingPosts={pendingPostsLoading}
+					hasMore={pendingPostsHasMore}
 				/>
 			</TabItem>
 			<TabItem
@@ -360,6 +380,7 @@
 					reportType="userReports"
 					handleLoadMoreReports={() => handleLoadUserReports(false)}
 					loadingReports={userReportsLoading}
+					hasMore={userReportsHasMore}
 				/>
 			</TabItem>
 			<TabItem
@@ -372,6 +393,7 @@
 					reportType="postReports"
 					handleLoadMoreReports={() => handleLoadPostReports(false)}
 					loadingReports={postReportsLoading}
+					hasMore={postReportsHasMore}
 				/>
 			</TabItem>
 			<TabItem
@@ -384,6 +406,7 @@
 					reportType="postCollectionReports"
 					handleLoadMoreReports={() => handleLoadCollectionReports(false)}
 					loadingReports={postCollectionReportsLoading}
+					hasMore={postCollectionReportsHasMore}
 				/>
 			</TabItem>
 			{#if $user && isModerationRole($user.role)}

@@ -1,23 +1,35 @@
 <script lang="ts">
 	import type { TPost } from '$lib/shared/types/posts';
 	import { getModerationPaginationData } from '$lib/client/helpers/context';
-	import { MAXIMUM_POSTS_PER_PAGE } from '$lib/shared/constants/posts';
-	import Button from 'flowbite-svelte/Button.svelte';
+	import {
+		getModerationGridColumnCount,
+		MODERATION_GRID_ROW_ESTIMATED_HEIGHT,
+		MODERATION_VIRTUAL_LIST_HEIGHT,
+	} from '$lib/client/helpers/moderation';
+	import { chunkArray } from '$lib/shared/helpers/util';
 	import Spinner from 'flowbite-svelte/Spinner.svelte';
 	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import { onMount } from 'svelte';
+	import VirtualizedList from '../reusable/VirtualizedList.svelte';
 	import PostModerationCard from './PostModerationCard.svelte';
 
 	type Props = {
-		handleLoadMorePosts: () => void;
+		handleLoadMorePosts: () => void | Promise<void>;
 		loadingPosts?: boolean;
+		hasMore?: boolean;
 		containerId: string;
 	};
 
-	let { handleLoadMorePosts, loadingPosts = false, containerId }: Props = $props();
+	let { handleLoadMorePosts, loadingPosts = false, hasMore = false, containerId }: Props = $props();
 	let posts = $state<TPost[]>([]);
+	let windowWidth = $state(typeof window !== 'undefined' ? window.innerWidth : 1280);
+	let isLoadingMore = $state(false);
 
 	const moderationData = getModerationPaginationData();
+
+	const columnCount = $derived(getModerationGridColumnCount(windowWidth));
+	const postRows = $derived(chunkArray(posts, columnCount));
+	const canLoadMore = $derived(hasMore && !loadingPosts && !isLoadingMore);
 
 	const moderationDataUnsubscribe = moderationData.subscribe((data) => {
 		if (data) {
@@ -25,14 +37,36 @@
 		}
 	});
 
+	const onResize = () => {
+		windowWidth = window.innerWidth;
+	};
+
+	const onLoadMore = async () => {
+		if (!canLoadMore) return;
+		isLoadingMore = true;
+		try {
+			await handleLoadMorePosts();
+		} finally {
+			isLoadingMore = false;
+		}
+	};
+
 	onMount(() => {
+		windowWidth = window.innerWidth;
+
 		return () => {
 			moderationDataUnsubscribe();
 		};
 	});
 </script>
 
-{#if posts.length === 0 && !loadingPosts}
+<svelte:window onresize={onResize} />
+
+{#if posts.length === 0 && loadingPosts}
+	<div class="flex items-center justify-center py-20">
+		<Spinner class="text-primary-500 h-10 w-10" />
+	</div>
+{:else if posts.length === 0}
 	<div
 		class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 py-20 text-center dark:border-gray-700 dark:bg-gray-800/30"
 	>
@@ -45,22 +79,32 @@
 		</p>
 	</div>
 {:else}
-	<section id={containerId} class="space-y-8">
-		<div
-			class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+	<section id={containerId} class="space-y-4">
+		<VirtualizedList
+			data={postRows}
+			listHeight={MODERATION_VIRTUAL_LIST_HEIGHT}
+			defaultEstimatedItemHeight={MODERATION_GRID_ROW_ESTIMATED_HEIGHT}
+			bufferSize={2}
+			viewportLabel="Pending posts"
+			{onLoadMore}
+			hasMore={canLoadMore}
+			loadMoreThreshold={1}
 		>
-			{#each posts as post (post.id)}
-				<PostModerationCard {post} />
-			{/each}
-		</div>
+			{#snippet children(row)}
+				<div
+					class="grid gap-6 pb-6"
+					style="grid-template-columns: repeat({columnCount}, minmax(0, 1fr));"
+				>
+					{#each row as post (post.id)}
+						<PostModerationCard {post} />
+					{/each}
+				</div>
+			{/snippet}
+		</VirtualizedList>
 
-		{#if loadingPosts}
-			<div class="flex items-center justify-center py-8">
+		{#if loadingPosts || isLoadingMore}
+			<div class="flex items-center justify-center py-4">
 				<Spinner class="text-primary-500 h-10 w-10" />
-			</div>
-		{:else if posts.length >= MAXIMUM_POSTS_PER_PAGE}
-			<div class="flex justify-center pt-4">
-				<Button color="blue" onclick={handleLoadMorePosts} class="px-10">Load more posts</Button>
 			</div>
 		{/if}
 	</section>

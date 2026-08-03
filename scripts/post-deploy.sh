@@ -10,25 +10,34 @@ trap 'log "Error on line $LINENO"; exit 1' ERR
 
 cd "$PROJECT_DIR"
 
-if ! command -v pnpm >/dev/null 2>&1; then
-	log "pnpm is not installed or not on PATH"
+PRISMA_BIN="$PROJECT_DIR/node_modules/.bin/prisma"
+TSX_BIN="$PROJECT_DIR/node_modules/.bin/tsx"
+DOTENV_BIN="$PROJECT_DIR/node_modules/.bin/dotenv"
+
+if [[ ! -x "$PRISMA_BIN" ]]; then
+	log "prisma binary not found at $PRISMA_BIN"
+	exit 1
+fi
+
+if [[ ! -x "$TSX_BIN" ]]; then
+	log "tsx binary not found at $TSX_BIN"
 	exit 1
 fi
 
 # Coolify injects env vars into the process environment. Locally we still support
 # loading from .env when present; dotenv-cli fails if the file is missing.
 run_with_env() {
-	if [[ -f .env ]]; then
-		pnpm exec dotenv -e .env -o -- "$@"
+	if [[ -f .env && -x "$DOTENV_BIN" ]]; then
+		"$DOTENV_BIN" -e .env -o -- "$@"
 	else
-		pnpm exec "$@"
+		"$@"
 	fi
 }
 
 log "Running prisma migrate deploy"
-run_with_env prisma migrate deploy
+run_with_env "$PRISMA_BIN" migrate deploy
 
 log "Running data migrations"
-run_with_env tsx scripts/dataMigrations/runDataMigrations.ts
+run_with_env "$TSX_BIN" scripts/dataMigrations/runDataMigrations.ts
 
 log "Post-deployment steps complete"
