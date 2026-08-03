@@ -1,6 +1,6 @@
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
-import type { SerializeOptions } from 'cookie';
+import type { CookieSerializeOptions } from '../../constants/cookies';
 import { uploadToBucket } from '../../aws/actions/s3';
 import { AWS_PROFILE_PICTURE_BUCKET_NAME } from '../../constants/aws';
 import { createEmailVerificationToken } from '../../db/actions/emailVerification';
@@ -134,7 +134,7 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			event.cookies.set(
 				SESSION_ID_KEY,
 				encodedAuthToken,
-				buildCookieOptions(true) as SerializeOptions & { path: string },
+				buildCookieOptions(true) as CookieSerializeOptions & { path: string },
 			);
 
 			logger.info('Creating user preferences', { userId: newUser.id });

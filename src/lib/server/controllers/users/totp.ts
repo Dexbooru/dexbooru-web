@@ -1,6 +1,6 @@
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
-import type { SerializeOptions } from 'cookie';
+import type { CookieSerializeOptions } from '../../constants/cookies';
 import { findUserById, findUserByName } from '../../db/actions/user';
 import { updateUserPreferences } from '../../db/actions/preference';
 import {
@@ -61,7 +61,7 @@ export const handleProcessUserTotp = async (event: RequestEvent) => {
 				event.cookies.set(
 					SESSION_ID_KEY,
 					encodedAuthToken,
-					buildCookieOptions(rememberMe) as SerializeOptions & { path: string },
+					buildCookieOptions(rememberMe) as CookieSerializeOptions & { path: string },
 				);
 
 				deleteTotpChallenge(challengeId);

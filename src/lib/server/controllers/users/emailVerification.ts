@@ -1,12 +1,12 @@
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { redirect, type RequestEvent } from '@sveltejs/kit';
-import type { SerializeOptions } from 'cookie';
 import {
 	DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
 	DEXBOORU_SUPPORT_DISPLAY_NAME,
 	EMAIL_VERIFICATION_SUBJECT,
 } from '../../constants/email';
+import type { CookieSerializeOptions } from '../../constants/cookies';
 import {
 	createEmailVerificationToken,
 	deleteEmailVerificationToken,
@@ -56,7 +56,7 @@ export const handleVerifyEmail = async (event: RequestEvent) => {
 				event.cookies.set(
 					SESSION_ID_KEY,
 					encodedAuthToken,
-					buildCookieOptions(true) as SerializeOptions & { path: string },
+					buildCookieOptions(true) as CookieSerializeOptions & { path: string },
 				);
 			}
 

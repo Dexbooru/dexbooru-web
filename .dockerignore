@@ -16,7 +16,7 @@ dist
 docker
 docs
 mock_data
-scripts
+scripts/venv
 tests
 .env
 .env.*

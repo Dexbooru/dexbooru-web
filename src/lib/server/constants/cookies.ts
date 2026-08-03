@@ -1,12 +1,20 @@
 import { dev } from '$app/environment';
 import { DOMAIN as APP_DOMAIN } from '$lib/server/runtimeEnv';
-import type { SerializeOptions } from 'cookie';
+
+export type CookieSerializeOptions = {
+	path?: string;
+	sameSite?: boolean | 'strict' | 'lax' | 'none';
+	secure?: boolean;
+	maxAge?: number;
+	httpOnly?: boolean;
+	domain?: string;
+};
 
 type CookieOptions = Pick<
-	SerializeOptions,
+	CookieSerializeOptions,
 	'path' | 'sameSite' | 'secure' | 'maxAge' | 'httpOnly' | 'domain'
 > & {
-	sameSite: 'strict' | 'lax' | 'none'; // Explicitly define sameSite as a literal type
+	sameSite: 'strict' | 'lax' | 'none';
 };
 
 export const SESSION_ID_COOKIE_STANDARD_AGE = 60 * 60 * 24 * 7;

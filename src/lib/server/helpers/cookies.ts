@@ -1,11 +1,11 @@
 import type { Cookies } from '@sveltejs/kit';
-import type { SerializeOptions } from 'cookie';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { DEXBOORU_NOTIFICATIONS_SESSION_COOKIE_KEY } from '$lib/server/constants/notifications';
 import {
 	SESSION_ID_COOKIE_OPTIONS,
 	SESSION_ID_COOKIE_STANDARD_AGE,
 	SESSION_ID_COOKIE_SUPER_AGE,
+	type CookieSerializeOptions,
 } from '../constants/cookies';
 
 /** Expire the session cookie; must mirror SESSION_ID_COOKIE_OPTIONS or the browser keeps the cookie. */
@@ -26,7 +26,7 @@ export const clearNotificationSessionCookie = (cookies: Cookies): void => {
 	});
 };
 
-export const buildCookieOptions = (rememberMe: boolean): SerializeOptions => {
+export const buildCookieOptions = (rememberMe: boolean): CookieSerializeOptions => {
 	return {
 		path: '/',
 		...SESSION_ID_COOKIE_OPTIONS,

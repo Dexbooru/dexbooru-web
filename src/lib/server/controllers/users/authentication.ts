@@ -1,7 +1,6 @@
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
-import type { SerializeOptions } from 'cookie';
 import { findUserByName, findUserById, findUserByEmail } from '../../db/actions/user';
 import { findUserPreferences } from '../../db/actions/preference';
 import {
@@ -15,7 +14,7 @@ import { doPasswordsMatch } from '../../helpers/password';
 import { generateEncodedUserTokenFromRecord } from '../../helpers/sessions';
 import { createTotpChallenge } from '../../helpers/totp';
 import { UserAuthFormSchema, UserAuthEndpointSchema } from '../request-schemas/users';
-import { SESSION_JWT_API_ENDPOINT_AGE } from '../../constants/cookies';
+import { SESSION_JWT_API_ENDPOINT_AGE, type CookieSerializeOptions } from '../../constants/cookies';
 import type { TUser } from '$lib/shared/types/users';
 import type { TRequestSchema } from '../../types/controllers';
 import logger from '../../logging/logger';
@@ -95,7 +94,7 @@ export const handleUserAuthFlowForm = async (event: RequestEvent) => {
 			event.cookies.set(
 				SESSION_ID_KEY,
 				encodedAuthToken,
-				buildCookieOptions(rememberMe) as SerializeOptions & { path: string },
+				buildCookieOptions(rememberMe) as CookieSerializeOptions & { path: string },
 			);
 			const redirectTo = getSafeRedirectTo(rawRedirectTo, '/posts');
 			redirect(302, redirectTo);

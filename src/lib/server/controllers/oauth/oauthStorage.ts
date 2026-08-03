@@ -1,6 +1,6 @@
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import type { RequestEvent } from '@sveltejs/kit';
-import type { SerializeOptions } from 'cookie';
+import type { CookieSerializeOptions } from '../../constants/cookies';
 import {
 	createErrorResponse,
 	createSuccessResponse,
@@ -21,7 +21,7 @@ export const handleOauthStorage = async (event: RequestEvent) => {
 		event.cookies.set(
 			SESSION_ID_KEY,
 			token,
-			buildCookieOptions(true) as SerializeOptions & { path: string },
+			buildCookieOptions(true) as CookieSerializeOptions & { path: string },
 		);
 
 		return createSuccessResponse(
