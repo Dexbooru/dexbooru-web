@@ -1,5 +1,6 @@
 import { dev } from '$app/environment';
 import {
+	AWS_BUCKET_NAMES,
 	AWS_LOCAL_COLLECTION_PICTURE_BASE_URL,
 	AWS_LOCAL_POSTS_BASE_URL,
 	AWS_LOCAL_PROFILE_PICTURE_BASE_URL,
@@ -14,6 +15,7 @@ import {
 	DeleteObjectCommand,
 	DeleteObjectsCommand,
 	GetObjectCommand,
+	HeadBucketCommand,
 	ListObjectsV2Command,
 	PutObjectCommand,
 	type DeleteObjectCommandOutput,
@@ -174,6 +176,28 @@ export async function deleteObjectsByKeys(bucketName: string, objectKeys: string
 					Quiet: true,
 				},
 			}),
+		);
+	}
+}
+
+export async function assertS3BucketsReachable(): Promise<void> {
+	const failures: string[] = [];
+
+	await Promise.all(
+		AWS_BUCKET_NAMES.map(async (bucketName) => {
+			try {
+				await awsS3.send(new HeadBucketCommand({ Bucket: bucketName }));
+				logger.info('S3 bucket preflight ok', { bucketName });
+			} catch (error) {
+				const message = error instanceof Error ? error.message : String(error);
+				failures.push(`${bucketName}: ${message}`);
+			}
+		}),
+	);
+
+	if (failures.length > 0) {
+		throw new Error(
+			`S3 preflight failed — required buckets missing or unreachable:\n${failures.join('\n')}`,
 		);
 	}
 }

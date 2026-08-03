@@ -8,9 +8,11 @@
 	import type { PostImageSimilarityResult } from '$lib/shared/types/postImageSimilarity';
 	import { isFileImage } from '$lib/shared/helpers/images';
 	import { toast } from '@zerodevx/svelte-toast';
-	import { untrack } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
+	import type { TPostImageSimilarityConfiguration } from '$lib/client/types/postImageSimilarity';
+	import { getPostImageSimilarityConfiguration } from '$lib/client/api/mlApi';
 
 	let { data } = $props();
 
@@ -20,6 +22,7 @@
 	let similarityDescription = $state('');
 
 	let similarityResults = $state<PostImageSimilarityResult[]>([]);
+	let similarityConfiguration = $state<TPostImageSimilarityConfiguration | null>(null);
 	let resultsLoading = $state(false);
 	let showNoResults = $state(false);
 
@@ -69,6 +72,28 @@
 		}
 		return 'Something went wrong while searching for similar posts.';
 	}
+
+	const fetchPostImageSimilarityConfiguration =
+		async (): Promise<TPostImageSimilarityConfiguration | null> => {
+			const response = await getPostImageSimilarityConfiguration();
+			if (!response.ok) {
+				toast.push(
+					'An unexpected error occured while fetching the post image similarity configuration',
+					FAILURE_TOAST_OPTIONS,
+				);
+
+				return null;
+			}
+
+			const configurationData = (await response.json()) as TPostImageSimilarityConfiguration;
+			return configurationData;
+		};
+
+	onMount(() => {
+		fetchPostImageSimilarityConfiguration().then((data) => {
+			similarityConfiguration = data;
+		});
+	});
 </script>
 
 <main class="w-full px-3 py-4 sm:px-4 md:px-6">
@@ -118,6 +143,7 @@
 				bind:imageUrl
 				bind:imageFile
 				bind:similarityDescription
+				{similarityConfiguration}
 				{onImageFileChange}
 			/>
 

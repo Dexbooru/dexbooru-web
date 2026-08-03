@@ -29,8 +29,7 @@ type TTransformedResult = {
 };
 
 type TImageTransformWorkerResponse =
-	| { id: string; ok: true; result: TTransformedResult }
-	| { id: string; ok: false; error: string };
+	{ id: string; ok: true; result: TTransformedResult } | { id: string; ok: false; error: string };
 
 const WEBP_OPTIONS = {
 	quality: 95,

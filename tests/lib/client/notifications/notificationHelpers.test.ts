@@ -15,7 +15,9 @@ describe('getCommentNotificationPreview', () => {
 		const preview = getCommentNotificationPreview(`<p>${longText}</p>`);
 
 		expect(preview.endsWith(COMMENT_CONTENT_PREVIEW_ELLIPSIS)).toBe(true);
-		expect(preview.length).toBe(COMMENT_CONTENT_PREVIEW_LENGTH + COMMENT_CONTENT_PREVIEW_ELLIPSIS.length);
+		expect(preview.length).toBe(
+			COMMENT_CONTENT_PREVIEW_LENGTH + COMMENT_CONTENT_PREVIEW_ELLIPSIS.length,
+		);
 		expect(preview.slice(0, COMMENT_CONTENT_PREVIEW_LENGTH)).toBe(
 			'a'.repeat(COMMENT_CONTENT_PREVIEW_LENGTH),
 		);

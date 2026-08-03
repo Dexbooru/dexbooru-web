@@ -11,8 +11,7 @@ import type { CustomDataMigrationCreateInput } from '../../src/generated/prisma/
 import type BaseDataMigration from './baseDataMigration';
 
 type LoadDataMigrationResult =
-	| { ok: true; migration: BaseDataMigration }
-	| { ok: false; reason: string };
+	{ ok: true; migration: BaseDataMigration } | { ok: false; reason: string };
 
 const formatElapsedDuration = (durationMs: number): string => {
 	if (durationMs < 1000) {

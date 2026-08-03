@@ -51,7 +51,7 @@
 				{postContainerTitle}
 			</h1>
 			<div class="flex flex-col space-y-2">
-				{#if ['/posts/tag', '/posts/artist'].some( (path) => page.url.pathname.includes(path), ) && getPageLabelType()}
+				{#if ['/posts/tag', '/posts/artist'].some( (path) => page.url.pathname.includes(path) ) && getPageLabelType()}
 					<Button
 						onclick={() =>
 							activeModal.set({

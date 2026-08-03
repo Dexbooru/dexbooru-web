@@ -55,7 +55,7 @@
 		id="pagination-container"
 		class="flex justify-center space-x-3 {noCollectionsLeft && 'mt-5'}"
 	>
-		{#if noCollectionsOnPage && !['collections/created'].find( (item) => page.url.href.includes(item), ) && $collectionPaginationData.pageNumber > 0}
+		{#if noCollectionsOnPage && !['collections/created'].find( (item) => page.url.href.includes(item) ) && $collectionPaginationData.pageNumber > 0}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}
 			{#if ($collectionPaginationData.pageNumber - 1 >= 0 || noCollectionsLeft) && $collectionPaginationData.pageNumber !== 0}

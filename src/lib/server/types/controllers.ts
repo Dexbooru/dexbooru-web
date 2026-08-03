@@ -36,5 +36,4 @@ export type TValidationError = {
 };
 
 export type TValidationResult<T> =
-	| { success: true; data: T }
-	| { success: false; errors: TValidationError[] };
+	{ success: true; data: T } | { success: false; errors: TValidationError[] };

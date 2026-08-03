@@ -1,9 +1,17 @@
-import { readdir } from 'node:fs/promises';
-import { resolve } from 'node:path';
-import ts from 'typescript';
+import { execFileSync } from 'node:child_process';
+import { mkdir, readdir, writeFile } from 'node:fs/promises';
+import { basename, dirname, join, resolve } from 'node:path';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+
+const require = createRequire(import.meta.url);
+const typescriptPackageDirectory = dirname(require.resolve('typescript/package.json'));
+const tscEntry = join(typescriptPackageDirectory, 'lib/tsc.js');
 
 const workerSourceDirectory = resolve('src/lib/server/workers');
-const workerOutputDirectory = resolve('build/server/chunks');
+const workerOutputDirectory = resolve('build/workers');
+const workersTsconfig = resolve('tsconfig.workers.json');
+const workersManifestPath = join(workerOutputDirectory, 'manifest.json');
 
 const discoverWorkerEntries = async (directory) => {
 	const entries = await readdir(directory, { withFileTypes: true });
@@ -28,28 +36,19 @@ if (workerEntries.length === 0) {
 	throw new Error(`No worker entries found in ${workerSourceDirectory}`);
 }
 
-const compilerOptions = {
-	target: ts.ScriptTarget.ES2022,
-	module: ts.ModuleKind.NodeNext,
-	moduleResolution: ts.ModuleResolutionKind.NodeNext,
-	esModuleInterop: true,
-	skipLibCheck: true,
-	types: ['node'],
-	rootDir: workerSourceDirectory,
-	outDir: workerOutputDirectory,
-	noEmitOnError: true,
-};
-const program = ts.createProgram(workerEntries, compilerOptions);
-const emitResult = program.emit();
-const diagnostics = [...ts.getPreEmitDiagnostics(program), ...emitResult.diagnostics];
+execFileSync(process.execPath, [tscEntry, '-p', workersTsconfig], {
+	stdio: 'inherit',
+	cwd: dirname(fileURLToPath(import.meta.url)),
+});
 
-if (diagnostics.length > 0) {
-	const message = ts.formatDiagnosticsWithColorAndContext(diagnostics, {
-		getCanonicalFileName: (fileName) => fileName,
-		getCurrentDirectory: process.cwd,
-		getNewLine: () => '\n',
-	});
-	throw new Error(`Failed to compile worker entries:\n${message}`);
-}
+await mkdir(workerOutputDirectory, { recursive: true });
 
-console.log(`Compiled ${workerEntries.length} worker thread module(s).`);
+const modules = workerEntries
+	.map((entryPath) => basename(entryPath).replace(/\.ts$/u, '.js'))
+	.sort();
+
+await writeFile(workersManifestPath, `${JSON.stringify({ modules }, null, '\t')}\n`, 'utf8');
+
+process.stdout.write(
+	`Compiled ${workerEntries.length} worker thread module(s) → ${workerOutputDirectory}\n`,
+);

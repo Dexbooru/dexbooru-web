@@ -40,11 +40,7 @@ export type IAccountRecoveryFormFields = {
 };
 
 export type TPASSWORD_REQUIREMENT_ABV =
-	| 'length'
-	| 'lowercase'
-	| 'uppercase'
-	| 'number'
-	| 'special-character';
+	'length' | 'lowercase' | 'uppercase' | 'number' | 'special-character';
 export type TPasswordRequirements = Record<TPASSWORD_REQUIREMENT_ABV, string>;
 
 type TEMAIL_REQUIREMENT_ABV = 'length' | 'valid-email';

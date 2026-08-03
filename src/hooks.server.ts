@@ -1,9 +1,15 @@
-import { dev } from '$app/environment';
+import { building, dev } from '$app/environment';
 import { ensureApplicationConfigurationLoaded } from '$lib/server/applicationConfiguration';
 import { populateAuthenticatedUser } from '$lib/server/helpers/controllers';
 import logger from '$lib/server/logging/logger';
+import { runStartupPreflightChecks } from '$lib/server/preflight';
 import { ensureUploadPipelineBootstrapped } from '$lib/server/uploads/bootstrap';
-import type { Handle, HandleServerError } from '@sveltejs/kit';
+import type { Handle, HandleServerError, ServerInit } from '@sveltejs/kit';
+
+export const init: ServerInit = async () => {
+	if (building) return;
+	await runStartupPreflightChecks();
+};
 
 export const handle: Handle = async ({ event, resolve }) => {
 	logger.info(event);

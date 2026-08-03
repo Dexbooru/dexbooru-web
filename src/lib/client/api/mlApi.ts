@@ -6,10 +6,18 @@ import type {
 } from '$lib/shared/types/tagRating';
 
 const TAG_RATING_PREDICT_PATH = '/api/tag-rating/predict';
+const POST_IMAGE_SIMILARITY_PATH = '/api/similarity/posts/images';
 
-/**
- * POST tag-rating predict (dexbooru-ai). Body matches `TagRatingPredictionRequest`.
- */
+export async function getPostImageSimilarityConfiguration(): Promise<Response> {
+	const url = `${ML_API_URL}${POST_IMAGE_SIMILARITY_PATH}/config`;
+	return await fetch(url, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+}
+
 export async function predictTagRating(
 	body: TagRatingPredictionRequest,
 	init?: RequestInit,
@@ -23,10 +31,6 @@ export async function predictTagRating(
 	});
 }
 
-/**
- * Fetches a rating prediction for post tags (space-separated tag string).
- * Returns `null` when there is nothing to send, the request fails, or JSON is invalid.
- */
 export async function fetchTagRatingPredictionForTags(
 	tags: string[],
 	init?: Pick<RequestInit, 'signal'>,

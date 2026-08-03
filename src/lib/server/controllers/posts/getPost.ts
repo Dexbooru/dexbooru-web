@@ -42,10 +42,7 @@ type TPrivilegedPostPayload = {
 };
 
 type TCachedIndividualPost =
-	| TPost
-	| TLegacyCachedPostPayload
-	| TPrivilegedPostPayload
-	| { notFound: true };
+	TPost | TLegacyCachedPostPayload | TPrivilegedPostPayload | { notFound: true };
 
 const isNotFoundCacheEntry = (value: TCachedIndividualPost): value is { notFound: true } => {
 	return 'notFound' in value && value.notFound === true;

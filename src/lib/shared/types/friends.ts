@@ -31,11 +31,7 @@ export type TFriendRequestSelector = Prisma.FriendRequestSelect<DefaultArgs>;
 
 export type TFriendRequestAction = 'accept' | 'decline';
 export type TFriendStatus =
-	| 'not-friends'
-	| 'request-pending'
-	| 'are-friends'
-	| 'is-self'
-	| 'irrelevant';
+	'not-friends' | 'request-pending' | 'are-friends' | 'is-self' | 'irrelevant';
 
 export type TFriendRequestSendBody = {
 	receiverUsername: string;

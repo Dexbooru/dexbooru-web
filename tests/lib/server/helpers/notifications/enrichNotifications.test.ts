@@ -49,10 +49,7 @@ describe('enrichNotifications', () => {
 		mockPostActions.findPostsByIds.mockResolvedValue([
 			{
 				id: 'p1',
-				imageUrls: [
-					'https://cdn.example/post-1.webp',
-					'https://cdn.example/post-2.webp',
-				],
+				imageUrls: ['https://cdn.example/post-1.webp', 'https://cdn.example/post-2.webp'],
 			},
 		]);
 

@@ -52,7 +52,7 @@
 
 {#if $commentPaginationData}
 	<div id="pagination-container" class="m-3 flex justify-center space-x-3">
-		{#if noCommentsOnPage && !['uploaded', 'liked'].find( (item) => page.url.href.includes(item), ) && $commentPaginationData.pageNumber > 0}
+		{#if noCommentsOnPage && !['uploaded', 'liked'].find( (item) => page.url.href.includes(item) ) && $commentPaginationData.pageNumber > 0}
 			<Button href={firstPageUrl.href} color="blue">Return to page 1</Button>
 		{:else}
 			{#if ($commentPaginationData.pageNumber - 1 >= 0 || noCommentsLeft) && $commentPaginationData.pageNumber !== 0}

@@ -1,6 +1,8 @@
 <script lang="ts">
+	import type { TPostImageSimilarityConfiguration } from '$lib/client/types/postImageSimilarity';
 	import { FILE_IMAGE_ACCEPT } from '$lib/shared/constants/images';
 	import { MAXIMUM_POST_DESCRIPTION_LENGTH } from '$lib/shared/constants/posts';
+	import Badge from 'flowbite-svelte/Badge.svelte';
 	import Fileupload from 'flowbite-svelte/Fileupload.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
 	import Label from 'flowbite-svelte/Label.svelte';
@@ -11,6 +13,7 @@
 		imageUrl: string;
 		imageFile: string;
 		similarityDescription: string;
+		similarityConfiguration: TPostImageSimilarityConfiguration | null;
 		onImageFileChange: (event: Event) => void | Promise<void>;
 	};
 
@@ -19,8 +22,14 @@
 		imageUrl = $bindable(),
 		imageFile = $bindable(),
 		similarityDescription = $bindable(),
+		similarityConfiguration,
 		onImageFileChange,
 	}: Props = $props();
+
+	const isAllImageDomainsAllowed = (configuration: TPostImageSimilarityConfiguration): boolean =>
+		configuration.all_image_domains_allowed_in_search ||
+		(configuration.allowed_image_domains.length === 1 &&
+			configuration.allowed_image_domains[0] === '*');
 </script>
 
 <div class="space-y-6">
@@ -48,6 +57,28 @@
 			size="md"
 			class="w-full dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
 		/>
+		{#if similarityConfiguration}
+			{#if isAllImageDomainsAllowed(similarityConfiguration)}
+				<p class="text-xs text-gray-500 dark:text-gray-400">
+					Image URLs from any domain are allowed for similarity search.
+				</p>
+			{:else if similarityConfiguration.allowed_image_domains.length > 0}
+				<div class="space-y-1.5">
+					<p class="text-xs text-gray-500 dark:text-gray-400">Allowed image URL domains:</p>
+					<div class="flex flex-wrap gap-1.5">
+						{#each similarityConfiguration.allowed_image_domains as domain (domain)}
+							<a href="https://{domain}" target="_blank" rel="noopener noreferrer">
+								<Badge color="blue" class="px-2 py-0.5">{domain}</Badge>
+							</a>
+						{/each}
+					</div>
+				</div>
+			{:else}
+				<p class="text-xs text-gray-500 dark:text-gray-400">
+					No external image URL domains are currently allowed.
+				</p>
+			{/if}
+		{/if}
 	</div>
 
 	<div class="space-y-1">

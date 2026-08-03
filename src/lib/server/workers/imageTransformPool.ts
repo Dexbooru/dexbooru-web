@@ -1,5 +1,4 @@
 import { Worker } from 'node:worker_threads';
-import { fileURLToPath } from 'node:url';
 import { dev } from '$app/environment';
 import logger from '../logging/logger';
 import type { TImageData } from '../types/images';
@@ -8,6 +7,7 @@ import type {
 	TImageTransformWorkerRequest,
 	TImageTransformWorkerResponse,
 } from './imageTransformWorkerTypes';
+import { getWorkerModuleUrl } from './workerModules';
 
 type TPendingJob = {
 	resolve: (value: TImageData) => void;
@@ -17,17 +17,9 @@ type TPendingJob = {
 const MAX_POOL_SIZE = 3;
 
 const createWorkerInstance = (): Worker => {
-	const workerUrl = new URL(
-		dev ? './imageTransformWorker.ts' : './imageTransformWorker.js',
-		import.meta.url,
-	);
-	const workerPath = fileURLToPath(workerUrl);
-	const needsTsLoader = workerPath.endsWith('.ts');
-
+	const workerUrl = getWorkerModuleUrl('imageTransformWorker');
 	return new Worker(workerUrl, {
-		// In vitest/vite-dev the source is still .ts and must be loaded through tsx
-		// outside Vite's resolver. The build script emits a standalone .js worker.
-		...(needsTsLoader ? { execArgv: ['--import', 'tsx'] } : {}),
+		...(dev ? { execArgv: ['--import', 'tsx'] } : {}),
 	});
 };
 
