@@ -205,7 +205,12 @@
 	{#snippet footer()}
 		<div class="flex w-full flex-wrap justify-end gap-3">
 			<Button color="alternative" disabled={saving} onclick={() => (open = false)}>Cancel</Button>
-			<Button color="blue" disabled={applyDisabled} onclick={handleApply}>
+			<Button
+				color="blue"
+				disabled={applyDisabled}
+				onclick={handleApply}
+				class={applyDisabled ? '' : 'opacity-100!'}
+			>
 				{#if saving}
 					<Spinner class="me-2" size="4" />
 				{/if}

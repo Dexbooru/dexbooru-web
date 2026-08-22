@@ -230,7 +230,12 @@
 		{maximumImagesAllowed}
 	/>
 
-	<Button disabled={editButtonDisabled} onclick={handleOnEditClick} class="w-full" color="green"
-		>Edit post</Button
+	<Button
+		disabled={editButtonDisabled}
+		onclick={handleOnEditClick}
+		class="w-full {editButtonDisabled ? '' : 'opacity-100!'}"
+		color="green"
 	>
+		Edit post
+	</Button>
 </Modal>

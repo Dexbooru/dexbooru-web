@@ -19,7 +19,7 @@
 
 	let otpErrorReason = $derived(form?.reason ?? null);
 	let otpCode: string = $state('');
-	let otpFormButtonDisabled = $derived(otpCode.length !== TOTP_CODE_LENGTH);
+	const otpFormButtonDisabled = $derived(otpCode.length !== TOTP_CODE_LENGTH);
 
 	onMount(() => {
 		const totpTimeoutIntervalId = setTimeout(() => {
@@ -33,7 +33,13 @@
 </script>
 
 <Card class="mt-20 w-full max-w-md">
-	<form class="flex flex-col space-y-6" method="POST">
+	<form
+		class="flex flex-col space-y-6"
+		method="POST"
+		onsubmit={(event) => {
+			if (otpFormButtonDisabled) event.preventDefault();
+		}}
+	>
 		<h3 class="text-center text-xl font-medium text-gray-900 dark:text-white">
 			Complete OTP Challenge
 		</h3>
@@ -62,7 +68,13 @@
 		<input type="hidden" name="username" value={username} />
 		<input type="hidden" name="rememberMe" value={rememberMe} />
 
-		<Button disabled={otpFormButtonDisabled} type="submit" class="w-full">Submit Code</Button>
+		<Button
+			disabled={otpFormButtonDisabled}
+			type="submit"
+			class="w-full {otpFormButtonDisabled ? '' : 'opacity-100!'}"
+		>
+			Submit Code
+		</Button>
 
 		{#if otpErrorReason}
 			<Alert color="red">

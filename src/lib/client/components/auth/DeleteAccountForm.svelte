@@ -9,13 +9,23 @@
 
 	let confirmedPassword: string = $state('');
 	let confirmationText: string = $state('');
+	const deleteAccountButtonDisabled = $derived(
+		confirmationText !== ACCOUNT_DELETION_CONFIRMATION_TEXT || confirmedPassword.length === 0,
+	);
 </script>
 
 <Card class="p-6 sm:p-8">
 	<h3 class="mb-5 text-center text-xl font-medium text-gray-900 dark:text-white">
 		DELETE YOUR ACCOUNT PERMANENTELY!
 	</h3>
-	<form method="POST" action="?/deleteAccount" class="flex flex-col space-y-2">
+	<form
+		method="POST"
+		action="?/deleteAccount"
+		class="flex flex-col space-y-2"
+		onsubmit={(event) => {
+			if (deleteAccountButtonDisabled) event.preventDefault();
+		}}
+	>
 		<Label class="mb-3 space-y-2">
 			<span>Enter <em>{ACCOUNT_DELETION_CONFIRMATION_TEXT}</em> phrase below to proceed</span>
 			<Input
@@ -39,8 +49,10 @@
 		<Button
 			type="submit"
 			color="red"
-			disabled={confirmationText !== ACCOUNT_DELETION_CONFIRMATION_TEXT ||
-				confirmedPassword.length === 0}>DELETE YOUR ACCOUNT</Button
+			disabled={deleteAccountButtonDisabled}
+			class={deleteAccountButtonDisabled ? '' : 'opacity-100!'}
 		>
+			DELETE YOUR ACCOUNT
+		</Button>
 	</form>
 </Card>

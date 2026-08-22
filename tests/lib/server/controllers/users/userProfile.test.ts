@@ -18,6 +18,18 @@ import type { Prisma } from '$generated/prisma/client';
 
 type TUser = Prisma.UserGetPayload<Record<string, never>>;
 
+const { mockDev } = vi.hoisted(() => ({
+	mockDev: { value: false },
+}));
+
+vi.mock('$app/environment', () => ({
+	get dev() {
+		return mockDev.value;
+	},
+	browser: false,
+	building: false,
+}));
+
 describe('user profile and lifecycle controllers', () => {
 	const mockUser = { id: 'u1', username: 'testuser', role: 'OWNER' };
 	const mockEvent = {
@@ -28,10 +40,11 @@ describe('user profile and lifecycle controllers', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockDev.value = false;
 	});
 
 	describe('handleCreateUser', () => {
-		it('should successfully create user and send verification email', async () => {
+		const setupSuccessfulRegistration = () => {
 			mockUserActions.findUserByNameOrEmail.mockResolvedValue(null);
 			mockImageHelpers.transformDefaultProfilePicture.mockResolvedValue(Buffer.from('pfp'));
 			mockS3Actions.uploadToBucket.mockResolvedValue('http://pfp-url');
@@ -40,6 +53,7 @@ describe('user profile and lifecycle controllers', () => {
 				id: 'u2',
 				username: 'newuser',
 				email: 'new@test.com',
+				emailVerified: mockDev.value,
 			} as TUser);
 			mockEmailVerificationActions.createEmailVerificationToken.mockResolvedValue({
 				id: 'token-id',
@@ -59,13 +73,43 @@ describe('user profile and lifecycle controllers', () => {
 			vi.mocked(redirect).mockImplementation(() => {
 				throw { status: 302 };
 			});
+		};
+
+		it('should successfully create user and send verification email in production', async () => {
+			mockDev.value = false;
+			setupSuccessfulRegistration();
 
 			await expect(handleCreateUser(mockEvent)).rejects.toEqual({ status: 302 });
 
-			expect(mockUserActions.createUser).toHaveBeenCalled();
+			expect(mockUserActions.createUser).toHaveBeenCalledWith(
+				'newuser',
+				'new@test.com',
+				'hashed_pass',
+				'http://pfp-url',
+				false,
+			);
 			expect(mockPreferenceActions.createUserPreferences).toHaveBeenCalled();
 			expect(mockEmailVerificationActions.createEmailVerificationToken).toHaveBeenCalledWith('u2');
 			expect(mockEmailHelpers.sendEmail).toHaveBeenCalled();
+			expect(redirect).toHaveBeenCalledWith(302, '/posts');
+		});
+
+		it('should auto-verify email and skip verification email in development', async () => {
+			mockDev.value = true;
+			setupSuccessfulRegistration();
+
+			await expect(handleCreateUser(mockEvent)).rejects.toEqual({ status: 302 });
+
+			expect(mockUserActions.createUser).toHaveBeenCalledWith(
+				'newuser',
+				'new@test.com',
+				'hashed_pass',
+				'http://pfp-url',
+				true,
+			);
+			expect(mockPreferenceActions.createUserPreferences).toHaveBeenCalled();
+			expect(mockEmailVerificationActions.createEmailVerificationToken).not.toHaveBeenCalled();
+			expect(mockEmailHelpers.sendEmail).not.toHaveBeenCalled();
 			expect(redirect).toHaveBeenCalledWith(302, '/posts');
 		});
 	});

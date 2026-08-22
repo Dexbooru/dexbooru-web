@@ -28,11 +28,14 @@
 
 	const loginErrorReason: string | undefined = $derived(form?.reason);
 
-	let username: string = $derived(form?.username || '');
-	let password: string = $state('');
-	let rememberMe: boolean = $state(false);
-	let loginFormButtonDisabled = $derived.by(() => {
-		return !(username.length > 0 && password.length > 0);
+	let username = $state('');
+	let password = $state('');
+	let rememberMe = $state(false);
+	const loginFormButtonDisabled = $derived(!(username.length > 0 && password.length > 0));
+
+	$effect(() => {
+		const formUsername = form?.username;
+		if (formUsername !== undefined) username = formUsername;
 	});
 
 	onMount(() => {
@@ -47,7 +50,13 @@
 </script>
 
 <Card class="mt-4 mr-3 mb-2 ml-3 p-6 shadow-lg">
-	<form class="flex flex-col space-y-6" method="POST">
+	<form
+		class="flex flex-col space-y-6"
+		method="POST"
+		onsubmit={(event) => {
+			if (loginFormButtonDisabled) event.preventDefault();
+		}}
+	>
 		<h3 class="text-center text-xl font-medium text-gray-900 dark:text-white">
 			Login to Dexbooru!
 		</h3>
@@ -89,7 +98,13 @@
 			<Input type="hidden" name="rememberMe" value={rememberMe.toString()} />
 		</div>
 		<Input type="hidden" name="redirectTo" value={page.url.searchParams.get('redirectTo') ?? ''} />
-		<Button disabled={loginFormButtonDisabled} type="submit" class="w-full">Log in</Button>
+		<Button
+			disabled={loginFormButtonDisabled}
+			type="submit"
+			class="w-full {loginFormButtonDisabled ? '' : 'opacity-100!'}"
+		>
+			Log in
+		</Button>
 
 		<OauthLinks
 			{discordAuthorizationUrl}

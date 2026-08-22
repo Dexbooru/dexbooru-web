@@ -19,6 +19,10 @@
 
 	const userPreferences = getAuthenticatedUserPreferences();
 
+	const generateQrButtonDisabled = $derived(currentPassword.length === 0 || totpLoading);
+	const enable2faButtonDisabled = $derived(
+		isNaN(parseInt(otpCode)) || otpCode.length !== TOTP_CODE_LENGTH || totpUri.length === 0,
+	);
 	const handleTotpGeneration = async () => {
 		if (currentPassword.length === 0 || totpUri.length > 0) return;
 
@@ -88,10 +92,13 @@
 			<Button type="submit">Disable 2FA on account</Button>
 		{:else}
 			<Button
-				disabled={currentPassword.length === 0 || totpLoading}
+				disabled={generateQrButtonDisabled}
 				onclick={handleTotpGeneration}
-				type="button">Generate QR Code</Button
+				type="button"
+				class={generateQrButtonDisabled ? '' : 'opacity-100!'}
 			>
+				Generate QR Code
+			</Button>
 		{/if}
 
 		{#if totpUri.length > 0}
@@ -133,11 +140,11 @@
 			</div>
 			<Button
 				type="submit"
-				disabled={isNaN(parseInt(otpCode)) ||
-					otpCode.length !== TOTP_CODE_LENGTH ||
-					totpUri.length === 0}
-				class="mt-4">Enable 2FA</Button
+				disabled={enable2faButtonDisabled}
+				class="mt-4 {enable2faButtonDisabled ? '' : 'opacity-100!'}"
 			>
+				Enable 2FA
+			</Button>
 		{/if}
 	</form>
 </Card>

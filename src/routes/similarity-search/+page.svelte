@@ -29,7 +29,7 @@
 	const similaritySearchButtonDisabled = $derived.by(() => {
 		return postId.length === 0 && imageUrl.length === 0 && imageFile.length === 0;
 	});
-
+	const similaritySearchSubmitDisabled = $derived(similaritySearchButtonDisabled || resultsLoading);
 	const resetFileUploadState = (target: HTMLInputElement) => {
 		target.value = '';
 		imageFile = '';
@@ -148,9 +148,11 @@
 			/>
 
 			<Button
-				disabled={similaritySearchButtonDisabled || resultsLoading}
+				disabled={similaritySearchSubmitDisabled}
 				type="submit"
-				class="w-full dark:bg-blue-700 dark:hover:bg-blue-800"
+				class="w-full dark:bg-blue-700 dark:hover:bg-blue-800 {similaritySearchSubmitDisabled
+					? ''
+					: 'opacity-100!'}"
 			>
 				Find most similar posts
 			</Button>

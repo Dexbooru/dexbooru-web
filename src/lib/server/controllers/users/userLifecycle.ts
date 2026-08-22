@@ -1,3 +1,4 @@
+import { dev } from '$app/environment';
 import { SESSION_ID_KEY } from '$lib/shared/constants/session';
 import { isRedirect, redirect, type RequestEvent } from '@sveltejs/kit';
 import type { CookieSerializeOptions } from '../../constants/cookies';
@@ -124,11 +125,21 @@ export const handleCreateUser = async (event: RequestEvent) => {
 				);
 			}
 
-			logger.info('Creating user account', { username });
+			logger.info('Creating user account', { username, autoVerifyEmail: dev });
 			const hashedPassword = await hashPassword(password);
 
-			const newUser = await createUser(username, email, hashedPassword, finalProfilePictureUrl);
-			logger.info('User created successfully', { userId: newUser.id, username: newUser.username });
+			const newUser = await createUser(
+				username,
+				email,
+				hashedPassword,
+				finalProfilePictureUrl,
+				dev,
+			);
+			logger.info('User created successfully', {
+				userId: newUser.id,
+				username: newUser.username,
+				emailVerified: newUser.emailVerified,
+			});
 
 			const encodedAuthToken = generateEncodedUserTokenFromRecord(newUser, true);
 			event.cookies.set(
@@ -140,24 +151,28 @@ export const handleCreateUser = async (event: RequestEvent) => {
 			logger.info('Creating user preferences', { userId: newUser.id });
 			await createUserPreferences(newUser.id);
 
-			try {
-				logger.info('Sending verification email', { userId: newUser.id });
-				const verificationToken = await createEmailVerificationToken(newUser.id);
-				await sendEmail({
-					from: {
-						name: DEXBOORU_SUPPORT_DISPLAY_NAME,
-						address: DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
-					},
-					to: newUser.email,
-					subject: EMAIL_VERIFICATION_SUBJECT,
-					html: buildEmailVerificationTemplate(newUser.username, verificationToken.id),
-				});
-				logger.info('Verification email sent successfully', { userId: newUser.id });
-			} catch (emailError) {
-				logger.error('Failed to send verification email', {
-					userId: newUser.id,
-					message: emailError instanceof Error ? emailError.message : String(emailError),
-				});
+			if (dev) {
+				logger.info('Skipping verification email in development mode', { userId: newUser.id });
+			} else {
+				try {
+					logger.info('Sending verification email', { userId: newUser.id });
+					const verificationToken = await createEmailVerificationToken(newUser.id);
+					await sendEmail({
+						from: {
+							name: DEXBOORU_SUPPORT_DISPLAY_NAME,
+							address: DEXBOORU_NO_REPLY_EMAIL_ADDRESS,
+						},
+						to: newUser.email,
+						subject: EMAIL_VERIFICATION_SUBJECT,
+						html: buildEmailVerificationTemplate(newUser.username, verificationToken.id),
+					});
+					logger.info('Verification email sent successfully', { userId: newUser.id });
+				} catch (emailError) {
+					logger.error('Failed to send verification email', {
+						userId: newUser.id,
+						message: emailError instanceof Error ? emailError.message : String(emailError),
+					});
+				}
 			}
 
 			logger.info('Registration completed, redirecting to posts', { userId: newUser.id });

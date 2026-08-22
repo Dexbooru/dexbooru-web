@@ -21,7 +21,10 @@
 	let collection: TPostCollection;
 	let title: string = $state('');
 	let description: string = $state('');
-	let editingCollection: boolean = false;
+	let editingCollection: boolean = $state(false);
+	const editCollectionButtonDisabled = $derived(
+		editingCollection || title.length === 0 || description.length === 0,
+	);
 
 	const activeModal = getActiveModal();
 	const collectionPage = getCollectionPage();
@@ -129,9 +132,11 @@
 	</p>
 
 	<Button
-		disabled={editingCollection || title.length === 0 || description.length === 0}
+		disabled={editCollectionButtonDisabled}
 		onclick={handleOnEditClick}
-		class="w-full"
-		color="green">Edit collection</Button
+		class="w-full {editCollectionButtonDisabled ? '' : 'opacity-100!'}"
+		color="green"
 	>
+		Edit collection
+	</Button>
 </Modal>

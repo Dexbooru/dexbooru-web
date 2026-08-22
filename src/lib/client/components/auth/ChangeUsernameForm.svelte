@@ -8,27 +8,21 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
-	import { onMount } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 
 	const changeUsernameRequirements = getChangeUsernameAuthRequirements();
 	const user = getAuthenticatedUser();
 
-	let usernameChanging: boolean = $state(false);
-	let newUsername: string = $state('');
-	let changeUsernameButtonDisabled = $state(true);
+	let usernameChanging = $state(false);
+	let newUsername = $state('');
 
-	const changeUsernameFormAuthRequirementsUnsubscribe = changeUsernameRequirements.subscribe(
-		(data) => {
-			const disabledCheck = newUsername.length > 0 && data.username?.unsatisfied.length === 0;
-			changeUsernameButtonDisabled = !disabledCheck;
-		},
-	);
-
-	onMount(() => {
-		return () => {
-			changeUsernameFormAuthRequirementsUnsubscribe();
-		};
+	const changeUsernameButtonDisabled = $derived.by(() => {
+		const data = $changeUsernameRequirements;
+		const isValid =
+			newUsername.length > 0 &&
+			(data.username?.unsatisfied?.length ?? 1) === 0 &&
+			newUsername !== $user?.username;
+		return !isValid || usernameChanging;
 	});
 </script>
 
@@ -59,6 +53,9 @@
 		method="POST"
 		action="?/username"
 		class="flex flex-col space-y-2"
+		onsubmit={(event) => {
+			if (changeUsernameButtonDisabled) event.preventDefault();
+		}}
 	>
 		<AuthInput
 			bind:input={newUsername}
@@ -69,8 +66,11 @@
 			formStore={changeUsernameRequirements}
 		/>
 		<Button
-			disabled={changeUsernameButtonDisabled || usernameChanging || newUsername === $user?.username}
-			type="submit">Change Username</Button
+			disabled={changeUsernameButtonDisabled}
+			type="submit"
+			class={changeUsernameButtonDisabled ? '' : 'opacity-100!'}
 		>
+			Change Username
+		</Button>
 	</form>
 </Card>

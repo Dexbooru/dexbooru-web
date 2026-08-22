@@ -3,7 +3,6 @@
 	import Alert from 'flowbite-svelte/Alert.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
-	import { onMount } from 'svelte';
 	import type { ActionData } from '../../../../routes/register/$types';
 	import ProfilePictureUpload from '../files/ProfilePictureUpload.svelte';
 	import AuthInput from './AuthInput.svelte';
@@ -20,7 +19,6 @@
 	let email = $state('');
 	let password = $state('');
 	let confirmedPassword = $state('');
-	let registerButtonDisabled = $state(true);
 
 	$effect(() => {
 		const formUsername = form?.username;
@@ -29,28 +27,30 @@
 		if (formEmail !== undefined) email = formEmail;
 	});
 
-	const registerFormAuthRequirementsUnsubscribe = registerFormRequirements.subscribe((data) => {
-		const disabledCheck =
+	const registerButtonDisabled = $derived.by(() => {
+		const data = $registerFormRequirements;
+		const isValid =
 			email.length > 0 &&
 			username.length > 0 &&
 			password.length > 0 &&
 			confirmedPassword.length > 0 &&
-			data.username?.unsatisfied.length === 0 &&
-			data.password?.unsatisfied.length === 0 &&
-			data.email?.unsatisfied.length === 0 &&
+			(data.username?.unsatisfied?.length ?? 1) === 0 &&
+			(data.password?.unsatisfied?.length ?? 1) === 0 &&
+			(data.email?.unsatisfied?.length ?? 1) === 0 &&
 			data.confirmedPassword === true;
-		registerButtonDisabled = !disabledCheck;
-	});
-
-	onMount(() => {
-		return () => {
-			registerFormAuthRequirementsUnsubscribe();
-		};
+		return !isValid;
 	});
 </script>
 
 <Card class="mt-5 mr-3 mb-5 ml-3 p-6 shadow-lg">
-	<form class="flex flex-col space-y-6" method="POST" enctype="multipart/form-data">
+	<form
+		class="flex flex-col space-y-6"
+		method="POST"
+		enctype="multipart/form-data"
+		onsubmit={(event) => {
+			if (registerButtonDisabled) event.preventDefault();
+		}}
+	>
 		<h3 class="text-center text-xl font-medium text-gray-900 dark:text-white">
 			Register an account on Dexbooru!
 		</h3>
@@ -88,7 +88,13 @@
 
 		<ProfilePictureUpload />
 
-		<Button disabled={registerButtonDisabled} type="submit" class="w-full">Register</Button>
+		<Button
+			disabled={registerButtonDisabled}
+			type="submit"
+			class="w-full {registerButtonDisabled ? '' : 'opacity-100!'}"
+		>
+			Register
+		</Button>
 		{#if registerErrorReason}
 			<Alert color="red">
 				<span class="font-medium">Registration error!</span>

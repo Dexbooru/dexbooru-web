@@ -79,10 +79,14 @@
 		labels = labels.filter((l) => l !== removalLabel);
 	};
 
+	const addButtonDisabled = $derived(
+		labels.length >= maxLabels || currentInput.trim().length === 0,
+	);
+
 	const handleKeypress = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') {
 			event.preventDefault();
-			addLabel();
+			if (!addButtonDisabled) addLabel();
 		}
 	};
 </script>
@@ -101,11 +105,13 @@
 			class="w-full"
 		/>
 		<Button
-			class="w-full sm:w-auto"
-			disabled={labels.length === maxLabels || currentInput.length === 0}
+			class="w-full sm:w-auto {addButtonDisabled ? '' : 'opacity-100!'}"
+			disabled={addButtonDisabled}
 			type="button"
-			onclick={addLabel}>Add</Button
+			onclick={addLabel}
 		>
+			Add
+		</Button>
 	</div>
 	<p class="mt-2 text-right leading-none dark:text-gray-400">
 		{currentInput.length}/{maxLabelLength}

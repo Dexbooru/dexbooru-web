@@ -9,7 +9,6 @@
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
 	import Input from 'flowbite-svelte/Input.svelte';
-	import { onMount } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 
 	type Props = {
@@ -21,22 +20,16 @@
 	let newPassword = $state('');
 	let confirmedNewPassword = $state('');
 	let passwordUpdating = $state(false);
-	let updatePasswordButtonDisabled = $state(true);
 
 	const changePasswordRequirements = getChangePasswordAuthRequirements();
-	const changePasswordRequirementsUnsubscribe = changePasswordRequirements.subscribe((data) => {
-		const disabledCheck =
+	const updatePasswordButtonDisabled = $derived.by(() => {
+		const data = $changePasswordRequirements;
+		const isValid =
 			newPassword.length > 0 &&
 			confirmedNewPassword.length > 0 &&
-			data.password?.unsatisfied.length === 0 &&
+			(data.password?.unsatisfied?.length ?? 1) === 0 &&
 			data.confirmedPassword === true;
-		updatePasswordButtonDisabled = !disabledCheck;
-	});
-
-	onMount(() => {
-		return () => {
-			changePasswordRequirementsUnsubscribe();
-		};
+		return !isValid || passwordUpdating;
 	});
 </script>
 
@@ -70,6 +63,9 @@
 		}}
 		method="POST"
 		class="flex flex-col space-y-6"
+		onsubmit={(event) => {
+			if (updatePasswordButtonDisabled) event.preventDefault();
+		}}
 	>
 		<AuthInput
 			labelTitle="New Password"
@@ -95,8 +91,12 @@
 		/>
 		<Input type="hidden" name="userId" value={passwordRecoveryAttempt.userId?.toString()} />
 
-		<Button disabled={updatePasswordButtonDisabled || passwordUpdating} type="submit" class="w-full"
-			>Update your password</Button
+		<Button
+			disabled={updatePasswordButtonDisabled}
+			type="submit"
+			class="w-full {updatePasswordButtonDisabled ? '' : 'opacity-100!'}"
 		>
+			Update your password
+		</Button>
 	</form>
 </Card>

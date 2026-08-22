@@ -126,7 +126,13 @@
 		bind:value={selectedNewRole}
 	/>
 
-	<Button disabled={updateRoleButtonDisabled} onclick={handleUpdateUserRole}>Update role</Button>
+	<Button
+		disabled={updateRoleButtonDisabled}
+		onclick={handleUpdateUserRole}
+		class={updateRoleButtonDisabled ? '' : 'opacity-100!'}
+	>
+		Update role
+	</Button>
 
 	{#if selectedNewRole === 'OWNER' && promotionUsername.length > 0 && $user && $user.username !== promotionUsername}
 		<Alert color="red">

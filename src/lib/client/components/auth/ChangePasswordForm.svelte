@@ -9,34 +9,25 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
-	import { onMount } from 'svelte';
 	import AuthInput from './AuthInput.svelte';
 
 	const changePasswordRequirements = getChangePasswordAuthRequirements();
 	const user = getAuthenticatedUser();
 
-	let passwordChanging: boolean = $state(false);
-	let oldPassword: string = $state('');
-	let newPassword: string = $state('');
-	let confirmedNewPassword: string = $state('');
-	let changePasswordButtonDiabled = $state(true);
+	let passwordChanging = $state(false);
+	let oldPassword = $state('');
+	let newPassword = $state('');
+	let confirmedNewPassword = $state('');
 
-	const changePasswordFormAuthRequirementsUnsubscribe = changePasswordRequirements.subscribe(
-		(data) => {
-			const disabledCheck =
-				oldPassword.length > 0 &&
-				newPassword.length > 0 &&
-				confirmedNewPassword.length > 0 &&
-				data.password?.unsatisfied.length === 0 &&
-				data.confirmedPassword === true;
-			changePasswordButtonDiabled = !disabledCheck;
-		},
-	);
-
-	onMount(() => {
-		return () => {
-			changePasswordFormAuthRequirementsUnsubscribe();
-		};
+	const changePasswordButtonDisabled = $derived.by(() => {
+		const data = $changePasswordRequirements;
+		const isValid =
+			oldPassword.length > 0 &&
+			newPassword.length > 0 &&
+			confirmedNewPassword.length > 0 &&
+			(data.password?.unsatisfied?.length ?? 1) === 0 &&
+			data.confirmedPassword === true;
+		return !isValid || passwordChanging;
 	});
 </script>
 
@@ -66,6 +57,9 @@
 		method="POST"
 		action="?/password"
 		class="flex flex-col space-y-4"
+		onsubmit={(event) => {
+			if (changePasswordButtonDisabled) event.preventDefault();
+		}}
 	>
 		<AuthInput
 			bind:input={oldPassword}
@@ -89,8 +83,12 @@
 			inputName="confirmedNewPassword"
 			formStore={changePasswordRequirements}
 		/>
-		<Button disabled={changePasswordButtonDiabled || passwordChanging} type="submit"
-			>Change Password</Button
+		<Button
+			disabled={changePasswordButtonDisabled}
+			type="submit"
+			class={changePasswordButtonDisabled ? '' : 'opacity-100!'}
 		>
+			Change Password
+		</Button>
 	</form>
 </Card>

@@ -43,6 +43,8 @@
 	// svelte-ignore state_referenced_locally
 	let commentContent = $state(htmlToMarkdown(content));
 	let commentContentMarkdown = $state('');
+	const createCommentButtonDisabled = $derived(commentCreating || commentContent.length === 0);
+	const editCommentButtonDisabled = $derived(commentEditing || commentContent.length === 0);
 
 	const user = getAuthenticatedUser();
 	const commentTree = getCommentTree();
@@ -162,18 +164,22 @@
 		</div>
 		{#if !editMode}
 			<Button
-				disabled={commentCreating || commentContent.length === 0}
+				disabled={createCommentButtonDisabled}
 				color="blue"
-				class="mt-5"
-				onclick={handleCommentCreate}>Post comment</Button
+				class="mt-5 {createCommentButtonDisabled ? '' : 'opacity-100!'}"
+				onclick={handleCommentCreate}
 			>
+				Post comment
+			</Button>
 		{:else}
 			<Button
-				disabled={commentEditing || commentContent.length === 0}
+				disabled={editCommentButtonDisabled}
 				color="blue"
-				class="mt-5"
-				onclick={handleCommentEdit}>Edit comment</Button
+				class="mt-5 {editCommentButtonDisabled ? '' : 'opacity-100!'}"
+				onclick={handleCommentEdit}
 			>
+				Edit comment
+			</Button>
 		{/if}
 	</TabItem>
 	<TabItem title="Preview your markdown comment">

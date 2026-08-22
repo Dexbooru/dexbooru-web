@@ -163,7 +163,7 @@
 
 	const isEmailVerified = $derived($user?.emailVerified ?? false);
 
-	let uploadButtonDisabled = $derived.by(() => {
+	const uploadButtonDisabled = $derived.by(() => {
 		const isValidForm =
 			isEmailVerified &&
 			!loadingPostPictures &&
@@ -453,6 +453,9 @@
 				class="flex flex-col justify-center"
 				enctype="multipart/form-data"
 				use:enhance={handleSubmit}
+				onsubmit={(event) => {
+					if (uploadButtonDisabled) event.preventDefault();
+				}}
 			>
 				<section class="space-y-2">
 					<DescriptionSection bind:description />
@@ -478,9 +481,14 @@
 					/>
 				</section>
 
-				<Button disabled={uploadButtonDisabled} color="green" type="submit" class="mt-5!"
-					>Upload post</Button
+				<Button
+					disabled={uploadButtonDisabled}
+					color="green"
+					type="submit"
+					class="mt-5! {uploadButtonDisabled ? '' : 'opacity-100!'}"
 				>
+					Upload post
+				</Button>
 			</form>
 		</Card>
 	{/if}

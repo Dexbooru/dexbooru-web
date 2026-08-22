@@ -10,6 +10,9 @@
 
 	let email: string = $state('');
 	let forgotPasswordEmailSending = $state(false);
+	const forgotPasswordButtonDisabled = $derived(
+		!EMAIL_REGEX.test(email) || forgotPasswordEmailSending,
+	);
 </script>
 
 <Card class="mt-20 p-5">
@@ -46,6 +49,9 @@
 		}}
 		method="POST"
 		class="flex flex-col space-y-6"
+		onsubmit={(event) => {
+			if (forgotPasswordButtonDisabled) event.preventDefault();
+		}}
 	>
 		<Label class="space-y-2">
 			<span>Email</span>
@@ -61,9 +67,11 @@
 		</Label>
 
 		<Button
-			disabled={!EMAIL_REGEX.test(email) || forgotPasswordEmailSending}
+			disabled={forgotPasswordButtonDisabled}
 			type="submit"
-			class="w-full">Send Recovery Email</Button
+			class="w-full {forgotPasswordButtonDisabled ? '' : 'opacity-100!'}"
 		>
+			Send Recovery Email
+		</Button>
 	</form>
 </Card>

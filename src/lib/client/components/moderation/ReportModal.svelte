@@ -37,6 +37,7 @@
 		PostReportCategory | PostCollectionReportCategory | UserReportCategory | ''
 	>('');
 	let reportSending = $state(false);
+	const reportButtonDisabled = $derived(reportSending || selectedReportReasonCategory === '');
 
 	const activeModal = getActiveModal();
 
@@ -144,9 +145,11 @@
 		/>
 	</Label>
 	<Button
-		disabled={reportSending || selectedReportReasonCategory === ''}
+		disabled={reportButtonDisabled}
 		onclick={sendReport}
-		class="w-full"
-		color="red">Report this {reportType}</Button
+		class="w-full {reportButtonDisabled ? '' : 'opacity-100!'}"
+		color="red"
 	>
+		Report this {reportType}
+	</Button>
 </Modal>

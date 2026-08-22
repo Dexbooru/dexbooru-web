@@ -27,7 +27,9 @@
 				!isFileImageSmall(profilePictureFile, 'profilePicture'))
 		);
 	});
-
+	const changeProfileSubmitDisabled = $derived(
+		changeProfileButtonDisabled || profilePictureChanging,
+	);
 	const onRemoveProfileCheckedChange = (event: Event) => {
 		const target = event.target as HTMLInputElement;
 		const newProfilePictureFileInput = document.getElementById(
@@ -71,6 +73,9 @@
 		action="?/profilePicture"
 		enctype="multipart/form-data"
 		class="flex flex-col space-y-3"
+		onsubmit={(event) => {
+			if (changeProfileSubmitDisabled) event.preventDefault();
+		}}
 	>
 		<ProfilePictureUpload bind:profilePictureFile isChangingProfilePicture />
 		<span class="text-center dark:text-white">------- OR -------</span>
@@ -78,8 +83,12 @@
 			>Remove Profile Picture</Checkbox
 		>
 		<Input type="hidden" name="removeProfilePicture" value={removeProfilePicture.toString()} />
-		<Button disabled={changeProfileButtonDisabled || profilePictureChanging} type="submit"
-			>Change Profile Picture</Button
+		<Button
+			disabled={changeProfileSubmitDisabled}
+			type="submit"
+			class={changeProfileSubmitDisabled ? '' : 'opacity-100!'}
 		>
+			Change Profile Picture
+		</Button>
 	</form>
 </Card>

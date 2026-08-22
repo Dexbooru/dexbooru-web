@@ -51,6 +51,9 @@
 						$applicationConfiguration.maximumCollectionThumbnailSizeMb))
 		);
 	});
+	const createCollectionSubmitDisabled = $derived(
+		createCollectionButtonDisabled || collectionCreating,
+	);
 	let isNsfw: boolean = $state(false);
 
 	const collectionPaginationData = getCollectionPaginationData();
@@ -241,9 +244,11 @@
 	{/if}
 
 	<Button
-		disabled={createCollectionButtonDisabled || collectionCreating}
+		disabled={createCollectionSubmitDisabled}
 		type="submit"
-		class="w-full {thumbnailFile !== null && 'mt-5 mb-10'}"
+		class="w-full {thumbnailFile !== null && 'mt-5 mb-10'} {createCollectionSubmitDisabled
+			? ''
+			: 'opacity-100!'}"
 	>
 		<CalendarEditSolid class="me-2.5 h-3.5 w-3.5 text-white" /> Create collection
 	</Button>

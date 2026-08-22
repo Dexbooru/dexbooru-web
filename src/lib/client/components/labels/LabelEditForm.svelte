@@ -73,7 +73,8 @@
 			)
 		);
 	});
-
+	const saveLabelButtonDisabled = $derived(labelEditing || labelEditButtonDisabled);
+	const resetLabelButtonDisabled = $derived(labelEditing || !isDirty);
 	const editLabel = async () => {
 		if (!$user || !labelType || !metadata) return;
 		labelEditing = true;
@@ -158,10 +159,20 @@
 		{/if}
 
 		<div class="flex gap-2 pt-2">
-			<Button class="flex-1" onclick={editLabel} disabled={labelEditing || labelEditButtonDisabled}>
+			<Button
+				class="flex-1 {saveLabelButtonDisabled ? '' : 'opacity-100!'}"
+				onclick={editLabel}
+				disabled={saveLabelButtonDisabled}
+			>
 				Save {labelType}
 			</Button>
-			<Button outline color="alternative" onclick={resetForm} disabled={labelEditing || !isDirty}>
+			<Button
+				outline
+				color="alternative"
+				onclick={resetForm}
+				disabled={resetLabelButtonDisabled}
+				class={resetLabelButtonDisabled ? '' : 'opacity-100!'}
+			>
 				<UndoOutline class="mr-2 h-4 w-4" /> Reset
 			</Button>
 		</div>
