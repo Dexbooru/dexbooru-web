@@ -18,6 +18,7 @@
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Card from 'flowbite-svelte/Card.svelte';
 	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
+	import CopyToClipboardButton from '../reusable/CopyToClipboardButton.svelte';
 	import OauthIcon from './OauthIcon.svelte';
 
 	type Props = {
@@ -89,10 +90,17 @@
 			{targetUser.username}
 		</h5>
 
-		<span class="text-sm text-gray-500 dark:text-gray-400">
-			Account id:
-			<strong class="break-all">{targetUser.id}</strong></span
+		<span
+			class="inline-flex max-w-full items-center gap-1 text-sm text-gray-500 dark:text-gray-400"
 		>
+			Account id:
+			<strong class="break-all">{targetUser.id}</strong>
+			<CopyToClipboardButton
+				value={targetUser.id}
+				label="Copy account id"
+				successMessage="Account id copied"
+			/>
+		</span>
 		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Account creation date:
 			<strong>{formatDate(new Date(targetUser.createdAt))}</strong></span

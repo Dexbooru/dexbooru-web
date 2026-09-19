@@ -21,6 +21,7 @@
 	import ExclamationCircleSolid from 'flowbite-svelte-icons/ExclamationCircleSolid.svelte';
 	import { flip } from 'svelte/animate';
 	import PostCard from '../posts/card/PostCard.svelte';
+	import CopyToClipboardButton from '../reusable/CopyToClipboardButton.svelte';
 	import CollectionActions from './card/CollectionActions.svelte';
 
 	type Props = {
@@ -141,7 +142,14 @@
 		<p class="text-sm font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
 			ID
 		</p>
-		<p class="text-lg font-medium break-all dark:text-white">{collection.id}</p>
+		<p class="inline-flex max-w-full items-center gap-1 text-lg font-medium dark:text-white">
+			<span class="break-all">{collection.id}</span>
+			<CopyToClipboardButton
+				value={collection.id}
+				label="Copy collection id"
+				successMessage="Collection id copied"
+			/>
+		</p>
 	</div>
 
 	<div class="space-y-1">
@@ -162,13 +170,22 @@
 		<p class="text-sm font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
 			Author
 		</p>
-		<p class="text-lg font-medium dark:text-white">
+		<p
+			class="inline-flex max-w-full flex-wrap items-center gap-1 text-lg font-medium dark:text-white"
+		>
 			{#if collection.author}
 				<a
 					class="text-primary-600 dark:text-primary-500 hover:underline"
 					href="/profile/{collection.author.username}">{collection.author.username}</a
 				>
-				<span class="ml-2 text-sm text-gray-400">({collection.author.id})</span>
+				<span class="inline-flex max-w-full items-center gap-1 text-sm text-gray-400">
+					<span class="break-all">({collection.author.id})</span>
+					<CopyToClipboardButton
+						value={collection.author.id}
+						label="Copy author id"
+						successMessage="Author id copied"
+					/>
+				</span>
 			{:else}
 				{DELETED_ACCOUNT_HEADING}
 			{/if}

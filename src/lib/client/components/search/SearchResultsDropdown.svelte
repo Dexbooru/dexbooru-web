@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { FAILURE_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { formatNumberWithCommas } from '$lib/client/helpers/posts';
 	import type { TAppSearchResult } from '$lib/shared/types/search';
+	import { toast } from '@zerodevx/svelte-toast';
 	import PalleteSolid from 'flowbite-svelte-icons/PaletteSolid.svelte';
 	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
 	import { fade, slide } from 'svelte/transition';
@@ -15,6 +17,13 @@
 
 	const onLabelClick = (labelName: string) => {
 		const searchInput = document.getElementById('advanced-searchbar') as HTMLInputElement;
+
+		if (!searchInput) return;
+		if (searchInput.value.includes(labelName)) {
+			toast.push('You cannot search for the same label twice', FAILURE_TOAST_OPTIONS);
+			return;
+		}
+
 		const tokens = searchInput.value.split(' ');
 		tokens[tokens.length - 1] = labelName;
 		searchInput.value = tokens.join(' ') + ' ';

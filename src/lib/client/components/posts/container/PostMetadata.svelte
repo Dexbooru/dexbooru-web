@@ -6,6 +6,7 @@
 	import { capitalize } from '$lib/shared/helpers/util';
 	import type { TPost } from '$lib/shared/types/posts';
 	import LabelContainer from '../../labels/LabelContainer.svelte';
+	import CopyToClipboardButton from '../../reusable/CopyToClipboardButton.svelte';
 
 	type Props = {
 		post: TPost;
@@ -19,11 +20,14 @@
 	const commentTree = getCommentTree();
 </script>
 
-<p class="text-lg break-all dark:text-white">
-	ID: <span class=" dark:text-gray-400">{post.id}</span>
+<p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-lg dark:text-white">
+	<span class="inline-flex max-w-full items-center gap-1 break-all">
+		ID: <span class="dark:text-gray-400">{post.id}</span>
+		<CopyToClipboardButton value={post.id} label="Copy post id" successMessage="Post id copied" />
+	</span>
 	<a
 		href="/similarity-search?postId={encodeURIComponent(post.id)}"
-		class="ml-2 text-sm text-blue-500 hover:underline"
+		class="text-sm text-blue-500 hover:underline"
 	>
 		Find similar images
 	</a>
@@ -54,10 +58,13 @@
 </p>
 
 {#if post.author}
-	<p class="text-lg dark:text-white">
-		Author ID: <span class="break-all dark:text-gray-400">
-			{post.author.id}
-		</span>
+	<p class="inline-flex max-w-full items-center gap-1 text-lg dark:text-white">
+		Author ID: <span class="break-all dark:text-gray-400">{post.author.id}</span>
+		<CopyToClipboardButton
+			value={post.author.id}
+			label="Copy author id"
+			successMessage="Author id copied"
+		/>
 	</p>
 {/if}
 
