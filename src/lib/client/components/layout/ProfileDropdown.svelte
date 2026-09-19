@@ -44,7 +44,15 @@
 <NotificationList />
 
 {#if $user}
-	<div role="group" class="relative" onmouseenter={() => (dropdownOpen = true)}>
+	<a href="/profile/{$user.username}" class="md:hidden" aria-label="Your profile">
+		<Avatar
+			onerror={onImageError}
+			src={$user.profilePictureUrl ?? DefaultProfilePicture}
+			alt="profile of {$user.username}"
+			class="hide-alt-text h-8 w-8"
+		/>
+	</a>
+	<div role="group" class="relative hidden md:block" onmouseenter={() => (dropdownOpen = true)}>
 		<Button
 			id="navbar-profile-picture"
 			class="flex space-x-4 bg-transparent !p-1 text-gray-900 hover:bg-gray-100 focus:ring-0 dark:bg-slate-700 dark:text-white dark:hover:bg-gray-700"
@@ -88,6 +96,9 @@
 			<DropdownDivider />
 			<DropdownItem
 				href="/profile/logout"
+				rel="external"
+				data-sveltekit-reload
+				data-sveltekit-preload-data="off"
 				class="text-gray-900 dark:text-white"
 				onclick={clearPostDraft}>Sign out</DropdownItem
 			>

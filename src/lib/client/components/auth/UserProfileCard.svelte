@@ -74,7 +74,7 @@
 	};
 </script>
 
-<Card class="mx-4 p-4 sm:mx-auto sm:p-6" style="min-width: 300px; max-width: 550px;">
+<Card class="w-full max-w-[34rem] p-5 sm:p-8">
 	{#if targetUser.moderationStatus === 'FLAGGED'}
 		<Alert color="red" class="mb-4">
 			<div class="flex items-center gap-2">
@@ -89,9 +89,9 @@
 			{targetUser.username}
 		</h5>
 
-		<span class="text-sm text-gray-500 dark:text-gray-400"
-			>Account id:
-			<strong>{targetUser.id}</strong></span
+		<span class="text-sm text-gray-500 dark:text-gray-400">
+			Account id:
+			<strong class="break-all">{targetUser.id}</strong></span
 		>
 		<span class="text-sm text-gray-500 dark:text-gray-400"
 			>Account creation date:

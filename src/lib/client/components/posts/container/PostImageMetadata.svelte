@@ -102,33 +102,35 @@
 
 {#if imagesMetadata.length > 0}
 	<p class="text-lg dark:text-white">Post images metadata:</p>
-	<Table hoverable={true}>
-		<TableHead>
-			<TableHeadCell>Filename</TableHeadCell>
-			<TableHeadCell>Width (px)</TableHeadCell>
-			<TableHeadCell>Height (px)</TableHeadCell>
-			<TableHeadCell>
-				<span class="sr-only">Download image</span>
-			</TableHeadCell>
-		</TableHead>
-		<TableBody class="w-1/2! divide-y">
-			{#each Object.keys($updatedPost).length > 0 && $updatedPost.imageUrls ? getPostImageMetadata($updatedPost) : imagesMetadata as { imageFileName, imageWidth, imageHeight, imageUrl } (imageUrl)}
-				{#if imageFileName.includes(ORIGINAL_IMAGE_SUFFIX) || (!imageFileName.includes(NSFW_PREVIEW_IMAGE_SUFFIX) && imageFileName.includes(PREVIEW_IMAGE_SUFFIX))}
-					<TableBodyRow>
-						<TableBodyCell>{imageFileName}</TableBodyCell>
-						<TableBodyCell>{imageWidth}</TableBodyCell>
-						<TableBodyCell>{imageHeight}</TableBodyCell>
-						<TableBodyCell>
-							<a
-								target="_blank"
-								href={imageUrl}
-								class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
-								>Download image</a
-							>
-						</TableBodyCell>
-					</TableBodyRow>
-				{/if}
-			{/each}
-		</TableBody>
-	</Table>
+	<div class="overflow-x-auto">
+		<Table hoverable={true}>
+			<TableHead>
+				<TableHeadCell>Filename</TableHeadCell>
+				<TableHeadCell>Width (px)</TableHeadCell>
+				<TableHeadCell>Height (px)</TableHeadCell>
+				<TableHeadCell>
+					<span class="sr-only">Download image</span>
+				</TableHeadCell>
+			</TableHead>
+			<TableBody class="w-1/2! divide-y">
+				{#each Object.keys($updatedPost).length > 0 && $updatedPost.imageUrls ? getPostImageMetadata($updatedPost) : imagesMetadata as { imageFileName, imageWidth, imageHeight, imageUrl } (imageUrl)}
+					{#if imageFileName.includes(ORIGINAL_IMAGE_SUFFIX) || (!imageFileName.includes(NSFW_PREVIEW_IMAGE_SUFFIX) && imageFileName.includes(PREVIEW_IMAGE_SUFFIX))}
+						<TableBodyRow>
+							<TableBodyCell>{imageFileName}</TableBodyCell>
+							<TableBodyCell>{imageWidth}</TableBodyCell>
+							<TableBodyCell>{imageHeight}</TableBodyCell>
+							<TableBodyCell>
+								<a
+									target="_blank"
+									href={imageUrl}
+									class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
+									>Download image</a
+								>
+							</TableBodyCell>
+						</TableBodyRow>
+					{/if}
+				{/each}
+			</TableBody>
+		</Table>
+	</div>
 {/if}

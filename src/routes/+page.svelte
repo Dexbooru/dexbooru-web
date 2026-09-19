@@ -67,7 +67,9 @@
 	<meta property="og:image" content={ApplicationLogo} />
 </svelte:head>
 
-<main class="mt-20 flex flex-col items-center justify-center px-4 text-center md:mt-40">
+<main
+	class="mt-20 mb-20 flex flex-col items-center justify-center px-4 pb-16 text-center md:mt-40 md:mb-0 md:pb-0"
+>
 	<h1 class="mb-6 text-3xl font-bold text-gray-900 md:text-5xl dark:text-gray-100">
 		Dexbooru - Anime/Manga Imageboard
 	</h1>
@@ -79,7 +81,7 @@
 			name="query"
 			autofocus
 			inputElementId="advanced-searchbar"
-			placeholder="example: tag1 -tag2 artist1 -artist2 uploader:bobby views:>1000 likes:<100"
+			placeholder="Search tags, artists, uploaders…"
 			queryInputHandler={handleSearchbarInput}
 			queryInputClear={() => (labelSearchResults = { tags: [], artists: [] })}
 			customClass="w-full max-w-2xl"

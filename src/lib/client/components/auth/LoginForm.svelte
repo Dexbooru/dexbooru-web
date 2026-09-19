@@ -49,7 +49,7 @@
 	});
 </script>
 
-<Card class="mt-4 mr-3 mb-2 ml-3 p-6 shadow-lg">
+<Card class="mx-3 mt-4 mb-2 w-full max-w-md p-6 shadow-lg">
 	<form
 		class="flex flex-col space-y-6"
 		method="POST"

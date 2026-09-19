@@ -14,7 +14,7 @@
 </script>
 
 <div class="flex flex-wrap gap-1">
-	{#each labels as label (label.name)}
+	{#each labels as label, index (label.id ?? `${label.name}-${index}`)}
 		<div
 			class="inline-flex items-center justify-center space-x-2 rounded border px-2 py-1 text-center text-xs leading-none dark:text-gray-400"
 		>

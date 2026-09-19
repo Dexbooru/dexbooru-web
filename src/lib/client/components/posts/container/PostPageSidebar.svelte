@@ -22,13 +22,10 @@
 	const postsBaseUrl = $derived(page.url.origin + page.url.pathname);
 </script>
 
-<Sidebar position="static">
+<Sidebar position="static" alwaysOpen class="!block">
 	<SidebarWrapper>
 		<SidebarGroup>
-			<SidebarDropdownWrapper
-				isOpen={uniqueArtists.length > 0 && uniqueTags.length > 0}
-				label="Order by"
-			>
+			<SidebarDropdownWrapper isOpen={true} params={{ duration: 0 }} label="Order by">
 				{#snippet icon()}
 					<OrderedListOutline
 						class="h-5 w-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
@@ -44,7 +41,11 @@
 					{/each}
 				{/each}
 			</SidebarDropdownWrapper>
-			<SidebarDropdownWrapper label="All Tags">
+			<SidebarDropdownWrapper
+				isOpen={uniqueTags.length > 0}
+				params={{ duration: 0 }}
+				label="All Tags"
+			>
 				{#snippet icon()}
 					<TagSolid
 						class="h-5 w-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
@@ -52,7 +53,11 @@
 				{/snippet}
 				<LabelContainer labelType="tag" labelsAreLarge labels={uniqueTags} />
 			</SidebarDropdownWrapper>
-			<SidebarDropdownWrapper label="All Artists">
+			<SidebarDropdownWrapper
+				isOpen={uniqueArtists.length > 0}
+				params={{ duration: 0 }}
+				label="All Artists"
+			>
 				{#snippet icon()}
 					<PalleteSolid
 						class="h-5 w-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"

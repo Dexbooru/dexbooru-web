@@ -21,10 +21,14 @@
 </script>
 
 {#if page.data.collections}
-	<Sidebar position="static">
+	<Sidebar position="static" alwaysOpen class="!block">
 		<SidebarWrapper>
 			<SidebarGroup>
-				<SidebarDropdownWrapper isOpen={$collectionPage.length > 0} label="Order by">
+				<SidebarDropdownWrapper
+					isOpen={$collectionPage.length > 0}
+					params={{ duration: 0 }}
+					label="Order by"
+				>
 					{#snippet icon()}
 						<OrderedListOutline
 							class="h-5 w-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
@@ -44,7 +48,11 @@
 					{/each}
 				</SidebarDropdownWrapper>
 
-				<SidebarDropdownWrapper isOpen={uniqueAuthors.length > 0} label="All Authors">
+				<SidebarDropdownWrapper
+					isOpen={uniqueAuthors.length > 0}
+					params={{ duration: 0 }}
+					label="All Authors"
+				>
 					{#snippet icon()}
 						<UserSolid
 							class="h-5 w-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"

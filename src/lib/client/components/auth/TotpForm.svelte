@@ -32,7 +32,7 @@
 	});
 </script>
 
-<Card class="mt-20 w-full max-w-md">
+<Card class="mx-3 mt-20 w-full max-w-md">
 	<form
 		class="flex flex-col space-y-6"
 		method="POST"

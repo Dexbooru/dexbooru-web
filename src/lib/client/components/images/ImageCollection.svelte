@@ -120,7 +120,7 @@
 			height={transformedImageDimensions && imageUrls.length > 0
 				? transformedImageDimensions[Number(index)]?.imageHeight || undefined
 				: undefined}
-			class="whole-post-image {imagesScaledDown ? 'visible' : 'invisible'} block"
+			class="whole-post-image {imagesScaledDown ? 'visible' : 'invisible'} block h-auto max-w-full"
 			src={imageUrl}
 			alt={imagesAlt}
 			onerror={onImageError}

@@ -24,7 +24,7 @@
 </script>
 
 {#if (page.data.posts ?? []).length > 0}
-	<div class="grid auto-rows-min grid-cols-1 gap-4 p-3 sm:grid-cols-3">
+	<div class="grid auto-rows-min grid-cols-1 gap-4 p-3 sm:grid-cols-2 lg:grid-cols-3">
 		{#if $postPaginationData}
 			{#each useHiddenPosts ? $blacklistedPostPage : useNsfwPosts ? $nsfwPostPage : $postPage as post (post.id)}
 				<PostCard {post} />
@@ -37,7 +37,7 @@
 	</div>
 {:else}
 	<div class="mt-20 flex flex-col space-y-5">
-		<p class="text-center text-6xl dark:text-white">No posts found</p>
+		<p class="text-center text-2xl sm:text-4xl lg:text-6xl dark:text-white">No posts found</p>
 		{#if (!$postPaginationData ? (page.data.posts ?? []) : useHiddenPosts ? $blacklistedPostPage : useNsfwPosts ? $nsfwPostPage : $postPage).length === 0}
 			<PostPaginator />
 		{/if}

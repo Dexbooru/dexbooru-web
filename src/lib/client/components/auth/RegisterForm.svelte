@@ -42,7 +42,7 @@
 	});
 </script>
 
-<Card class="mt-5 mr-3 mb-5 ml-3 p-6 shadow-lg">
+<Card class="mx-3 mt-5 mb-5 w-full max-w-md p-6 shadow-lg">
 	<form
 		class="flex flex-col space-y-6"
 		method="POST"
@@ -51,7 +51,7 @@
 			if (registerButtonDisabled) event.preventDefault();
 		}}
 	>
-		<h3 class="text-center text-xl font-medium text-gray-900 dark:text-white">
+		<h3 class="text-center text-lg font-medium text-gray-900 sm:text-xl dark:text-white">
 			Register an account on Dexbooru!
 		</h3>
 		<AuthInput

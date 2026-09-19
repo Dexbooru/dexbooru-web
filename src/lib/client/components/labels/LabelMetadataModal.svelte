@@ -70,6 +70,11 @@
 	onclose={() => activeModal.set({ isOpen: false, focusedModalName: null })}
 	size="sm"
 	outsideclose
+	class="m-6 max-h-[calc(100dvh-3rem)] w-[calc(100%-3rem)]! max-w-lg sm:m-auto"
+	classes={{
+		header: 'gap-3 px-5 py-4 text-base leading-snug break-words sm:px-6 sm:text-xl',
+		body: 'px-5 py-4 sm:px-6',
+	}}
 >
 	{#if loadingLabelMetadata}
 		<Spinner class="mr-auto ml-auto block" size="10" />
