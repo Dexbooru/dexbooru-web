@@ -57,7 +57,7 @@
 
 {#if open}
 	<div class="fixed inset-0 z-[60] bg-gray-900/50" role="presentation" onclick={closeDrawer}></div>
-	<aside
+	<div
 		id="mobile-nav-drawer"
 		class="fixed inset-y-0 right-0 z-[70] flex w-80 max-w-[min(20rem,100vw)] flex-col overflow-y-auto border-l border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
 		role="dialog"
@@ -178,5 +178,5 @@
 				</section>
 			{/if}
 		</nav>
-	</aside>
+	</div>
 {/if}

@@ -47,8 +47,6 @@
 		"@types/bcryptjs": "^3.0.0",
 		"@types/html-to-text": "^9.0.4",
 		"@types/jsonwebtoken": "^9.0.10",
-		"@types/markdown-it": "^14.1.2",
-		"@types/markdown-it-emoji": "^3.0.1",
 		"@types/minimist": "^1.2.5",
 		"@types/node": "^26.1.2",
 		"@types/nodemailer": "^8.0.1",

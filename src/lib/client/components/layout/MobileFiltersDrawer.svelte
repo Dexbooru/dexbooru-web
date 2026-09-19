@@ -64,7 +64,7 @@
 	onclick={closeDrawer}
 ></div>
 
-<aside
+<div
 	bind:this={panelEl}
 	class="fixed inset-y-0 left-0 z-[70] flex h-dvh min-h-dvh w-[min(20rem,100vw)] flex-col overflow-y-auto border-r border-gray-200 bg-white p-4 transition-transform duration-200 md:hidden dark:border-gray-700 dark:bg-gray-800 {open
 		? 'translate-x-0'
@@ -89,4 +89,4 @@
 	<div class="min-h-0 flex-1 overflow-y-auto pb-8">
 		{@render children?.()}
 	</div>
-</aside>
+</div>
