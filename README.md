@@ -312,8 +312,15 @@ If you don't pass the `PORT` environment variable before running the server, it 
 
 ## Sign in to seeded accounts
 
-You can sign into any of the mock accounts created after the seeding script has finished, by copying over any username from the database, along with this password `root_password_12345`.
-This is a hardcoded string that is then hashed, when running the insertions in the `User` table, during the seeding script.
+After `pnpm dbseed`, these role accounts share the mock password `password`:
+
+| Username | Role |
+|----------|------|
+| `owner` | OWNER |
+| `moderator` | MODERATOR |
+| `user` | USER |
+
+The additional faker “mock users” created for sample posts are **not** loginable (random unhashed passwords).
 
 ## Features in Progress
 

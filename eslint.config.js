@@ -58,6 +58,9 @@ export default tseslint.config(
 			'**/AGENTS.md',
 			'**/GEMINI.md',
 			'**/CLAUDE.md',
+			'.features-gen/',
+			'playwright-report/',
+			'test-results/',
 		],
 	},
 );
