@@ -11,6 +11,7 @@
 	import { onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import CollectionCreateModal from '../CollectionCreateModal.svelte';
+	import MobileFiltersDrawer from '$lib/client/components/layout/MobileFiltersDrawer.svelte';
 	import CollectionPageSidebar from './CollectionPageSidebar.svelte';
 	import CollectionPaginator from './CollectionPaginator.svelte';
 	import CollectionsGrid from './CollectionsGrid.svelte';
@@ -56,9 +57,12 @@
 		</div>
 		<div id="collection-container-body" class="mb-5 space-y-4">
 			<div id="collection-container-title" class="block space-y-3">
-				<h1 class="text-lg sm:text-3xl md:text-3xl lg:text-4xl dark:text-white">
+				<h1 class="text-lg break-words sm:text-3xl md:text-3xl lg:text-4xl dark:text-white">
 					{collectionContainerTitle}
 				</h1>
+				<MobileFiltersDrawer>
+					<CollectionPageSidebar {uniqueAuthors} />
+				</MobileFiltersDrawer>
 				{#if $user && (pathname === '/collections' || pathname === '/collections/created' || (pathname.includes('collections/users') && collectionsUsername === $user.username))}
 					<Button
 						onclick={() => (isCollectionCreateModalOpen = true)}

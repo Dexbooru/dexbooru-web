@@ -50,65 +50,68 @@
 			You can filter by specific properties using the <code>prefix:value</code> syntax.
 		</P>
 
-		<Table hoverable={true} class="mb-6">
-			<TableHead>
-				<TableHeadCell>Prefix</TableHeadCell>
-				<TableHeadCell>Description</TableHeadCell>
-				<TableHeadCell>Example</TableHeadCell>
-			</TableHead>
-			<TableBody>
-				<TableBodyRow>
-					<TableBodyCell><code>uploader</code></TableBodyCell>
-					<TableBodyCell>Filter by the user who uploaded the post (username or UUID).</TableBodyCell
-					>
-					<TableBodyCell><code>uploader:admin</code></TableBodyCell>
-				</TableBodyRow>
-				<TableBodyRow>
-					<TableBodyCell><code>views</code></TableBodyCell>
-					<TableBodyCell>Filter by view count.</TableBodyCell>
-					<TableBodyCell><code>views:&gt;1000</code></TableBodyCell>
-				</TableBodyRow>
-				<TableBodyRow>
-					<TableBodyCell><code>likes</code></TableBodyCell>
-					<TableBodyCell>Filter by like count.</TableBodyCell>
-					<TableBodyCell><code>likes:&gt;=50</code></TableBodyCell>
-				</TableBodyRow>
-				<TableBodyRow>
-					<TableBodyCell><code>moderationStatus</code></TableBodyCell>
-					<TableBodyCell>Filter by status (PENDING, APPROVED, REJECTED).</TableBodyCell>
-					<TableBodyCell><code>moderationStatus:APPROVED</code></TableBodyCell>
-				</TableBodyRow>
-				<TableBodyRow>
-					<TableBodyCell><code>sourceLink</code></TableBodyCell>
-					<TableBodyCell>Filter by the exact source URL.</TableBodyCell>
-					<TableBodyCell><code>sourceLink:https://example.com/image.png</code></TableBodyCell>
-				</TableBodyRow>
-				<TableBodyRow>
-					<TableBodyCell><code>sourceTitle</code></TableBodyCell>
-					<TableBodyCell
-						>Filter by the title of the source material (e.g., anime, game).</TableBodyCell
-					>
-					<TableBodyCell><code>sourceTitle:Naruto</code></TableBodyCell>
-				</TableBodyRow>
-				<TableBodyRow>
-					<TableBodyCell><code>characterName</code></TableBodyCell>
-					<TableBodyCell
-						>Filter by a specific character name associated with the source.</TableBodyCell
-					>
-					<TableBodyCell><code>characterName:Sasuke</code></TableBodyCell>
-				</TableBodyRow>
-				<TableBodyRow>
-					<TableBodyCell><code>id</code></TableBodyCell>
-					<TableBodyCell>Filter by the exact Post UUID.</TableBodyCell>
-					<TableBodyCell><code>id:123e4567-e89b-12d3-a456-426614174000</code></TableBodyCell>
-				</TableBodyRow>
-				<TableBodyRow>
-					<TableBodyCell><code>createdAt</code></TableBodyCell>
-					<TableBodyCell>Filter by creation date (YYYY-MM-DD).</TableBodyCell>
-					<TableBodyCell><code>createdAt:&gt;2023-01-01</code></TableBodyCell>
-				</TableBodyRow>
-			</TableBody>
-		</Table>
+		<div class="overflow-x-auto">
+			<Table hoverable={true} class="mb-6">
+				<TableHead>
+					<TableHeadCell>Prefix</TableHeadCell>
+					<TableHeadCell>Description</TableHeadCell>
+					<TableHeadCell>Example</TableHeadCell>
+				</TableHead>
+				<TableBody>
+					<TableBodyRow>
+						<TableBodyCell><code>uploader</code></TableBodyCell>
+						<TableBodyCell
+							>Filter by the user who uploaded the post (username or UUID).</TableBodyCell
+						>
+						<TableBodyCell><code>uploader:admin</code></TableBodyCell>
+					</TableBodyRow>
+					<TableBodyRow>
+						<TableBodyCell><code>views</code></TableBodyCell>
+						<TableBodyCell>Filter by view count.</TableBodyCell>
+						<TableBodyCell><code>views:&gt;1000</code></TableBodyCell>
+					</TableBodyRow>
+					<TableBodyRow>
+						<TableBodyCell><code>likes</code></TableBodyCell>
+						<TableBodyCell>Filter by like count.</TableBodyCell>
+						<TableBodyCell><code>likes:&gt;=50</code></TableBodyCell>
+					</TableBodyRow>
+					<TableBodyRow>
+						<TableBodyCell><code>moderationStatus</code></TableBodyCell>
+						<TableBodyCell>Filter by status (PENDING, APPROVED, REJECTED).</TableBodyCell>
+						<TableBodyCell><code>moderationStatus:APPROVED</code></TableBodyCell>
+					</TableBodyRow>
+					<TableBodyRow>
+						<TableBodyCell><code>sourceLink</code></TableBodyCell>
+						<TableBodyCell>Filter by the exact source URL.</TableBodyCell>
+						<TableBodyCell><code>sourceLink:https://example.com/image.png</code></TableBodyCell>
+					</TableBodyRow>
+					<TableBodyRow>
+						<TableBodyCell><code>sourceTitle</code></TableBodyCell>
+						<TableBodyCell
+							>Filter by the title of the source material (e.g., anime, game).</TableBodyCell
+						>
+						<TableBodyCell><code>sourceTitle:Naruto</code></TableBodyCell>
+					</TableBodyRow>
+					<TableBodyRow>
+						<TableBodyCell><code>characterName</code></TableBodyCell>
+						<TableBodyCell
+							>Filter by a specific character name associated with the source.</TableBodyCell
+						>
+						<TableBodyCell><code>characterName:Sasuke</code></TableBodyCell>
+					</TableBodyRow>
+					<TableBodyRow>
+						<TableBodyCell><code>id</code></TableBodyCell>
+						<TableBodyCell>Filter by the exact Post UUID.</TableBodyCell>
+						<TableBodyCell><code>id:123e4567-e89b-12d3-a456-426614174000</code></TableBodyCell>
+					</TableBodyRow>
+					<TableBodyRow>
+						<TableBodyCell><code>createdAt</code></TableBodyCell>
+						<TableBodyCell>Filter by creation date (YYYY-MM-DD).</TableBodyCell>
+						<TableBodyCell><code>createdAt:&gt;2023-01-01</code></TableBodyCell>
+					</TableBodyRow>
+				</TableBody>
+			</Table>
+		</div>
 	</section>
 
 	<section class="mb-10">

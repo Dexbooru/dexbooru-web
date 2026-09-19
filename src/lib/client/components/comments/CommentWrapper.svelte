@@ -3,6 +3,7 @@
 	import ApplicationLogo from '$lib/client/assets/app_logo.webp';
 	import DefaultProfilePicture from '$lib/client/assets/default_profile_picture.webp';
 	import CommentPageSidebar from '$lib/client/components/comments/CommentPageSidebar.svelte';
+	import MobileFiltersDrawer from '$lib/client/components/layout/MobileFiltersDrawer.svelte';
 	import { generateCommentWrapperMetatags } from '$lib/client/helpers/comments';
 	import { getCommentPaginationData } from '$lib/client/helpers/context';
 	import { groupBy } from '$lib/shared/helpers/util';
@@ -98,7 +99,10 @@
 					No comments found on page {(page.data.pageNumber ?? 0) + 1}
 				</h1>
 			{:else}
-				<h1 class="m-4 text-4xl dark:text-white">{titleData.title}</h1>
+				<h1 class="m-4 text-xl break-words sm:text-3xl dark:text-white">{titleData.title}</h1>
+				<MobileFiltersDrawer>
+					<CommentPageSidebar />
+				</MobileFiltersDrawer>
 				<CommentPaginator />
 				{#each Object.entries(commentDateGroups) as [date, comments] (date)}
 					<Group

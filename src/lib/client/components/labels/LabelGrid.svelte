@@ -73,7 +73,7 @@
 </script>
 
 <main class="m-7 flex grow flex-col justify-center space-y-5">
-	<h1 class="text-center text-4xl dark:text-white">
+	<h1 class="text-center text-2xl sm:text-4xl dark:text-white">
 		{labelType === 'tag' ? 'Tags' : 'Artists'} Index
 	</h1>
 	<div class="flex flex-wrap">
@@ -81,7 +81,7 @@
 			<Button
 				disabled={loadingLabels}
 				onclick={(event: Event) => getLabelsOnCurrentPage(event, false)}
-				class="m-2 items-center justify-center  rounded-lg border border-gray-300 bg-white text-gray-900 focus-within:ring-gray-200 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-within:ring-gray-700 dark:hover:border-gray-600 dark:hover:bg-gray-700"
+				class="m-1 items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus-within:ring-gray-200 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus-within:ring-gray-700 dark:hover:border-gray-600 dark:hover:bg-gray-700"
 				>{option}</Button
 			>
 		{/each}

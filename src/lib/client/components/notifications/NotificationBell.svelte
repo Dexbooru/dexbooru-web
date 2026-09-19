@@ -9,7 +9,7 @@
 
 <div
 	id="notification-bell"
-	class="mr-3 inline-flex cursor-pointer items-center text-center text-sm font-medium text-gray-500 hover:text-gray-900 focus:outline-none dark:text-gray-400 dark:hover:text-white"
+	class="mr-1 inline-flex h-11 min-w-11 cursor-pointer items-center justify-center text-center text-sm font-medium text-gray-500 hover:text-gray-900 focus:outline-none md:mr-3 dark:text-gray-400 dark:hover:text-white"
 >
 	<BellSolid class="h-5 w-5" />
 

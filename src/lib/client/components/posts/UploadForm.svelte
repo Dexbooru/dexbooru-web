@@ -403,14 +403,11 @@
 		</div>
 	{:else}
 		<Card size="lg" class="mt-3 mb-3 w-full max-w-3xl space-y-2 p-6 shadow-lg">
-			<div class="flex items-center justify-between">
-				<div class="w-1/4"></div>
-				<Heading class="mt-2 mb-5 text-center">Upload a post!</Heading>
-				<div class="flex w-1/4 justify-end">
-					{#if hasDraft}
-						<Button color="red" size="xs" onclick={handleClearDraft}>Clear Draft</Button>
-					{/if}
-				</div>
+			<div class="mb-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+				<Heading class="mt-2 text-center">Upload a post!</Heading>
+				{#if hasDraft}
+					<Button color="red" size="xs" onclick={handleClearDraft}>Clear Draft</Button>
+				{/if}
 			</div>
 
 			{#if duplicates.length > 0}

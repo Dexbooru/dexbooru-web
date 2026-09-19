@@ -19,7 +19,7 @@
 	const commentTree = getCommentTree();
 </script>
 
-<p class="text-lg dark:text-white">
+<p class="text-lg break-all dark:text-white">
 	ID: <span class=" dark:text-gray-400">{post.id}</span>
 	<a
 		href="/similarity-search?postId={encodeURIComponent(post.id)}"
@@ -55,7 +55,7 @@
 
 {#if post.author}
 	<p class="text-lg dark:text-white">
-		Author ID: <span class=" dark:text-gray-400">
+		Author ID: <span class="break-all dark:text-gray-400">
 			{post.author.id}
 		</span>
 	</p>
@@ -140,16 +140,16 @@
 
 {#if similarPosts.length > 0}
 	<p class="text-lg dark:text-white">Similar posts (found {similarPosts.length})</p>
-	<section class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+	<section class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-4">
 		{#each similarPosts as post (post.id)}
 			<div class="flex flex-col items-center">
-				<a href="/posts/{post.id}" class="block">
+				<a href="/posts/{post.id}" class="block w-full max-w-[200px]">
 					<img
 						width="200"
 						height="200"
 						alt={post.tagString + post.artistString}
 						src={post.imageUrls[0]}
-						class="h-[200px] w-[200px] rounded-lg object-contain transition-transform duration-200 hover:scale-105"
+						class="h-auto w-full max-w-full rounded-lg object-contain transition-transform duration-200 hover:scale-105"
 					/>
 				</a>
 				<span class="mt-2 text-center text-sm dark:text-gray-300">

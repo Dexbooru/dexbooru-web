@@ -6,6 +6,7 @@
 	import { LABEL_METADATA_MODAL_NAME } from '$lib/client/constants/layout';
 	import { getActiveModal, getOriginalPostsPage, getPostsPage } from '$lib/client/helpers/context';
 	import { getUniqueLabelsFromPosts } from '$lib/shared/helpers/labels';
+	import MobileFiltersDrawer from '$lib/client/components/layout/MobileFiltersDrawer.svelte';
 	import PalleteSolid from 'flowbite-svelte-icons/PaletteSolid.svelte';
 	import TagSolid from 'flowbite-svelte-icons/TagSolid.svelte';
 	import Button from 'flowbite-svelte/Button.svelte';
@@ -47,9 +48,12 @@
 	</div>
 	<div id="post-container-body" class="mb-5 space-y-4">
 		<div id="post-container-title" class="block space-y-3">
-			<h1 class="text-lg sm:text-3xl md:text-3xl lg:text-4xl dark:text-white">
+			<h1 class="text-lg break-words sm:text-3xl md:text-3xl lg:text-4xl dark:text-white">
 				{postContainerTitle}
 			</h1>
+			<MobileFiltersDrawer>
+				<PostPageSidebar {uniqueTags} {uniqueArtists} />
+			</MobileFiltersDrawer>
 			<div class="flex flex-col space-y-2">
 				{#if ['/posts/tag', '/posts/artist'].some( (path) => page.url.pathname.includes(path) ) && getPageLabelType()}
 					<Button

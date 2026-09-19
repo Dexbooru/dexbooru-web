@@ -9,28 +9,31 @@
 </script>
 
 {#if $friendData}
-	<Tabs style="underline">
-		<TabItem
-			open
-			title="Friends ({formatNumberWithCommas($friendData.friends.length)})"
-			class="focus:ring-0"
-		>
+	<Tabs style="underline" class="flex flex-wrap gap-y-2 overflow-x-auto">
+		<TabItem open class="focus:ring-0">
+			{#snippet titleSlot()}
+				<span class="whitespace-nowrap"
+					>Friends ({formatNumberWithCommas($friendData.friends.length)})</span
+				>
+			{/snippet}
 			<FriendList listType="friend" />
 		</TabItem>
 
-		<TabItem
-			title="Sent Friend Requests ({formatNumberWithCommas($friendData.sentFriendRequests.length)})"
-			class="focus:ring-0"
-		>
+		<TabItem class="focus:ring-0">
+			{#snippet titleSlot()}
+				<span class="whitespace-nowrap"
+					>Sent ({formatNumberWithCommas($friendData.sentFriendRequests.length)})</span
+				>
+			{/snippet}
 			<FriendList listType="sent-request" />
 		</TabItem>
 
-		<TabItem
-			title="Received Friend Requests ({formatNumberWithCommas(
-				$friendData.receivedFriendRequests.length,
-			)})"
-			class="focus:ring-0"
-		>
+		<TabItem class="focus:ring-0">
+			{#snippet titleSlot()}
+				<span class="whitespace-nowrap"
+					>Received ({formatNumberWithCommas($friendData.receivedFriendRequests.length)})</span
+				>
+			{/snippet}
 			<FriendList listType="received-request" />
 		</TabItem>
 	</Tabs>

@@ -108,15 +108,17 @@
 	</div>
 
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-		<Card class="w-full max-w-none p-6 lg:p-8">
+		<Card class="w-full max-w-none overflow-x-auto p-4 sm:p-6 lg:p-8">
 			<div class="mb-8 flex items-center justify-center">
-				<h5 class="text-2xl leading-none font-bold text-gray-900 dark:text-white">
+				<h5 class="text-lg leading-snug font-bold text-gray-900 sm:text-2xl dark:text-white">
 					Top {TOP_K_LABEL_COUNT} Tags by post count
 				</h5>
 			</div>
 			{#if hasTagData}
 				{#key isDark}
-					<Chart options={tagOptions} class="py-6" />
+					<div class="overflow-x-auto">
+						<Chart options={tagOptions} class="py-6" />
+					</div>
 				{/key}
 			{:else}
 				<div class="flex min-h-75 items-center justify-center">
@@ -125,15 +127,17 @@
 			{/if}
 		</Card>
 
-		<Card class="w-full max-w-none p-6 lg:p-8">
+		<Card class="w-full max-w-none overflow-x-auto p-4 sm:p-6 lg:p-8">
 			<div class="mb-8 flex items-center justify-center">
-				<h5 class="text-2xl leading-none font-bold text-gray-900 dark:text-white">
+				<h5 class="text-lg leading-snug font-bold text-gray-900 sm:text-2xl dark:text-white">
 					Top {TOP_K_LABEL_COUNT} Artists by post count
 				</h5>
 			</div>
 			{#if hasArtistData}
 				{#key isDark}
-					<Chart options={artistOptions} class="py-6" />
+					<div class="overflow-x-auto">
+						<Chart options={artistOptions} class="py-6" />
+					</div>
 				{/key}
 			{:else}
 				<div class="flex min-h-75 items-center justify-center">
@@ -144,9 +148,9 @@
 	</div>
 
 	<div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-		<Card class="w-full max-w-none p-6 lg:p-8">
+		<Card class="w-full max-w-none overflow-x-auto p-4 sm:p-6 lg:p-8">
 			<div class="mb-8 flex items-center justify-center">
-				<h5 class="text-2xl leading-none font-bold text-gray-900 dark:text-white">
+				<h5 class="text-lg leading-snug font-bold text-gray-900 sm:text-2xl dark:text-white">
 					Top {topLikedPosts.length} Most Liked Posts over the past {TOP_K_POST_LOOKBACK_HOURS} hour(s)
 				</h5>
 			</div>
@@ -200,9 +204,9 @@
 			{/if}
 		</Card>
 
-		<Card class="w-full max-w-none p-6 lg:p-8">
+		<Card class="w-full max-w-none overflow-x-auto p-4 sm:p-6 lg:p-8">
 			<div class="mb-8 flex items-center justify-center">
-				<h5 class="text-2xl leading-none font-bold text-gray-900 dark:text-white">
+				<h5 class="text-lg leading-snug font-bold text-gray-900 sm:text-2xl dark:text-white">
 					Top {topViewedPosts.length} Most Viewed Posts over the past {TOP_K_POST_LOOKBACK_HOURS} hour(s)
 				</h5>
 			</div>

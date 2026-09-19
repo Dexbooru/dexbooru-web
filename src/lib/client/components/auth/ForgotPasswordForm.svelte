@@ -15,7 +15,7 @@
 	);
 </script>
 
-<Card class="mt-20 p-5">
+<Card class="mx-3 mt-20 w-full max-w-md p-5">
 	<h3 class="mb-5 text-center text-xl font-medium text-gray-900 dark:text-white">
 		Account Recovery
 	</h3>

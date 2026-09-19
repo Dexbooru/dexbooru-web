@@ -62,7 +62,7 @@
 	};
 </script>
 
-<div class="relative {!isGlobal && 'mr-4'} {customClass} " style="width: {width}">
+<div class="relative max-w-full {!isGlobal && 'mr-4'} {customClass} " style="width: {width}">
 	<div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
 		<SearchOutline class="z-30 h-5 w-4 text-gray-500 dark:text-gray-400" />
 	</div>

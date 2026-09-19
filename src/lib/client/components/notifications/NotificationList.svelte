@@ -23,7 +23,7 @@
 
 <Dropdown
 	triggeredBy="#notification-bell"
-	class="w-full max-w-sm divide-y divide-gray-100 rounded shadow dark:divide-gray-700 dark:bg-gray-800"
+	class="w-[calc(100vw-1.5rem)] max-w-sm divide-y divide-gray-100 rounded shadow sm:w-full dark:divide-gray-700 dark:bg-gray-800"
 >
 	<div class="py-2 text-center font-bold dark:text-white">Notifications ({$unreadCount})</div>
 	{#if recentNotifications.length > 0}

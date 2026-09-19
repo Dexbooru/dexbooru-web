@@ -29,6 +29,6 @@
 	<meta property="profile:username" content={targetUser.username} />
 </svelte:head>
 
-<main class="mt-5 mb-5 grid place-items-center">
+<main class="mt-5 mb-8 flex justify-center px-6 sm:px-8">
 	<UserProfileCard {targetUser} {friendStatus} {userStatistics} {linkedAccounts} />
 </main>

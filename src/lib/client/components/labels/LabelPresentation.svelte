@@ -17,7 +17,7 @@
 </script>
 
 {#if metadata && labelType}
-	<div class=" text-gray-800 dark:text-gray-300">
+	<div class="text-gray-800 dark:text-gray-300">
 		<p class="text-md font-semibold">ID:</p>
 		<span class="mb-4 block text-sm text-gray-600 dark:text-gray-400">{metadata.id}</span>
 
@@ -54,7 +54,7 @@
 								href={link}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="text-blue-500 hover:underline dark:text-blue-300"
+								class="min-w-0 break-all text-blue-500 hover:underline dark:text-blue-300"
 							>
 								{link}
 							</a>
