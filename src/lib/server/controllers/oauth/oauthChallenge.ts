@@ -105,7 +105,14 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 								ipAddress,
 								true,
 							);
-							redirect(302, `/login/totp/${newTotpChallengeId}`);
+							redirect(
+								302,
+								buildOauthProcessingUrl({
+									totpChallengeId: newTotpChallengeId,
+									applicationName: matchingApplication,
+									redirectTo: getSafeRedirectTo(storedRedirectTo, '/posts'),
+								}),
+							);
 						}
 
 						const encodedAuthToken = generateEncodedUserTokenFromRecord(matchingDbUser, true);

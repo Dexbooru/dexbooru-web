@@ -6,16 +6,20 @@ import type { TOauthApplication, TSimplifiedUserResponse } from '../../types/oau
 
 type TOauthProcessingUrlParams = {
 	redirectTo?: string;
-	token: string;
 	applicationName: TOauthApplication;
-};
+} & ({ token: string; totpChallengeId?: never } | { totpChallengeId: string; token?: never });
 
 export const buildOauthProcessingUrl = (data: TOauthProcessingUrlParams): string => {
-	const { redirectTo = '/', token, applicationName } = data;
+	const { redirectTo = '/', applicationName } = data;
 	const searchParams = new URLSearchParams();
-	searchParams.set(SESSION_ID_KEY, token);
 	searchParams.set('application', applicationName);
 	searchParams.set('redirectTo', redirectTo);
+
+	if ('totpChallengeId' in data && data.totpChallengeId) {
+		searchParams.set('totpChallengeId', data.totpChallengeId);
+	} else if ('token' in data) {
+		searchParams.set(SESSION_ID_KEY, data.token);
+	}
 
 	return `/oauth/process?${searchParams.toString()}`;
 };

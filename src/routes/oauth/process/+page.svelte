@@ -13,8 +13,14 @@
 	const applicationName = page.url.searchParams.get('application') ?? '';
 	const redirectTo = page.url.searchParams.get('redirectTo') ?? '/';
 	const oauthToken = page.url.searchParams.get(SESSION_ID_KEY) ?? '';
+	const totpChallengeId = page.url.searchParams.get('totpChallengeId') ?? '';
 
 	onMount(() => {
+		if (totpChallengeId.length > 0) {
+			goto(`/login/totp/${totpChallengeId}`);
+			return;
+		}
+
 		if (
 			!oauthToken ||
 			oauthToken.length === 0 ||

@@ -18,6 +18,7 @@ import {
 	isValidOtpCode,
 } from '../../helpers/totp';
 import logger from '../../logging/logger';
+import type { TControllerHandlerVariant } from '../../types/controllers';
 import {
 	UserProcessTotpSchema,
 	UserGetTotpSchema,
@@ -81,39 +82,67 @@ export const handleProcessUserTotp = async (event: RequestEvent) => {
 	);
 };
 
-export const handleGetUserTotp = async (event: RequestEvent) => {
-	return await validateAndHandleRequest(
-		event,
-		'page-server-load',
-		UserGetTotpSchema,
-		async (data) => {
-			const { challengeId } = data.pathParams;
-			try {
-				const challengeData = await getTotpChallenge(challengeId);
-				if (!challengeData) {
-					redirect(302, '/login');
+export const handleGetUserTotp = async (
+	event: RequestEvent,
+	handlerType: TControllerHandlerVariant = 'page-server-load',
+) => {
+	return await validateAndHandleRequest(event, handlerType, UserGetTotpSchema, async (data) => {
+		const { challengeId } = data.pathParams;
+		try {
+			const challengeData = await getTotpChallenge(challengeId);
+			if (!challengeData) {
+				if (handlerType === 'api-route') {
+					return createErrorResponse(
+						handlerType,
+						404,
+						'The TOTP challenge was not found or has expired',
+					);
 				}
+				redirect(302, '/login');
+			}
 
-				const ipAddress = event.getClientAddress();
-				if (ipAddress !== challengeData.ipAddress) {
-					redirect(302, '/login');
+			const ipAddress = event.getClientAddress();
+			if (ipAddress !== challengeData.ipAddress) {
+				if (handlerType === 'api-route') {
+					return createErrorResponse(
+						handlerType,
+						403,
+						'The TOTP challenge is not valid for this client',
+					);
 				}
+				redirect(302, '/login');
+			}
 
-				return createSuccessResponse(
-					'page-server-load',
-					'Successfully fetched the login TOTP challenge id',
-					{ challengeData },
-				);
-			} catch (error) {
-				if (isRedirect(error)) throw error;
-				throw createErrorResponse(
-					'page-server-load',
+			if (handlerType === 'api-route') {
+				return createSuccessResponse(handlerType, 'Successfully fetched the login TOTP challenge', {
+					username: challengeData.username,
+					rememberMe: challengeData.rememberMe,
+				});
+			}
+
+			return createSuccessResponse(
+				handlerType,
+				'Successfully fetched the login TOTP challenge id',
+				{
+					challengeData,
+				},
+			);
+		} catch (error) {
+			if (isRedirect(error)) throw error;
+			if (handlerType === 'api-route') {
+				return createErrorResponse(
+					handlerType,
 					500,
 					'An unexpected error occured while fetching the TOTP form',
 				);
 			}
-		},
-	);
+			throw createErrorResponse(
+				handlerType,
+				500,
+				'An unexpected error occured while fetching the TOTP form',
+			);
+		}
+	});
 };
 
 export const handleGenerateUserTotpData = async (event: RequestEvent) => {
