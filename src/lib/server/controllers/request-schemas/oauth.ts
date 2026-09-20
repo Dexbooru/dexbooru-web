@@ -14,4 +14,10 @@ const OauthCallbackSchema = {
 	}),
 } satisfies TRequestSchema;
 
-export { OauthCallbackSchema, OauthStoreSchema };
+const OauthAuthorizationUrlsGetSchema = {
+	urlSearchParams: z.object({
+		redirectTo: z.string().optional(),
+	}),
+} satisfies TRequestSchema;
+
+export { OauthAuthorizationUrlsGetSchema, OauthCallbackSchema, OauthStoreSchema };
