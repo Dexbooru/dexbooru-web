@@ -22,7 +22,7 @@ import { generateEncodedUserTokenFromRecord } from '../../helpers/sessions';
 import { createTotpChallenge } from '../../helpers/totp';
 import type { IOauthProvider } from '../../types/oauth';
 import { OauthCallbackSchema } from '../request-schemas/oauth';
-import { buildOauthProcessingUrl, handleAccountLink } from './helpers';
+import { buildOauthErrorRedirect, buildOauthProcessingUrl, handleAccountLink } from './helpers';
 
 export const handleOauthChallenge = async (event: RequestEvent) => {
 	return await validateAndHandleRequest(
@@ -31,6 +31,7 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 		OauthCallbackSchema,
 		async (data) => {
 			const { state, code } = data.urlSearchParams;
+			let nativeReturnUrl: string | undefined;
 
 			try {
 				const matchingApplication = SkeletonOauthProvider.getApplicationFromState(state);
@@ -59,7 +60,9 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 						break;
 				}
 
-				const storedRedirectTo = await authProvider.validateAuthState(state);
+				const storedState = await authProvider.validateAuthState(state);
+				nativeReturnUrl = storedState.nativeReturnUrl;
+				const storedRedirectTo = getSafeRedirectTo(storedState.redirectTo, '/posts');
 				const accessToken = await authProvider.getToken(code, state);
 				const oauthUserData = await authProvider.getUserData(accessToken);
 				const userIdFromState = SkeletonOauthProvider.extractUserIdFromState(state);
@@ -80,6 +83,7 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 						token: encodedAuthToken,
 						applicationName: matchingApplication,
 						redirectTo: '/profile/settings?tab=security',
+						nativeReturnUrl,
 					});
 
 					redirect(302, oauthProcessingUrl);
@@ -110,7 +114,8 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 								buildOauthProcessingUrl({
 									totpChallengeId: newTotpChallengeId,
 									applicationName: matchingApplication,
-									redirectTo: getSafeRedirectTo(storedRedirectTo, '/posts'),
+									redirectTo: storedRedirectTo,
+									nativeReturnUrl,
 								}),
 							);
 						}
@@ -119,7 +124,8 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 						const oauthProcessingUrl = buildOauthProcessingUrl({
 							token: encodedAuthToken,
 							applicationName: matchingApplication,
-							redirectTo: getSafeRedirectTo(storedRedirectTo, '/posts'),
+							redirectTo: storedRedirectTo,
+							nativeReturnUrl,
 						});
 
 						redirect(302, oauthProcessingUrl);
@@ -153,7 +159,8 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 						const oauthProcessingUrl = buildOauthProcessingUrl({
 							token: encodedAuthToken,
 							applicationName: matchingApplication,
-							redirectTo: getSafeRedirectTo(storedRedirectTo, '/posts'),
+							redirectTo: storedRedirectTo,
+							nativeReturnUrl,
 						});
 
 						redirect(302, oauthProcessingUrl);
@@ -163,7 +170,7 @@ export const handleOauthChallenge = async (event: RequestEvent) => {
 				if (isRedirect(error)) throw error;
 
 				const errorMesssage = (error as Error).message;
-				redirect(302, '/login?oauthError=' + encodeURIComponent(errorMesssage));
+				redirect(302, buildOauthErrorRedirect(errorMesssage, nativeReturnUrl));
 			}
 		},
 	);

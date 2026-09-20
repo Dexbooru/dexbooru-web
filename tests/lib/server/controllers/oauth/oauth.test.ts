@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { handleGetOauthAuthorizationUrls } from '$lib/server/controllers/oauth/getOauthAuthorizationUrls';
 import { handleOauthChallenge } from '$lib/server/controllers/oauth/oauthChallenge';
-import { buildOauthProcessingUrl } from '$lib/server/controllers/oauth/helpers';
+import { buildOauthErrorRedirect, buildOauthProcessingUrl } from '$lib/server/controllers/oauth/helpers';
 import {
 	mockControllerHelpers,
 	mockLinkedAccountActions,
@@ -74,6 +74,35 @@ describe('oauth controllers', () => {
 			expect(url.searchParams.get('totpChallengeId')).toBe('challenge-id');
 			expect(url.searchParams.get('dexbooru-session')).toBeNull();
 		});
+
+		it('should prefix the native return url when one is stored', () => {
+			const url = new URL(
+				buildOauthProcessingUrl({
+					token: 'encoded-token',
+					applicationName: 'discord',
+					redirectTo: '/posts',
+					nativeReturnUrl: 'dexboorumobile://oauth/process',
+				}),
+			);
+
+			expect(url.protocol).toBe('dexboorumobile:');
+			expect(url.host).toBe('oauth');
+			expect(url.pathname).toBe('/process');
+			expect(url.searchParams.get('application')).toBe('discord');
+			expect(url.searchParams.get('dexbooru-session')).toBe('encoded-token');
+		});
+	});
+
+	describe('buildOauthErrorRedirect', () => {
+		it('should send website errors to the login page', () => {
+			expect(buildOauthErrorRedirect('nope')).toBe('/login?oauthError=nope');
+		});
+
+		it('should send native errors back to the app return url', () => {
+			expect(buildOauthErrorRedirect('nope', 'dexboorumobile://oauth/process')).toBe(
+				'dexboorumobile://oauth/process?oauthError=nope',
+			);
+		});
 	});
 
 	describe('handleGetOauthAuthorizationUrls', () => {
@@ -91,7 +120,7 @@ describe('oauth controllers', () => {
 			await handleGetOauthAuthorizationUrls(mockEvent);
 
 			expect(mockOauthProvider.getAuthorizationUrl).toHaveBeenCalledTimes(3);
-			expect(mockOauthProvider.getAuthorizationUrl).toHaveBeenNthCalledWith(1, '/posts');
+			expect(mockOauthProvider.getAuthorizationUrl).toHaveBeenNthCalledWith(1, '/posts', undefined);
 			expect(mockControllerHelpers.createSuccessResponse).toHaveBeenCalledWith(
 				'api-route',
 				'Successfully fetched OAuth authorization URLs',
@@ -113,7 +142,46 @@ describe('oauth controllers', () => {
 
 			await handleGetOauthAuthorizationUrls(mockEvent);
 
-			expect(mockOauthProvider.getAuthorizationUrl).toHaveBeenCalledWith('/posts');
+			expect(mockOauthProvider.getAuthorizationUrl).toHaveBeenCalledWith('/posts', undefined);
+		});
+
+		it('should pass a safe native return url through to providers', async () => {
+			mockOauthProvider.getAuthorizationUrl.mockResolvedValue('https://oauth.example/auth');
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (event, handlerType, schema, callback) => {
+					return await callback({
+						urlSearchParams: {
+							redirectTo: '/posts',
+							nativeReturnUrl: 'dexboorumobile://oauth/process',
+						},
+					});
+				},
+			);
+
+			await handleGetOauthAuthorizationUrls(mockEvent);
+
+			expect(mockOauthProvider.getAuthorizationUrl).toHaveBeenCalledWith(
+				'/posts',
+				'dexboorumobile://oauth/process',
+			);
+		});
+
+		it('should drop an unsafe native return url', async () => {
+			mockOauthProvider.getAuthorizationUrl.mockResolvedValue('https://oauth.example/auth');
+			mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+				async (event, handlerType, schema, callback) => {
+					return await callback({
+						urlSearchParams: {
+							redirectTo: '/posts',
+							nativeReturnUrl: 'https://evil.example/steal',
+						},
+					});
+				},
+			);
+
+			await handleGetOauthAuthorizationUrls(mockEvent);
+
+			expect(mockOauthProvider.getAuthorizationUrl).toHaveBeenCalledWith('/posts', undefined);
 		});
 
 		it('should return a 500 when a provider fails to build a url', async () => {
@@ -145,7 +213,7 @@ describe('oauth controllers', () => {
 			);
 			mockSkeletonOauthProvider.getApplicationFromState.mockReturnValue('discord');
 			mockSkeletonOauthProvider.extractUserIdFromState.mockReturnValue(undefined);
-			mockOauthProvider.validateAuthState.mockResolvedValue('/posts');
+			mockOauthProvider.validateAuthState.mockResolvedValue({ redirectTo: '/posts' });
 			mockOauthProvider.getToken.mockResolvedValue('access-token');
 			mockOauthProvider.getUserData.mockResolvedValue(oauthUserData);
 			mockSessionHelpers.generateEncodedUserTokenFromRecord.mockReturnValue('encoded-token');
@@ -228,6 +296,68 @@ describe('oauth controllers', () => {
 			expect(redirect).toHaveBeenCalledWith(
 				302,
 				expect.stringMatching(/\/oauth\/process\?.*dexbooru-session=encoded-token/),
+			);
+		});
+
+		it('should redirect an existing user back to the native app', async () => {
+			mockOauthProvider.validateAuthState.mockResolvedValue({
+				redirectTo: '/posts',
+				nativeReturnUrl: 'dexboorumobile://oauth/process',
+			});
+			mockLinkedAccountActions.findUserFromPlatformNameAndId.mockResolvedValue({
+				id: 'u1',
+				username: 'linked-user',
+			} as TUser);
+			mockPreferenceActions.findUserPreferences.mockResolvedValue({
+				twoFactorAuthenticationEnabled: false,
+			} as TPreferences);
+
+			await expect(handleOauthChallenge(mockEvent)).rejects.toEqual({ status: 302 });
+
+			expect(redirect).toHaveBeenCalledWith(
+				302,
+				expect.stringMatching(
+					/^dexboorumobile:\/\/oauth\/process\?.*dexbooru-session=encoded-token/,
+				),
+			);
+		});
+
+		it('should redirect native 2FA users with a totp challenge id', async () => {
+			mockOauthProvider.validateAuthState.mockResolvedValue({
+				redirectTo: '/posts',
+				nativeReturnUrl: 'exp://192.168.1.20:8081/--/oauth/process',
+			});
+			mockLinkedAccountActions.findUserFromPlatformNameAndId.mockResolvedValue({
+				id: 'u1',
+				username: 'linked-user',
+			} as TUser);
+			mockPreferenceActions.findUserPreferences.mockResolvedValue({
+				twoFactorAuthenticationEnabled: true,
+			} as TPreferences);
+			mockTotpHelpers.createTotpChallenge.mockResolvedValue('challenge-id');
+
+			await expect(handleOauthChallenge(mockEvent)).rejects.toEqual({ status: 302 });
+
+			expect(redirect).toHaveBeenCalledWith(
+				302,
+				expect.stringMatching(
+					/^exp:\/\/192\.168\.1\.20:8081\/--\/oauth\/process\?.*totpChallengeId=challenge-id/,
+				),
+			);
+		});
+
+		it('should send native oauth errors back to the app', async () => {
+			mockOauthProvider.validateAuthState.mockResolvedValue({
+				redirectTo: '/posts',
+				nativeReturnUrl: 'dexboorumobile://oauth/process',
+			});
+			mockOauthProvider.getToken.mockRejectedValue(new Error('token exchange failed'));
+
+			await expect(handleOauthChallenge(mockEvent)).rejects.toEqual({ status: 302 });
+
+			expect(redirect).toHaveBeenCalledWith(
+				302,
+				'dexboorumobile://oauth/process?oauthError=token%20exchange%20failed',
 			);
 		});
 	});

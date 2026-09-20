@@ -1,9 +1,14 @@
+export type TOauthStoredState = {
+	redirectTo: string;
+	nativeReturnUrl?: string;
+};
+
 export interface IOauthProvider {
-	getAuthorizationUrl(redirectTo?: string): Promise<string>;
+	getAuthorizationUrl(redirectTo?: string, nativeReturnUrl?: string): Promise<string>;
 	getIdentity<T>(_token: string): Promise<T>;
 	getToken(_code: string, _state: string): Promise<string>;
 	getUserData(_token: string): Promise<TSimplifiedUserResponse>;
-	validateAuthState(stateKey: string): Promise<string>;
+	validateAuthState(stateKey: string): Promise<TOauthStoredState>;
 }
 
 export type TOauthApplication = 'google' | 'github' | 'discord';

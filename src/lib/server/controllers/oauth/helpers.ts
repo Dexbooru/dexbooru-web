@@ -7,10 +7,11 @@ import type { TOauthApplication, TSimplifiedUserResponse } from '../../types/oau
 type TOauthProcessingUrlParams = {
 	redirectTo?: string;
 	applicationName: TOauthApplication;
+	nativeReturnUrl?: string;
 } & ({ token: string; totpChallengeId?: never } | { totpChallengeId: string; token?: never });
 
 export const buildOauthProcessingUrl = (data: TOauthProcessingUrlParams): string => {
-	const { redirectTo = '/', applicationName } = data;
+	const { redirectTo = '/', applicationName, nativeReturnUrl } = data;
 	const searchParams = new URLSearchParams();
 	searchParams.set('application', applicationName);
 	searchParams.set('redirectTo', redirectTo);
@@ -21,7 +22,21 @@ export const buildOauthProcessingUrl = (data: TOauthProcessingUrlParams): string
 		searchParams.set(SESSION_ID_KEY, data.token);
 	}
 
-	return `/oauth/process?${searchParams.toString()}`;
+	const query = searchParams.toString();
+	if (nativeReturnUrl) {
+		return `${nativeReturnUrl}?${query}`;
+	}
+
+	return `/oauth/process?${query}`;
+};
+
+export const buildOauthErrorRedirect = (errorMessage: string, nativeReturnUrl?: string): string => {
+	const encoded = encodeURIComponent(errorMessage);
+	if (nativeReturnUrl) {
+		return `${nativeReturnUrl}?oauthError=${encoded}`;
+	}
+
+	return `/login?oauthError=${encoded}`;
 };
 
 export const handleAccountLink = async (

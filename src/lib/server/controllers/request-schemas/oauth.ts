@@ -17,6 +17,7 @@ const OauthCallbackSchema = {
 const OauthAuthorizationUrlsGetSchema = {
 	urlSearchParams: z.object({
 		redirectTo: z.string().optional(),
+		nativeReturnUrl: z.string().optional(),
 	}),
 } satisfies TRequestSchema;
 

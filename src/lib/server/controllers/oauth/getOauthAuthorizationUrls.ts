@@ -4,7 +4,7 @@ import {
 	createSuccessResponse,
 	validateAndHandleRequest,
 } from '../../helpers/controllers';
-import { getSafeRedirectTo } from '../../helpers/redirect';
+import { getSafeNativeReturnUrl, getSafeRedirectTo } from '../../helpers/redirect';
 import {
 	DiscordOauthProvider,
 	GithubOauthProvider,
@@ -21,15 +21,16 @@ export const handleGetOauthAuthorizationUrls = async (event: RequestEvent) => {
 		async (data) => {
 			try {
 				const redirectTo = getSafeRedirectTo(data.urlSearchParams.redirectTo, '/posts');
+				const nativeReturnUrl = getSafeNativeReturnUrl(data.urlSearchParams.nativeReturnUrl);
 				const googleAuthProvider = new GoogleOauthProvider(event);
 				const discordAuthProvider = new DiscordOauthProvider(event);
 				const githubAuthProvider = new GithubOauthProvider(event);
 
 				const [googleAuthorizationUrl, discordAuthorizationUrl, githubAuthorizationUrl] =
 					await Promise.all([
-						googleAuthProvider.getAuthorizationUrl(redirectTo),
-						discordAuthProvider.getAuthorizationUrl(redirectTo),
-						githubAuthProvider.getAuthorizationUrl(redirectTo),
+						googleAuthProvider.getAuthorizationUrl(redirectTo, nativeReturnUrl),
+						discordAuthProvider.getAuthorizationUrl(redirectTo, nativeReturnUrl),
+						githubAuthProvider.getAuthorizationUrl(redirectTo, nativeReturnUrl),
 					]);
 
 				return createSuccessResponse('api-route', 'Successfully fetched OAuth authorization URLs', {

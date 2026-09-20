@@ -18,6 +18,7 @@ import type {
 	TGithubUserResponse,
 	TGoogleUserResponse,
 	TOauthApplication,
+	TOauthStoredState,
 	TOauthTokenExchangeParams,
 	TOauthTokenResponse,
 	TOuth2AuthorizationParams,
@@ -74,12 +75,12 @@ export class SkeletonOauthProvider {
 			: undefined;
 	}
 
-	async validateAuthState(stateKey: string): Promise<string> {
+	async validateAuthState(stateKey: string): Promise<TOauthStoredState> {
 		const value = await redis.get(stateKey);
 		if (!value) {
 			throw new Error('Invalid state provided in url parameter');
 		}
-		return value;
+		return parseOauthStoredState(value);
 	}
 
 	protected deleteStateByKey(stateKey: string): void {
@@ -91,12 +92,36 @@ export class SkeletonOauthProvider {
 		redis.del(stateKey);
 	}
 
-	async storeAuthState(redirectTo?: string): Promise<string> {
+	async storeAuthState(redirectTo?: string, nativeReturnUrl?: string): Promise<string> {
 		const stateKey = this.constructKey();
-		await redis.set(stateKey, redirectTo ?? '/');
+		const storedState: TOauthStoredState = {
+			redirectTo: redirectTo ?? '/',
+			...(nativeReturnUrl ? { nativeReturnUrl } : {}),
+		};
+		await redis.set(stateKey, JSON.stringify(storedState));
 
 		return stateKey;
 	}
+}
+
+export function parseOauthStoredState(value: string): TOauthStoredState {
+	try {
+		const parsed = JSON.parse(value) as unknown;
+		if (parsed && typeof parsed === 'object' && 'redirectTo' in parsed) {
+			const record = parsed as Record<string, unknown>;
+			if (typeof record.redirectTo === 'string') {
+				return {
+					redirectTo: record.redirectTo,
+					nativeReturnUrl:
+						typeof record.nativeReturnUrl === 'string' ? record.nativeReturnUrl : undefined,
+				};
+			}
+		}
+	} catch {
+		// Legacy values were a bare redirect path.
+	}
+
+	return { redirectTo: value };
 }
 
 export class GoogleOauthProvider extends SkeletonOauthProvider implements IOauthProvider {
@@ -127,8 +152,8 @@ export class GoogleOauthProvider extends SkeletonOauthProvider implements IOauth
 		return (await response.json()) as TGoogleUserResponse;
 	}
 
-	async getAuthorizationUrl(redirectTo?: string): Promise<string> {
-		const computedState = await this.storeAuthState(redirectTo);
+	async getAuthorizationUrl(redirectTo?: string, nativeReturnUrl?: string): Promise<string> {
+		const computedState = await this.storeAuthState(redirectTo, nativeReturnUrl);
 		const authorizationParams: TOuth2AuthorizationParams = {
 			state: computedState,
 			response_type: GoogleOauthProvider.responseType,
@@ -223,8 +248,8 @@ export class DiscordOauthProvider extends SkeletonOauthProvider implements IOaut
 		return `${DiscordOauthProvider.avatarCdnUrl}/${userId}/${avatarHash}.${imageExtension}`;
 	}
 
-	async getAuthorizationUrl(redirectTo?: string): Promise<string> {
-		const computedState = await this.storeAuthState(redirectTo);
+	async getAuthorizationUrl(redirectTo?: string, nativeReturnUrl?: string): Promise<string> {
+		const computedState = await this.storeAuthState(redirectTo, nativeReturnUrl);
 		const authorizationParams: TOuth2AuthorizationParams = {
 			state: computedState,
 			client_id: OAUTH_DISCORD_CLIENT_ID,
@@ -312,8 +337,8 @@ export class GithubOauthProvider extends SkeletonOauthProvider implements IOauth
 		super(event, GithubOauthProvider.applicationSource);
 	}
 
-	async getAuthorizationUrl(redirectTo?: string): Promise<string> {
-		const computedState = await this.storeAuthState(redirectTo);
+	async getAuthorizationUrl(redirectTo?: string, nativeReturnUrl?: string): Promise<string> {
+		const computedState = await this.storeAuthState(redirectTo, nativeReturnUrl);
 		const authorizationParams: TOuth2AuthorizationParams = {
 			client_id: OAUTH_GITHUB_CLIENT_ID,
 			redirect_uri: CALLBACK_ENDPOINT,
