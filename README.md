@@ -314,11 +314,11 @@ If you don't pass the `PORT` environment variable before running the server, it 
 
 After `pnpm dbseed`, these role accounts share the mock password `password`:
 
-| Username | Role |
-|----------|------|
-| `owner` | OWNER |
+| Username    | Role      |
+| ----------- | --------- |
+| `owner`     | OWNER     |
 | `moderator` | MODERATOR |
-| `user` | USER |
+| `user`      | USER      |
 
 The additional faker “mock users” created for sample posts are **not** loginable (random unhashed passwords).
 
