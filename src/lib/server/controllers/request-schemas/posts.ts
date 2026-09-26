@@ -135,7 +135,7 @@ const CreatePostSchema = {
 				},
 			),
 		uploadId: z.string().uuid().optional(),
-		ignoreDuplicates: BoolStrSchema.optional().default(false),
+		ignoreDuplicates: BoolStrSchema,
 	}),
 } satisfies TRequestSchema;
 
