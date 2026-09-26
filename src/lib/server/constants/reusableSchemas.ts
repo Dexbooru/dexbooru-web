@@ -1,9 +1,7 @@
 import { z } from 'zod';
 
-export const BoolStrSchema = z
+const BoolStrValueSchema = z
 	.union([z.literal('true'), z.literal('false'), z.literal('on'), z.literal('off'), z.boolean()])
-	.optional()
-	.default('false')
 	.transform((val) => {
 		if (typeof val === 'string') {
 			if (val === 'on') return true;
@@ -13,6 +11,12 @@ export const BoolStrSchema = z
 
 		return val;
 	});
+
+/** Parses form bool strings; defaults to false when omitted (checkbox-style fields). */
+export const BoolStrSchema = BoolStrValueSchema.optional().default(false);
+
+/** Parses form bool strings; leaves undefined when omitted (partial updates). */
+export const OptionalBoolStrSchema = BoolStrValueSchema.optional();
 
 export const PageNumberSchema = z
 	.string()

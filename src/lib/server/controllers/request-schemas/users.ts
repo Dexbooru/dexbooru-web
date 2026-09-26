@@ -1,4 +1,4 @@
-import { BoolStrSchema } from '$lib/server/constants/reusableSchemas';
+import { BoolStrSchema, OptionalBoolStrSchema } from '$lib/server/constants/reusableSchemas';
 import { getApplicationConfigurationSync } from '$lib/server/applicationConfiguration';
 import type { TRequestSchema } from '$lib/server/types/controllers';
 import { ACCOUNT_DELETION_CONFIRMATION_TEXT, EMAIL_REQUIREMENTS } from '$lib/shared/constants/auth';
@@ -197,8 +197,8 @@ const GetUserSchema = {
 
 const UpdateUserPersonalPreferencesSchema = {
 	form: z.object({
-		autoBlurNsfw: BoolStrSchema.optional(),
-		browseInSafeMode: BoolStrSchema.optional(),
+		autoBlurNsfw: OptionalBoolStrSchema,
+		browseInSafeMode: OptionalBoolStrSchema,
 		blacklistedTags: z
 			.string()
 			.transform((val) => val.toLocaleLowerCase().trim().split('\n'))
@@ -232,9 +232,9 @@ const UpdateUserUserInterfacePreferencesSchema = {
 				message: `The maximum site wide CSS length is ${getApplicationConfigurationSync().maximumSiteWideCssLength} characters`,
 			})
 			.optional(),
-		hidePostMetadataOnPreview: BoolStrSchema.optional(),
-		hideCollectionMetadataOnPreview: BoolStrSchema.optional(),
-		hideImageCarousel: BoolStrSchema.optional(),
+		hidePostMetadataOnPreview: OptionalBoolStrSchema,
+		hideCollectionMetadataOnPreview: OptionalBoolStrSchema,
+		hideImageCarousel: OptionalBoolStrSchema,
 	}),
 } satisfies TRequestSchema;
 
@@ -272,13 +272,13 @@ const UserUpdatePasswordAccountRecoverySchema = {
 
 const UserDataExportSchema = {
 	body: z.object({
-		exportLinkedAccounts: BoolStrSchema.optional(),
-		exportPreferences: BoolStrSchema.optional(),
-		exportUploadedPosts: BoolStrSchema.optional(),
-		exportLikedPosts: BoolStrSchema.optional(),
-		exportCreatedPostCollections: BoolStrSchema.optional(),
-		exportFriends: BoolStrSchema.optional(),
-		sendEmail: BoolStrSchema.optional().default(false),
+		exportLinkedAccounts: OptionalBoolStrSchema,
+		exportPreferences: OptionalBoolStrSchema,
+		exportUploadedPosts: OptionalBoolStrSchema,
+		exportLikedPosts: OptionalBoolStrSchema,
+		exportCreatedPostCollections: OptionalBoolStrSchema,
+		exportFriends: OptionalBoolStrSchema,
+		sendEmail: BoolStrSchema,
 		format: z.enum(['JSON', 'CSV', 'TXT', 'XLSX']).optional().default('JSON'),
 	}),
 } satisfies TRequestSchema;
