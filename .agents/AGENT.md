@@ -16,7 +16,7 @@ Canonical instructions for AI agents working in this repository. Refresh this fi
 | Object storage | AWS S3 (Localstack locally) |
 | Messaging | RabbitMQ, AWS SQS |
 | Validation | Zod 4 |
-| Testing | Vitest 4 |
+| Testing | Vitest 4 (unit); Playwright + Gherkin via playwright-bdd (E2E) |
 | Package manager | **pnpm only** (`preinstall` enforces this) |
 
 ---
@@ -33,13 +33,16 @@ Canonical instructions for AI agents working in this repository. Refresh this fi
 ### Core commands
 
 ```bash
-pnpm install          # install deps; runs prisma generate via postinstall
+pnpm install          # install deps; prisma generate + Chromium (unless PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1)
 pnpm dev              # Vite dev server (default http://localhost:5173)
 pnpm build            # production build
 pnpm run-build        # run built app
 pnpm check            # svelte-check + TypeScript
-pnpm test             # vitest run
+pnpm test             # vitest run (unit; used by Husky pre-commit)
 pnpm test:coverage    # coverage report
+pnpm test:e2e         # Playwright Gherkin scenarios (needs live app + seeded DB)
+pnpm test:e2e:ui      # Playwright UI mode
+pnpm e2e:install      # download Chromium if postinstall was skipped
 pnpm lint             # prettier + eslint
 pnpm lint:fix         # auto-fix
 ```
@@ -93,7 +96,8 @@ src/
 ├── hooks.server.ts
 └── app.css
 
-tests/              # Mirrors src/lib layout; mocks in tests/mocks/
+tests/              # Mirrors src/lib layout; mocks in tests/mocks/ (Vitest only)
+e2e/                # Playwright Gherkin features + step definitions
 prisma/schema/      # Split Prisma schema files
 scripts/            # One-off scripts, localstack init, data migrations
 ```
@@ -310,10 +314,39 @@ Co-located tests also exist (e.g. `src/lib/shared/helpers/__tests__/`) — prefe
 ### Running tests
 
 ```bash
-pnpm test                    # full suite
+pnpm test                    # Vitest unit suite
 pnpm test path/to/file.test.ts
 pnpm test:coverage
 ```
+
+Do **not** put browser E2E under `tests/` (Vitest + global mocks). Do **not** add `pnpm test:e2e` to Husky.
+
+### E2E (Playwright + Gherkin)
+
+Browser scenarios use [playwright-bdd](https://github.com/vitalets/playwright-bdd): `.feature` files compiled by `bddgen`, then run with the Playwright test runner (Chromium).
+
+**Prerequisites:** Docker postgres + redis (and Localstack if the flow needs S3), `.env` at repo root, `pnpm dbseed`, app reachable at `http://localhost:5173` (or set `PLAYWRIGHT_BASE_URL`). `playwright.config.ts` starts `pnpm dev` if nothing is already listening.
+
+**Browsers:** `pnpm install` downloads Chromium via `scripts/installPlaywrightBrowsers.mjs`. Skip with `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` (CI unit jobs do this). Re-install with `pnpm e2e:install`.
+
+**Seeded login accounts** (password `password`): `owner` (OWNER), `moderator` (MODERATOR), `user` (USER). Constants live in `scripts/helpers/seedAccounts.ts`.
+
+```bash
+pnpm test:e2e         # bddgen && playwright test
+pnpm test:e2e:ui
+```
+
+Layout:
+
+```
+e2e/features/**/*.feature   # Gherkin
+e2e/steps/**/*.ts           # Given / When / Then
+e2e/fixtures.ts             # createBdd()
+playwright.config.ts
+.features-gen/              # generated specs (gitignored)
+```
+
+When changing user-visible auth or navigation, add or update a Gherkin scenario and run `pnpm test:e2e`.
 
 ### Mocking
 
@@ -399,5 +432,6 @@ When working on Svelte/SvelteKit:
 - [ ] Zod validation on server inputs
 - [ ] Tests for major, minor, and edge cases
 - [ ] `pnpm test` and `pnpm check` pass
+- [ ] `pnpm test:e2e` when changing user-visible auth or navigation
 - [ ] Svelte components validated with autofixer
 - [ ] Flowbite imports are per-component paths

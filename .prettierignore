@@ -22,3 +22,8 @@ scripts/venv/
 .gemini/
 **/AGENT.md
 **/AGENTS.md
+
+# Playwright
+.features-gen/
+playwright-report/
+test-results/

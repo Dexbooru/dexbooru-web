@@ -3,6 +3,8 @@ allowBuilds:
   esbuild: true
   prisma: true
   sharp: true
+  playwright: true
+  '@playwright/test': true
 
 verifyDepsBeforeRun: false
 

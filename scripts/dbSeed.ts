@@ -9,9 +9,7 @@ import type { TAggregateOptions } from './helpers/aggregateDanbooruData';
 import dumpData from './helpers/dumpData';
 import factories from './helpers/factories';
 import createLogger from './helpers/logger';
-
-const OWNER_USERNAME = 'owner';
-const OWNER_PASSWORD = 'password';
+import { MOCK_USER_PASSWORD, SEEDED_LOGIN_ACCOUNTS } from './helpers/seedAccounts';
 
 async function main() {
 	const logger = createLogger('debug');
@@ -66,19 +64,19 @@ async function main() {
 			outputDir: aggregationResult.outputDir,
 		});
 
-		const ownerPassword = await hashPassword(OWNER_PASSWORD);
-		const ownerUser = factories.user({
-			username: OWNER_USERNAME,
-			role: UserRole.OWNER,
-			password: ownerPassword,
-		});
-
-		await dbClient.user.create({
-			data: ownerUser,
-		});
-		logger.debug(
-			`Created owner user with username: ${OWNER_USERNAME} and password: ${OWNER_PASSWORD}`,
-		);
+		const mockPasswordHash = await hashPassword(MOCK_USER_PASSWORD);
+		for (const account of SEEDED_LOGIN_ACCOUNTS) {
+			await dbClient.user.create({
+				data: factories.user({
+					username: account.username,
+					role: UserRole[account.role],
+					password: mockPasswordHash,
+				}),
+			});
+			logger.debug(
+				`Created ${account.role} user with username: ${account.username} and password: ${MOCK_USER_PASSWORD}`,
+			);
+		}
 	} catch (error) {
 		logger.error('An error occurred during the aggregation or database operations:', error);
 	} finally {

@@ -6,6 +6,7 @@ import type { PrismaClient, User } from '../../src/generated/prisma/client';
 import type { TDanbooruPost } from './aggregateDanbooruData';
 import factories from './factories';
 import buildLogger from './logger';
+import { SEEDED_LOGIN_ACCOUNTS } from './seedAccounts';
 
 const TOTAL_ARTISTS = 3000;
 const BUFFER_SIZE = 20;
@@ -140,7 +141,16 @@ async function dumpData({
 
 		logger.info('Deleted all existing data successfully');
 
-		const mockUsers = factories.user.createMany(20);
+		const reservedUsernames = new Set<string>(
+			SEEDED_LOGIN_ACCOUNTS.map((account) => account.username),
+		);
+		const mockUsers = factories.user.createMany(20).map((user) => {
+			let username = user.username;
+			while (reservedUsernames.has(username)) {
+				username = factories.user().username;
+			}
+			return { ...user, username };
+		});
 		const userWriteResult = await prismaClient.user.createMany({
 			data: mockUsers,
 		});

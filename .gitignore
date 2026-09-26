@@ -30,3 +30,10 @@ mock_data/
 coverage-final.json
 coverage-summary.json
 *.lcov
+
+# Playwright E2E
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/.features-gen/

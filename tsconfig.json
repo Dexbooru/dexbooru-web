@@ -27,6 +27,8 @@
 		".svelte-kit/types/**/$types.d.ts",
 		"vite.config.js",
 		"vite.config.ts",
+		"playwright.config.ts",
+		"e2e/**/*.ts",
 		"src/**/*.js",
 		"src/**/*.ts",
 		"src/**/*.d.ts",
