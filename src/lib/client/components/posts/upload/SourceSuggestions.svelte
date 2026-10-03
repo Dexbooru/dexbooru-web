@@ -152,6 +152,16 @@
 		tags = [...tags, label];
 	};
 
+	const urlParts = (url: string) => {
+		try {
+			const parsed = new URL(url);
+			const path = `${parsed.pathname}${parsed.search}`;
+			return { host: parsed.hostname.replace(/^www\./, ''), path: path === '/' ? '' : path };
+		} catch {
+			return { host: url, path: '' };
+		}
+	};
+
 	const formatSimilarity = (similarity: number) =>
 		Number.isInteger(similarity) ? `${similarity}%` : `${similarity.toFixed(1)}%`;
 </script>
@@ -174,6 +184,16 @@
 			{/if}
 		{/each}
 	</div>
+{/snippet}
+
+{#snippet favicon(host: string)}
+	<img
+		src="https://www.google.com/s2/favicons?domain={encodeURIComponent(host)}&sz=32"
+		alt=""
+		loading="lazy"
+		class="h-4 w-4 shrink-0 rounded-sm"
+		onerror={(event) => event.currentTarget.classList.add('invisible')}
+	/>
 {/snippet}
 
 {#if showSuggestions}
@@ -241,26 +261,44 @@
 									</div>
 								{/if}
 								{#if sourceUrls.length > 0}
-									<div class="space-y-1">
-										<p class="text-xs font-medium text-gray-700 dark:text-gray-300">Sources</p>
-										{#each sourceUrls as url (url)}
-											<div class="flex min-w-0 items-center gap-2">
-												<span class="truncate text-xs text-gray-600 dark:text-gray-300">{url}</span>
-												{#if sourceLink === url}
-													<Badge color="blue" rounded class="shrink-0">Use as source</Badge>
-												{:else}
-													<Button
-														type="button"
-														size="xs"
-														color="blue"
-														class="shrink-0"
-														onclick={() => (sourceLink = url)}
+									<div>
+										<p class="mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">Sources</p>
+										<ul
+											class="divide-y divide-gray-200 rounded-md border border-gray-200 bg-white dark:divide-gray-700 dark:border-gray-700 dark:bg-gray-900"
+										>
+											{#each sourceUrls as url (url)}
+												{@const parts = urlParts(url)}
+												<li class="flex items-center gap-3 px-3 py-2">
+													{@render favicon(parts.host)}
+													<a
+														href={url}
+														target="_blank"
+														rel="noopener noreferrer"
+														title={url}
+														class="min-w-0 flex-1 truncate text-sm"
 													>
-														Use as source
-													</Button>
-												{/if}
-											</div>
-										{/each}
+														<span
+															class="text-primary-600 dark:text-primary-500 font-medium hover:underline"
+															>{parts.host}</span
+														>
+														<span class="text-gray-500 dark:text-gray-400">{parts.path}</span>
+													</a>
+													{#if sourceLink === url}
+														<Badge color="green" rounded class="shrink-0">Current source</Badge>
+													{:else}
+														<Button
+															type="button"
+															size="xs"
+															color="alternative"
+															class="shrink-0"
+															onclick={() => (sourceLink = url)}
+														>
+															Use as source
+														</Button>
+													{/if}
+												</li>
+											{/each}
+										</ul>
 									</div>
 								{/if}
 								{#if state.suggestions.matches.length === 0}
@@ -280,12 +318,15 @@
 															href={match.sourceUrls[0]}
 															target="_blank"
 															rel="noopener noreferrer"
-															class="text-primary-700 dark:text-primary-400 hover:underline"
+															class="text-primary-600 dark:text-primary-500 inline-flex items-center gap-1.5 font-medium hover:underline"
 														>
+															{@render favicon(urlParts(match.sourceUrls[0]).host)}
 															{match.indexName}
 														</a>
 													{:else}
-														<span class="text-gray-900 dark:text-white">{match.indexName}</span>
+														<span class="font-medium text-gray-900 dark:text-white"
+															>{match.indexName}</span
+														>
 													{/if}
 													<p class="text-gray-600 tabular-nums dark:text-gray-300">
 														{formatSimilarity(match.similarity)}
