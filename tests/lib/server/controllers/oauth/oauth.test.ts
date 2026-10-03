@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { handleGetOauthAuthorizationUrls } from '$lib/server/controllers/oauth/getOauthAuthorizationUrls';
 import { handleOauthChallenge } from '$lib/server/controllers/oauth/oauthChallenge';
-import { buildOauthErrorRedirect, buildOauthProcessingUrl } from '$lib/server/controllers/oauth/helpers';
+import {
+	buildOauthErrorRedirect,
+	buildOauthProcessingUrl,
+} from '$lib/server/controllers/oauth/helpers';
 import {
 	mockControllerHelpers,
 	mockLinkedAccountActions,
