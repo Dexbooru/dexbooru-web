@@ -6,6 +6,7 @@
 	import LabelSection from '$lib/client/components/posts/upload/LabelSection.svelte';
 	import RatingEstimate from '$lib/client/components/posts/upload/RatingEstimate.svelte';
 	import SourceLinkSection from '$lib/client/components/posts/upload/SourceLinkSection.svelte';
+	import SourceSuggestions from '$lib/client/components/posts/upload/SourceSuggestions.svelte';
 	import UploadStatusModal from '$lib/client/components/posts/upload/UploadStatusModal.svelte';
 	import { FAILURE_TOAST_OPTIONS, SUCCESS_TOAST_OPTIONS } from '$lib/client/constants/toasts';
 	import { getAuthenticatedUser } from '$lib/client/helpers/context';
@@ -464,6 +465,8 @@
 					<SourceLinkSection bind:sourceLink />
 
 					<PostPictureUpload bind:loadingPictures={loadingPostPictures} bind:images={postImages} />
+
+					<SourceSuggestions images={postImages} bind:tags bind:artists bind:sourceLink />
 
 					<Checkbox class="" bind:checked={isNsfw} disabled={nsfwLockedByExplicitPrediction}>
 						Mark post as NSFW?
