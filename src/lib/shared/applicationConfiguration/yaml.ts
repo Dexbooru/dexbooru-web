@@ -1,12 +1,19 @@
 import { buildDefaultApplicationConfiguration } from './defaults';
 import { APPLICATION_CONFIGURATION_SECTIONS } from './registry';
-import type {
-	TApplicationConfiguration,
-	TApplicationConfigurationKey,
-	TApplicationConfigurationSection,
-	TApplicationConfigurationSectionKey,
-	TApplicationConfigurationYaml,
-	TPartialApplicationConfiguration,
+import {
+	normalizeSauceNaoEnabledIndexIds,
+	SAUCE_NAO_MINIMUM_SIMILARITY_LOWER_BOUND,
+	SAUCE_NAO_MINIMUM_SIMILARITY_UPPER_BOUND,
+} from './sauceNao';
+import {
+	isNumericApplicationConfigurationKey,
+	type TApplicationConfiguration,
+	type TApplicationConfigurationKey,
+	type TApplicationConfigurationSection,
+	type TApplicationConfigurationSectionKey,
+	type TApplicationConfigurationYaml,
+	type TNumericApplicationConfigurationKey,
+	type TPartialApplicationConfiguration,
 } from './types';
 
 type TSectionConfigurationMap = {
@@ -58,6 +65,7 @@ const SECTION_CONFIGURATION_KEYS = {
 	reports: ['maximumReportReasonDescriptionLength', 'maximumReportsPerPage'],
 	pagination: ['maximumTagsPerPage', 'maximumArtistsPerPage'],
 	rateLimit: ['likePostRateLimitMax', 'likePostRateLimitWindowMs'],
+	sauceNao: ['sauceNaoEnabledIndexes', 'sauceNaoMinimumSimilarity'],
 } as const satisfies TSectionConfigurationMap;
 
 const SECTION_CONFIGURATION_KEY_SETS = Object.fromEntries(
@@ -89,6 +97,50 @@ const assertKnownSectionKeys = (section: TApplicationConfigurationSectionKey, va
 	}
 };
 
+const parseNumericYamlValue = (value: unknown, path: string): number => {
+	if (typeof value !== 'number' || !Number.isFinite(value)) {
+		throw new Error(`Invalid value for "${path}". Expected a number, received ${typeof value}.`);
+	}
+	return value;
+};
+
+const parseEnabledIndexesYamlValue = (value: unknown, path: string): number[] => {
+	if (
+		!Array.isArray(value) ||
+		value.some((indexId) => typeof indexId !== 'number' || !Number.isInteger(indexId))
+	) {
+		throw new Error(`Invalid value for "${path}". Expected an array of SauceNAO index ids.`);
+	}
+	return normalizeSauceNaoEnabledIndexIds(value);
+};
+
+const parseMinimumSimilarityYamlValue = (value: unknown, path: string): number => {
+	const parsed = parseNumericYamlValue(value, path);
+	if (
+		parsed < SAUCE_NAO_MINIMUM_SIMILARITY_LOWER_BOUND ||
+		parsed > SAUCE_NAO_MINIMUM_SIMILARITY_UPPER_BOUND
+	) {
+		throw new Error(`"${path}" must be between 1 and 100.`);
+	}
+	return parsed;
+};
+
+const NUMERIC_YAML_FIELD_PARSERS: Partial<
+	Record<TNumericApplicationConfigurationKey, (value: unknown, path: string) => number>
+> = {
+	sauceNaoMinimumSimilarity: parseMinimumSimilarityYamlValue,
+};
+
+const parseYamlField = (
+	key: TNumericApplicationConfigurationKey,
+	value: unknown,
+	path: string,
+): number => {
+	const parser = NUMERIC_YAML_FIELD_PARSERS[key];
+	if (parser) return parser(value, path);
+	return parseNumericYamlValue(value, path);
+};
+
 export const flattenApplicationConfigurationYaml = (
 	yaml: TApplicationConfigurationYaml,
 ): TPartialApplicationConfiguration => {
@@ -102,12 +154,13 @@ export const flattenApplicationConfigurationYaml = (
 		assertKnownSectionKeys(section, sectionValue);
 
 		for (const [key, value] of Object.entries(sectionValue)) {
-			if (typeof value !== 'number') {
-				throw new Error(
-					`Invalid value for "${section}.${key}". Expected a number, received ${typeof value}.`,
-				);
+			const configurationKey = key as TApplicationConfigurationKey;
+			const path = `${section}.${key}`;
+			if (!isNumericApplicationConfigurationKey(configurationKey)) {
+				flattened[configurationKey] = parseEnabledIndexesYamlValue(value, path);
+				continue;
 			}
-			flattened[key as TApplicationConfigurationKey] = value;
+			flattened[configurationKey] = parseYamlField(configurationKey, value, path);
 		}
 	}
 
@@ -119,7 +172,7 @@ export const nestApplicationConfiguration = (
 ): TApplicationConfigurationSection => {
 	const nested: Partial<TApplicationConfigurationSection> = {};
 	for (const section of APPLICATION_CONFIGURATION_SECTIONS) {
-		const sectionData: Record<string, number> = {};
+		const sectionData: Record<string, number | number[]> = {};
 		for (const key of SECTION_CONFIGURATION_KEYS[section]) {
 			sectionData[key] = configuration[key];
 		}

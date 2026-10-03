@@ -1,3 +1,7 @@
+import {
+	DEFAULT_SAUCENAO_ENABLED_INDEX_IDS,
+	DEFAULT_SAUCENAO_MINIMUM_SIMILARITY,
+} from '../constants/sauceNao';
 import type { TApplicationConfiguration, TCoreApplicationConfiguration } from './types';
 
 export const APPLICATION_CONFIGURATION_SINGLETON_ID = 'singleton';
@@ -41,6 +45,8 @@ export const APPLICATION_CONFIGURATION_DEFAULTS: TCoreApplicationConfiguration =
 	maximumArtistsPerPage: 100,
 	likePostRateLimitMax: 10,
 	likePostRateLimitWindowMs: 60000,
+	sauceNaoEnabledIndexes: DEFAULT_SAUCENAO_ENABLED_INDEX_IDS,
+	sauceNaoMinimumSimilarity: DEFAULT_SAUCENAO_MINIMUM_SIMILARITY,
 };
 
 export const buildDefaultApplicationConfiguration = (): TApplicationConfiguration => {

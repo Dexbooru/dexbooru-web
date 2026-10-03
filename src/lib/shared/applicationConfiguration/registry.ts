@@ -1,12 +1,12 @@
 import type {
 	TApplicationConfiguration,
-	TApplicationConfigurationKey,
 	TApplicationConfigurationSectionKey,
+	TNumericApplicationConfigurationKey,
 } from './types';
 
 type TVarcharFieldMapping = {
 	type: 'varchar';
-	configKey: TApplicationConfigurationKey;
+	configKey: TNumericApplicationConfigurationKey;
 	section: TApplicationConfigurationSectionKey;
 	table: string;
 	column: string;
@@ -15,7 +15,7 @@ type TVarcharFieldMapping = {
 
 type TComputedVarcharFieldMapping = {
 	type: 'computed_varchar';
-	configKey: TApplicationConfigurationKey;
+	configKey: TNumericApplicationConfigurationKey;
 	section: TApplicationConfigurationSectionKey;
 	table: string;
 	column: string;
@@ -36,6 +36,7 @@ export const APPLICATION_CONFIGURATION_SECTIONS = [
 	'reports',
 	'pagination',
 	'rateLimit',
+	'sauceNao',
 ] as const satisfies TApplicationConfigurationSectionKey[];
 
 export const APPLICATION_CONFIGURATION_VARCHAR_FIELD_MAPPINGS: TConfigurationSchemaFieldMapping[] =
