@@ -18,6 +18,7 @@ export const OAUTH_GOOGLE_CLIENT_ID = env.OAUTH_GOOGLE_CLIENT_ID ?? '';
 export const OAUTH_GOOGLE_CLIENT_SECRET = env.OAUTH_GOOGLE_CLIENT_SECRET ?? '';
 export const OTP_PRIVATE_KEY = env.OTP_PRIVATE_KEY ?? '';
 export const RABBITMQ_URL = env.RABBITMQ_URL ?? '';
+export const SAUCENAO_API_KEY = env.SAUCENAO_API_KEY ?? '';
 export const SMTP_HOST = env.SMTP_HOST ?? '';
 export const SMTP_PASSWORD = env.SMTP_PASSWORD ?? '';
 export const SMTP_PORT = env.SMTP_PORT ?? '';

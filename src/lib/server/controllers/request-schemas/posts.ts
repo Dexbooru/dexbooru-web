@@ -1,7 +1,7 @@
 import { BoolStrSchema, PageNumberSchema } from '$lib/server/constants/reusableSchemas';
 import { getApplicationConfigurationSync } from '$lib/server/applicationConfiguration';
 import type { TRequestSchema } from '$lib/server/types/controllers';
-import { isFileImage } from '$lib/shared/helpers/images';
+import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
 import { isLabelAppropriate, transformLabels } from '$lib/shared/helpers/labels';
 import { z } from 'zod';
 
@@ -139,6 +139,16 @@ const CreatePostSchema = {
 	}),
 } satisfies TRequestSchema;
 
+const GetSourceSuggestionsSchema = {
+	form: z.object({
+		image: z
+			.instanceof(globalThis.File)
+			.refine((file) => isFileImage(file) && isFileImageSmall(file, 'post'), {
+				message: 'The uploaded image must be a supported image within the post upload size limit.',
+			}),
+	}),
+} satisfies TRequestSchema;
+
 const GetSimilarPostsSchema = {
 	form: z.object({
 		postId: z.string().uuid().optional(),
@@ -182,6 +192,7 @@ export {
 	GetPostsWithSourceTitleSchema,
 	GetPostsWithTagNameSchema,
 	GetSimilarPostsSchema,
+	GetSourceSuggestionsSchema,
 	LikePostSchema,
 	PostUpdateSchema,
 };
