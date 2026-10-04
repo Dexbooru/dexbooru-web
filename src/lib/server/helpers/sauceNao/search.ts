@@ -112,10 +112,30 @@ const buildSearchUrl = (apiKey: string, dbmask: string) => {
 	return url;
 };
 
-export const lookupSauceNaoSuggestions = async (
+const sauceNaoCacheClient = (options: TSauceNaoLookupOptions): TSauceNaoCacheClient =>
+	options.redis ?? {
+		get: (key) => redis.get(key),
+		set: (key, value, setOptions) =>
+			setOptions ? redis.set(key, value, setOptions) : redis.set(key, value),
+	};
+
+type TSauceNaoLookupContext =
+	| { status: 'disabled' }
+	| {
+			status: 'ready';
+			minimumSimilarity: number;
+			cacheKey: string;
+			client: TSauceNaoCacheClient;
+			fetchImpl: typeof fetch;
+			sleep: (milliseconds: number) => Promise<void>;
+			random: () => number;
+			requestUrl: URL;
+	  };
+
+const prepareSauceNaoLookup = async (
 	image: Uint8Array,
-	options: TSauceNaoLookupOptions = {},
-): Promise<TSauceNaoLookupResult> => {
+	options: TSauceNaoLookupOptions,
+): Promise<TSauceNaoLookupContext> => {
 	const apiKey = (options.apiKey ?? SAUCENAO_API_KEY).trim();
 	const { sauceNaoEnabledIndexes: enabledIndexIds, sauceNaoMinimumSimilarity: minimumSimilarity } =
 		options.configuration ?? (await getApplicationConfiguration());
@@ -124,17 +144,42 @@ export const lookupSauceNaoSuggestions = async (
 	}
 
 	const dbmask = buildSauceNaoDbMask(enabledIndexIds);
-	const cacheKey = `saucenao:v1:${dbmask}:${hashImage(image)}`;
-	const client: TSauceNaoCacheClient = options.redis ?? {
-		get: (key) => redis.get(key),
-		set: (key, value, setOptions) =>
-			setOptions ? redis.set(key, value, setOptions) : redis.set(key, value),
+	return {
+		status: 'ready',
+		minimumSimilarity,
+		cacheKey: `saucenao:v1:${dbmask}:${hashImage(image)}`,
+		client: sauceNaoCacheClient(options),
+		fetchImpl: options.fetch ?? fetch,
+		sleep: options.sleep ?? defaultSleep,
+		random: options.random ?? Math.random,
+		requestUrl: buildSearchUrl(apiKey, dbmask),
 	};
-	const fetchImpl = options.fetch ?? fetch;
-	const sleep = options.sleep ?? defaultSleep;
-	const random = options.random ?? Math.random;
-	const requestUrl = buildSearchUrl(apiKey, dbmask);
+};
 
+export const readCachedSauceNaoMatches = async (
+	image: Uint8Array,
+	options: TSauceNaoLookupOptions = {},
+): Promise<TSauceNaoMatch[]> => {
+	try {
+		const context = await prepareSauceNaoLookup(image, options);
+		if (context.status === 'disabled') return [];
+		const cached = await readCache(context.client, context.cacheKey);
+		if (!cached) return [];
+		return aggregateSauceNaoSuggestions(cached, context.minimumSimilarity).matches;
+	} catch (error) {
+		logger.error('Could not read cached SauceNAO matches.', error);
+		return [];
+	}
+};
+
+export const lookupSauceNaoSuggestions = async (
+	image: Uint8Array,
+	options: TSauceNaoLookupOptions = {},
+): Promise<TSauceNaoLookupResult> => {
+	const context = await prepareSauceNaoLookup(image, options);
+	if (context.status === 'disabled') return { status: 'disabled' };
+
+	const { client, cacheKey, minimumSimilarity, fetchImpl, sleep, random, requestUrl } = context;
 	const cached = await readCache(client, cacheKey);
 	if (cached !== null) {
 		return {

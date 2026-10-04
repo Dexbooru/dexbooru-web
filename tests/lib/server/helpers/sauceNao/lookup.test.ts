@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { lookupSauceNaoSuggestions } from '$lib/server/helpers/sauceNao/search';
+import {
+	lookupSauceNaoSuggestions,
+	readCachedSauceNaoMatches,
+} from '$lib/server/helpers/sauceNao/search';
 
 const IMAGE = new Uint8Array([1, 2, 3, 4]);
 const IMAGE_HASH = '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a';
@@ -360,5 +363,80 @@ describe('lookupSauceNaoSuggestions', () => {
 			suggestions: { artists: ['Pixiv Artist'] },
 		});
 		expect(fetchImpl).toHaveBeenCalledTimes(1);
+	});
+});
+
+const cachedMatch = (similarity: number, indexId: number) => ({
+	indexId,
+	indexName: indexId === 5 ? 'Pixiv' : 'Danbooru',
+	similarity,
+	thumbnailUrl: 'https://img.saucenao.com/cached.jpg',
+	title: null,
+	sourceUrls: [] as string[],
+	artists: [] as string[],
+	characters: ['Hatsune Miku'],
+	series: ['Vocaloid'],
+});
+
+const readOptions = (
+	redisClient: ReturnType<typeof createRedis>['client'],
+	fetchImpl: ReturnType<typeof createFetch>['fetchImpl'],
+	overrides: { apiKey?: string; minimumSimilarity?: number } = {},
+) => ({
+	fetch: fetchImpl,
+	redis: redisClient,
+	apiKey: overrides.apiKey ?? 'test-key',
+	configuration: {
+		sauceNaoEnabledIndexes: [5, 9],
+		sauceNaoMinimumSimilarity: overrides.minimumSimilarity ?? 70,
+	},
+});
+
+describe('readCachedSauceNaoMatches', () => {
+	it('returns [] on a cache miss and does not call SauceNAO', async () => {
+		const redis = createRedis();
+		const { fetchImpl } = createFetch([]);
+
+		await expect(
+			readCachedSauceNaoMatches(IMAGE, readOptions(redis.client, fetchImpl)),
+		).resolves.toEqual([]);
+		expect(fetchImpl).not.toHaveBeenCalled();
+	});
+
+	it('returns cached matches at or above the similarity cutoff, highest first', async () => {
+		const high = cachedMatch(93.5, 5);
+		const low = cachedMatch(40, 9);
+		const redis = createRedis({ [CACHE_KEY]: JSON.stringify([low, high]) });
+		const { fetchImpl } = createFetch([]);
+
+		await expect(
+			readCachedSauceNaoMatches(IMAGE, readOptions(redis.client, fetchImpl)),
+		).resolves.toEqual([high]);
+		expect(fetchImpl).not.toHaveBeenCalled();
+	});
+
+	it('returns [] when SauceNAO is disabled and does not call SauceNAO', async () => {
+		const redis = createRedis({ [CACHE_KEY]: JSON.stringify([cachedMatch(99, 5)]) });
+		const { fetchImpl } = createFetch([]);
+
+		await expect(
+			readCachedSauceNaoMatches(IMAGE, readOptions(redis.client, fetchImpl, { apiKey: '  ' })),
+		).resolves.toEqual([]);
+		expect(fetchImpl).not.toHaveBeenCalled();
+	});
+
+	it('returns [] when the cache read throws and does not call SauceNAO', async () => {
+		const client = {
+			get: async () => {
+				throw new Error('redis down');
+			},
+			set: async () => 'OK',
+		};
+		const { fetchImpl } = createFetch([]);
+
+		await expect(readCachedSauceNaoMatches(IMAGE, readOptions(client, fetchImpl))).resolves.toEqual(
+			[],
+		);
+		expect(fetchImpl).not.toHaveBeenCalled();
 	});
 });

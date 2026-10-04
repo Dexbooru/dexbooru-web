@@ -1,5 +1,6 @@
 import type { ModerationReportStatus } from '$generated/prisma/client';
 import type { TPost, TPostOrderByColumn, TPostPaginationData } from '$lib/shared/types/posts';
+import type { TPostSourceOverrides, TPostSourceType } from '$lib/shared/types/sauceNao';
 import type { RequestEvent } from '@sveltejs/kit';
 import type {
 	TControllerHandlerVariant,
@@ -124,6 +125,9 @@ export type TCreatePostFormInput = {
 	sourceLink: string;
 	uploadId?: string;
 	ignoreDuplicates: boolean;
+	characterName?: string;
+	sourceTitle?: string;
+	sourceType?: TPostSourceType;
 };
 
 export type TCreatePostStrategy = {
@@ -164,6 +168,8 @@ export type TCreatePostStrategy = {
 		post: TCreatePostRecord;
 		originalImageUrls: string[];
 		uploadId?: string;
+		overrides: TPostSourceOverrides;
+		postPictures: File[];
 	}) => Promise<void> | void;
 	onFormActionSuccess: (ctx: {
 		post: TCreatePostRecord;
