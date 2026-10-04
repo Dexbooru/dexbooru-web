@@ -4,6 +4,7 @@
 	import { checkDuplicatePosts } from '$lib/client/api/posts';
 	import DescriptionSection from '$lib/client/components/posts/upload/DescriptionSection.svelte';
 	import LabelSection from '$lib/client/components/posts/upload/LabelSection.svelte';
+	import PostSourceSection from '$lib/client/components/posts/upload/PostSourceSection.svelte';
 	import RatingEstimate from '$lib/client/components/posts/upload/RatingEstimate.svelte';
 	import SourceLinkSection from '$lib/client/components/posts/upload/SourceLinkSection.svelte';
 	import SourceSuggestions from '$lib/client/components/posts/upload/SourceSuggestions.svelte';
@@ -22,6 +23,7 @@
 	import { isExplicitTagRating, isNsfwTagRating } from '$lib/shared/helpers/tagRating';
 	import type { TagRatingPredictionResponse } from '$lib/shared/types/tagRating';
 	import type { TPostDuplicate } from '$lib/shared/types/posts';
+	import type { TPostSourceFields, TPostSourceType } from '$lib/shared/types/sauceNao';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { toast } from '@zerodevx/svelte-toast';
 	import EnvelopeSolid from 'flowbite-svelte-icons/EnvelopeSolid.svelte';
@@ -48,6 +50,10 @@
 	let artists = $state<string[]>([]);
 	let description = $state('');
 	let sourceLink = $state('');
+	let characterName = $state('');
+	let sourceTitle = $state('');
+	let sourceType = $state<TPostSourceType | ''>('');
+	let detectedSource = $state<TPostSourceFields | null>(null);
 	let hasLoaded = $state(false);
 	let shouldShowDraftToast = true;
 
@@ -136,6 +142,9 @@
 				artists = form.artists || [];
 				description = form.description || '';
 				sourceLink = form.sourceLink || '';
+				characterName = form.characterName || '';
+				sourceTitle = form.sourceTitle || '';
+				sourceType = form.sourceType || '';
 			});
 		}
 	});
@@ -143,13 +152,25 @@
 	$effect(() => {
 		if (!hasLoaded) return;
 
-		const currentDraft = { isNsfw, tags, artists, description, sourceLink };
+		const currentDraft = {
+			isNsfw,
+			tags,
+			artists,
+			description,
+			sourceLink,
+			characterName,
+			sourceTitle,
+			sourceType,
+		};
 		const isEmpty =
 			!isNsfw &&
 			tags.length === 0 &&
 			artists.length === 0 &&
 			description === '' &&
-			sourceLink === '';
+			sourceLink === '' &&
+			characterName === '' &&
+			sourceTitle === '' &&
+			sourceType === '';
 
 		if (isEmpty) {
 			clearPostDraft();
@@ -159,7 +180,14 @@
 	});
 
 	const hasDraft = $derived(
-		isNsfw || tags.length > 0 || artists.length > 0 || description !== '' || sourceLink !== '',
+		isNsfw ||
+			tags.length > 0 ||
+			artists.length > 0 ||
+			description !== '' ||
+			sourceLink !== '' ||
+			characterName !== '' ||
+			sourceTitle !== '' ||
+			sourceType !== '',
 	);
 
 	const isEmailVerified = $derived($user?.emailVerified ?? false);
@@ -259,6 +287,9 @@
 			artists = form.artists || [];
 			description = form.description || '';
 			sourceLink = form.sourceLink || '';
+			characterName = form.characterName || '';
+			sourceTitle = form.sourceTitle || '';
+			sourceType = form.sourceType || '';
 		} else {
 			const draft = loadPostDraft();
 			if (draft) {
@@ -267,6 +298,9 @@
 				artists = draft.artists;
 				description = draft.description;
 				sourceLink = draft.sourceLink;
+				characterName = draft.characterName;
+				sourceTitle = draft.sourceTitle;
+				sourceType = draft.sourceType;
 			}
 		}
 		hasLoaded = true;
@@ -295,6 +329,10 @@
 		artists = [];
 		description = '';
 		sourceLink = '';
+		characterName = '';
+		sourceTitle = '';
+		sourceType = '';
+		detectedSource = null;
 		postImages = [];
 	};
 
@@ -464,9 +502,18 @@
 
 					<SourceLinkSection bind:sourceLink />
 
+					<PostSourceSection bind:characterName bind:sourceTitle bind:sourceType {detectedSource} />
+
 					<PostPictureUpload bind:loadingPictures={loadingPostPictures} bind:images={postImages} />
 
-					<SourceSuggestions images={postImages} bind:tags bind:artists bind:sourceLink />
+					<SourceSuggestions
+						images={postImages}
+						bind:artists
+						bind:sourceLink
+						bind:characterName
+						bind:sourceTitle
+						bind:detectedSource
+					/>
 
 					<Checkbox class="" bind:checked={isNsfw} disabled={nsfwLockedByExplicitPrediction}>
 						Mark post as NSFW?

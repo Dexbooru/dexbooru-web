@@ -7,6 +7,7 @@ import type {
 } from '$generated/prisma/client';
 import type { DefaultArgs } from '@prisma/client/runtime/client';
 import type { TComment } from './comments';
+import type { TPostSourceType } from './sauceNao';
 
 export type TPostLikeAction = 'like' | 'dislike';
 
@@ -96,4 +97,7 @@ export type TPostDraft = {
 	artists: string[];
 	description: string;
 	sourceLink: string;
+	characterName: string;
+	sourceTitle: string;
+	sourceType: TPostSourceType | '';
 };
