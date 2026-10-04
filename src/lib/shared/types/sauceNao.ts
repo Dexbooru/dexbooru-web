@@ -1,8 +1,28 @@
+import type { POST_SOURCE_TYPES } from '../constants/posts';
+
+export type TPostSourceType = (typeof POST_SOURCE_TYPES)[number];
+
 export type TSauceNaoIndex = {
 	id: number;
 	maskBit: number;
 	name: string;
+	sourceType?: TPostSourceType;
 };
+
+export type TPostSourceFields = {
+	characterName: string;
+	sourceTitle: string;
+	sourceType: TPostSourceType;
+};
+
+export type TPostSourceOverrides = {
+	characterName?: string;
+	sourceTitle?: string;
+	sourceType?: TPostSourceType;
+};
+
+export type TPostSourceResolution =
+	({ status: 'known' } & TPostSourceFields) | { status: 'unknown' };
 
 export type TSauceNaoMatch = {
 	indexId: number;
