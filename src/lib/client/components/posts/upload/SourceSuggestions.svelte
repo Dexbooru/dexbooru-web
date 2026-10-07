@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fetchSourceSuggestions } from '$lib/client/api/posts';
 	import { getApplicationConfiguration } from '$lib/client/helpers/context';
+	import { isAbortError } from '$lib/shared/helpers/async';
 	import { isLabelAppropriate, transformLabel } from '$lib/shared/helpers/labels';
 	import { pickSauceNaoPostSource } from '$lib/shared/helpers/sauceNao';
 	import type { TPostSourceFields, TSauceNaoImageSuggestions } from '$lib/shared/types/sauceNao';
@@ -49,9 +50,6 @@
 
 	let suggestionsByImageId = $state<Record<string, TImageSuggestionState>>({});
 	const requests = new SvelteMap<string, AbortController>();
-
-	const isAbortError = (error: unknown) =>
-		(error instanceof DOMException || error instanceof Error) && error.name === 'AbortError';
 
 	const forgetImage = (id: string) => {
 		requests.get(id)?.abort();
@@ -323,11 +321,17 @@
 									<ul class="space-y-2">
 										{#each state.suggestions.matches.slice(0, TOP_MATCH_COUNT) as match, matchIndex (`${match.indexId}-${matchIndex}`)}
 											<li class="flex items-center gap-2">
-												<img
-													src={match.thumbnailUrl}
-													alt=""
-													class="h-12 w-12 shrink-0 rounded object-cover"
-												/>
+												{#if match.thumbnailUrl}
+													<img
+														src={match.thumbnailUrl}
+														alt=""
+														class="h-12 w-12 shrink-0 rounded object-cover"
+													/>
+												{:else}
+													<div
+														class="h-12 w-12 shrink-0 rounded bg-gray-100 dark:bg-gray-700"
+													></div>
+												{/if}
 												<div class="min-w-0 text-sm">
 													{#if match.sourceUrls[0]}
 														<a

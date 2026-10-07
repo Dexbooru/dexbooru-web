@@ -1,26 +1,33 @@
 import { Buffer } from 'node:buffer';
-import { createHash } from 'node:crypto';
 import { getApplicationConfiguration } from '$lib/server/applicationConfiguration';
 import type { TApplicationConfiguration } from '$lib/shared/applicationConfiguration';
+import {
+	SAUCENAO_ATTEMPT_TIMEOUT_MS,
+	SAUCENAO_BACKOFF_BASE_MS,
+	SAUCENAO_BACKOFF_CAP_MS,
+	SAUCENAO_CACHE_KEY_PREFIX,
+	SAUCENAO_CACHE_TTL_EMPTY_MS,
+	SAUCENAO_CACHE_TTL_NONEMPTY_MS,
+	SAUCENAO_COOLDOWN_KEY,
+	SAUCENAO_DAILY_COOLDOWN_MS,
+	SAUCENAO_DEDUPE_ALL_METHODS,
+	SAUCENAO_HIDE_NOTHING,
+	SAUCENAO_MAX_ATTEMPTS,
+	SAUCENAO_OUTPUT_TYPE_JSON,
+	SAUCENAO_RESULTS_PER_SEARCH,
+	SAUCENAO_SEARCH_URL,
+	SAUCENAO_SHORT_COOLDOWN_MS,
+} from '$lib/server/constants/sauceNao';
 import redis from '$lib/server/db/redis';
+import { hashImageBuffer } from '$lib/server/helpers/images';
 import logger from '$lib/server/logging/logger';
 import { SAUCENAO_API_KEY } from '$lib/server/runtimeEnv';
+import { fullJitterBackoffMs, isAbortOrTimeoutError, sleep } from '$lib/shared/helpers/async';
 import { buildSauceNaoDbMask } from '$lib/shared/helpers/sauceNao';
 import type { TSauceNaoMatch, TSauceNaoSuggestionsResponse } from '$lib/shared/types/sauceNao';
 import { classifySauceNaoAttempt } from './classify';
 import { aggregateSauceNaoSuggestions, normalizeSauceNaoResults } from './normalize';
 import { CachedSauceNaoMatchesSchema } from './schema';
-
-const SAUCENAO_SEARCH_URL = 'https://saucenao.com/search.php';
-const COOLDOWN_KEY = 'saucenao:cooldown';
-const ATTEMPT_TIMEOUT_MS = 15_000;
-const MAX_ATTEMPTS = 3;
-const BACKOFF_BASE_MS = 1_000;
-const BACKOFF_CAP_MS = 8_000;
-const SHORT_COOLDOWN_MS = 30_000;
-const DAILY_COOLDOWN_MS = 60 * 60 * 1000;
-const CACHE_TTL_NONEMPTY_MS = 7 * 24 * 60 * 60 * 1000;
-const CACHE_TTL_EMPTY_MS = 24 * 60 * 60 * 1000;
 
 type TSauceNaoCacheClient = {
 	get: (key: string) => Promise<string | null>;
@@ -41,21 +48,6 @@ export type TSauceNaoLookupOptions = {
 
 export type TSauceNaoLookupResult = TSauceNaoSuggestionsResponse | { status: 'unavailable' };
 
-const defaultSleep = (milliseconds: number) =>
-	new Promise<void>((resolve) => {
-		setTimeout(resolve, milliseconds);
-	});
-
-const fullJitterDelayMs = (retryIndex: number, random: () => number) => {
-	const ceiling = Math.min(BACKOFF_CAP_MS, BACKOFF_BASE_MS * 2 ** retryIndex);
-	return Math.floor(random() * ceiling);
-};
-
-const hashImage = (image: Uint8Array) => createHash('sha256').update(image).digest('hex');
-
-const isTimeoutError = (error: unknown) =>
-	error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError');
-
 const readCache = async (
 	client: TSauceNaoCacheClient,
 	key: string,
@@ -73,7 +65,7 @@ const readCache = async (
 };
 
 const writeCache = async (client: TSauceNaoCacheClient, key: string, matches: TSauceNaoMatch[]) => {
-	const ttl = matches.length === 0 ? CACHE_TTL_EMPTY_MS : CACHE_TTL_NONEMPTY_MS;
+	const ttl = matches.length === 0 ? SAUCENAO_CACHE_TTL_EMPTY_MS : SAUCENAO_CACHE_TTL_NONEMPTY_MS;
 	try {
 		await client.set(key, JSON.stringify(matches), { PX: ttl });
 	} catch (error) {
@@ -83,7 +75,7 @@ const writeCache = async (client: TSauceNaoCacheClient, key: string, matches: TS
 
 const isCoolingDown = async (client: TSauceNaoCacheClient) => {
 	try {
-		const raw = await client.get(COOLDOWN_KEY);
+		const raw = await client.get(SAUCENAO_COOLDOWN_KEY);
 		return raw != null && raw.length > 0;
 	} catch (error) {
 		logger.error('Could not read SauceNAO cooldown.', error);
@@ -93,8 +85,8 @@ const isCoolingDown = async (client: TSauceNaoCacheClient) => {
 
 const writeCooldown = async (client: TSauceNaoCacheClient, window: 'short' | 'daily') => {
 	try {
-		await client.set(COOLDOWN_KEY, window, {
-			PX: window === 'daily' ? DAILY_COOLDOWN_MS : SHORT_COOLDOWN_MS,
+		await client.set(SAUCENAO_COOLDOWN_KEY, window, {
+			PX: window === 'daily' ? SAUCENAO_DAILY_COOLDOWN_MS : SAUCENAO_SHORT_COOLDOWN_MS,
 		});
 	} catch (error) {
 		logger.error('Could not set SauceNAO cooldown.', error);
@@ -103,12 +95,12 @@ const writeCooldown = async (client: TSauceNaoCacheClient, window: 'short' | 'da
 
 const buildSearchUrl = (apiKey: string, dbmask: string) => {
 	const url = new URL(SAUCENAO_SEARCH_URL);
-	url.searchParams.set('output_type', '2');
+	url.searchParams.set('output_type', SAUCENAO_OUTPUT_TYPE_JSON);
 	url.searchParams.set('api_key', apiKey);
 	url.searchParams.set('dbmask', dbmask);
-	url.searchParams.set('numres', '8');
-	url.searchParams.set('dedupe', '2');
-	url.searchParams.set('hide', '0');
+	url.searchParams.set('numres', SAUCENAO_RESULTS_PER_SEARCH);
+	url.searchParams.set('dedupe', SAUCENAO_DEDUPE_ALL_METHODS);
+	url.searchParams.set('hide', SAUCENAO_HIDE_NOTHING);
 	return url;
 };
 
@@ -147,10 +139,10 @@ const prepareSauceNaoLookup = async (
 	return {
 		status: 'ready',
 		minimumSimilarity,
-		cacheKey: `saucenao:v1:${dbmask}:${hashImage(image)}`,
+		cacheKey: `${SAUCENAO_CACHE_KEY_PREFIX}:${dbmask}:${hashImageBuffer(Buffer.from(image))}`,
 		client: sauceNaoCacheClient(options),
 		fetchImpl: options.fetch ?? fetch,
-		sleep: options.sleep ?? defaultSleep,
+		sleep: options.sleep ?? sleep,
 		random: options.random ?? Math.random,
 		requestUrl: buildSearchUrl(apiKey, dbmask),
 	};
@@ -199,7 +191,7 @@ export const lookupSauceNaoSuggestions = async (
 			const response = await fetchImpl(requestUrl, {
 				method: 'POST',
 				body,
-				signal: AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
+				signal: AbortSignal.timeout(SAUCENAO_ATTEMPT_TIMEOUT_MS),
 			});
 			let parsedBody: unknown;
 			try {
@@ -214,15 +206,22 @@ export const lookupSauceNaoSuggestions = async (
 			});
 		} catch (error) {
 			return classifySauceNaoAttempt(
-				isTimeoutError(error) ? { kind: 'timeout' } : { kind: 'network' },
+				isAbortOrTimeoutError(error) ? { kind: 'timeout' } : { kind: 'network' },
 			);
 		}
 	};
 
 	let lastCauseWasShortLimit = false;
-	for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+	for (let attempt = 0; attempt < SAUCENAO_MAX_ATTEMPTS; attempt += 1) {
 		if (attempt > 0) {
-			await sleep(fullJitterDelayMs(attempt - 1, random));
+			await sleep(
+				fullJitterBackoffMs({
+					retryIndex: attempt - 1,
+					baseMs: SAUCENAO_BACKOFF_BASE_MS,
+					capMs: SAUCENAO_BACKOFF_CAP_MS,
+					random,
+				}),
+			);
 		}
 		const outcome = await runAttempt();
 		if (outcome.status === 'ok') {

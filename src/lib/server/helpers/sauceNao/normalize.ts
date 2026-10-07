@@ -96,8 +96,9 @@ export const normalizeSauceNaoResult = (result: TSauceNaoResult): TSauceNaoMatch
 	const artists = collectFields(result.data, LIST_FIELDS.artists);
 	const characters = collectFields(result.data, LIST_FIELDS.characters);
 	const series = collectFields(result.data, LIST_FIELDS.series);
-	const sourceUrls: string[] = [];
-	appendValues(result.data.ext_urls, false, sourceUrls);
+	const externalUrls: string[] = [];
+	appendValues(result.data.ext_urls, false, externalUrls);
+	const sourceUrls = externalUrls.filter(isHttpUrl);
 	consumeSource(result.data.source, series, sourceUrls);
 
 	const index = SAUCENAO_INDEXES_BY_ID.get(result.header.index_id);
@@ -106,7 +107,7 @@ export const normalizeSauceNaoResult = (result: TSauceNaoResult): TSauceNaoMatch
 		indexId: result.header.index_id,
 		indexName: index?.name ?? result.header.index_name,
 		similarity: Number.isFinite(similarity) ? similarity : 0,
-		thumbnailUrl: result.header.thumbnail,
+		thumbnailUrl: isHttpUrl(result.header.thumbnail) ? result.header.thumbnail : '',
 		title: readTitle(result.data),
 		sourceUrls,
 		artists,

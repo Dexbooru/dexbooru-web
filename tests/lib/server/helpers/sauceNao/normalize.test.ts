@@ -105,6 +105,28 @@ describe('normalizeSauceNaoResult', () => {
 		});
 	});
 
+	it('drops non-http ext_urls and thumbnails', () => {
+		const match = normalizeSauceNaoResult(
+			result(
+				{
+					similarity: '90',
+					thumbnail: 'javascript:alert(1)',
+					index_id: 9,
+					index_name: 'Danbooru',
+				},
+				{
+					ext_urls: [
+						'javascript:alert(1)',
+						'data:text/html,hi',
+						'https://danbooru.donmai.us/posts/2',
+					],
+				},
+			),
+		);
+		expect(match.thumbnailUrl).toBe('');
+		expect(match.sourceUrls).toEqual(['https://danbooru.donmai.us/posts/2']);
+	});
+
 	it('splits array and comma-separated creators and keeps a non-url source as series', () => {
 		expect(
 			normalizeSauceNaoResult(

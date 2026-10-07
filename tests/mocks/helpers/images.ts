@@ -1,6 +1,8 @@
+import { createHash } from 'node:crypto';
 import { vi } from 'vitest';
 
 export const mockImageHelpers = {
+	hashImageBuffer: vi.fn((buffer: Buffer) => createHash('sha256').update(buffer).digest('hex')),
 	transformDefaultProfilePicture: vi.fn(),
 	transformProfilePictureFromFile: vi.fn(),
 	transformCollectionThumbnailFromFile: vi.fn(),
