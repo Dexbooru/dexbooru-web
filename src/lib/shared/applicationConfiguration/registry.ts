@@ -1,12 +1,12 @@
 import type {
 	TApplicationConfiguration,
+	TApplicationConfigurationKey,
 	TApplicationConfigurationSectionKey,
-	TNumericApplicationConfigurationKey,
 } from './types';
 
 type TVarcharFieldMapping = {
 	type: 'varchar';
-	configKey: TNumericApplicationConfigurationKey;
+	configKey: TApplicationConfigurationKey;
 	section: TApplicationConfigurationSectionKey;
 	table: string;
 	column: string;
@@ -15,7 +15,7 @@ type TVarcharFieldMapping = {
 
 type TComputedVarcharFieldMapping = {
 	type: 'computed_varchar';
-	configKey: TNumericApplicationConfigurationKey;
+	configKey: TApplicationConfigurationKey;
 	section: TApplicationConfigurationSectionKey;
 	table: string;
 	column: string;

@@ -18,13 +18,18 @@ import {
 	SAUCENAO_SEARCH_URL,
 	SAUCENAO_SHORT_COOLDOWN_MS,
 } from '$lib/server/constants/sauceNao';
+import { listEnabledSauceNaoIndexes } from '$lib/server/db/actions/sauceNaoIndex';
 import redis from '$lib/server/db/redis';
 import { hashImageBuffer } from '$lib/server/helpers/images';
 import logger from '$lib/server/logging/logger';
 import { SAUCENAO_API_KEY } from '$lib/server/runtimeEnv';
 import { fullJitterBackoffMs, isAbortOrTimeoutError, sleep } from '$lib/shared/helpers/async';
 import { buildSauceNaoDbMask } from '$lib/shared/helpers/sauceNao';
-import type { TSauceNaoMatch, TSauceNaoSuggestionsResponse } from '$lib/shared/types/sauceNao';
+import type {
+	TSauceNaoIndex,
+	TSauceNaoMatch,
+	TSauceNaoSuggestionsResponse,
+} from '$lib/shared/types/sauceNao';
 import { classifySauceNaoAttempt } from './classify';
 import { aggregateSauceNaoSuggestions, normalizeSauceNaoResults } from './normalize';
 import { CachedSauceNaoMatchesSchema } from './schema';
@@ -40,10 +45,8 @@ export type TSauceNaoLookupOptions = {
 	random?: () => number;
 	redis?: TSauceNaoCacheClient;
 	apiKey?: string;
-	configuration?: Pick<
-		TApplicationConfiguration,
-		'sauceNaoEnabledIndexes' | 'sauceNaoMinimumSimilarity'
-	>;
+	enabledIndexes?: TSauceNaoIndex[];
+	configuration?: Pick<TApplicationConfiguration, 'sauceNaoMinimumSimilarity'>;
 };
 
 export type TSauceNaoLookupResult = TSauceNaoSuggestionsResponse | { status: 'unavailable' };
@@ -116,6 +119,7 @@ type TSauceNaoLookupContext =
 	| {
 			status: 'ready';
 			minimumSimilarity: number;
+			indexesById: ReadonlyMap<number, TSauceNaoIndex>;
 			cacheKey: string;
 			client: TSauceNaoCacheClient;
 			fetchImpl: typeof fetch;
@@ -129,16 +133,18 @@ const prepareSauceNaoLookup = async (
 	options: TSauceNaoLookupOptions,
 ): Promise<TSauceNaoLookupContext> => {
 	const apiKey = (options.apiKey ?? SAUCENAO_API_KEY).trim();
-	const { sauceNaoEnabledIndexes: enabledIndexIds, sauceNaoMinimumSimilarity: minimumSimilarity } =
+	const enabledIndexes = options.enabledIndexes ?? (await listEnabledSauceNaoIndexes());
+	const { sauceNaoMinimumSimilarity: minimumSimilarity } =
 		options.configuration ?? (await getApplicationConfiguration());
-	if (apiKey.length === 0 || enabledIndexIds.length === 0) {
+	if (apiKey.length === 0 || enabledIndexes.length === 0) {
 		return { status: 'disabled' };
 	}
 
-	const dbmask = buildSauceNaoDbMask(enabledIndexIds);
+	const dbmask = buildSauceNaoDbMask(enabledIndexes.map((index) => index.maskBit));
 	return {
 		status: 'ready',
 		minimumSimilarity,
+		indexesById: new Map(enabledIndexes.map((index) => [index.id, index])),
 		cacheKey: `${SAUCENAO_CACHE_KEY_PREFIX}:${dbmask}:${hashImageBuffer(Buffer.from(image))}`,
 		client: sauceNaoCacheClient(options),
 		fetchImpl: options.fetch ?? fetch,
@@ -171,7 +177,8 @@ export const lookupSauceNaoSuggestions = async (
 	const context = await prepareSauceNaoLookup(image, options);
 	if (context.status === 'disabled') return { status: 'disabled' };
 
-	const { client, cacheKey, minimumSimilarity, fetchImpl, sleep, random, requestUrl } = context;
+	const { client, cacheKey, minimumSimilarity, indexesById, fetchImpl, sleep, random, requestUrl } =
+		context;
 	const cached = await readCache(client, cacheKey);
 	if (cached !== null) {
 		return {
@@ -225,7 +232,7 @@ export const lookupSauceNaoSuggestions = async (
 		}
 		const outcome = await runAttempt();
 		if (outcome.status === 'ok') {
-			const matches = normalizeSauceNaoResults(outcome.results);
+			const matches = normalizeSauceNaoResults(outcome.results, indexesById);
 			// Similarity is applied on read, so a later cutoff change can reuse this payload.
 			await writeCache(client, cacheKey, matches);
 			return {

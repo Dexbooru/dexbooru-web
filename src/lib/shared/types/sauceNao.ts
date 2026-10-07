@@ -6,7 +6,9 @@ export type TSauceNaoIndex = {
 	id: number;
 	maskBit: number;
 	name: string;
-	sourceType?: TPostSourceType;
+	available: boolean;
+	enabled: boolean;
+	sourceType: TPostSourceType | null;
 };
 
 export type TPostSourceFields = {
@@ -27,6 +29,7 @@ export type TPostSourceResolution =
 export type TSauceNaoMatch = {
 	indexId: number;
 	indexName: string;
+	sourceType: TPostSourceType | null;
 	similarity: number;
 	thumbnailUrl: string;
 	title: string | null;

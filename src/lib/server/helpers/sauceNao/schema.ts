@@ -1,3 +1,4 @@
+import { POST_SOURCE_TYPES } from '$lib/shared/constants/posts';
 import { z } from 'zod';
 
 export const SauceNaoResultSchema = z.object({
@@ -24,6 +25,7 @@ export const CachedSauceNaoMatchesSchema = z.array(
 	z.object({
 		indexId: z.number(),
 		indexName: z.string(),
+		sourceType: z.enum(POST_SOURCE_TYPES).nullable(),
 		similarity: z.number(),
 		thumbnailUrl: z.string(),
 		title: z.string().nullable(),

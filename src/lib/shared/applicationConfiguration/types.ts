@@ -38,7 +38,6 @@ export type TApplicationConfiguration = {
 	maximumArtistsPerPage: number;
 	likePostRateLimitMax: number;
 	likePostRateLimitWindowMs: number;
-	sauceNaoEnabledIndexes: number[];
 	sauceNaoMinimumSimilarity: number;
 	createdAt: Date;
 	updatedAt: Date;
@@ -108,30 +107,11 @@ export type TApplicationConfigurationSection = {
 		TCoreApplicationConfiguration,
 		'likePostRateLimitMax' | 'likePostRateLimitWindowMs'
 	>;
-	sauceNao: Pick<
-		TCoreApplicationConfiguration,
-		'sauceNaoEnabledIndexes' | 'sauceNaoMinimumSimilarity'
-	>;
+	sauceNao: Pick<TCoreApplicationConfiguration, 'sauceNaoMinimumSimilarity'>;
 };
 
 export type TApplicationConfigurationSectionKey = keyof TApplicationConfigurationSection;
 export type TApplicationConfigurationKey = keyof TCoreApplicationConfiguration;
-
-export type TNumericApplicationConfigurationKey = {
-	[K in TApplicationConfigurationKey]: TCoreApplicationConfiguration[K] extends number ? K : never;
-}[TApplicationConfigurationKey];
-
-export const NON_NUMERIC_APPLICATION_CONFIGURATION_KEYS = {
-	sauceNaoEnabledIndexes: true,
-} as const satisfies Record<
-	Exclude<TApplicationConfigurationKey, TNumericApplicationConfigurationKey>,
-	true
->;
-
-export const isNumericApplicationConfigurationKey = (
-	key: TApplicationConfigurationKey,
-): key is TNumericApplicationConfigurationKey =>
-	!Object.hasOwn(NON_NUMERIC_APPLICATION_CONFIGURATION_KEYS, key);
 
 export type TApplicationConfigurationYaml = {
 	[K in keyof TApplicationConfigurationSection]?: Partial<TApplicationConfigurationSection[K]>;

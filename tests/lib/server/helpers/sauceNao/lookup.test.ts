@@ -3,6 +3,7 @@ import {
 	lookupSauceNaoSuggestions,
 	readCachedSauceNaoMatches,
 } from '$lib/server/helpers/sauceNao/search';
+import type { TSauceNaoIndex } from '$lib/shared/types/sauceNao';
 
 const IMAGE = new Uint8Array([1, 2, 3, 4]);
 const IMAGE_HASH = '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a806a';
@@ -72,10 +73,25 @@ const createFetch = (responses: Array<Response | Error>) => {
 const jsonResponse = (body: unknown, status: number) =>
 	new Response(JSON.stringify(body), { status });
 
+const indexRow = (id: number, maskBit: number, name: string): TSauceNaoIndex => ({
+	id,
+	maskBit,
+	name,
+	available: true,
+	enabled: true,
+	sourceType: null,
+});
+
+const DEFAULT_ENABLED_INDEXES = [indexRow(5, 5, 'Pixiv'), indexRow(9, 9, 'Danbooru')];
+
 const lookup = (
 	redisClient: ReturnType<typeof createRedis>['client'],
 	fetchImpl: ReturnType<typeof createFetch>['fetchImpl'],
-	overrides: { minimumSimilarity?: number; apiKey?: string; enabledIndexIds?: number[] } = {},
+	overrides: {
+		minimumSimilarity?: number;
+		apiKey?: string;
+		enabledIndexes?: TSauceNaoIndex[];
+	} = {},
 ) => {
 	const sleeps: number[] = [];
 	const pending = lookupSauceNaoSuggestions(IMAGE, {
@@ -86,8 +102,8 @@ const lookup = (
 		random: () => 0.5,
 		redis: redisClient,
 		apiKey: overrides.apiKey ?? 'test-key',
+		enabledIndexes: overrides.enabledIndexes ?? DEFAULT_ENABLED_INDEXES,
 		configuration: {
-			sauceNaoEnabledIndexes: overrides.enabledIndexIds ?? [5, 9],
 			sauceNaoMinimumSimilarity: overrides.minimumSimilarity ?? 70,
 		},
 	});
@@ -104,7 +120,7 @@ describe('lookupSauceNaoSuggestions', () => {
 			lookup(redis.client, missingKey.fetchImpl, { apiKey: '  ' }).pending,
 		).resolves.toEqual({ status: 'disabled' });
 		await expect(
-			lookup(redis.client, emptyIndexes.fetchImpl, { enabledIndexIds: [] }).pending,
+			lookup(redis.client, emptyIndexes.fetchImpl, { enabledIndexes: [] }).pending,
 		).resolves.toEqual({ status: 'disabled' });
 		expect(missingKey.fetchImpl).not.toHaveBeenCalled();
 		expect(emptyIndexes.fetchImpl).not.toHaveBeenCalled();
@@ -127,6 +143,7 @@ describe('lookupSauceNaoSuggestions', () => {
 						{
 							indexId: 5,
 							indexName: 'Pixiv',
+							sourceType: null,
 							similarity: 93.5,
 							thumbnailUrl: 'https://img.saucenao.com/pixiv.jpg',
 							title: 'Evening Light',
@@ -158,6 +175,7 @@ describe('lookupSauceNaoSuggestions', () => {
 					{
 						indexId: 5,
 						indexName: 'Pixiv',
+						sourceType: null,
 						similarity: 93.5,
 						thumbnailUrl: 'https://img.saucenao.com/pixiv.jpg',
 						title: 'Evening Light',
@@ -269,6 +287,7 @@ describe('lookupSauceNaoSuggestions', () => {
 					{
 						indexId: 5,
 						indexName: 'Pixiv',
+						sourceType: null,
 						similarity: 93.5,
 						thumbnailUrl: 'https://img.saucenao.com/pixiv.jpg',
 						title: 'Evening Light',
@@ -289,6 +308,7 @@ describe('lookupSauceNaoSuggestions', () => {
 			{
 				indexId: 5,
 				indexName: 'Pixiv',
+				sourceType: null,
 				similarity: 93.5,
 				thumbnailUrl: 'https://img.saucenao.com/pixiv.jpg',
 				title: 'Evening Light',
@@ -300,6 +320,7 @@ describe('lookupSauceNaoSuggestions', () => {
 			{
 				indexId: 9,
 				indexName: 'Danbooru',
+				sourceType: null,
 				similarity: 40,
 				thumbnailUrl: 'https://img.saucenao.com/low.jpg',
 				title: null,
@@ -369,6 +390,7 @@ describe('lookupSauceNaoSuggestions', () => {
 const cachedMatch = (similarity: number, indexId: number) => ({
 	indexId,
 	indexName: indexId === 5 ? 'Pixiv' : 'Danbooru',
+	sourceType: null,
 	similarity,
 	thumbnailUrl: 'https://img.saucenao.com/cached.jpg',
 	title: null,
@@ -386,8 +408,8 @@ const readOptions = (
 	fetch: fetchImpl,
 	redis: redisClient,
 	apiKey: overrides.apiKey ?? 'test-key',
+	enabledIndexes: DEFAULT_ENABLED_INDEXES,
 	configuration: {
-		sauceNaoEnabledIndexes: [5, 9],
 		sauceNaoMinimumSimilarity: overrides.minimumSimilarity ?? 70,
 	},
 });

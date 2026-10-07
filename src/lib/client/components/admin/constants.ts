@@ -2,7 +2,6 @@ import type { TSection } from './types';
 
 export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 	{
-		kind: 'numeric',
 		name: 'Labels',
 		fields: [
 			{ key: 'maximumTagLength', label: 'Maximum tag length' },
@@ -20,7 +19,6 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 		],
 	},
 	{
-		kind: 'numeric',
 		name: 'Posts',
 		fields: [
 			{ key: 'maximumSourceLinkLength', label: 'Maximum source link length' },
@@ -37,7 +35,6 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 		],
 	},
 	{
-		kind: 'numeric',
 		name: 'Images',
 		fields: [
 			{ key: 'maximumImagesPerPost', label: 'Maximum images per post' },
@@ -59,7 +56,6 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 		],
 	},
 	{
-		kind: 'numeric',
 		name: 'Comments',
 		fields: [
 			{ key: 'maximumCommentContentLength', label: 'Maximum comment content length' },
@@ -67,7 +63,6 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 		],
 	},
 	{
-		kind: 'numeric',
 		name: 'Collections',
 		fields: [
 			{ key: 'maximumCollectionTitleLength', label: 'Maximum collection title length' },
@@ -80,7 +75,6 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 		],
 	},
 	{
-		kind: 'numeric',
 		name: 'Authentication',
 		fields: [
 			{ key: 'minimumUsernameLength', label: 'Minimum username length' },
@@ -90,7 +84,6 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 		],
 	},
 	{
-		kind: 'numeric',
 		name: 'Preferences, reports and pagination',
 		tabLabel: 'Preferences',
 		fields: [
@@ -105,7 +98,6 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 		],
 	},
 	{
-		kind: 'numeric',
 		name: 'Rate limit',
 		fields: [
 			{ key: 'likePostRateLimitMax', label: 'Like post rate limit max' },
@@ -116,13 +108,7 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 		],
 	},
 	{
-		kind: 'sauceNao',
 		name: 'SauceNAO',
-		enabledIndexesKey: 'sauceNaoEnabledIndexes',
-		minimumSimilarity: {
-			key: 'sauceNaoMinimumSimilarity',
-			label: 'Minimum match similarity (%)',
-			step: 1,
-		},
+		fields: [{ key: 'sauceNaoMinimumSimilarity', label: 'Minimum match similarity (%)' }],
 	},
 ];

@@ -1,3 +1,18 @@
+-- CreateTable
+CREATE TABLE "SauceNaoIndex" (
+    "id" INTEGER NOT NULL,
+    "maskBit" INTEGER NOT NULL,
+    "name" TEXT NOT NULL,
+    "available" BOOLEAN NOT NULL,
+    "enabled" BOOLEAN NOT NULL,
+    "sourceType" "PostSourceType",
+    "lastSyncedAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "SauceNaoIndex_pkey" PRIMARY KEY ("id")
+);
+
+-- AlterTable
 ALTER TABLE "ApplicationConfiguration"
-ADD COLUMN "sauceNaoEnabledIndexes" INTEGER[] NOT NULL DEFAULT ARRAY[5, 6, 8, 9, 11, 12, 25, 26, 27, 28, 34, 39, 41, 44]::INTEGER[],
 ADD COLUMN "sauceNaoMinimumSimilarity" DOUBLE PRECISION NOT NULL DEFAULT 70;

@@ -37,16 +37,8 @@ export const getOrCreateApplicationConfiguration = async (): Promise<TApplicatio
 	};
 };
 
-const getFieldUpdateExpression = (key: string, value: number | number[]) => {
-	if (!Array.isArray(value)) {
-		return Prisma.sql`${Prisma.raw(`"${key}"`)} = ${value}`;
-	}
-	// An empty JS array is not a usable int[] parameter, and a populated one needs an explicit cast.
-	if (value.length === 0) {
-		return Prisma.sql`${Prisma.raw(`"${key}"`)} = ARRAY[]::int[]`;
-	}
-	return Prisma.sql`${Prisma.raw(`"${key}"`)} = ${value}::int[]`;
-};
+const getFieldUpdateExpression = (key: string, value: number) =>
+	Prisma.sql`${Prisma.raw(`"${key}"`)} = ${value}`;
 
 export const updateApplicationConfiguration = async (
 	configuration: TPartialApplicationConfiguration,

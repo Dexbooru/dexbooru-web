@@ -1,10 +1,4 @@
 import type { TRequestSchema } from '$lib/server/types/controllers';
-import {
-	normalizeSauceNaoEnabledIndexIds,
-	SAUCE_NAO_MINIMUM_SIMILARITY_LOWER_BOUND,
-	SAUCE_NAO_MINIMUM_SIMILARITY_UPPER_BOUND,
-} from '$lib/shared/applicationConfiguration';
-import { isKnownSauceNaoIndexId } from '$lib/shared/helpers/sauceNao';
 import { z } from 'zod';
 
 const OptionalNumber = z.number().finite().positive();
@@ -50,26 +44,7 @@ const ApplicationConfigurationUpdateSchema = {
 			maximumArtistsPerPage: OptionalNumber.optional(),
 			likePostRateLimitMax: OptionalNumber.optional(),
 			likePostRateLimitWindowMs: OptionalNumber.optional(),
-			sauceNaoEnabledIndexes: z
-				.array(z.number().int())
-				.superRefine((indexIds, ctx) => {
-					for (const indexId of indexIds) {
-						if (!isKnownSauceNaoIndexId(indexId)) {
-							ctx.addIssue({
-								code: 'custom',
-								message: `Unknown SauceNAO index id: ${indexId}`,
-							});
-						}
-					}
-				})
-				.transform((indexIds) => normalizeSauceNaoEnabledIndexIds(indexIds))
-				.optional(),
-			sauceNaoMinimumSimilarity: z
-				.number()
-				.finite()
-				.min(SAUCE_NAO_MINIMUM_SIMILARITY_LOWER_BOUND)
-				.max(SAUCE_NAO_MINIMUM_SIMILARITY_UPPER_BOUND)
-				.optional(),
+			sauceNaoMinimumSimilarity: z.number().finite().min(1).max(100).optional(),
 		})
 		.refine((body) => Object.keys(body).length > 0, {
 			message: 'At least one configuration field must be provided.',

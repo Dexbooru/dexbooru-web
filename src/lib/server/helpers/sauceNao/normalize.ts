@@ -1,5 +1,8 @@
-import { SAUCENAO_INDEXES_BY_ID } from '$lib/shared/constants/sauceNao';
-import type { TSauceNaoImageSuggestions, TSauceNaoMatch } from '$lib/shared/types/sauceNao';
+import type {
+	TSauceNaoImageSuggestions,
+	TSauceNaoIndex,
+	TSauceNaoMatch,
+} from '$lib/shared/types/sauceNao';
 import type { TSauceNaoResult } from './schema';
 
 type TListField = {
@@ -92,7 +95,10 @@ const readTitle = (data: Record<string, unknown>) => {
 	return null;
 };
 
-export const normalizeSauceNaoResult = (result: TSauceNaoResult): TSauceNaoMatch => {
+export const normalizeSauceNaoResult = (
+	result: TSauceNaoResult,
+	indexesById: ReadonlyMap<number, TSauceNaoIndex>,
+): TSauceNaoMatch => {
 	const artists = collectFields(result.data, LIST_FIELDS.artists);
 	const characters = collectFields(result.data, LIST_FIELDS.characters);
 	const series = collectFields(result.data, LIST_FIELDS.series);
@@ -101,11 +107,12 @@ export const normalizeSauceNaoResult = (result: TSauceNaoResult): TSauceNaoMatch
 	const sourceUrls = externalUrls.filter(isHttpUrl);
 	consumeSource(result.data.source, series, sourceUrls);
 
-	const index = SAUCENAO_INDEXES_BY_ID.get(result.header.index_id);
+	const index = indexesById.get(result.header.index_id);
 	const similarity = Number.parseFloat(result.header.similarity);
 	return {
 		indexId: result.header.index_id,
 		indexName: index?.name ?? result.header.index_name,
+		sourceType: index?.sourceType ?? null,
 		similarity: Number.isFinite(similarity) ? similarity : 0,
 		thumbnailUrl: isHttpUrl(result.header.thumbnail) ? result.header.thumbnail : '',
 		title: readTitle(result.data),
@@ -116,8 +123,10 @@ export const normalizeSauceNaoResult = (result: TSauceNaoResult): TSauceNaoMatch
 	};
 };
 
-export const normalizeSauceNaoResults = (results: readonly TSauceNaoResult[]): TSauceNaoMatch[] =>
-	results.map(normalizeSauceNaoResult);
+export const normalizeSauceNaoResults = (
+	results: readonly TSauceNaoResult[],
+	indexesById: ReadonlyMap<number, TSauceNaoIndex>,
+): TSauceNaoMatch[] => results.map((result) => normalizeSauceNaoResult(result, indexesById));
 
 type TRankedName = {
 	name: string;

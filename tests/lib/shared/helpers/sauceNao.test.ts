@@ -9,6 +9,7 @@ import type { TSauceNaoMatch } from '$lib/shared/types/sauceNao';
 const match = (overrides: Partial<TSauceNaoMatch>): TSauceNaoMatch => ({
 	indexId: 9,
 	indexName: 'Danbooru',
+	sourceType: null,
 	similarity: 90,
 	thumbnailUrl: 'https://img.saucenao.com/x.jpg',
 	title: null,
@@ -33,9 +34,13 @@ describe('pickSauceNaoPostSource', () => {
 		});
 	});
 
-	it('uses the source type of the index the match came from', () => {
+	it('uses the source type carried on the match', () => {
 		const picked = pickSauceNaoPostSource([
-			match({ indexId: 37, characters: ['Frieren'], series: ['Sousou no Frieren'] }),
+			match({
+				sourceType: 'MANGA',
+				characters: ['Frieren'],
+				series: ['Sousou no Frieren'],
+			}),
 		]);
 		expect(picked).toEqual({
 			characterName: 'frieren',
@@ -106,26 +111,19 @@ describe('resolvePostSource', () => {
 });
 
 describe('buildSauceNaoDbMask', () => {
-	it('sets the documented bit for indexes below the reserved slot', () => {
-		expect(buildSauceNaoDbMask([5])).toBe('32');
+	it('sets bits 5 and 9', () => {
 		expect(buildSauceNaoDbMask([5, 9])).toBe('544');
 	});
 
-	it('uses the shifted bit for indexes after reserved index 17', () => {
-		expect(buildSauceNaoDbMask([18])).toBe(String(0x20000));
-		expect(buildSauceNaoDbMask([25])).toBe(String(0x1000000));
+	it('sets bit 17', () => {
+		expect(buildSauceNaoDbMask([17])).toBe('131072');
 	});
 
-	it('builds masks wider than 32 bits without truncation', () => {
-		expect(buildSauceNaoDbMask([41])).toBe('1099511627776');
-		expect(buildSauceNaoDbMask([44, 5])).toBe('8796093022240');
+	it('sets bit 40 without truncating past 32 bits', () => {
+		expect(buildSauceNaoDbMask([40])).toBe('1099511627776');
 	});
 
 	it('returns zero for an empty selection', () => {
 		expect(buildSauceNaoDbMask([])).toBe('0');
-	});
-
-	it('rejects unknown and reserved index ids', () => {
-		expect(() => buildSauceNaoDbMask([17])).toThrow('Unknown SauceNAO index id: 17');
 	});
 });

@@ -1,18 +1,13 @@
 import { Prisma } from '$generated/prisma/client';
 import {
 	APPLICATION_CONFIGURATION_VARCHAR_FIELD_MAPPINGS,
-	isNumericApplicationConfigurationKey,
-	normalizeSauceNaoEnabledIndexIds,
-	SAUCE_NAO_MINIMUM_SIMILARITY_LOWER_BOUND,
-	SAUCE_NAO_MINIMUM_SIMILARITY_UPPER_BOUND,
 	type TApplicationConfiguration,
 	type TApplicationConfigurationKey,
-	type TNumericApplicationConfigurationKey,
 	type TPartialApplicationConfiguration,
 } from '$lib/shared/applicationConfiguration';
 import prisma from '../db/prisma';
 
-const MINIMUM_LIMITS: Partial<Record<TNumericApplicationConfigurationKey, number>> = {
+const MINIMUM_LIMITS: Partial<Record<TApplicationConfigurationKey, number>> = {
 	maximumTagLength: 1,
 	maximumArtistLength: 1,
 	maximumTagDescriptionLength: 1,
@@ -51,11 +46,11 @@ const MINIMUM_LIMITS: Partial<Record<TNumericApplicationConfigurationKey, number
 	maximumArtistsPerPage: 1,
 	likePostRateLimitMax: 1,
 	likePostRateLimitWindowMs: 1,
-	sauceNaoMinimumSimilarity: SAUCE_NAO_MINIMUM_SIMILARITY_LOWER_BOUND,
+	sauceNaoMinimumSimilarity: 1,
 };
 
-const MAXIMUM_LIMITS: Partial<Record<TNumericApplicationConfigurationKey, number>> = {
-	sauceNaoMinimumSimilarity: SAUCE_NAO_MINIMUM_SIMILARITY_UPPER_BOUND,
+const MAXIMUM_LIMITS: Partial<Record<TApplicationConfigurationKey, number>> = {
+	sauceNaoMinimumSimilarity: 100,
 };
 
 const assertRelationalLimits = (
@@ -75,21 +70,15 @@ const assertRelationalLimits = (
 	}
 };
 
-const assertSauceNaoIndexes = (updates: TPartialApplicationConfiguration) => {
-	if (updates.sauceNaoEnabledIndexes === undefined) return;
-	updates.sauceNaoEnabledIndexes = normalizeSauceNaoEnabledIndexIds(updates.sauceNaoEnabledIndexes);
-};
-
 const assertMinimumBounds = (updates: TPartialApplicationConfiguration) => {
-	for (const key of Object.keys(updates) as TApplicationConfigurationKey[]) {
-		if (!isNumericApplicationConfigurationKey(key)) continue;
-		const value = updates[key];
-		if (value === undefined) continue;
-		const minimum = MINIMUM_LIMITS[key];
+	for (const [key, value] of Object.entries(updates)) {
+		if (typeof value !== 'number') continue;
+		const configurationKey = key as TApplicationConfigurationKey;
+		const minimum = MINIMUM_LIMITS[configurationKey];
 		if (minimum !== undefined && value < minimum) {
 			throw new Error(`"${key}" must be greater than or equal to ${minimum}.`);
 		}
-		const maximum = MAXIMUM_LIMITS[key];
+		const maximum = MAXIMUM_LIMITS[configurationKey];
 		if (maximum !== undefined && value > maximum) {
 			throw new Error(`"${key}" must be less than or equal to ${maximum}.`);
 		}
@@ -156,7 +145,6 @@ export const validateApplicationConfigurationUpdate = async (
 	updates: TPartialApplicationConfiguration,
 	current: TApplicationConfiguration,
 ) => {
-	assertSauceNaoIndexes(updates);
 	assertMinimumBounds(updates);
 	assertRelationalLimits(updates, current);
 	await assertExistingUsernamesMeetMinimumLength(updates, current);

@@ -1,0 +1,11 @@
+model SauceNaoIndex {
+  id           Int             @id
+  maskBit      Int
+  name         String
+  available    Boolean
+  enabled      Boolean
+  sourceType   PostSourceType?
+  lastSyncedAt DateTime
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}

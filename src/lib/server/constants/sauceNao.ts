@@ -14,6 +14,8 @@ export const SAUCENAO_COOLDOWN_KEY = 'saucenao:cooldown';
 export const SAUCENAO_SHORT_COOLDOWN_MS = 30_000;
 export const SAUCENAO_DAILY_COOLDOWN_MS = 60 * 60 * 1000;
 
+export const SAUCENAO_INDEX_CATALOG_SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
+
 export const SAUCENAO_CACHE_KEY_PREFIX = 'saucenao:v2';
 export const SAUCENAO_CACHE_TTL_NONEMPTY_MS = 7 * 24 * 60 * 60 * 1000;
 export const SAUCENAO_CACHE_TTL_EMPTY_MS = 24 * 60 * 60 * 1000;

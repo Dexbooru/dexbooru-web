@@ -392,6 +392,7 @@ describe('handleCreatePost', () => {
 	const mikuMatch = {
 		indexId: 37,
 		indexName: 'MangaDex',
+		sourceType: 'MANGA' as const,
 		similarity: 96,
 		thumbnailUrl: 'https://img.saucenao.com/m.jpg',
 		title: null,

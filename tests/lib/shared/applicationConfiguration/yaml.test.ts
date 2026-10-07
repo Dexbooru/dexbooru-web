@@ -56,46 +56,14 @@ describe('application configuration YAML helpers', () => {
 		expect(nested.comments.maximumCommentContentLength).toBe(1500);
 		expect(nested.rateLimit.likePostRateLimitWindowMs).toBe(60_000);
 		expect(nested.sauceNao.sauceNaoMinimumSimilarity).toBe(70);
-		expect(nested.sauceNao.sauceNaoEnabledIndexes).toEqual([
-			5, 6, 8, 9, 11, 12, 25, 26, 27, 28, 34, 39, 41, 44,
-		]);
 	});
 
-	it('parses sauceNao indexes and similarity', () => {
+	it('parses sauceNao minimum similarity as a number', () => {
 		const flattened = flattenApplicationConfigurationYaml({
-			sauceNao: {
-				sauceNaoEnabledIndexes: [5, 5, 9],
-				sauceNaoMinimumSimilarity: 82.5,
-			},
+			sauceNao: { sauceNaoMinimumSimilarity: 82.5 },
 		});
 
-		expect(flattened.sauceNaoEnabledIndexes).toEqual([5, 9]);
 		expect(flattened.sauceNaoMinimumSimilarity).toBe(82.5);
-	});
-
-	it('rejects unknown sauceNao index ids', () => {
-		expect(() =>
-			flattenApplicationConfigurationYaml({
-				sauceNao: { sauceNaoEnabledIndexes: [17] },
-			}),
-		).toThrow('Unknown SauceNAO index id: 17');
-	});
-
-	it('rejects sauceNao similarity outside 1..100', () => {
-		expect(() =>
-			flattenApplicationConfigurationYaml({
-				sauceNao: { sauceNaoMinimumSimilarity: 101 },
-			}),
-		).toThrow('"sauceNao.sauceNaoMinimumSimilarity" must be between 1 and 100.');
-	});
-
-	it('rejects a non-array sauceNao index list', () => {
-		expect(() =>
-			flattenApplicationConfigurationYaml({
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				sauceNao: { sauceNaoEnabledIndexes: 5 as any },
-			}),
-		).toThrow('Expected an array of SauceNAO index ids');
 	});
 
 	it('rejects non-numeric values for numeric keys', () => {

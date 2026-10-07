@@ -71,30 +71,6 @@ describe('validateApplicationConfigurationUpdate', () => {
 		).rejects.toThrow('"sauceNaoMinimumSimilarity" must be less than or equal to 100.');
 	});
 
-	it('rejects unknown sauceNao index ids and dedupes known ones', async () => {
-		await expect(
-			validateApplicationConfigurationUpdate(
-				{ sauceNaoEnabledIndexes: [5, 17] },
-				buildDefaultApplicationConfiguration(),
-			),
-		).rejects.toThrow('Unknown SauceNAO index id: 17');
-
-		const updates = { sauceNaoEnabledIndexes: [5, 5, 9] };
-		await expect(
-			validateApplicationConfigurationUpdate(updates, buildDefaultApplicationConfiguration()),
-		).resolves.toBeUndefined();
-		expect(updates.sauceNaoEnabledIndexes).toEqual([5, 9]);
-	});
-
-	it('allows an empty sauceNao index list', async () => {
-		await expect(
-			validateApplicationConfigurationUpdate(
-				{ sauceNaoEnabledIndexes: [] },
-				buildDefaultApplicationConfiguration(),
-			),
-		).resolves.toBeUndefined();
-	});
-
 	it('allows increased minimumUsernameLength when there are no users', async () => {
 		mockPrisma.$queryRaw.mockResolvedValue([{ minLength: null }]);
 		await expect(

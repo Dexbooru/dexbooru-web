@@ -1,15 +1,38 @@
 import { describe, expect, it } from 'vitest';
 import {
 	aggregateSauceNaoSuggestions,
-	normalizeSauceNaoResult,
+	normalizeSauceNaoResult as normalizeResult,
 } from '$lib/server/helpers/sauceNao/normalize';
-import type { TSauceNaoMatch } from '$lib/shared/types/sauceNao';
+import type { TPostSourceType, TSauceNaoIndex, TSauceNaoMatch } from '$lib/shared/types/sauceNao';
 import type { TSauceNaoResult } from '$lib/server/helpers/sauceNao/schema';
 
 const result = (
 	header: TSauceNaoResult['header'],
 	data: Record<string, unknown>,
 ): TSauceNaoResult => ({ header, data });
+
+const catalogRow = (
+	id: number,
+	name: string,
+	sourceType: TPostSourceType | null = null,
+): TSauceNaoIndex => ({
+	id,
+	maskBit: 0,
+	name,
+	available: true,
+	enabled: true,
+	sourceType,
+});
+
+const indexesById = new Map<number, TSauceNaoIndex>([
+	[5, catalogRow(5, 'Pixiv')],
+	[9, catalogRow(9, 'Danbooru')],
+	[41, catalogRow(41, 'Twitter')],
+	[21, catalogRow(21, 'Anime', 'ANIME')],
+]);
+
+const normalizeSauceNaoResult = (sauceNaoResult: TSauceNaoResult) =>
+	normalizeResult(sauceNaoResult, indexesById);
 
 describe('normalizeSauceNaoResult', () => {
 	it('reads a pixiv result from member_name, title, and ext_urls', () => {
@@ -33,6 +56,7 @@ describe('normalizeSauceNaoResult', () => {
 		).toEqual({
 			indexId: 5,
 			indexName: 'Pixiv',
+			sourceType: null,
 			similarity: 93.5,
 			thumbnailUrl: 'https://img.saucenao.com/pixiv.jpg',
 			title: 'Evening Light',
@@ -65,6 +89,7 @@ describe('normalizeSauceNaoResult', () => {
 		).toEqual({
 			indexId: 9,
 			indexName: 'Danbooru',
+			sourceType: null,
 			similarity: 88.2,
 			thumbnailUrl: 'https://img.saucenao.com/danbooru.jpg',
 			title: null,
@@ -95,6 +120,7 @@ describe('normalizeSauceNaoResult', () => {
 		).toEqual({
 			indexId: 41,
 			indexName: 'Twitter',
+			sourceType: null,
 			similarity: 80,
 			thumbnailUrl: 'https://img.saucenao.com/twitter.jpg',
 			title: null,
@@ -148,6 +174,7 @@ describe('normalizeSauceNaoResult', () => {
 		).toEqual({
 			indexId: 21,
 			indexName: 'Anime',
+			sourceType: 'ANIME',
 			similarity: 70.25,
 			thumbnailUrl: 'https://img.saucenao.com/anime.jpg',
 			title: 'English Title',
@@ -171,6 +198,7 @@ describe('normalizeSauceNaoResult', () => {
 			),
 		);
 		expect(match.indexName).toBe('Custom Index');
+		expect(match.sourceType).toBeNull();
 		expect(match.title).toBeNull();
 	});
 });
@@ -180,6 +208,7 @@ const match = (
 ): TSauceNaoMatch => ({
 	indexId: 5,
 	indexName: 'Pixiv',
+	sourceType: null,
 	thumbnailUrl: 'https://img.example/thumb.jpg',
 	title: null,
 	sourceUrls: [],
