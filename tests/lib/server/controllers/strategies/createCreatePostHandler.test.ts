@@ -124,6 +124,7 @@ describe('createCreatePostHandler', () => {
 	});
 
 	it('creates a post and runs afterCreate for api-route success', async () => {
+		const picture = new File([Uint8Array.from([7])], 'miku.png', { type: 'image/png' });
 		mockValidateAndHandleRequest.mockImplementation(
 			async (_event, handlerType, _schema, callback) =>
 				callback({
@@ -132,10 +133,13 @@ describe('createCreatePostHandler', () => {
 						tags: ['t'],
 						artists: ['a'],
 						isNsfw: false,
-						postPictures: [],
+						postPictures: [picture],
 						sourceLink: 'https://example.com',
 						uploadId: 'upload-1',
 						ignoreDuplicates: false,
+						characterName: 'hatsune_miku',
+						sourceTitle: 'vocaloid',
+						sourceType: 'ANIME',
 					},
 				}),
 		);
@@ -149,6 +153,12 @@ describe('createCreatePostHandler', () => {
 			expect.objectContaining({
 				uploadId: 'upload-1',
 				originalImageUrls: ['https://cdn.example/a_original'],
+				postPictures: [picture],
+				overrides: {
+					characterName: 'hatsune_miku',
+					sourceTitle: 'vocaloid',
+					sourceType: 'ANIME',
+				},
 			}),
 		);
 		expect(onFormActionSuccess).not.toHaveBeenCalled();

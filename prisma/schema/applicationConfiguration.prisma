@@ -49,6 +49,8 @@ model ApplicationConfiguration {
   likePostRateLimitMax      Int @default(10)
   likePostRateLimitWindowMs Int @default(60000)
 
+  sauceNaoMinimumSimilarity Float @default(70)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }

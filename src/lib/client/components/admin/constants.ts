@@ -107,4 +107,8 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 			},
 		],
 	},
+	{
+		name: 'SauceNAO',
+		fields: [{ key: 'sauceNaoMinimumSimilarity', label: 'Minimum match similarity (%)' }],
+	},
 ];

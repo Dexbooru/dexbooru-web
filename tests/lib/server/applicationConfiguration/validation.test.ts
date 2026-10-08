@@ -55,6 +55,22 @@ describe('validateApplicationConfigurationUpdate', () => {
 		).resolves.toBeUndefined();
 	});
 
+	it('rejects sauceNao similarity outside 1..100', async () => {
+		await expect(
+			validateApplicationConfigurationUpdate(
+				{ sauceNaoMinimumSimilarity: 0 },
+				buildDefaultApplicationConfiguration(),
+			),
+		).rejects.toThrow('"sauceNaoMinimumSimilarity" must be greater than or equal to 1.');
+
+		await expect(
+			validateApplicationConfigurationUpdate(
+				{ sauceNaoMinimumSimilarity: 101 },
+				buildDefaultApplicationConfiguration(),
+			),
+		).rejects.toThrow('"sauceNaoMinimumSimilarity" must be less than or equal to 100.');
+	});
+
 	it('allows increased minimumUsernameLength when there are no users', async () => {
 		mockPrisma.$queryRaw.mockResolvedValue([{ minLength: null }]);
 		await expect(

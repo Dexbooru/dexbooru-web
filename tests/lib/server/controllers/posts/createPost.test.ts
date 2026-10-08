@@ -1,8 +1,7 @@
 import type { Prisma } from '$generated/prisma/client';
 import type { PUBLIC_POST_SELECTORS } from '$lib/server/constants/posts';
-import { handleCreatePost } from '$lib/server/controllers/posts/createPost';
+import { readCachedSauceNaoMatches } from '$lib/server/helpers/sauceNao/search';
 import { ORIGINAL_IMAGE_SUFFIX } from '$lib/shared/constants/images';
-import { uploadPostImages } from '$lib/server/controllers/posts/helpers';
 import type { RequestEvent } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,10 +9,14 @@ import {
 	mockControllerHelpers,
 	mockNewPostVectorTargetPublish,
 	mockPostActions,
+	mockPostSourceActions,
 	mockS3Actions,
 	mockSQSActions,
+	mockUploadStatus,
 	mockUserActions,
 } from '../../../../mocks';
+import { handleCreatePost } from '$lib/server/controllers/posts/createPost';
+import { uploadPostImages } from '$lib/server/controllers/posts/helpers';
 import { mockMLApiHelpers } from '../../../../mocks/helpers/mlApi';
 import { mockSessionHelpers } from '../../../../mocks/helpers/sessions';
 import { NewPostVectorTargetPublisher } from '$lib/server/rabbitmq/publishers/newPostVectorTarget';
@@ -24,6 +27,9 @@ const ORIGINAL_TEST_IMAGE_URL = `https://cdn.example.com/key${ORIGINAL_IMAGE_SUF
 // We still need to mock the controller helper module because it's in the same directory as the controller
 // and we want to control its output
 vi.mock('$lib/server/controllers/posts/helpers');
+vi.mock('$lib/server/helpers/sauceNao/search', () => ({
+	readCachedSauceNaoMatches: vi.fn(async () => []),
+}));
 
 type TCreatedPost = Prisma.PostGetPayload<{ select: typeof PUBLIC_POST_SELECTORS }>;
 type TDuplicatePost = Prisma.PostGetPayload<{
@@ -58,6 +64,9 @@ describe('handleCreatePost', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockSQSActions.enqueueBatchUploadedPostImages.mockReset();
+		vi.mocked(readCachedSauceNaoMatches).mockResolvedValue([]);
+		mockPostSourceActions.createPostSource.mockResolvedValue({ id: 'ps1' });
 	});
 
 	it('should return 403 when user email is not verified', async () => {
@@ -365,5 +374,169 @@ describe('handleCreatePost', () => {
 		expect(mockS3Actions.deleteBatchFromBucket).toHaveBeenCalledWith(expect.any(String), ['url1']);
 		expect(mockNewPostVectorTargetPublish).not.toHaveBeenCalled();
 		expect(result.status).toBe(500);
+	});
+
+	const baseForm = {
+		description: 'test desc',
+		tags: ['tag1'],
+		artists: ['artist1'],
+		isNsfw: false,
+		sourceLink: 'http://example.com',
+		uploadId: 'upload1',
+		ignoreDuplicates: false,
+	};
+
+	const imageFile = (byte: number, name: string) =>
+		new File([Uint8Array.from([byte])], name, { type: 'image/png' });
+
+	const mikuMatch = {
+		indexId: 37,
+		indexName: 'MangaDex',
+		sourceType: 'MANGA' as const,
+		similarity: 96,
+		thumbnailUrl: 'https://img.saucenao.com/m.jpg',
+		title: null,
+		sourceUrls: [] as string[],
+		artists: [] as string[],
+		characters: ['Hatsune Miku'],
+		series: ['Vocaloid'],
+	};
+
+	const characterOnlyMatch = {
+		...mikuMatch,
+		indexId: 9,
+		indexName: 'Danbooru',
+		characters: ['Only Character'],
+		series: [] as string[],
+	};
+
+	const submitCreate = async (form: Record<string, unknown>) => {
+		mockControllerHelpers.validateAndHandleRequest.mockImplementation(
+			async (_event, _handlerType, _schema, callback) => callback({ form }),
+		);
+		mockUserActions.findUserById.mockResolvedValue({ id: 'u1', emailVerified: true });
+		vi.mocked(uploadPostImages).mockResolvedValue({
+			postImageUrls: ['url1'],
+			postImageWidths: [100],
+			postImageHeights: [100],
+			postImageHashes: ['hash1'],
+		});
+		mockPostActions.findDuplicatePosts.mockResolvedValue([]);
+		mockPostActions.createPost.mockResolvedValue(buildSuccessfulCreatedPost());
+		return (await handleCreatePost(mockEvent, 'api-route')) as Response;
+	};
+
+	it('creates a post source from complete overrides and skips the classification queue', async () => {
+		const result = await submitCreate({
+			...baseForm,
+			postPictures: [imageFile(9, 'full.png')],
+			characterName: 'hatsune_miku',
+			sourceTitle: 'vocaloid',
+			sourceType: 'ANIME',
+		});
+
+		expect(result.status).toBe(201);
+		expect(mockPostSourceActions.createPostSource).toHaveBeenCalledWith(
+			'new-p1',
+			'hatsune_miku',
+			'vocaloid',
+			'ANIME',
+		);
+		expect(mockSQSActions.enqueueBatchUploadedPostImages).not.toHaveBeenCalled();
+		expect(readCachedSauceNaoMatches).not.toHaveBeenCalled();
+		expect(mockUploadStatus.emitUploadProgress).toHaveBeenCalledWith(
+			'upload1',
+			'Saving post source...',
+		);
+		expect(mockUploadStatus.emitUploadProgress).not.toHaveBeenCalledWith(
+			'upload1',
+			'Enqueing post images for classification...',
+		);
+	});
+
+	it('creates a post source from the first cached SauceNAO pair and skips the queue', async () => {
+		vi.mocked(readCachedSauceNaoMatches).mockImplementation(async (image: Uint8Array) => {
+			if (image[0] === 1) return [characterOnlyMatch];
+			return [mikuMatch];
+		});
+
+		const result = await submitCreate({
+			...baseForm,
+			postPictures: [imageFile(1, 'first.png'), imageFile(2, 'second.png')],
+		});
+
+		expect(result.status).toBe(201);
+		expect(mockPostSourceActions.createPostSource).toHaveBeenCalledWith(
+			'new-p1',
+			'hatsune_miku',
+			'vocaloid',
+			'MANGA',
+		);
+		expect(mockSQSActions.enqueueBatchUploadedPostImages).not.toHaveBeenCalled();
+	});
+
+	it('merges a partial override with the cached SauceNAO pair', async () => {
+		vi.mocked(readCachedSauceNaoMatches).mockResolvedValue([mikuMatch]);
+
+		const result = await submitCreate({
+			...baseForm,
+			postPictures: [imageFile(3, 'partial.png')],
+			characterName: 'kagamine_rin',
+		});
+
+		expect(result.status).toBe(201);
+		expect(mockPostSourceActions.createPostSource).toHaveBeenCalledWith(
+			'new-p1',
+			'kagamine_rin',
+			'vocaloid',
+			'MANGA',
+		);
+		expect(mockSQSActions.enqueueBatchUploadedPostImages).not.toHaveBeenCalled();
+	});
+
+	it('enqueues classification when no character and series can be resolved', async () => {
+		vi.mocked(readCachedSauceNaoMatches).mockResolvedValue([characterOnlyMatch]);
+
+		const result = await submitCreate({
+			...baseForm,
+			postPictures: [imageFile(4, 'unknown.png')],
+		});
+
+		expect(result.status).toBe(201);
+		expect(mockPostSourceActions.createPostSource).not.toHaveBeenCalled();
+		expect(mockSQSActions.enqueueBatchUploadedPostImages).toHaveBeenCalledWith(
+			expect.objectContaining({ id: 'new-p1', imageUrls: [ORIGINAL_TEST_IMAGE_URL] }),
+		);
+		expect(mockUploadStatus.emitUploadProgress).toHaveBeenCalledWith(
+			'upload1',
+			'Enqueing post images for classification...',
+		);
+	});
+
+	it('enqueues classification when creating the post source throws', async () => {
+		mockPostSourceActions.createPostSource.mockRejectedValue(new Error('db down'));
+
+		const result = await submitCreate({
+			...baseForm,
+			postPictures: [imageFile(5, 'throws.png')],
+			characterName: 'hatsune_miku',
+			sourceTitle: 'vocaloid',
+			sourceType: 'ANIME',
+		});
+
+		expect(result.status).toBe(201);
+		expect(mockPostSourceActions.createPostSource).toHaveBeenCalledWith(
+			'new-p1',
+			'hatsune_miku',
+			'vocaloid',
+			'ANIME',
+		);
+		expect(mockSQSActions.enqueueBatchUploadedPostImages).toHaveBeenCalledWith(
+			expect.objectContaining({ id: 'new-p1', imageUrls: [ORIGINAL_TEST_IMAGE_URL] }),
+		);
+		expect(mockUploadStatus.emitUploadProgress).toHaveBeenCalledWith(
+			'upload1',
+			'Enqueing post images for classification...',
+		);
 	});
 });

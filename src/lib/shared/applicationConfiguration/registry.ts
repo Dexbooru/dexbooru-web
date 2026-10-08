@@ -36,6 +36,7 @@ export const APPLICATION_CONFIGURATION_SECTIONS = [
 	'reports',
 	'pagination',
 	'rateLimit',
+	'sauceNao',
 ] as const satisfies TApplicationConfigurationSectionKey[];
 
 export const APPLICATION_CONFIGURATION_VARCHAR_FIELD_MAPPINGS: TConfigurationSchemaFieldMapping[] =

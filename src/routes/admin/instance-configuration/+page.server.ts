@@ -1,4 +1,5 @@
 import { getApplicationConfiguration } from '$lib/server/applicationConfiguration';
+import { listAvailableSauceNaoIndexes } from '$lib/server/db/actions/sauceNaoIndex';
 import { NULLABLE_USER } from '$lib/shared/constants/auth';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -13,9 +14,13 @@ export const load: PageServerLoad = async (event) => {
 		redirect(302, '/');
 	}
 
-	const applicationConfiguration = await getApplicationConfiguration();
+	const [applicationConfiguration, sauceNaoIndexes] = await Promise.all([
+		getApplicationConfiguration(),
+		listAvailableSauceNaoIndexes(),
+	]);
 
 	return {
 		applicationConfiguration,
+		sauceNaoIndexes,
 	};
 };

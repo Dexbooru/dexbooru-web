@@ -33,6 +33,9 @@ export function createCreatePostHandler(strategy: TCreatePostStrategy) {
 					sourceLink,
 					uploadId,
 					ignoreDuplicates,
+					characterName,
+					sourceTitle,
+					sourceType,
 				} = form;
 				const errorData = {
 					sourceLink,
@@ -40,6 +43,9 @@ export function createCreatePostHandler(strategy: TCreatePostStrategy) {
 					tags,
 					artists,
 					isNsfw,
+					characterName,
+					sourceTitle,
+					sourceType,
 				};
 				const user = event.locals.user;
 
@@ -131,6 +137,8 @@ export function createCreatePostHandler(strategy: TCreatePostStrategy) {
 						post: newPost,
 						originalImageUrls,
 						uploadId,
+						overrides: { characterName, sourceTitle, sourceType },
+						postPictures,
 					});
 
 					if (handlerType === 'form-action') {

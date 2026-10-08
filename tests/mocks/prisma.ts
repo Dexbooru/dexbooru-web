@@ -109,6 +109,11 @@ export const mockPrisma = {
 		findUnique: vi.fn(),
 		update: vi.fn(),
 	},
+	sauceNaoIndex: {
+		findMany: vi.fn(),
+		upsert: vi.fn(),
+		updateMany: vi.fn(),
+	},
 	$queryRaw: vi.fn(),
 	$executeRaw: vi.fn(),
 	$transaction: vi.fn(),

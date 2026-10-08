@@ -44,6 +44,7 @@ const ApplicationConfigurationUpdateSchema = {
 			maximumArtistsPerPage: OptionalNumber.optional(),
 			likePostRateLimitMax: OptionalNumber.optional(),
 			likePostRateLimitWindowMs: OptionalNumber.optional(),
+			sauceNaoMinimumSimilarity: z.number().finite().min(1).max(100).optional(),
 		})
 		.refine((body) => Object.keys(body).length > 0, {
 			message: 'At least one configuration field must be provided.',

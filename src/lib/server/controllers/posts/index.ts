@@ -1,4 +1,5 @@
 export * from './getSimilarPosts';
+export * from './getSourceSuggestions';
 export * from './updatePost';
 export * from '../strategies/postsByLabel';
 export * from './createPost';

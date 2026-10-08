@@ -1,8 +1,9 @@
 import { BoolStrSchema, PageNumberSchema } from '$lib/server/constants/reusableSchemas';
 import { getApplicationConfigurationSync } from '$lib/server/applicationConfiguration';
 import type { TRequestSchema } from '$lib/server/types/controllers';
-import { isFileImage } from '$lib/shared/helpers/images';
-import { isLabelAppropriate, transformLabels } from '$lib/shared/helpers/labels';
+import { MAXIMUM_POST_SOURCE_LABEL_LENGTH, POST_SOURCE_TYPES } from '$lib/shared/constants/posts';
+import { isFileImage, isFileImageSmall } from '$lib/shared/helpers/images';
+import { isLabelAppropriate, transformLabel, transformLabels } from '$lib/shared/helpers/labels';
 import { z } from 'zod';
 
 const PostPaginationSchema = z.object({
@@ -81,6 +82,27 @@ const GetPostsWithArtistNameSchema = createGetPostsByNameSchema('artist');
 const GetPostsWithCharacterNameSchema = createGetPostsByNameSchema('character');
 const GetPostsWithSourceTitleSchema = createGetPostsByNameSchema('source');
 
+const optionalPostSourceLabel = (label: string) =>
+	z
+		.string()
+		.optional()
+		.transform((value) => {
+			if (value === undefined) return undefined;
+			const normalized = transformLabel(value);
+			return normalized.length === 0 ? undefined : normalized;
+		})
+		.refine(
+			(value) =>
+				value === undefined ||
+				(value.length <= MAXIMUM_POST_SOURCE_LABEL_LENGTH && isLabelAppropriate(value, 'tag')),
+			{ message: `The provided ${label} was not appropriate` },
+		);
+
+const optionalPostSourceType = z
+	.union([z.literal(''), z.enum(POST_SOURCE_TYPES)])
+	.optional()
+	.transform((value) => (value === undefined || value === '' ? undefined : value));
+
 const CreatePostSchema = {
 	form: z.object({
 		sourceLink: z.string().url(),
@@ -136,6 +158,19 @@ const CreatePostSchema = {
 			),
 		uploadId: z.string().uuid().optional(),
 		ignoreDuplicates: BoolStrSchema,
+		characterName: optionalPostSourceLabel('character name'),
+		sourceTitle: optionalPostSourceLabel('series name'),
+		sourceType: optionalPostSourceType,
+	}),
+} satisfies TRequestSchema;
+
+const GetSourceSuggestionsSchema = {
+	form: z.object({
+		image: z
+			.instanceof(globalThis.File)
+			.refine((file) => isFileImage(file) && isFileImageSmall(file, 'post'), {
+				message: 'The uploaded image must be a supported image within the post upload size limit.',
+			}),
 	}),
 } satisfies TRequestSchema;
 
@@ -182,6 +217,7 @@ export {
 	GetPostsWithSourceTitleSchema,
 	GetPostsWithTagNameSchema,
 	GetSimilarPostsSchema,
+	GetSourceSuggestionsSchema,
 	LikePostSchema,
 	PostUpdateSchema,
 };

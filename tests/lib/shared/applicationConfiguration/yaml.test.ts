@@ -55,5 +55,23 @@ describe('application configuration YAML helpers', () => {
 		expect(nested.posts.maximumTagsPerPost).toBe(20);
 		expect(nested.comments.maximumCommentContentLength).toBe(1500);
 		expect(nested.rateLimit.likePostRateLimitWindowMs).toBe(60_000);
+		expect(nested.sauceNao.sauceNaoMinimumSimilarity).toBe(70);
+	});
+
+	it('parses sauceNao minimum similarity as a number', () => {
+		const flattened = flattenApplicationConfigurationYaml({
+			sauceNao: { sauceNaoMinimumSimilarity: 82.5 },
+		});
+
+		expect(flattened.sauceNaoMinimumSimilarity).toBe(82.5);
+	});
+
+	it('rejects non-numeric values for numeric keys', () => {
+		expect(() =>
+			flattenApplicationConfigurationYaml({
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				labels: { maximumTagLength: '12' as any },
+			}),
+		).toThrow('Expected a number, received string');
 	});
 });

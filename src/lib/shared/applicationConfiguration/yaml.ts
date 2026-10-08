@@ -58,6 +58,7 @@ const SECTION_CONFIGURATION_KEYS = {
 	reports: ['maximumReportReasonDescriptionLength', 'maximumReportsPerPage'],
 	pagination: ['maximumTagsPerPage', 'maximumArtistsPerPage'],
 	rateLimit: ['likePostRateLimitMax', 'likePostRateLimitWindowMs'],
+	sauceNao: ['sauceNaoMinimumSimilarity'],
 } as const satisfies TSectionConfigurationMap;
 
 const SECTION_CONFIGURATION_KEY_SETS = Object.fromEntries(

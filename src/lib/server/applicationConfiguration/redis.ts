@@ -1,4 +1,7 @@
-import type { TApplicationConfiguration } from '$lib/shared/applicationConfiguration';
+import {
+	buildDefaultApplicationConfiguration,
+	type TApplicationConfiguration,
+} from '$lib/shared/applicationConfiguration';
 import {
 	APPLICATION_CONFIGURATION_CACHE_KEY,
 	APPLICATION_CONFIGURATION_REDIS_CHANNEL,
@@ -7,17 +10,24 @@ import redis from '../db/redis';
 import logger from '../logging/logger';
 import { applicationConfigurationEmitter } from '../events/applicationConfiguration';
 
+const hydrateApplicationConfiguration = (
+	payload: TApplicationConfiguration,
+): TApplicationConfiguration => {
+	return {
+		...buildDefaultApplicationConfiguration(),
+		...payload,
+		createdAt: new Date(payload.createdAt),
+		updatedAt: new Date(payload.updatedAt),
+	};
+};
+
 export const getApplicationConfigurationFromRedis =
 	async (): Promise<TApplicationConfiguration | null> => {
 		try {
 			const cachedConfiguration = await redis.get(APPLICATION_CONFIGURATION_CACHE_KEY);
 			if (!cachedConfiguration) return null;
 			const parsed = JSON.parse(cachedConfiguration) as TApplicationConfiguration;
-			return {
-				...parsed,
-				createdAt: new Date(parsed.createdAt),
-				updatedAt: new Date(parsed.updatedAt),
-			};
+			return hydrateApplicationConfiguration(parsed);
 		} catch (error) {
 			logger.error('Could not read application configuration from redis cache.', error);
 			return null;
@@ -60,11 +70,7 @@ export const setupApplicationConfigurationRedisSubscription = async () => {
 			(message) => {
 				try {
 					const payload = JSON.parse(message) as TApplicationConfiguration;
-					const hydratedPayload = {
-						...payload,
-						createdAt: new Date(payload.createdAt),
-						updatedAt: new Date(payload.updatedAt),
-					};
+					const hydratedPayload = hydrateApplicationConfiguration(payload);
 					applicationConfigurationEmitter.emitUpdated(hydratedPayload);
 				} catch (error) {
 					logger.error('Failed to parse application configuration pub/sub payload.', error);

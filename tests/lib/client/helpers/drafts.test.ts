@@ -24,6 +24,9 @@ const sampleDraft: TPostDraft = {
 	description: 'A cat post',
 	sourceLink: 'https://example.com',
 	isNsfw: false,
+	characterName: 'hatsune_miku',
+	sourceTitle: 'vocaloid',
+	sourceType: 'ANIME',
 };
 
 describe('post draft localStorage helpers', () => {
@@ -40,6 +43,30 @@ describe('post draft localStorage helpers', () => {
 		savePostDraft(sampleDraft);
 
 		expect(loadPostDraft()).toEqual(sampleDraft);
+	});
+
+	it('loads an older draft that has no source fields', () => {
+		localStorage.setItem(
+			'currentPostDraft',
+			JSON.stringify({
+				tags: ['cat'],
+				artists: ['artist'],
+				description: 'A cat post',
+				sourceLink: 'https://example.com',
+				isNsfw: false,
+			}),
+		);
+
+		expect(loadPostDraft()).toEqual({
+			tags: ['cat'],
+			artists: ['artist'],
+			description: 'A cat post',
+			sourceLink: 'https://example.com',
+			isNsfw: false,
+			characterName: '',
+			sourceTitle: '',
+			sourceType: '',
+		});
 	});
 
 	it('returns null when no draft is stored', () => {

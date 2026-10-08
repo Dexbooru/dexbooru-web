@@ -46,6 +46,11 @@ const MINIMUM_LIMITS: Partial<Record<TApplicationConfigurationKey, number>> = {
 	maximumArtistsPerPage: 1,
 	likePostRateLimitMax: 1,
 	likePostRateLimitWindowMs: 1,
+	sauceNaoMinimumSimilarity: 1,
+};
+
+const MAXIMUM_LIMITS: Partial<Record<TApplicationConfigurationKey, number>> = {
+	sauceNaoMinimumSimilarity: 100,
 };
 
 const assertRelationalLimits = (
@@ -67,10 +72,15 @@ const assertRelationalLimits = (
 
 const assertMinimumBounds = (updates: TPartialApplicationConfiguration) => {
 	for (const [key, value] of Object.entries(updates)) {
-		const minimum = MINIMUM_LIMITS[key as TApplicationConfigurationKey];
-		if (minimum === undefined) continue;
-		if (value < minimum) {
+		if (typeof value !== 'number') continue;
+		const configurationKey = key as TApplicationConfigurationKey;
+		const minimum = MINIMUM_LIMITS[configurationKey];
+		if (minimum !== undefined && value < minimum) {
 			throw new Error(`"${key}" must be greater than or equal to ${minimum}.`);
+		}
+		const maximum = MAXIMUM_LIMITS[configurationKey];
+		if (maximum !== undefined && value > maximum) {
+			throw new Error(`"${key}" must be less than or equal to ${maximum}.`);
 		}
 	}
 };

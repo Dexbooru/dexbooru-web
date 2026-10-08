@@ -38,6 +38,7 @@ export type TApplicationConfiguration = {
 	maximumArtistsPerPage: number;
 	likePostRateLimitMax: number;
 	likePostRateLimitWindowMs: number;
+	sauceNaoMinimumSimilarity: number;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -106,6 +107,7 @@ export type TApplicationConfigurationSection = {
 		TCoreApplicationConfiguration,
 		'likePostRateLimitMax' | 'likePostRateLimitWindowMs'
 	>;
+	sauceNao: Pick<TCoreApplicationConfiguration, 'sauceNaoMinimumSimilarity'>;
 };
 
 export type TApplicationConfigurationSectionKey = keyof TApplicationConfigurationSection;
