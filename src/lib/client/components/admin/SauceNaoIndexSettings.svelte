@@ -2,7 +2,10 @@
 	import Button from 'flowbite-svelte/Button.svelte';
 	import Checkbox from 'flowbite-svelte/Checkbox.svelte';
 	import { updateEnabledSauceNaoIndexes } from '$lib/client/api/sauceNao';
-	import { DEFAULT_SAUCENAO_ENABLED_INDEX_IDS } from '$lib/shared/constants/sauceNao';
+	import {
+		DEFAULT_SAUCENAO_ENABLED_INDEX_IDS,
+		getSauceNaoIndexWebsiteBaseUrl,
+	} from '$lib/shared/constants/sauceNao';
 	import type { TSauceNaoIndex } from '$lib/shared/types/sauceNao';
 
 	type Props = {
@@ -59,7 +62,7 @@
 	};
 </script>
 
-<section class="w-full p-4">
+<div class="mt-8 border-t border-gray-200 pt-8 dark:border-gray-700">
 	<div class="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 		<div>
 			<h2 class="text-xl font-semibold text-gray-900 dark:text-white">SauceNAO indexes</h2>
@@ -96,7 +99,20 @@
 					checked={selectedIds.includes(index.id)}
 					onchange={(event) => setIndexEnabled(index.id, event.currentTarget.checked)}
 				>
-					{index.name}
+					{@const websiteBaseUrl = getSauceNaoIndexWebsiteBaseUrl(index.id)}
+					{#if websiteBaseUrl}
+						<a
+							href={websiteBaseUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-primary-600 dark:text-primary-500 hover:underline"
+							onclick={(event) => event.stopPropagation()}
+						>
+							{index.name}
+						</a>
+					{:else}
+						{index.name}
+					{/if}
 				</Checkbox>
 			{/each}
 		</div>
@@ -104,4 +120,4 @@
 			Restore defaults
 		</Button>
 	{/if}
-</section>
+</div>

@@ -22,6 +22,7 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 		name: 'Posts',
 		fields: [
 			{ key: 'maximumSourceLinkLength', label: 'Maximum source link length' },
+			{ key: 'sauceNaoMinimumSimilarity', label: 'SauceNAO minimum match similarity (%)' },
 			{ key: 'maximumPostsPerPage', label: 'Maximum posts per page' },
 			{ key: 'maximumSimilarPostsPerPost', label: 'Maximum similar posts per post' },
 			{ key: 'maximumTagsPerPost', label: 'Maximum tags per post' },
@@ -106,9 +107,5 @@ export const INSTANCE_CONFIGURATION_SECTIONS: TSection[] = [
 				label: 'Like post rate limit window (ms)',
 			},
 		],
-	},
-	{
-		name: 'SauceNAO',
-		fields: [{ key: 'sauceNaoMinimumSimilarity', label: 'Minimum match similarity (%)' }],
 	},
 ];

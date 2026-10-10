@@ -1,6 +1,5 @@
 <script lang="ts">
 	import InstanceConfigurationForm from '$lib/client/components/admin/InstanceConfigurationForm.svelte';
-	import SauceNaoIndexSettings from '$lib/client/components/admin/SauceNaoIndexSettings.svelte';
 	import type { PageData } from './$types';
 
 	type Props = {
@@ -15,6 +14,8 @@
 </svelte:head>
 
 <main>
-	<InstanceConfigurationForm initialConfiguration={data.applicationConfiguration} />
-	<SauceNaoIndexSettings initialIndexes={data.sauceNaoIndexes} />
+	<InstanceConfigurationForm
+		initialConfiguration={data.applicationConfiguration}
+		sauceNaoIndexes={data.sauceNaoIndexes}
+	/>
 </main>

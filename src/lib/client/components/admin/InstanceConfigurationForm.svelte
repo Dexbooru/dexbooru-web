@@ -6,7 +6,9 @@
 	import TabItem from 'flowbite-svelte/TabItem.svelte';
 	import Tabs from 'flowbite-svelte/Tabs.svelte';
 	import { updateApplicationConfiguration } from '$lib/client/api/applicationConfiguration';
+	import SauceNaoIndexSettings from '$lib/client/components/admin/SauceNaoIndexSettings.svelte';
 	import { INSTANCE_CONFIGURATION_SECTIONS } from '$lib/client/components/admin/constants';
+	import type { TSauceNaoIndex } from '$lib/shared/types/sauceNao';
 	import { getApplicationConfiguration } from '$lib/client/helpers/context';
 	import type {
 		TApplicationConfiguration,
@@ -20,12 +22,13 @@
 
 	type Props = {
 		initialConfiguration: TApplicationConfiguration;
+		sauceNaoIndexes: TSauceNaoIndex[];
 	};
 
 	const sections: TSection[] = INSTANCE_CONFIGURATION_SECTIONS;
 	const applicationConfiguration = getApplicationConfiguration();
 
-	let { initialConfiguration }: Props = $props();
+	let { initialConfiguration, sauceNaoIndexes }: Props = $props();
 	const createConfigurationCopy = () => ({ ...initialConfiguration });
 	const pageLoadConfiguration = createConfigurationCopy();
 	let currentConfiguration: TApplicationConfiguration = createConfigurationCopy();
@@ -173,6 +176,9 @@
 							</div>
 						{/each}
 					</div>
+					{#if section.name === 'Posts'}
+						<SauceNaoIndexSettings initialIndexes={sauceNaoIndexes} />
+					{/if}
 				</div>
 			</TabItem>
 		{/each}
